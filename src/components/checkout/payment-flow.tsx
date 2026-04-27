@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
+import { claimBusiness } from "@/app/actions/claim-business"
 
 type Business = {
   id: string
@@ -24,13 +25,13 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const handleSimulatePayment = (e: React.FormEvent) => {
+  const handleSimulatePayment = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
-    setTimeout(() => {
-      setIsProcessing(false)
-      setIsSuccess(true)
-    }, 2000)
+    await new Promise((r) => setTimeout(r, 1500))
+    await claimBusiness(business.id)
+    setIsProcessing(false)
+    setIsSuccess(true)
   }
 
   if (isSuccess) {
@@ -53,7 +54,7 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
           <p className="text-slate-600 mb-8 leading-relaxed">
             Tu perfil para <strong>{business.name}</strong> está ahora verificado y en línea. El cliente ha sido notificado y el contacto ha sido desbloqueado.
           </p>
-          <Button className="w-full bg-slate-900 text-white rounded-xl py-6 hover:bg-slate-800" onClick={() => window.location.href = "/dashboard"}>
+          <Button className="w-full bg-slate-900 text-white rounded-xl py-6 hover:bg-slate-800" onClick={() => window.location.href = `/dashboard?businessId=${business.id}`}>
             Ir al Panel de Control
           </Button>
         </Card>
@@ -79,7 +80,7 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-4">
               <div>
-                <p className="font-medium text-slate-900">Suscripción Valle Premium</p>
+                <p className="font-medium text-slate-900">Suscripción InkaPortal Premium</p>
                 <p className="text-sm text-slate-500">Prueba gratuita por 14 días</p>
               </div>
               <p className="font-bold text-slate-900">S/ 0.00</p>

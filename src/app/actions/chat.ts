@@ -1,9 +1,7 @@
 "use server"
 
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { GoogleGenAI } from "@google/genai"
-
-const prisma = new PrismaClient()
 
 export async function askConcierge(message: string, language: string = "English") {
   try {
@@ -34,7 +32,7 @@ export async function askConcierge(message: string, language: string = "English"
 
     // 3. Prompt engineering with dynamic i18n
     const prompt = `
-    You are the AI Concierge for "Valle", an ultra-premium travel platform for the Sacred Valley in Peru.
+    You are the AI Concierge for "InkaPortal", an ultra-premium travel platform for the Sacred Valley in Peru.
     Your tone must be extremely elegant, concise, helpful, and "Apple-level minimal". 
     CRITICAL: You MUST speak in ${language}.
     
@@ -57,6 +55,6 @@ export async function askConcierge(message: string, language: string = "English"
     return response.text || "Lo siento, la niebla en los Andes me impide conectar. Intenta de nuevo."
   } catch (error) {
     console.error("Error in askConcierge:", error)
-    return "Ocurrió un error al consultar el oráculo del valle. Por favor, intenta más tarde."
+    return "Ocurrió un error al consultar el oráculo de InkaPortal. Por favor, intenta más tarde."
   }
 }

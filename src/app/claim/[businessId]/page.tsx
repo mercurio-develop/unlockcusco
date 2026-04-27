@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star } from "lucide-react"
-
-const prisma = new PrismaClient()
 
 interface ClaimPageProps {
   params: Promise<{ businessId: string }>
@@ -45,7 +43,7 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
           <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
           <div>
             <h2 className="text-red-800 font-bold text-lg">Acción Requerida: Cliente en Espera</h2>
-            <p className="text-red-700 text-sm mt-1">Un turista internacional intentó contactar a <strong>{business.name}</strong> hace unos minutos, pero su perfil figura como "No Verificado".</p>
+            <p className="text-red-700 text-sm mt-1">Un turista internacional intentó contactar a <strong>{business.name}</strong> hace unos minutos, pero su perfil figura como &quot;No Verificado&quot;.</p>
           </div>
         </div>
 
@@ -55,10 +53,10 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
           <div className="md:col-span-3 space-y-6">
             <div>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                No pierdas más clientes en el Valle Sagrado.
+                No pierdas más clientes en el Valle Sagrado con InkaPortal.
               </h1>
               <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-                InkaPortal es el directorio potenciado por IA que usan los turistas para planear su viaje. Reclama tu perfil ahora para desbloquear el contacto del cliente y activar el botón de "Reserva Inmediata".
+                InkaPortal es el directorio potenciado por IA que usan los turistas para planear su viaje. Reclama tu perfil ahora para desbloquear el contacto del cliente y activar el botón de &quot;Reserva Inmediata&quot;.
               </p>
             </div>
 

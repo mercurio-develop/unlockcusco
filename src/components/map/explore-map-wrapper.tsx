@@ -1,32 +1,23 @@
 "use client"
 
-import dynamic from 'next/dynamic'
-
-type Business = {
-  id: string
-  name: string
-  category: string
-  lat: number
-  lng: number
-  rating: number | null
-  reviewsCount: number
-  imageUrl: string
-  isClaimed: boolean
-}
+import dynamic from "next/dynamic"
+import type { Business } from "@/components/explore/explore-view"
 
 interface ExploreMapProps {
   businesses: Business[]
+  selectedId: string | null
+  onSelectBusiness: (id: string) => void
 }
 
-const DynamicMap = dynamic(() => import('./explore-map'), { 
+const DynamicMap = dynamic(() => import("./explore-map"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full w-full bg-slate-100">
-      <p className="text-slate-500">Cargando mapa...</p>
+    <div className="flex items-center justify-center h-full w-full bg-[#09090B]">
+      <p className="text-white/40 text-sm">Loading map…</p>
     </div>
-  )
+  ),
 })
 
-export function ExploreMapWrapper({ businesses }: ExploreMapProps) {
-  return <DynamicMap businesses={businesses} />
+export function ExploreMapWrapper(props: ExploreMapProps) {
+  return <DynamicMap {...props} />
 }

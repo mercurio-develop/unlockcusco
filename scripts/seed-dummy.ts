@@ -8,7 +8,7 @@ async function main() {
   const dummyBusinesses = [
     {
       name: "Tunupa Restaurant Valle Sagrado",
-      category: "Gastronomía",
+      category: "Dining",
       lat: -13.3031,
       lng: -72.1160,
       rating: 4.6,
@@ -23,7 +23,7 @@ async function main() {
     },
     {
       name: "Kawsay Spa & Yoga",
-      category: "Bienestar",
+      category: "Wellness",
       lat: -13.2985,
       lng: -71.8492, // Pisac
       rating: 4.9,
@@ -37,7 +37,7 @@ async function main() {
     },
     {
       name: "Inka Trekking Adventures",
-      category: "Aventura",
+      category: "Adventure",
       lat: -13.2584,
       lng: -72.2635, // Ollantaytambo
       rating: 4.8,
@@ -51,7 +51,7 @@ async function main() {
     },
     {
       name: "El Albergue Ollantaytambo",
-      category: "Descanso",
+      category: "Stays",
       lat: -13.2570,
       lng: -72.2630,
       rating: 4.7,
@@ -65,7 +65,7 @@ async function main() {
     },
     {
       name: "Pisac Indian Market",
-      category: "Cultura",
+      category: "Culture",
       lat: -13.2995,
       lng: -71.8480,
       rating: 4.5,

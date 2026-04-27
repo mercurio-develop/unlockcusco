@@ -2,11 +2,25 @@
 
 import { MapPin, Star, Activity, Utensils, Car, Zap } from 'lucide-react';
 
-export default function ItineraryAlternatives({ plans }: { plans: any[] }) {
+type Plan = {
+  planId: string;
+  combinedRating: number;
+  totalDistanceKm: string;
+  morning: {
+    name: string;
+    rating: number;
+  };
+  afternoon: {
+    name: string;
+    rating: number;
+  };
+};
+
+export default function ItineraryAlternatives({ plans }: { plans: Plan[] }) {
   return (
     <div className="w-full my-6 flex flex-col gap-6">
       <div className="text-[#D4AF37] text-xs font-mono uppercase tracking-widest flex items-center gap-2">
-        <MapPin size={14} /> Valle Smart Routes Found
+        <MapPin size={14} /> InkaPortal Smart Routes Found
       </div>
       {plans.map((plan, index) => (
         <div

@@ -1,8 +1,6 @@
 "use server"
 
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from "@/lib/prisma"
 
 export async function generateShadowLead(businessId: string, touristName: string, date: string) {
   const business = await prisma.business.findUnique({

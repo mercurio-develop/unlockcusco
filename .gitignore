@@ -23,6 +23,11 @@
 # misc
 .DS_Store
 *.pem
+.idea/
+.gemini/
+workspace/
+secretary.skill
+secretary/
 
 # debug
 npm-debug.log*

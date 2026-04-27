@@ -23,7 +23,8 @@ function interleaveCategories(sortedBusinesses: Business[]) {
     hasMore = false
     for (const cat of categories) {
       if (byCategory[cat].length > 0) {
-        interleaved.push(byCategory[cat].shift())
+        const item = byCategory[cat].shift()
+        if (item) interleaved.push(item)
         hasMore = true
       }
     }

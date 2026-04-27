@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { PaymentFlow } from "@/components/checkout/payment-flow"
-
-const prisma = new PrismaClient()
 
 interface CheckoutPageProps {
   params: Promise<{ businessId: string }>

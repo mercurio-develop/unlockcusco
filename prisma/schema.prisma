@@ -18,6 +18,8 @@ model Business {
   imageUrl     String
   whatsapp     String?
   isClaimed    Boolean  @default(false)
+  locationSlug String   @default("")
+  categorySlug String   @default("")
   reviews      Review[]
 }
 
