@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
+import { askConcierge } from "@/app/actions/chat"
+
 type Message = {
   id: string
   role: "ai" | "user"
@@ -17,7 +19,7 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: "1",
     role: "ai",
-    content: "¡Hola! Soy tu Conserje de InkaPortal. ✨\n\n¿Buscas aventura, relajación, o la mejor picantería del Valle Sagrado? Dime qué te apetece y te armaré el itinerario perfecto."
+    content: "Welcome to Valle. ✨\n\nHow can I curate your day in the Sacred Valley?"
   }
 ]
 
@@ -25,25 +27,36 @@ export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
 
-    // Add user message
-    const userMsg: Message = { id: Date.now().toString(), role: "user", content: input }
+    const userText = input.trim()
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: userText }
     setMessages(prev => [...prev, userMsg])
     setInput("")
+    setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const responseText = await askConcierge(userText)
       const aiMsg: Message = { 
         id: (Date.now() + 1).toString(), 
         role: "ai", 
-        content: "¡Excelente elección! Estoy buscando las mejores opciones 'No Verificadas' y 'Premium' en nuestra base de datos para ofrecerte una experiencia auténtica. (Modo Demo: Respuestas IA próximamente 🚀)" 
+        content: responseText 
       }
       setMessages(prev => [...prev, aiMsg])
-    }, 1000)
+    } catch (error) {
+      const errorMsg: Message = { 
+        id: (Date.now() + 1).toString(), 
+        role: "ai", 
+        content: "Error de conexión. Intenta nuevamente más tarde." 
+      }
+      setMessages(prev => [...prev, errorMsg])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -59,20 +72,20 @@ export function AiConcierge() {
           >
             <Card className="flex flex-col h-[500px] shadow-2xl border-indigo-100 overflow-hidden bg-white/95 backdrop-blur-md">
               {/* Header */}
-              <div className="bg-indigo-600 p-4 text-white flex justify-between items-center shrink-0">
+              <div className="bg-[#D4AF37] p-4 text-black flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="bg-white/20 p-1.5 rounded-lg">
+                  <div className="bg-black/10 p-1.5 rounded-lg">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm">InkaPortal Concierge</h3>
-                    <p className="text-xs text-indigo-200">Asistente IA 24/7</p>
+                    <h3 className="font-bold text-sm">Valle Concierge</h3>
+                    <p className="text-xs text-black/70">Khipu AI Assistant</p>
                   </div>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-indigo-100 hover:text-white hover:bg-white/20 rounded-full"
+                  className="text-black/70 hover:text-black hover:bg-black/10 rounded-full"
                   onClick={() => setIsOpen(false)}
                 >
                   <X className="w-5 h-5" />
@@ -86,36 +99,49 @@ export function AiConcierge() {
                     key={msg.id} 
                     className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                   >
-                    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-200" : "bg-indigo-100"}`}>
-                      {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-indigo-600" />}
+                    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-200" : "bg-[#D4AF37]/20"}`}>
+                      {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-[#D4AF37]" />}
                     </div>
                     <div 
                       className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
                         msg.role === "user" 
                           ? "bg-slate-900 text-white rounded-tr-sm" 
-                          : "bg-white border border-indigo-50 text-slate-700 rounded-tl-sm"
+                          : "bg-white border border-[#D4AF37]/20 text-slate-700 rounded-tl-sm"
                       }`}
                     >
                       {msg.content}
                     </div>
                   </div>
                 ))}
+                {isLoading && (
+                  <div className="flex gap-3 max-w-[85%] mr-auto">
+                    <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-[#D4AF37]/20">
+                      <Bot className="w-4 h-4 text-[#D4AF37]" />
+                    </div>
+                    <div className="p-3 rounded-2xl text-sm bg-white border border-[#D4AF37]/20 text-slate-700 rounded-tl-sm flex items-center gap-1.5">
+                      <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                      <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Input Area */}
               <div className="p-4 bg-slate-50 border-t shrink-0">
                 <form onSubmit={handleSend} className="flex gap-2">
                   <Input 
-                    placeholder="Escribe tu idea aquí..." 
+                    placeholder="Describe tu día ideal..." 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="bg-white border-slate-200 focus-visible:ring-indigo-500 rounded-full"
+                    disabled={isLoading}
+                    className="bg-white border-slate-200 focus-visible:ring-[#D4AF37] rounded-full"
                   />
                   <Button 
                     type="submit" 
                     size="icon" 
-                    className="bg-indigo-600 hover:bg-indigo-700 rounded-full shrink-0 shadow-md transition-transform hover:scale-105"
-                    disabled={!input.trim()}
+                    className="bg-[#D4AF37] text-black hover:bg-[#C5A059] rounded-full shrink-0 shadow-md transition-transform hover:scale-105"
+                    disabled={!input.trim() || isLoading}
                   >
                     <Send className="w-4 h-4" />
                   </Button>

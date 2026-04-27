@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import { notFound } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -86,10 +87,12 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               </div>
 
               <div className="mt-6 text-center">
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
-                  Reclamar Perfil y Ver Contacto
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                <Link href={`/claim/${business.id}/checkout`}>
+                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
+                    Reclamar Perfil y Ver Contacto
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
                 <p className="text-xs text-slate-500 mt-3">Prueba gratis por 30 días. Luego s/49 al mes.</p>
               </div>
             </Card>

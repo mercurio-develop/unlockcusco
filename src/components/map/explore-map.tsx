@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-// @ts-expect-error react-map-gl types might not be perfectly resolved
-import Map, { Marker, Popup } from 'react-map-gl';
+import Map, { Marker, Popup } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MapPin } from 'lucide-react';
 
