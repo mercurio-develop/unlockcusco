@@ -36,6 +36,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const { q } = await searchParams
   let businesses = await prisma.business.findMany({
     orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
+    take: 100, // Limit payload to client
   })
 
   if (q) {

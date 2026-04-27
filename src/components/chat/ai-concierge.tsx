@@ -95,7 +95,8 @@ export function AiConcierge() {
                       if (part.type === 'tool-invocation') {
                         const toolInvocation = part.toolInvocation;
                         if (toolInvocation?.toolName === 'buildSpatialItinerary' && toolInvocation?.state === 'result') {
-                          return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result} />
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result as any} />
                         }
                       }
                       return null;

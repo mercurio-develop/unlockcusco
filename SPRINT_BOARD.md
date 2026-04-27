@@ -16,6 +16,7 @@ This document tracks atomic tasks for the current sprint. The Project Manager sk
 - [ ] *None currently.*
 
 ### ✅ Done (Recent)
+- [x] **UI/UX:** Redesign Navbar to a minimal, floating glass "Apple-level" aesthetic with Framer Motion.
 - [x] **Branding:** Transitioned all references from "Valle" and "OpenClaw" to "InkaPortal".
 - [x] **Project Management:** Upgraded Secretary skill to Project Manager.
 - [x] **Code Quality:** Fixed all TypeScript `any` types and unescaped entities; Next.js linter passes with 0 errors.

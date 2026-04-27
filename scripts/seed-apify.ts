@@ -66,10 +66,10 @@ async function main() {
     try {
       const run = await apifyClient.actor("compass/google-maps-extractor").call({
         searchStringsArray: [search],
-        maxCrawledPlacesPerSearch: 15,
-        language: 'es',
-        maxImages: 1,
-        maxReviews: 3,
+        maxCrawledPlacesPerSearch: 20,
+        language: 'en',
+        maxImages: 2,
+        maxReviews: 5,
       });
 
       const { items } = await apifyClient.dataset(run.defaultDatasetId).listItems();
@@ -95,8 +95,8 @@ async function main() {
           const imageUrl = imageUrls?.[0] ?? FALLBACK_IMAGES[category];
           const rating = (item.totalScore as number) ?? null
           // Skip low-quality businesses
-          if (rating !== null && rating < 4.0) {
-            console.log(`   ⏭  Skipped (low rating ${rating}): ${name}`)
+          if (rating !== null && rating < 4.5) {
+            console.log(`   ⏭  Skipped (rating ${rating} < 4.5): ${name}`)
             continue
           }
 

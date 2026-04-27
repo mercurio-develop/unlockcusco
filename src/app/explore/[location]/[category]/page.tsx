@@ -19,11 +19,11 @@ const LOCATION_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
-  gastronomia: { label: 'Gastronomía', emoji: '🍽️' },
-  bienestar:   { label: 'Bienestar',   emoji: '🧘' },
-  aventura:    { label: 'Aventura',    emoji: '🥾' },
-  descanso:    { label: 'Descanso',    emoji: '🛌' },
-  cultura:     { label: 'Cultura',     emoji: '🏺' },
+  dining:    { label: 'Dining',    emoji: '🍽️' },
+  wellness:  { label: 'Wellness',  emoji: '🧘' },
+  adventure: { label: 'Adventure', emoji: '🥾' },
+  stays:     { label: 'Stays',     emoji: '🛌' },
+  culture:   { label: 'Culture',   emoji: '🏺' },
 }
 
 export async function generateStaticParams() {
@@ -53,6 +53,14 @@ export async function generateMetadata({
   }
 }
 
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  dining: "Experience the culinary renaissance of the Andes. From traditional *picanterías* serving slow-roasted guinea pig to avant-garde restaurants blending local ingredients with modern techniques, the Sacred Valley offers a world-class dining experience.",
+  wellness: "Reconnect with your inner self. Discover holistic spas, ancient Inca healing therapies, yoga retreats, and meditation centers nestled in the tranquil mountains of the Sacred Valley.",
+  adventure: "Get your adrenaline pumping. The Sacred Valley is a playground for thrill-seekers, offering world-class trekking, ATV tours, white-water rafting, and zip-lining across breathtaking landscapes.",
+  stays: "Rest in unparalleled comfort. Whether you seek a luxury eco-lodge, a boutique boutique hotel, or a cozy family-run inn, find the perfect basecamp for your Andean explorations.",
+  culture: "Immerse yourself in living history. Explore vibrant artisan markets, ancient ruins, traditional textile weaving centers, and interactive workshops that preserve the legacy of the Incas.",
+}
+
 export default async function CategoryPage({
   params,
 }: {
@@ -69,6 +77,7 @@ export default async function CategoryPage({
 
   const loc = LOCATION_LABELS[location] ?? location
   const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
+  const description = CATEGORY_DESCRIPTIONS[category] ?? `Explore the best ${cat.label} options in ${loc}.`
 
   return (
     <div className="min-h-screen bg-[#09090B] font-sans">
@@ -94,8 +103,11 @@ export default async function CategoryPage({
           <h1 className="text-4xl md:text-6xl font-serif text-white tracking-tight">
             {cat.emoji} {cat.label}
           </h1>
-          <p className="mt-3 text-white/50 text-lg font-light">
-            {localBusinesses.length} lugares verificados en {loc}
+          <p className="mt-4 text-white/70 text-lg font-light max-w-2xl leading-relaxed">
+            {description}
+          </p>
+          <p className="mt-6 text-[#D4AF37] text-sm font-medium tracking-wide uppercase">
+            {localBusinesses.length} verified locations in {loc}
           </p>
         </div>
       </div>
