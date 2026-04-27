@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { Star, Zap, ArrowUpRight } from "lucide-react"
 
 type Business = {
@@ -82,7 +83,7 @@ export function BusinessGrid({ businesses }: BusinessGridProps) {
       >
         {filtered.map((business, i) => (
           <motion.div
-            key={business.id}
+            key={`${business.id}-${i}`}
             variants={{
               hidden: { opacity: 0, y: 24 },
               visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
@@ -92,10 +93,12 @@ export function BusinessGrid({ businesses }: BusinessGridProps) {
               i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-[3/4]"
             }`}
           >
-            <img
+            <Image
               src={business.imageUrl}
               alt={business.name}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              fill
+              unoptimized
+              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
 
             {/* Gradient */}

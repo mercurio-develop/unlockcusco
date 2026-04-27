@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import dynamic from "next/dynamic"
+import Image from "next/image"
 import { ExploreSearch } from "./explore-search"
 import { BusinessCard } from "@/components/cards/business-card"
 
@@ -50,10 +51,13 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
   return (
     <div className="h-[calc(100vh-64px)] w-full flex overflow-hidden bg-[#09090B] font-sans relative">
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay pointer-events-none">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
           className="w-full h-full object-cover"
           alt="Andes Mountains"
+          fill
+          priority
+          unoptimized
         />
       </div>
 
@@ -74,9 +78,9 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
             </div>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pb-20">
-              {businesses.map((business) => (
+              {businesses.map((business, i) => (
                 <div
-                  key={business.id}
+                  key={`${business.id}-${i}`}
                   ref={(el) => {
                     if (el) cardRefs.current.set(business.id, el)
                     else cardRefs.current.delete(business.id)

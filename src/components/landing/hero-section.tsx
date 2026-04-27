@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Sparkles, ArrowRight, ChevronDown } from "lucide-react"
+import Image from "next/image"
 
 export function HeroSection() {
   const [query, setQuery] = useState("")
@@ -17,26 +18,16 @@ export function HeroSection() {
   return (
     <div className="h-screen w-full relative flex flex-col items-center justify-center overflow-hidden bg-[#09090B]">
       <div className="absolute inset-0 z-0 opacity-60 mix-blend-overlay">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
-          className="w-full h-full object-cover"
+          className="object-cover"
           alt="Andes Mountains"
+          fill
+          priority
+          unoptimized
         />
       </div>
       <div className="bg-gradient-to-t from-[#09090B] via-[#09090B]/50 to-transparent absolute inset-0 z-0" />
-
-      {/* Navbar */}
-      <div className="w-full absolute top-0 z-50 flex justify-between items-center p-6 lg:px-12">
-        <div className="tracking-[0.4em] text-white text-xl font-serif">INKAPORTAL.</div>
-        <div className="flex items-center">
-          <button onClick={() => router.push("/explore")} className="text-white/70 hover:text-white transition text-sm mr-6">
-            For Locals
-          </button>
-          <button onClick={() => router.push("/dashboard")} className="bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2 rounded-full text-white text-sm hover:bg-white/20 transition">
-            Sign In
-          </button>
-        </div>
-      </div>
 
       {/* Hero */}
       <motion.div

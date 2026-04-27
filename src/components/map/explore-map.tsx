@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
-import "mapbox-gl/dist/mapbox-gl.css"
+import 'mapbox-gl/dist/mapbox-gl.css'
+import Image from "next/image"
 import { Star, Zap, ArrowUpRight, MapPin } from "lucide-react"
 import type { Business } from "@/components/explore/explore-view"
 
@@ -122,7 +123,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         return (
           <Marker
-            key={business.id}
+            key={`${business.id}-${index}`}
             longitude={business.lng}
             latitude={business.lat}
             anchor="bottom"
@@ -196,9 +197,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative">
-              <img
+              <Image
                 src={popupBusiness.imageUrl}
                 alt={popupBusiness.name}
+                width={260}
+                height={128}
+                unoptimized
                 className="w-full h-32 object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] to-transparent opacity-60" />
@@ -234,7 +238,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                   View Details <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${popupBusiness.lat},${popupBusiness.lng}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(popupBusiness.name)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/80 hover:text-white rounded-xl transition-colors border border-white/10"

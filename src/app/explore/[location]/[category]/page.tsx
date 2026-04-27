@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 
@@ -44,11 +45,11 @@ export async function generateMetadata({
   const loc = LOCATION_LABELS[location] ?? location
   const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
   return {
-    title: `${cat.emoji} ${cat.label} en ${loc} — InkaPortal Sacred Valley`,
-    description: `Descubre los mejores negocios de ${cat.label} en ${loc}, Valle Sagrado. Reservas directas sin comisiones vía WhatsApp.`,
+    title: `${cat.emoji} ${cat.label} in ${loc} — InkaPortal Sacred Valley`,
+    description: `Discover the best ${cat.label} businesses in ${loc}, Sacred Valley. Book directly with zero commissions via WhatsApp.`,
     openGraph: {
-      title: `${cat.label} en ${loc} | InkaPortal`,
-      description: `Los mejores de ${cat.label} en ${loc}, Valle Sagrado del Cusco.`,
+      title: `${cat.label} in ${loc} | InkaPortal`,
+      description: `The best of ${cat.label} in ${loc}, Sacred Valley, Cusco.`,
     },
   }
 }
@@ -57,7 +58,7 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   dining: "Experience the culinary renaissance of the Andes. From traditional *picanterías* serving slow-roasted guinea pig to avant-garde restaurants blending local ingredients with modern techniques, the Sacred Valley offers a world-class dining experience.",
   wellness: "Reconnect with your inner self. Discover holistic spas, ancient Inca healing therapies, yoga retreats, and meditation centers nestled in the tranquil mountains of the Sacred Valley.",
   adventure: "Get your adrenaline pumping. The Sacred Valley is a playground for thrill-seekers, offering world-class trekking, ATV tours, white-water rafting, and zip-lining across breathtaking landscapes.",
-  stays: "Rest in unparalleled comfort. Whether you seek a luxury eco-lodge, a boutique boutique hotel, or a cozy family-run inn, find the perfect basecamp for your Andean explorations.",
+  stays: "Rest in unparalleled comfort. Whether you seek a luxury eco-lodge, a boutique hotel, or a cozy family-run inn, find the perfect basecamp for your Andean explorations.",
   culture: "Immerse yourself in living history. Explore vibrant artisan markets, ancient ruins, traditional textile weaving centers, and interactive workshops that preserve the legacy of the Incas.",
 }
 
@@ -84,10 +85,13 @@ export default async function CategoryPage({
       {/* Header */}
       <div className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 opacity-30 mix-blend-overlay">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
-            className="w-full h-full object-cover"
+            className="object-cover"
             alt=""
+            fill
+            priority
+            unoptimized
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-[#09090B]/60 to-[#09090B]" />
@@ -121,11 +125,13 @@ export default async function CategoryPage({
               className="group relative flex flex-col rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md hover:border-white/20 hover:shadow-[0_0_40px_-10px_rgba(212,175,55,0.15)] transition-all duration-300"
             >
               {/* Image */}
-              <div className="relative h-48 overflow-hidden">
-                <img
+              <div className="relative h-48 overflow-hidden w-full">
+                <Image
                   src={business.imageUrl}
                   alt={business.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  fill
+                  unoptimized
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 {business.isClaimed && (
@@ -150,34 +156,34 @@ export default async function CategoryPage({
                 </div>
 
                 {business.reviewsCount > 0 && (
-                  <p className="text-white/40 text-xs mb-4">{business.reviewsCount} reseñas</p>
+                  <p className="text-white/40 text-xs mb-4">{business.reviewsCount} reviews</p>
                 )}
 
                 <div className="mt-auto space-y-2">
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${business.lat},${business.lng}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-white/30 hover:text-white/60 text-xs transition-colors"
                   >
-                    <MapPin className="w-3 h-3" /> Ver en Google Maps
+                    <MapPin className="w-3 h-3" /> View on Google Maps
                   </a>
 
                   {business.isClaimed && business.whatsapp ? (
                     <a
-                      href={`https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(`¡Hola ${business.name}! Vi tu perfil en InkaPortal y me gustaría reservar. ¿Tienen disponibilidad?`)}`}
+                      href={`https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}! I saw your profile on InkaPortal and I'd like to book. Do you have availability?`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-green-600 text-white text-sm font-semibold py-3 rounded-xl transition-colors"
                     >
-                      Reservar ahora
+                      Book Now
                     </a>
                   ) : (
                     <Link
                       href={`/claim/${business.id}`}
                       className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-sm font-medium py-3 rounded-xl transition-colors"
                     >
-                      Consultar disponibilidad
+                      Check Availability
                     </Link>
                   )}
                 </div>

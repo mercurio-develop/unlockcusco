@@ -52,9 +52,9 @@ export async function askConcierge(message: string, language: string = "English"
       contents: prompt,
     })
 
-    return response.text || "Lo siento, la niebla en los Andes me impide conectar. Intenta de nuevo."
+    return response.text || "Sorry, the fog in the Andes prevents me from connecting. Try again."
   } catch (error) {
     console.error("Error in askConcierge:", error)
-    return "Ocurrió un error al consultar el oráculo de InkaPortal. Por favor, intenta más tarde."
+    return "An error occurred while consulting the InkaPortal oracle. Please try again later."
   }
 }

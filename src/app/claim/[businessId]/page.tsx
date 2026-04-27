@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -24,26 +25,26 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
   // Redirect if already claimed
   if (business.isClaimed) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="max-w-md p-8 text-center space-y-4">
+      <div className="min-h-screen bg-[#09090B] flex items-center justify-center p-4">
+        <Card className="max-w-md p-8 text-center space-y-4 bg-white/5 border-white/10 backdrop-blur-md">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="text-2xl font-bold">Perfil Verificado</h2>
-          <p className="text-slate-600">Este perfil ya ha sido reclamado y está activo recibiendo reservas directas.</p>
+          <h2 className="text-2xl font-bold text-white">Verified Profile</h2>
+          <p className="text-white/60">This profile has already been claimed and is actively receiving direct bookings.</p>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[#09090B] py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Urgent Header */}
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm flex gap-4 items-start">
-          <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+        <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm flex gap-4 items-start">
+          <AlertCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
           <div>
-            <h2 className="text-red-800 font-bold text-lg">Acción Requerida: Cliente en Espera</h2>
-            <p className="text-red-700 text-sm mt-1">Un turista internacional intentó contactar a <strong>{business.name}</strong> hace unos minutos, pero su perfil figura como &quot;No Verificado&quot;.</p>
+            <h2 className="text-red-400 font-bold text-lg">Action Required: Waiting Client</h2>
+            <p className="text-red-300/80 text-sm mt-1">An international tourist tried to contact <strong>{business.name}</strong> a few minutes ago, but your profile is listed as &quot;Unverified&quot;.</p>
           </div>
         </div>
 
@@ -52,89 +53,93 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
           {/* Main Value Prop */}
           <div className="md:col-span-3 space-y-6">
             <div>
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                No pierdas más clientes en el Valle Sagrado con InkaPortal.
+              <h1 className="text-4xl font-extrabold text-white tracking-tight">
+                Don&apos;t lose any more clients in the Sacred Valley with InkaPortal.
               </h1>
-              <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-                InkaPortal es el directorio potenciado por IA que usan los turistas para planear su viaje. Reclama tu perfil ahora para desbloquear el contacto del cliente y activar el botón de &quot;Reserva Inmediata&quot;.
+              <p className="mt-4 text-lg text-white/60 leading-relaxed">
+                InkaPortal is the AI-powered directory tourists use to plan their trips. Claim your profile now to unlock client contacts and activate the &quot;Instant Booking&quot; button.
               </p>
             </div>
 
-            <Card className="p-6 border-indigo-100 shadow-lg bg-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-indigo-600 text-white px-4 py-1 text-xs font-bold rounded-bl-lg">
-                NUEVO LEAD
+            <Card className="p-6 border-white/10 shadow-lg bg-white/5 relative overflow-hidden backdrop-blur-xl">
+              <div className="absolute top-0 right-0 bg-[#D4AF37] text-black px-4 py-1 text-xs font-bold rounded-bl-lg">
+                NEW LEAD
               </div>
-              <h3 className="font-bold text-lg flex items-center gap-2 mb-4">
-                <Lock className="w-5 h-5 text-slate-400" />
-                Detalles de la Reserva Ocultos
+              <h3 className="font-bold text-lg flex items-center gap-2 mb-4 text-white">
+                <Lock className="w-5 h-5 text-white/40" />
+                Hidden Booking Details
               </h3>
               
-              <div className="space-y-3 bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <div className="space-y-3 bg-black/40 p-4 rounded-lg border border-white/5">
                 <div className="flex justify-between items-center blur-sm select-none">
-                  <span className="text-slate-500">Nombre del Turista:</span>
-                  <span className="font-medium text-slate-900">Sarah J********</span>
+                  <span className="text-white/50">Tourist Name:</span>
+                  <span className="font-medium text-white/90">Sarah J********</span>
                 </div>
                 <div className="flex justify-between items-center blur-sm select-none">
-                  <span className="text-slate-500">Fecha de Interés:</span>
-                  <span className="font-medium text-slate-900">15 de Mayo, 2026</span>
+                  <span className="text-white/50">Date of Interest:</span>
+                  <span className="font-medium text-white/90">May 15, 2026</span>
                 </div>
                 <div className="flex justify-between items-center blur-sm select-none">
-                  <span className="text-slate-500">Categoría:</span>
-                  <span className="font-medium text-slate-900">{business.category}</span>
+                  <span className="text-white/50">Category:</span>
+                  <span className="font-medium text-white/90">{business.category}</span>
                 </div>
               </div>
 
               <div className="mt-6 text-center">
                 <Link href={`/claim/${business.id}/checkout`}>
-                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
-                    Reclamar Perfil y Ver Contacto
+                  <Button className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
+                    Claim Profile & View Contact
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <p className="text-xs text-slate-500 mt-3">Prueba gratis por 30 días. Luego s/49 al mes.</p>
+                <p className="text-xs text-white/40 mt-3">Free 30-day trial. Then $49/month.</p>
               </div>
             </Card>
           </div>
 
           {/* Business Preview Sidebar */}
           <div className="md:col-span-2">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Así te ven los turistas hoy</h3>
-            <Card className="overflow-hidden relative opacity-75 grayscale-[30%] pointer-events-none">
-              <div className="absolute inset-0 bg-white/20 z-10 backdrop-blur-[1px] flex items-center justify-center">
-                <Badge variant="secondary" className="bg-white/90 text-slate-800 shadow-lg border-red-200 text-xs uppercase tracking-widest font-bold">
-                  No Verificado
+            <h3 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-4">How tourists see you today</h3>
+            <Card className="overflow-hidden relative opacity-75 grayscale-[30%] pointer-events-none bg-white/5 border-white/10">
+              <div className="absolute inset-0 bg-black/20 z-10 backdrop-blur-[1px] flex items-center justify-center">
+                <Badge variant="secondary" className="bg-[#09090B] text-white/90 shadow-lg border-red-500/30 text-xs uppercase tracking-widest font-bold">
+                  Unverified
                 </Badge>
               </div>
               
-              <img
-                src={business.imageUrl}
-                alt={business.name}
-                className="object-cover h-40 w-full"
-              />
-              <div className="p-4">
+              <div className="relative h-40 w-full">
+                <Image
+                  src={business.imageUrl}
+                  alt={business.name}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4 text-white">
                 <h3 className="font-bold text-lg line-clamp-1">{business.name}</h3>
-                <p className="text-sm text-slate-500 mt-1">{business.category}</p>
+                <p className="text-sm text-white/50 mt-1">{business.category}</p>
                 {business.rating && (
                   <div className="flex items-center gap-1 mt-2">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-4 w-4 fill-[#D4AF37] text-[#D4AF37]" />
                     <span className="font-semibold text-sm">{business.rating}</span>
-                    <span className="text-xs text-gray-500">({business.reviewsCount})</span>
+                    <span className="text-xs text-white/40">({business.reviewsCount})</span>
                   </div>
                 )}
-                <Button variant="outline" className="w-full mt-4" disabled>
-                  Consultar Disponibilidad
+                <Button variant="outline" className="w-full mt-4 bg-white/5 border-white/10 text-white/50" disabled>
+                  Check Availability
                 </Button>
               </div>
             </Card>
 
             <div className="mt-8 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="bg-green-100 p-2 rounded-full shrink-0">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
+                <div className="bg-[#25D366]/20 p-2 rounded-full shrink-0">
+                  <TrendingUp className="w-4 h-4 text-[#25D366]" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900">Aumenta tus Ventas</h4>
-                  <p className="text-xs text-slate-600 mt-1">Conecta directamente por WhatsApp con turistas de alto valor sin comisiones por reserva.</p>
+                  <h4 className="font-bold text-sm text-white">Increase Your Sales</h4>
+                  <p className="text-xs text-white/60 mt-1">Connect directly via WhatsApp with high-value tourists. No booking commissions.</p>
                 </div>
               </div>
             </div>

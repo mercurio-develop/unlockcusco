@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Star, Zap, MapPin } from "lucide-react"
+import Image from "next/image"
 import { generateShadowLead } from "@/app/actions/shadow-lead"
 
 type Business = {
@@ -43,12 +44,12 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
   const handleBookNow = () => {
     if (!business.whatsapp) return
     const msg = encodeURIComponent(
-      `¡Hola ${business.name}! 👋 Vi tu perfil en InkaPortal y me gustaría hacer una reserva. ¿Cuándo tienen disponibilidad?`
+      `Hello ${business.name}! 👋 I saw your profile on InkaPortal and I'd like to make a reservation. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp}?text=${msg}`, "_blank")
   }
 
-  const handleConsultar = async () => {
+  const handleConsult = async () => {
     if (!touristName || !date) return
 
     try {
@@ -71,11 +72,13 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           : "border-white/10 hover:border-white/20"
       }`}
     >
-      <div className="relative overflow-hidden">
-        <img
+      <div className="relative overflow-hidden h-56 w-full">
+        <Image
           src={business.imageUrl}
           alt={business.name}
-          className="object-cover h-56 w-full group-hover:scale-105 transition-transform duration-700 ease-out"
+          fill
+          unoptimized
+          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
         {business.isClaimed && (
@@ -106,7 +109,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
         <div className="mt-auto pt-4">
           {/* Google Maps link */}
           <a
-            href={`https://www.google.com/maps/search/?api=1&query=${business.lat},${business.lng}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
@@ -156,7 +159,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
                     />
                   </div>
                 </div>
-                <Button onClick={handleConsultar} className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                <Button onClick={handleConsult} className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
                   Send Inquiry
                 </Button>
               </DialogContent>
