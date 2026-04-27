@@ -1,12 +1,12 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
 
 export const buildSpatialItinerary = tool({
   description:
     'Generates multi-stop alternative itineraries by pairing a morning activity with an afternoon meal. Filters the database for the highest-rated places and calculates the geographic distance between them.',
-  parameters: z.object({
+  inputSchema: z.object({
     morningIntent: z.string().describe('Search keyword for morning'),
     afternoonIntent: z.string().describe('Search keyword for afternoon'),
   }),
@@ -14,8 +14,8 @@ export const buildSpatialItinerary = tool({
     const morningItems = await prisma.business.findMany({
       where: {
         OR: [
-          { name: { contains: morningIntent, mode: 'insensitive' } },
-          { category: { contains: morningIntent, mode: 'insensitive' } },
+          { name: { contains: morningIntent } },
+          { category: { contains: morningIntent } },
         ],
       },
       orderBy: { rating: 'desc' },
@@ -25,8 +25,8 @@ export const buildSpatialItinerary = tool({
     const afternoonItems = await prisma.business.findMany({
       where: {
         OR: [
-          { name: { contains: afternoonIntent, mode: 'insensitive' } },
-          { category: { contains: afternoonIntent, mode: 'insensitive' } },
+          { name: { contains: afternoonIntent } },
+          { category: { contains: afternoonIntent } },
         ],
       },
       orderBy: { rating: 'desc' },
@@ -37,7 +37,7 @@ export const buildSpatialItinerary = tool({
 
     for (const morning of morningItems) {
       for (const afternoon of afternoonItems) {
-        if (!morning.lat || !morning.lng || !afternoon.lat || !afternoon.lng) continue;
+        if (!morning.lat || !morning.lng || !afternoon.lat || !afternoon.lng || morning.rating === null || afternoon.rating === null) continue;
 
         const distance = calculateDistance(morning.lat, morning.lng, afternoon.lat, afternoon.lng);
 
