@@ -145,15 +145,22 @@ scripts/
 
 ## Patterns to follow
 
+### 1. Feature-Sliced Architecture & Centralized Routes
+- **Domain-Driven:** We are migrating to a feature-sliced architecture in `src/features/`. Code should be organized by business domain (e.g., `business`, `concierge`, `leads`), NOT by technical type.
+- **Internal Feature Structure:** Inside a feature (e.g., `src/features/ticket/`), strictly separate: `actions/` (mutations), `queries/` (fetching), `components/` (UI), and `types.ts`.
+- **Pure Global Components:** `src/components/` is strictly for pure, global UI primitives (like shadcn) and generic helpers. Domain-specific components belong in `src/features/*/components`.
+- **Centralized Routing:** NEVER hardcode route strings (e.g., `href="/explore"`). Always use the route functions defined in `src/paths.ts` (e.g., `explorePath()`).
+
+### 2. Server Actions & Components
 ```tsx
-// Server action
+// Server action (inside src/features/domain/actions/do-something.ts)
 "use server"
 import { prisma } from "@/lib/prisma"
 export async function doSomething(id: string) { ... }
 
-// Client component using server action
+// Client component using server action (inside src/features/domain/components/my-component.tsx)
 "use client"
-import { doSomething } from "@/app/actions/something"
+import { doSomething } from "@/features/domain/actions/do-something"
 // call directly: await doSomething(id)
 
 // Dialog (Base UI, NOT Radix)

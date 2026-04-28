@@ -17,6 +17,7 @@ This document serves as a comprehensive context brief for Gemini Deep Thinking, 
 - **Data Hygiene Pipeline:** Created a Python CLI (`scripts/clean_db.py`) to systematically purge out-of-bounds geographic locations, prune low-review businesses, and strip messy scraping artifacts from titles (e.g., removing ", Cusco" or " - Restaurant").
 - **Cost Control:** Implemented strict token limits (`maxTokens: 300`) and prompt engineering to enforce brevity and minimize API costs during the bootstrapping phase.
 - **Routing Overhaul:** Stripped brittle `slug` logic from the schema and routing, switching to robust UUID-based routing for business detail pages.
+- **Enterprise Architecture Migration:** Transitioning the codebase to a Feature-Sliced Architecture (`src/features/`) grouped by business domain, with centralized route management (`src/paths.ts`) to eliminate hardcoded URL strings.
 
 ## 3. Pending Features (The Backlog)
 These are the immediate next steps required for MVP launch:
