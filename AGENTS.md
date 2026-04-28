@@ -26,7 +26,7 @@ Breaking changes — APIs, conventions, file structure may differ from training 
 | Map | `mapbox-gl` + `react-map-gl` v8 | Key: `NEXT_PUBLIC_MAPBOX_TOKEN` |
 | DB | Prisma + SQLite (`prisma/dev.db`) | 5 seeded businesses |
 | Animations | `framer-motion` |  |
-| Styling | Tailwind CSS v4 | Dark theme: `bg-[#09090B]`, gold accent: `#D4AF37` |
+| Styling | Tailwind CSS v4 | Light theme: Slate-900 (heavy text/primary buttons), Rose-600 (accents/CTAs), Serif headings |
 
 **Never do `new PrismaClient()` directly.** Always import `prisma` from `@/lib/prisma` (singleton).
 
