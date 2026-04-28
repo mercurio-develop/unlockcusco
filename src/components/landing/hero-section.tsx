@@ -23,9 +23,9 @@ export function HeroSection() {
     <div className="h-[calc(100vh-56px)] w-full relative flex flex-col items-center justify-center overflow-hidden bg-white">
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=3000&auto=format&fit=crop"
           className="object-cover"
-          alt="Andes Mountains"
+          alt="Sacred Valley, Peru"
           fill
           priority
           unoptimized
@@ -72,11 +72,16 @@ export function HeroSection() {
           </button>
         </div>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-3 max-w-3xl">
+        <div className="mt-10 flex flex-wrap justify-center gap-3 max-w-4xl">
           {[
             { emoji: "🌿", text: "Recovery massage after the Inca Trail" },
             { emoji: "🛵", text: "Hidden ATV routes in Maras" },
             { emoji: "🍽️", text: "Authentic local Picantería near me" },
+            { emoji: "🦙", text: "Trekking with Llamas in the mountains" },
+            { emoji: "🛖", text: "Boutique stays in Ollantaytambo" },
+            { emoji: "☕", text: "Best specialty coffee in Pisac" },
+            { emoji: "✨", text: "Spiritual retreats and yoga" },
+            { emoji: "🚕", text: "Private transport to Cusco airport" },
           ].map(({ emoji, text }) => (
             <div
               key={text}
