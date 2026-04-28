@@ -11,7 +11,7 @@ test.describe('InkaPortal App End-to-End', () => {
     await input.fill('massage');
     
     // Submit the form
-    await page.locator('button:has-text("Design Trip")').click();
+    await page.locator('button:has-text("Enter the Portal")').click();
     
     // Verify it navigated correctly
     await expect(page).toHaveURL(/.*\/explore\?q=massage/, { timeout: 10000 });

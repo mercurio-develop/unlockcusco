@@ -23,7 +23,7 @@ export function HeroSection() {
     <div className="h-[calc(100vh-56px)] w-full relative flex flex-col items-center justify-center overflow-hidden bg-[#09090B]">
       <div className="absolute inset-0 z-0 opacity-60">
         <Image
-          src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=3000&auto=format&fit=crop"
           className="object-cover"
           alt="Sacred Valley, Andes Mountains"
           fill
@@ -91,7 +91,7 @@ export function HeroSection() {
             <div
               key={text}
               onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
-              className="bg-[#09090B]/60 border border-white/10 text-white/80 px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/10 hover:text-white transition-all cursor-pointer backdrop-blur-md shadow-lg whitespace-nowrap"
+              className="bg-white/5 border border-white/10 text-white/60 px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/10 hover:text-white transition-all cursor-pointer backdrop-blur-xl shadow-lg whitespace-nowrap hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]"
             >
               <span>{emoji}</span> {text}
             </div>
