@@ -64,7 +64,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
     <>
       <div className="relative mb-6">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Sparkles className="h-5 w-5 text-[#D4AF37]" />
+          <Sparkles className="h-5 w-5 text-rose-500" />
         </div>
         <input
           type="text"
@@ -72,35 +72,35 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && navigate(value, currentLoc, currentCat)}
           placeholder="Describe your perfect day (e.g. massage and good food)..."
-          className="w-full py-5 pl-12 pr-16 rounded-2xl border border-white/20 bg-white/5 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all text-white shadow-[0_0_30px_-5px_rgba(255,255,255,0.05)] text-lg placeholder:text-white/40 font-light backdrop-blur-md"
+          className="w-full py-5 pl-12 pr-16 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
         />
         
         <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
           <DialogTrigger render={
-            <button type="button" className={`absolute inset-y-0 right-4 flex items-center transition-colors ${currentLoc || currentCat ? 'text-[#D4AF37]' : 'text-white/50 hover:text-white'}`}>
+            <button type="button" className={`absolute inset-y-0 right-4 flex items-center transition-colors ${currentLoc || currentCat ? 'text-rose-600' : 'text-gray-400 hover:text-slate-900'}`}>
               <SlidersHorizontal className="h-5 w-5" />
             </button>
           } />
-          <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-[#09090B] border border-white/20 backdrop-blur-xl">
-            <DialogHeader className="mb-6 border-b border-white/10 pb-4 relative">
-              <DialogTitle className="text-2xl font-serif tracking-tight text-white flex items-center gap-2">
-                <SlidersHorizontal className="w-5 h-5 text-[#D4AF37]" /> Filters
+          <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200 shadow-2xl">
+            <DialogHeader className="mb-6 border-b border-gray-100 pb-4 relative">
+              <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900 flex items-center gap-2">
+                <SlidersHorizontal className="w-5 h-5 text-slate-400" /> Filters
               </DialogTitle>
             </DialogHeader>
             
             <div className="space-y-8">
               {/* Location Filter */}
               <div>
-                <h4 className="text-sm font-semibold text-white/80 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
+                <h4 className="text-sm font-bold text-slate-500 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
                   <MapPin className="w-4 h-4" /> Location
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedLoc("")}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                       selectedLoc === "" 
-                        ? "bg-[#D4AF37] text-black shadow-lg" 
-                        : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+                        ? "bg-slate-900 text-white shadow-md" 
+                        : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                     }`}
                   >
                     Anywhere
@@ -109,10 +109,10 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
                     <button
                       key={loc.value}
                       onClick={() => setSelectedLoc(loc.value)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                         selectedLoc === loc.value 
-                          ? "bg-[#D4AF37] text-black shadow-lg" 
-                          : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+                          ? "bg-slate-900 text-white shadow-md" 
+                          : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                       }`}
                     >
                       {loc.label}
@@ -123,16 +123,16 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
 
               {/* Category Filter */}
               <div>
-                <h4 className="text-sm font-semibold text-white/80 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
+                <h4 className="text-sm font-bold text-slate-500 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
                   <Tag className="w-4 h-4" /> Category
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedCat("")}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                       selectedCat === "" 
-                        ? "bg-[#D4AF37] text-black shadow-lg" 
-                        : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+                        ? "bg-slate-900 text-white shadow-md" 
+                        : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                     }`}
                   >
                     All Experiences
@@ -141,10 +141,10 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
                     <button
                       key={cat.value}
                       onClick={() => setSelectedCat(cat.value)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                         selectedCat === cat.value 
-                          ? "bg-[#D4AF37] text-black shadow-lg" 
-                          : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+                          ? "bg-slate-900 text-white shadow-md" 
+                          : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                       }`}
                     >
                       {cat.label}
@@ -155,7 +155,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
               
               <Button 
                 onClick={applyFilters} 
-                className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold py-6 rounded-xl text-lg mt-4 shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-lg mt-4 shadow-lg transition-transform hover:scale-[1.02]"
               >
                 Show Results
               </Button>
@@ -165,7 +165,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
       </div>
 
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide items-center">
-        <span className="text-white/40 text-sm font-medium whitespace-nowrap mr-2">Quick Filters:</span>
+        <span className="text-slate-400 text-sm font-bold whitespace-nowrap mr-2">Quick Filters:</span>
         {CATEGORIES.map((cat) => {
           const isActive =
             currentCat === cat.value ||
@@ -175,10 +175,10 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
               key={cat.value}
               type="button"
               onClick={() => handleCategoryQuickFilter(cat.value)}
-              className={`px-5 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all text-sm font-medium border ${
+              className={`px-5 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all text-sm font-semibold border ${
                 isActive
-                  ? "bg-[#D4AF37] text-black border-[#D4AF37] hover:bg-[#C5A059] shadow-[0_0_15px_rgba(212,175,55,0.4)]"
-                  : "bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:border-white/30"
+                  ? "bg-slate-900 text-white border-slate-900 shadow-md"
+                  : "bg-white text-slate-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
               }`}
             >
               {cat.label}

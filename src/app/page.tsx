@@ -6,7 +6,7 @@ export default async function HomePage() {
   const { businesses, hasMore } = await fetchBusinesses({ page: 0, limit: 20 })
 
   return (
-    <div className="bg-[#09090B]">
+    <div className="bg-white">
       <HeroSection />
       <BusinessGrid initialBusinesses={businesses} initialHasMore={hasMore} />
     </div>

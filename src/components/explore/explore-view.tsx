@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 import dynamic from "next/dynamic"
-import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { MapIcon, MapPinOff, Loader2 } from "lucide-react"
 import { useInView } from "react-intersection-observer"
@@ -37,8 +36,8 @@ interface ExploreViewProps {
 const ExploreMap = dynamic(() => import("@/components/map/explore-map"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-full w-full bg-[#09090B]">
-      <p className="text-white/40 text-sm">Loading map…</p>
+    <div className="flex items-center justify-center h-full w-full bg-slate-50">
+      <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
     </div>
   ),
 })
@@ -59,10 +58,13 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
 
   // Sync state when props change due to Server Component re-rendering from search params
   useEffect(() => {
-    setBusinesses(initialBusinesses)
-    setHasMore(initialHasMore)
-    setPage(0)
-    setShowDesktopMap(initialBusinesses.length > 0)
+    const timer = setTimeout(() => {
+      setBusinesses(initialBusinesses)
+      setHasMore(initialHasMore)
+      setPage(0)
+      setShowDesktopMap(initialBusinesses.length > 0)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [initialBusinesses, initialHasMore])
 
   const loadMore = useCallback(async () => {
@@ -88,6 +90,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
 
   useEffect(() => {
     if (inView) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadMore()
     }
   }, [inView, loadMore])
@@ -111,28 +114,17 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   }
 
   return (
-    <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-[#09090B] font-sans relative">
-      <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay pointer-events-none">
-        <Image
-          src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
-          className="w-full h-full object-cover"
-          alt="Andes Mountains"
-          fill
-          priority
-          unoptimized
-        />
-      </div>
-
+    <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative">
       {/* Card list panel */}
-      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[55%] lg:w-[60%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-white/10 bg-[#09090B]/80 backdrop-blur-xl ${viewMode === "map" ? "hidden md:flex" : ""}`}>
-        <div className="px-8 pt-8 pb-4 bg-transparent z-10 sticky top-0 border-b border-white/10">
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[55%] lg:w-[60%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-gray-200 bg-white ${viewMode === "map" ? "hidden md:flex" : ""}`}>
+        <div className="px-8 pt-8 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-serif tracking-tight text-white">
+            <h1 className="text-3xl font-serif tracking-tight text-slate-900">
               Explore the INKAPORTAL
             </h1>
             <button
               onClick={() => setShowDesktopMap(!showDesktopMap)}
-              className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-white/80 hover:text-white transition-colors"
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 shadow-sm rounded-full text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
             >
               {showDesktopMap ? <MapPinOff className="w-4 h-4" /> : <MapIcon className="w-4 h-4" />}
               {showDesktopMap ? "Hide Map" : "Show Map"}
@@ -141,15 +133,15 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
           <ExploreSearch initialQuery={initialQuery} />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
           {businesses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-white/50 space-y-4">
-              <p className="text-xl font-light">No places found for this search.</p>
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
+              <p className="text-xl font-medium text-slate-600">No places found for this search.</p>
               <p className="text-sm">Try &quot;massage&quot;, &quot;ATV&quot;, or &quot;restaurant&quot;.</p>
             </div>
           ) : (
             <>
-              <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-8 pb-8 transition-all duration-500`}>
+              <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-x-6 gap-y-10 pb-8 transition-all duration-500`}>
                 {businesses.map((business, i) => (
                   <div
                     key={`${business.id}-${i}`}
@@ -169,7 +161,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
               
               {/* Infinite Scroll Trigger */}
               <div ref={ref} className="flex justify-center items-center h-16 pb-20">
-                {isLoading && <Loader2 className="w-6 h-6 text-[#D4AF37] animate-spin" />}
+                {isLoading && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
               </div>
             </>
           )}
@@ -177,7 +169,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       </div>
 
       {/* Map panel */}
-      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"} flex flex-col relative z-10 border-l border-white/10 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"} flex flex-col relative z-10 bg-slate-100 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
         {showDesktopMap && (
           <ExploreMap
             businesses={businesses}
@@ -189,19 +181,19 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
 
       {/* Mobile view toggle */}
       <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div className="flex items-center bg-[#09090B]/90 backdrop-blur-xl border border-white/20 rounded-full p-1 shadow-2xl">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-2xl">
           <button
             onClick={() => setViewMode("list")}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-              viewMode === "list" ? "bg-white text-black" : "text-white/70 hover:text-white"
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+              viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
             }`}
           >
             List
           </button>
           <button
             onClick={() => setViewMode("map")}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-              viewMode === "map" ? "bg-[#D4AF37] text-black" : "text-white/70 hover:text-white"
+            className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
+              viewMode === "map" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Map

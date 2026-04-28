@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -13,12 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, MapPin } from "lucide-react"
+import { Star, Zap } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 
-type Business = {
+export type Business = {
   id: string
   name: string
   category: string
@@ -45,7 +42,8 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleBookNow = () => {
+  const handleBookNow = (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (!business.whatsapp) return
     const msg = encodeURIComponent(
       `Hello ${business.name}! 👋 I saw your profile on INKAPORTAL and I'd like to make a reservation. When do you have availability?`
@@ -53,7 +51,8 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
     window.open(`https://wa.me/51${business.whatsapp}?text=${msg}`, "_blank")
   }
 
-  const handleConsult = async () => {
+  const handleConsult = async (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (!touristName || !date) return
 
     try {
@@ -71,15 +70,16 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
   const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl
 
   return (
-    <Card
+    <div
       onClick={onSelect}
-      className={`relative flex flex-col rounded-3xl shadow-xl transition-all duration-300 group bg-[#09090B]/60 backdrop-blur-xl cursor-pointer p-1.5 ${
-        isHighlighted
-          ? "border-[#D4AF37]/80 shadow-[0_0_24px_-4px_rgba(212,175,55,0.4)] scale-[1.01]"
-          : "border-white/10 hover:border-white/20 hover:bg-[#09090B]/80"
+      className={`flex flex-col gap-3 group cursor-pointer transition-all duration-300 ${
+        isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100"
       }`}
     >
-      <div className="relative overflow-hidden h-36 md:h-48 w-full rounded-[1.25rem]">
+      {/* Image Container */}
+      <div className={`relative w-full aspect-square overflow-hidden rounded-2xl transition-all duration-300 ${
+        isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
+      }`}>
         <Image
           src={displayImage}
           alt={business.name}
@@ -87,102 +87,87 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           unoptimized
           className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-        {business.isClaimed && (
-          <Badge className="absolute top-4 right-4 bg-[#25D366] hover:bg-green-500 text-white font-bold border-none shadow-lg flex items-center gap-1.5 px-3 py-1.5 z-10 backdrop-blur-sm">
-            <Zap className="h-3.5 w-3.5 fill-current" />
-            Instant Booking
-          </Badge>
-        )}
-        {business.instagramHandle && (
-           <Badge className="absolute top-4 left-4 bg-black/60 hover:bg-black/80 text-white font-bold border-white/20 shadow-lg flex items-center gap-1.5 px-3 py-1.5 z-10 backdrop-blur-md">
-            {business.instagramHandle}
-          </Badge>
-        )}
+        
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10 pointer-events-none">
+          {business.instagramHandle ? (
+            <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md">
+              {business.instagramHandle}
+            </span>
+          ) : <div />}
+          
+          {business.isClaimed && (
+            <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md flex items-center gap-1">
+              <Zap className="w-3 h-3 fill-rose-600 text-rose-600" />
+              Verified
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="p-4 md:p-5 flex flex-col flex-1 relative z-10">
-        <div className="flex flex-col gap-2 mb-3">
-          <div className="flex justify-between items-start gap-2">
-            <h3 className="text-lg md:text-xl font-serif tracking-tight line-clamp-1 text-white group-hover:text-[#D4AF37] transition-colors flex-1">{business.name}</h3>
-            {business.rating !== null && (
-              <div className="flex items-center gap-1 bg-black/40 px-1.5 py-1 rounded-lg border border-white/10 shrink-0 backdrop-blur-sm">
-                <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37]" />
-                <span className="font-bold text-xs text-white">{business.rating}</span>
-                <span className="text-[10px] text-white/50 font-medium">({business.reviewsCount})</span>
-              </div>
-            )}
-          </div>
-          <div>
-            <Badge variant="secondary" className="text-white/70 bg-white/5 border border-white/10 font-medium px-2.5 py-0.5 text-[10px] md:text-xs">
-              {business.category}
-            </Badge>
-          </div>
+      {/* Info Container */}
+      <div className="flex flex-col gap-1">
+        <div className="flex justify-between items-start gap-2">
+          <h3 className="font-semibold text-slate-900 text-[15px] leading-tight line-clamp-1 flex-1">
+            {business.name}
+          </h3>
+          {business.rating !== null && (
+            <div className="flex items-center gap-1 shrink-0">
+              <Star className="w-3.5 h-3.5 fill-slate-900 text-slate-900" />
+              <span className="font-medium text-sm text-slate-900">{business.rating}</span>
+            </div>
+          )}
         </div>
+        <p className="text-slate-500 text-sm line-clamp-1">
+          {business.category} • {business.reviewsCount} reviews
+        </p>
 
-        <div className="mt-auto pt-3">
-          <div className="flex flex-col gap-2 mb-4">
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors w-fit"
-            >
-              <MapPin className="w-3 h-3" /> View on Map
-            </a>
-            
-            <Link 
-              href={`/business/${business.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="text-[#D4AF37] text-xs font-semibold hover:text-[#C5A059] transition-colors inline-block"
-            >
-              View Profile & Reviews →
-            </Link>
-          </div>
-
+        <div className="mt-2">
           {business.isClaimed ? (
             <Button
               onClick={handleBookNow}
-              className="w-full bg-[#25D366] hover:bg-green-600 text-white text-sm font-semibold py-4 md:py-5 rounded-xl shadow-md shadow-green-500/20 transition-all hover:-translate-y-0.5"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold py-5 rounded-xl transition-all"
             >
               Book Now
             </Button>
           ) : (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger render={
-                <Button variant="outline" className="w-full text-white bg-white/5 border-white/10 hover:bg-white/10 hover:text-white text-sm font-semibold py-4 md:py-5 rounded-xl transition-all hover:-translate-y-0.5 shadow-sm backdrop-blur-sm">
+                <Button 
+                  onClick={(e) => e.stopPropagation()} 
+                  variant="outline" 
+                  className="w-full bg-white text-slate-900 border-gray-200 hover:bg-gray-50 hover:text-slate-900 text-sm font-semibold py-5 rounded-xl transition-all"
+                >
                   Check Availability
                 </Button>
               } />
-              <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-[#09090B] border border-white/20">
+              <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
                 <DialogHeader className="mb-4">
-                  <DialogTitle className="text-2xl font-serif tracking-tight text-white">Check Availability</DialogTitle>
+                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Check Availability</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 py-4">
                   <div className="grid gap-2.5">
-                    <Label htmlFor="name" className="text-white/70 font-medium">Your Name</Label>
+                    <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
                     <Input
                       id="name"
                       placeholder="e.g. Sarah Jenkins"
                       value={touristName}
                       onChange={(e) => setTouristName(e.target.value)}
-                      className="rounded-xl border-white/20 bg-white/5 text-white focus-visible:ring-[#D4AF37] px-4 py-6 placeholder:text-white/30"
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
                     />
                   </div>
                   <div className="grid gap-2.5">
-                    <Label htmlFor="date" className="text-white/70 font-medium">Estimated Date</Label>
+                    <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
                     <Input
                       id="date"
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="rounded-xl border-white/20 bg-white/5 text-white focus-visible:ring-[#D4AF37] px-4 py-6"
-                      style={{ colorScheme: "dark" }}
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
                     />
                   </div>
                 </div>
-                <Button onClick={handleConsult} className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
                   Send Inquiry
                 </Button>
               </DialogContent>
@@ -190,6 +175,6 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           )}
         </div>
       </div>
-    </Card>
+    </div>
   )
 }
