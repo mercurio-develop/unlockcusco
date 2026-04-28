@@ -41,19 +41,17 @@ function enhanceImageUrl(url: string | undefined): string | null {
 }
 
 const SEARCHES = [
-  "Spa and wellness Urubamba, Cusco, Peru",
-  "Vegan and organic restaurant Urubamba, Cusco, Peru",
-  "Specialty coffee cafe Urubamba, Cusco, Peru",
-  "Private taxi transport Urubamba, Cusco, Peru",
-  "Textiles authentic market Pisac, Cusco, Peru",
-  "Yoga and spiritual retreat Pisac, Cusco, Peru",
-  "Shaman plant medicine Pisac, Cusco, Peru",
-  "ATV tour Cuatrimotos Maras, Cusco, Peru",
-  "Salt mines tour Maras, Cusco, Peru",
-  "Boutique hotel Ollantaytambo, Cusco, Peru",
-  "Restaurant near train station Ollantaytambo, Cusco, Peru",
-  "Local tour guide Ollantaytambo, Cusco, Peru",
-  "Artisan weaving workshop Chinchero, Cusco, Peru"
+  "Boutique tour operator Cusco, Peru",
+  "Private tours agency Urubamba, Cusco, Peru",
+  "Local trekking outfitter Cusco, Peru",
+  "Alternative experiential tour agency Cusco, Peru",
+  "Adventure tour outfitter Maras, Cusco, Peru",
+  "ATV quad biking private tours Maras, Cusco, Peru",
+  "Horseback riding tours Sacred Valley, Peru",
+  "Cultural community tours Pisac, Cusco, Peru",
+  "Luxury travel agency Cusco, Peru",
+  "Private guide Ollantaytambo, Cusco, Peru",
+  "Eco tourism agency Sacred Valley, Peru"
 ];
 
 async function main() {
@@ -66,9 +64,9 @@ async function main() {
     try {
       const run = await apifyClient.actor("compass/google-maps-extractor").call({
         searchStringsArray: [search],
-        maxCrawledPlacesPerSearch: 15,
+        maxCrawledPlacesPerSearch: 20,
         language: "en",
-        maxImages: 3,
+        maxImages: 4,
         maxReviews: 5,
         reviewsSort: "newest",
         scrapeReviewerName: false,
@@ -76,8 +74,8 @@ async function main() {
         scrapeReviewerUrl: false,
         scrapeResponseFromOwnerText: false,
         extractOpeningHours: true,
-        skipClosedPlaces: false,
-        includeWebResults: false
+        skipClosedPlaces: true,
+        includeWebResults: true
       });
 
       const { items } = await apifyClient.dataset(run.defaultDatasetId).listItems();
