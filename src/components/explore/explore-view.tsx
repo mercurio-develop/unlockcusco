@@ -51,7 +51,6 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   const [page, setPage] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   
-  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null)
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
   const [showDesktopMap, setShowDesktopMap] = useState(initialBusinesses.length > 0)
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -59,7 +58,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   const searchParams = useSearchParams()
   const { ref, inView } = useInView()
   
-  const { panelMode, setPanelMode, activeRelay, swapModeCategory } = useItinerary()
+  const { panelMode, setPanelMode, activeRelay, swapModeCategory, selectedId, setSelectedId } = useItinerary()
 
   // Sync state when props change due to Server Component re-rendering from search params
   useEffect(() => {
@@ -68,9 +67,12 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       setHasMore(initialHasMore)
       setPage(0)
       setShowDesktopMap(initialBusinesses.length > 0)
+      if (initialSelectedId && initialSelectedId !== selectedId) {
+         setSelectedId(initialSelectedId)
+      }
     }, 0)
     return () => clearTimeout(timer)
-  }, [initialBusinesses, initialHasMore])
+  }, [initialBusinesses, initialHasMore, initialSelectedId, selectedId, setSelectedId])
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return

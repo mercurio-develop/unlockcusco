@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamText } from 'ai';
-import { findNearbyBusinesses } from '@/lib/ai/tools/find-nearby';
-import { buildItinerary } from '@/lib/ai/tools/build-itinerary';
+import { findLocalExperiences } from '@/lib/ai/tools/local-experiences';
+import { buildSpatialItinerary } from '@/lib/ai/tools/itinerary-builder';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { buildChronoRelay } from '@/lib/ai/tools/chrono-relay';
 import { askAvailability } from '@/lib/ai/tools/ask-availability';
@@ -22,11 +22,11 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: google('gemini-2.5-pro'),
-      system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay).`,
+      system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay). Use findLocalExperiences to recommend specific spots. Use buildSpatialItinerary for multi-stop plans.`,
       messages,
       tools: {
-        findNearbyBusinesses,
-        buildItinerary,
+        findLocalExperiences,
+        buildSpatialItinerary,
         estimateTaxiFare,
         buildChronoRelay,
         askAvailability,

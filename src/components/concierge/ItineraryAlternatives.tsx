@@ -1,6 +1,7 @@
 "use client";
 
 import { MapPin, Star, Activity, Utensils, Car, Zap } from 'lucide-react';
+import { useItinerary } from '@/lib/store/itinerary-context';
 
 type Plan = {
   planId: string;
@@ -9,14 +10,37 @@ type Plan = {
   morning: {
     name: string;
     rating: number;
+    lat?: number;
+    lng?: number;
+    id?: string;
   };
   afternoon: {
     name: string;
     rating: number;
+    lat?: number;
+    lng?: number;
+    id?: string;
   };
 };
 
 export default function ItineraryAlternatives({ plans }: { plans: Plan[] }) {
+  const { setActiveRelay, setPanelMode } = useItinerary();
+
+  const handleSelectPlan = (plan: Plan) => {
+    setActiveRelay({
+      origin: "Morning Activity",
+      destination: "Afternoon Activity",
+      food: { ...plan.morning, distance: "0 km" },
+      transit: { name: "Local Transfer", driver: "Pending", rating: 5.0, whatsapp: "" },
+      stay: { ...plan.afternoon },
+      transitCost: 15,
+      foodCost: 0,
+      totalCost: 15,
+      distanceKm: plan.totalDistanceKm,
+    });
+    setPanelMode("itinerary");
+  };
+
   return (
     <div className="w-full my-6 flex flex-col gap-5">
       <div className="text-rose-600 text-[10px] uppercase font-semibold tracking-widest flex items-center gap-2 mb-2">
@@ -64,8 +88,11 @@ export default function ItineraryAlternatives({ plans }: { plans: Plan[] }) {
             </div>
           </div>
 
-          <button className="w-full mt-7 bg-slate-900 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md text-sm">
-            <Zap size={14} /> Book via Apple Pay
+          <button 
+            onClick={() => handleSelectPlan(plan)}
+            className="w-full mt-7 bg-slate-900 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md text-sm"
+          >
+            <Zap size={14} /> Lock Itinerary & Show on Map
           </button>
         </div>
       ))}

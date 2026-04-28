@@ -24,6 +24,8 @@ interface ItineraryContextType {
   setPanelMode: (mode: PanelMode) => void;
   swapModeCategory: "food" | "transit" | "stay" | null;
   setSwapModeCategory: (category: "food" | "transit" | "stay" | null) => void;
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
 }
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(undefined);
@@ -32,12 +34,14 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
   const [activeRelay, setActiveRelay] = useState<RelayPayload | null>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>("categories");
   const [swapModeCategory, setSwapModeCategory] = useState<"food" | "transit" | "stay" | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
     <ItineraryContext.Provider value={{
       activeRelay, setActiveRelay,
       panelMode, setPanelMode,
-      swapModeCategory, setSwapModeCategory
+      swapModeCategory, setSwapModeCategory,
+      selectedId, setSelectedId
     }}>
       {children}
     </ItineraryContext.Provider>

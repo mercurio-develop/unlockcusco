@@ -1,7 +1,8 @@
 "use client";
 
-import { MapPin, Star, Clock, Car, ArrowRight } from 'lucide-react';
+import { MapPin, Star, Clock, Car, ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useItinerary } from '@/lib/store/itinerary-context';
 
 type ExperienceResult = {
   targetLocation: string;
@@ -13,6 +14,8 @@ type ExperienceResult = {
 };
 
 export default function ExperienceRecommendations({ result }: { result: ExperienceResult }) {
+  const { setSelectedId, setPanelMode } = useItinerary();
+
   if (!result.experiences || result.experiences.length === 0) {
     return (
       <div className="w-full my-4 bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col gap-2">
@@ -22,6 +25,12 @@ export default function ExperienceRecommendations({ result }: { result: Experien
   }
 
   const isSameTown = result.targetLocation.toLowerCase() === result.userLocation.toLowerCase();
+
+  const handleShowOnMap = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    setSelectedId(id);
+    setPanelMode("categories");
+  };
 
   return (
     <div className="w-full my-6 flex flex-col gap-5">
@@ -51,12 +60,20 @@ export default function ExperienceRecommendations({ result }: { result: Experien
                 <h3 className="text-sm font-semibold text-slate-900 leading-tight group-hover:text-rose-600 transition-colors">{exp.name}</h3>
                 <p className="text-xs text-slate-500 mt-1">{exp.category}</p>
               </div>
-              {exp.rating && (
-                <div className="flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-md border border-rose-100 shrink-0">
-                  <Star size={10} className="fill-rose-500 text-rose-500" />
-                  <span className="text-xs font-bold text-slate-900">{exp.rating}</span>
-                </div>
-              )}
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                {exp.rating && (
+                  <div className="flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-md border border-rose-100">
+                    <Star size={10} className="fill-rose-500 text-rose-500" />
+                    <span className="text-xs font-bold text-slate-900">{exp.rating}</span>
+                  </div>
+                )}
+                <button 
+                  onClick={(e) => handleShowOnMap(e, exp.id)}
+                  className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold text-slate-400 hover:text-rose-600 transition-colors"
+                >
+                  <Eye size={12} /> Show Map
+                </button>
+              </div>
             </div>
           </Link>
           );
