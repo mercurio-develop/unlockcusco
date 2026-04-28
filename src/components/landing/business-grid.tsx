@@ -81,8 +81,7 @@ export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridPr
           className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium transition-colors text-sm group"
         >
           See all on map
-          <ArrowRight
-            className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
 
@@ -93,10 +92,10 @@ export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridPr
             key={cat}
             onClick={() => handleCategoryChange(cat)}
             disabled={isLoading && active !== cat}
-            className={`px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border shadow-sm ${
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border ${
               active === cat
-                ? "bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
-                : "bg-white text-slate-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                ? "bg-slate-900 text-white border-slate-900"
+                : "bg-white text-slate-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
             } ${isLoading && active !== cat ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {cat}
@@ -120,8 +119,8 @@ export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridPr
               visible: {opacity: 1, y: 0, transition: {duration: 0.4}},
             }}
           >
-            <BusinessCard 
-              business={business} 
+            <BusinessCard
+              business={business}
               onSelect={() => router.push(`/explore?id=${business.id}`)}
             />
           </motion.div>
@@ -130,14 +129,14 @@ export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridPr
 
       {/* Infinite Scroll Trigger */}
       <div ref={ref} className="mt-12 flex justify-center h-16 items-center">
-        {isLoading && <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />}
+        {isLoading && <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />}
       </div>
 
       {/* Bottom CTA */}
       <div className="mt-8 text-center flex flex-col items-center gap-6">
         <button
           onClick={() => router.push("/explore")}
-          className="inline-flex items-center gap-3 bg-white border border-gray-200 text-slate-900 px-8 py-4 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all hover:border-gray-300 shadow-sm"
+          className="inline-flex items-center gap-3 bg-white border border-gray-200 text-slate-900 px-8 py-4 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all shadow-sm"
         >
           Open the full map
           <ArrowRight className="w-4 h-4" />

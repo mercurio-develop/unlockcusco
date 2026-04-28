@@ -1,5 +1,4 @@
 import { ExploreView } from "@/components/explore/explore-view"
-import { AiConcierge } from "@/components/chat/ai-concierge"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
@@ -40,7 +39,6 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         initialQuery={q ?? ""} 
         initialSelectedId={id ?? null} 
       />
-      <AiConcierge />
     </div>
   )
 }
