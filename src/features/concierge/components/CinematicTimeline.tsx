@@ -5,6 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { createRelayPaymentIntent } from "../actions/process-relay-payment";
+import { useItinerary } from "@/lib/store/itinerary-context";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_mock");
 
@@ -53,21 +54,26 @@ function RelayCheckoutForm({ clientSecret, totalCostUSD, onComplete }: { clientS
 export function CinematicTimeline({ relay }: { relay: any }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const { setActiveRelay, setPanelMode } = useItinerary();
 
   useEffect(() => {
+    // Sync the generated relay to the global context so the explore page can react
+    setActiveRelay(relay);
+    setPanelMode("itinerary");
+
     createRelayPaymentIntent({
         totalCostUSD: relay.totalCost,
         relayId: `${relay.origin}-${relay.destination}`,
     }).then((res) => {
         if (res.clientSecret) setClientSecret(res.clientSecret);
     });
-  }, [relay]);
+  }, [relay, setActiveRelay, setPanelMode]);
 
   return (
     <div className="bg-[#09090B]/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-5 w-full my-4 text-white font-sans">
       <div className="flex items-center gap-2 mb-6">
         <div className="bg-[#D4AF37]/20 p-1.5 rounded-md border border-[#D4AF37]/30">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinelinejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="12 2 2 7 12 12 22 7 12 2" />
             <polyline points="2 17 12 22 22 17" />
             <polyline points="2 12 12 17 22 12" />
@@ -118,7 +124,7 @@ export function CinematicTimeline({ relay }: { relay: any }) {
 
         {isCompleted ? (
           <div className="bg-green-500/10 text-green-400 p-3 rounded-lg text-sm text-center border border-green-500/20 flex items-center justify-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinelinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
             Booking Confirmed. Relay secured.
           </div>
         ) : clientSecret ? (

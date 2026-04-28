@@ -8,6 +8,9 @@ import { useInView } from "react-intersection-observer"
 import { ExploreSearch } from "./explore-search"
 import { BusinessCard } from "@/components/cards/business-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
+import { useItinerary } from "@/lib/store/itinerary-context"
+import { ItineraryPanel } from "./itinerary-panel"
+import { CalendarDays, LayoutGrid } from "lucide-react"
 
 export type Business = {
   id: string
@@ -55,6 +58,8 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   
   const searchParams = useSearchParams()
   const { ref, inView } = useInView()
+  
+  const { panelMode, setPanelMode, activeRelay, swapModeCategory } = useItinerary()
 
   // Sync state when props change due to Server Component re-rendering from search params
   useEffect(() => {
@@ -101,7 +106,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       window.dispatchEvent(new Event('resize'))
     }, 550) // Wait for CSS transition to finish
     return () => clearTimeout(timer)
-  }, [viewMode, showDesktopMap])
+  }, [viewMode, showDesktopMap, panelMode])
 
   const handleMarkerClick = (id: string) => {
     setSelectedId(id)
@@ -117,8 +122,8 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
     <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative">
       {/* Card list panel */}
       <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] xl:w-[35%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-gray-200 bg-white ${viewMode === "map" ? "hidden md:flex" : ""}`}>
-        <div className="px-6 pt-6 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
+        <div className="px-6 pt-6 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between">
             <h1 className="text-2xl font-serif tracking-tight text-slate-900">
               Explore the INKAPORTAL
             </h1>
@@ -130,42 +135,70 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
               {showDesktopMap ? "Hide Map" : "Show Map"}
             </button>
           </div>
-          <ExploreSearch initialQuery={initialQuery} />
-        </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-          {businesses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
-              <p className="text-xl font-medium text-slate-600">No places found for this search.</p>
-              <p className="text-sm">Try &quot;massage&quot;, &quot;ATV&quot;, or &quot;restaurant&quot;.</p>
+          <div className="bg-slate-100 p-1 rounded-lg flex w-full">
+            <button 
+              onClick={() => setPanelMode("categories")}
+              className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+              <LayoutGrid className="w-4 h-4" /> Discover Places
+            </button>
+            <button 
+              onClick={() => setPanelMode("itinerary")}
+              className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"} ${!activeRelay && "opacity-50 cursor-not-allowed"}`}
+              disabled={!activeRelay}
+            >
+              <CalendarDays className="w-4 h-4" /> Active Itinerary
+            </button>
+          </div>
+
+          {panelMode === "categories" && <ExploreSearch initialQuery={initialQuery} />}
+          {swapModeCategory && panelMode === "categories" && (
+            <div className="bg-rose-50 text-rose-700 p-3 flex justify-between items-center rounded-md border border-rose-100 text-sm font-medium mt-2">
+              <span>Select a replacement for {swapModeCategory}...</span>
             </div>
-          ) : (
-            <>
-              <div className={`grid grid-cols-1 ${showDesktopMap ? "2xl:grid-cols-2" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"} gap-x-6 gap-y-8 pb-8 transition-all duration-500`}>
-                {businesses.map((business, i) => (
-                  <div
-                    key={`${business.id}-${i}`}
-                    ref={(el) => {
-                      if (el) cardRefs.current.set(business.id, el)
-                      else cardRefs.current.delete(business.id)
-                    }}
-                  >
-                    <BusinessCard
-                      business={business}
-                      isHighlighted={selectedId === business.id}
-                      onSelect={() => handleCardSelect(business.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-              
-              {/* Infinite Scroll Trigger */}
-              <div ref={ref} className="flex justify-center items-center h-16 pb-20">
-                {isLoading && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
-              </div>
-            </>
           )}
         </div>
+
+        {panelMode === "categories" ? (
+          <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+            {businesses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
+                <p className="text-xl font-medium text-slate-600">No places found for this search.</p>
+                <p className="text-sm">Try &quot;massage&quot;, &quot;ATV&quot;, or &quot;restaurant&quot;.</p>
+              </div>
+            ) : (
+              <>
+                <div className={`grid grid-cols-1 ${showDesktopMap ? "2xl:grid-cols-2" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"} gap-x-6 gap-y-8 pb-8 transition-all duration-500`}>
+                  {businesses.map((business, i) => (
+                    <div
+                      key={`${business.id}-${i}`}
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(business.id, el)
+                        else cardRefs.current.delete(business.id)
+                      }}
+                    >
+                      <BusinessCard
+                        business={business}
+                        isHighlighted={selectedId === business.id}
+                        onSelect={() => handleCardSelect(business.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Infinite Scroll Trigger */}
+                <div ref={ref} className="flex justify-center items-center h-16 pb-20">
+                  {isLoading && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-hidden relative">
+             <ItineraryPanel />
+          </div>
+        )}
       </div>
 
       {/* Map panel */}

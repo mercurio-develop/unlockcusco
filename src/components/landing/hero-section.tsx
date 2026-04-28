@@ -12,7 +12,7 @@ export function HeroSection() {
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault()
-    router.push(query.trim() ? `/explore?q=${encodeURIComponent(query)}` : "/explore")
+    router.push(query.trim() ? `/explore?ai_prompt=${encodeURIComponent(query)}` : "/explore")
   }
 
   return (
@@ -61,7 +61,7 @@ export function HeroSection() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Describe your perfect day in the Sacred Valley..."
+            placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
             className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-base placeholder:text-gray-400"
           />
           <button
@@ -83,13 +83,13 @@ export function HeroSection() {
             { emoji: "🛵", text: "Hidden ATV routes in Maras" },
             { emoji: "☕", text: "Specialty coffee with fast Wi-Fi" },
             { emoji: "🏔️", text: "Local guides for off-beaten treks" },
-            { emoji: "🛖", text: "Quiet boutique stays in Ollantaytambo" },
-            { emoji: "🧘", text: "Yoga and sound healing retreats" },
-          ].map(({ emoji, text }) => (
+            { emoji: "🎫", text: "Boleto Turístico locations" },
+            { emoji: "⛰️", text: "Machu Picchu Live Availability", href: "/explore/machu-picchu" },
+          ].map(({ emoji, text, href }) => (
             <button
               key={text}
               type="button"
-              onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
+              onClick={() => router.push(href || `/explore?ai_prompt=${encodeURIComponent(text)}`)}
               className="bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-4 py-2 rounded-full text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm"
             >
               {emoji} {text}

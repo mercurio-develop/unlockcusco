@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,6 +18,7 @@ import { PendingAvailability } from "@/features/concierge/components/PendingAvai
 export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
+  const searchParams = useSearchParams()
 
   const initialMessages: UIMessage[] = [
     {
@@ -32,6 +34,24 @@ export function AiConcierge() {
     }),
     messages: initialMessages
   });
+
+  // Seamless Handoff: auto-submit ai_prompt if present
+  useEffect(() => {
+    const aiPrompt = searchParams.get("ai_prompt");
+    if (aiPrompt) {
+      setIsOpen(true);
+      // Wait a tiny bit for UI to mount before sending message
+      setTimeout(() => {
+        sendMessage({ text: aiPrompt });
+      }, 300);
+      
+      // Clean up the URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("ai_prompt");
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -98,6 +118,18 @@ export function AiConcierge() {
                     {msg.parts?.map((part: { type: string, toolInvocation?: { toolName: string, state: string, toolCallId: string, result: unknown } }) => {
                       if (part.type === 'tool-invocation') {
                         const toolInvocation = part.toolInvocation;
+                        if (toolInvocation?.toolName === 'buildChronoRelay' && toolInvocation?.state === 'result') {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          return <CinematicTimeline key={toolInvocation.toolCallId} relay={toolInvocation.result as any} />
+                        }
+                        if (toolInvocation?.toolName === 'askAvailability') {
+                          if (toolInvocation?.state === 'result') {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            return <PendingAvailability key={toolInvocation.toolCallId} message={(toolInvocation.result as any).message} />
+                          } else {
+                            return <PendingAvailability key={toolInvocation.toolCallId} message="Contacting vendor via Ghost Phone..." />
+                          }
+                        }
                         if (toolInvocation?.toolName === 'buildSpatialItinerary' && toolInvocation?.state === 'result') {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result as any} />

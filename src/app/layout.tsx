@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
+import { ItineraryProvider } from "@/lib/store/itinerary-context";
+import { AiConcierge } from "@/components/chat/ai-concierge";
 
 const fontSans = Manrope({
   variable: "--font-sans",
@@ -29,10 +31,13 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#09090B] text-white font-sans">
-        <Navbar />
-        <main className="flex-1 flex flex-col pt-14">
-          {children}
-        </main>
+        <ItineraryProvider>
+          <Navbar />
+          <main className="flex-1 flex flex-col pt-14">
+            {children}
+          </main>
+          <AiConcierge />
+        </ItineraryProvider>
       </body>
     </html>
   );

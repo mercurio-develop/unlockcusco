@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { Star, Zap } from "lucide-react"
 import type { Business } from "@/components/explore/explore-view"
+import { useItinerary } from "@/lib/store/itinerary-context"
 
 const CATEGORY_STYLE: Record<string, { bg: string; emoji: string }> = {
   Dining: { bg: "#EA580C", emoji: "🍽️" },
@@ -24,8 +25,38 @@ interface ExploreMapProps {
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const [popupBusiness, setPopupBusiness] = useState<Business | null>(null)
+  const { activeRelay, panelMode } = useItinerary()
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+
+  const activeRouteGeoJSON = useMemo(() => {
+    if (panelMode !== "itinerary" || !activeRelay) return null;
+    
+    // We try to use the coordinates of the chosen food/transit/stay from the relay payload.
+    // If exact coordinates aren't returned, we skip drawing the line.
+    // For MVP, we'll try to find the businesses in the passed prop if they exist, or use defaults.
+    const getCoords = (node: any) => {
+        if (node?.lng && node?.lat) return [node.lng, node.lat];
+        // fallback to businesses array lookup if available
+        const b = businesses.find(b => b.name === node?.name);
+        return b ? [b.lng, b.lat] : null;
+    }
+
+    const c1 = getCoords(activeRelay.food);
+    const c2 = getCoords(activeRelay.stay);
+
+    if (c1 && c2) {
+      return {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [c1, c2]
+        }
+      } as GeoJSON.Feature<GeoJSON.LineString>;
+    }
+    return null;
+  }, [activeRelay, panelMode, businesses])
 
   // Fly to selected business
   useEffect(() => {
@@ -43,34 +74,52 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     setPopupBusiness(b)
   }, [selectedId, businesses])
 
-  // Fit bounds when businesses change
+  // Fit bounds when businesses or route change
   useEffect(() => {
-    if (businesses.length > 0 && mapRef.current) {
-      let minLng = businesses[0].lng
-      let maxLng = businesses[0].lng
-      let minLat = businesses[0].lat
-      let maxLat = businesses[0].lat
+    if (mapRef.current) {
+        if (activeRouteGeoJSON) {
+            const coords = activeRouteGeoJSON.geometry.coordinates;
+            let minLng = Math.min(...coords.map(c => c[0]));
+            let maxLng = Math.max(...coords.map(c => c[0]));
+            let minLat = Math.min(...coords.map(c => c[1]));
+            let maxLat = Math.max(...coords.map(c => c[1]));
 
-      for (const b of businesses) {
-        if (b.lng < minLng) minLng = b.lng
-        if (b.lng > maxLng) maxLng = b.lng
-        if (b.lat < minLat) minLat = b.lat
-        if (b.lat > maxLat) maxLat = b.lat
-      }
+            if (minLng === maxLng) { minLng -= 0.01; maxLng += 0.01 }
+            if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01 }
 
-      // If they are all the same point, add a tiny offset so fitBounds doesn't crash
-      if (minLng === maxLng) { minLng -= 0.01; maxLng += 0.01 }
-      if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01 }
+            mapRef.current.fitBounds(
+              [
+                [minLng, minLat],
+                [maxLng, maxLat],
+              ],
+              { padding: 80, duration: 1500, pitch: 45 }
+            );
+        } else if (businesses.length > 0) {
+          let minLng = businesses[0].lng
+          let maxLng = businesses[0].lng
+          let minLat = businesses[0].lat
+          let maxLat = businesses[0].lat
 
-      mapRef.current.fitBounds(
-        [
-          [minLng, minLat],
-          [maxLng, maxLat],
-        ],
-        { padding: 80, duration: 1000, pitch: 45 }
-      )
+          for (const b of businesses) {
+            if (b.lng < minLng) minLng = b.lng
+            if (b.lng > maxLng) maxLng = b.lng
+            if (b.lat < minLat) minLat = b.lat
+            if (b.lat > maxLat) maxLat = b.lat
+          }
+
+          if (minLng === maxLng) { minLng -= 0.01; maxLng += 0.01 }
+          if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01 }
+
+          mapRef.current.fitBounds(
+            [
+              [minLng, minLat],
+              [maxLng, maxLat],
+            ],
+            { padding: 80, duration: 1000, pitch: 45 }
+          )
+        }
     }
-  }, [businesses])
+  }, [businesses, activeRouteGeoJSON])
 
   if (!mapboxToken) {
     return (
@@ -114,6 +163,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           "sky-atmosphere-sun-intensity": 15,
         }}
       />
+
+      {activeRouteGeoJSON && (
+        <Source id="active-route" type="geojson" data={activeRouteGeoJSON}>
+          <Layer
+            id="active-route-line"
+            type="line"
+            layout={{
+              "line-join": "round",
+              "line-cap": "round"
+            }}
+            paint={{
+              "line-color": "#D4AF37",
+              "line-width": 6,
+              "line-opacity": 0.8,
+              "line-dasharray": [1, 2]
+            }}
+          />
+        </Source>
+      )}
 
       {businesses.map((business, index) => {
         const style = CATEGORY_STYLE[business.category] ?? { bg: "#6366F1", emoji: "📍" }
