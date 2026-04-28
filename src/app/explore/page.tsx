@@ -4,7 +4,7 @@ import { AiConcierge } from "@/components/chat/ai-concierge"
 import { Business } from "@prisma/client"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string }>
+  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string }>
 }
 
 // Helper to interleave categories while maintaining relative rating sort
@@ -33,28 +33,31 @@ function interleaveCategories(sortedBusinesses: Business[]) {
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id } = await searchParams
+  const { q, id, loc, cat } = await searchParams
   const query = q?.toLowerCase() || ""
 
-  let targetCategory = ""
-  if (query) {
+  let targetCategory = cat || ""
+  if (query && !targetCategory) {
     if (query.includes("massage") || query.includes("spa") || query.includes("wellness") || query.includes("recovery")) targetCategory = "Wellness"
     else if (query.includes("atv") || query.includes("hiking") || query.includes("adventure") || query.includes("tour") || query.includes("trail")) targetCategory = "Adventure"
     else if (query.includes("picantería") || query.includes("restaurant") || query.includes("food") || query.includes("dining") || query.includes("eat")) targetCategory = "Dining"
     else if (query.includes("hotel") || query.includes("stays") || query.includes("sleep")) targetCategory = "Stays"
-    else if (query.includes("market") || query.includes("culture") || query.includes("art")) targetCategory = "Culture"
+    else if (query.includes("market") || query.includes("culture") || query.includes("art") || query.includes("textile")) targetCategory = "Culture"
   }
 
-  const whereClause = targetCategory
-    ? { category: targetCategory }
-    : query
-    ? {
-        OR: [
-          { name: { contains: query } },
-          { category: { contains: query } },
-        ],
-      }
-    : {}
+  const whereClause: Record<string, unknown> = {}
+  if (targetCategory) {
+    whereClause.category = targetCategory
+  }
+  if (loc) {
+    whereClause.locationSlug = loc
+  }
+  if (query) {
+    whereClause.OR = [
+      { name: { contains: query } },
+      { category: { contains: query } },
+    ]
+  }
 
   let businesses = await prisma.business.findMany({
     where: whereClause,

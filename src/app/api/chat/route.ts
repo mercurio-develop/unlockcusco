@@ -2,6 +2,7 @@ import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { buildSpatialItinerary } from '@/lib/ai/tools/itinerary-builder';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
+import { findLocalExperiences } from '@/lib/ai/tools/local-experiences';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -25,11 +26,13 @@ export async function POST(req: Request) {
 Your tone must be extremely elegant, concise, helpful, and "Apple-level minimal".
 Always prioritize brevity. Never write long paragraphs; stick to 1-3 short sentences unless returning tool data.
 When users ask for complex multi-step itineraries involving a morning and afternoon activity, ALWAYS use the buildSpatialItinerary tool to find the best options. DO NOT hallucinate businesses, use the tool.
-When users ask for a taxi, transport, or how to get to a specific destination, ALWAYS use the estimateTaxiFare tool.`,
+When users ask for a taxi, transport, or how to get to a specific destination, ALWAYS use the estimateTaxiFare tool.
+When users ask to find a single experience, buy an item (like textiles), or want recommendations in a specific town based on their current location, ALWAYS use the findLocalExperiences tool to calculate the distance and find the best matches.`,
       messages,
       tools: {
         buildSpatialItinerary,
         estimateTaxiFare,
+        findLocalExperiences,
       },
     });
 

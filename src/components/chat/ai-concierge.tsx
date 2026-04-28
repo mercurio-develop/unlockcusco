@@ -10,6 +10,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import ItineraryAlternatives from "@/components/concierge/ItineraryAlternatives"
 import TaxiEstimate from "@/components/concierge/TaxiEstimate"
+import ExperienceRecommendations from "@/components/concierge/ExperienceRecommendations"
 
 export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
@@ -102,6 +103,10 @@ export function AiConcierge() {
                         if (toolInvocation?.toolName === 'estimateTaxiFare' && toolInvocation?.state === 'result') {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           return <TaxiEstimate key={toolInvocation.toolCallId} result={toolInvocation.result as any} />
+                        }
+                        if (toolInvocation?.toolName === 'findLocalExperiences' && toolInvocation?.state === 'result') {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          return <ExperienceRecommendations key={toolInvocation.toolCallId} result={toolInvocation.result as any} />
                         }
                       }
                       return null;
