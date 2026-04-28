@@ -20,7 +20,7 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
     date: "May 15, 2026",
     phone: "+1 (555) 234-7890",
     email: "sarah.j@outlook.com",
-    message: `Hi! I'm looking for a relaxing experience in the Sacred Valley. I found ${businessName} through INKAPORTAL and I'd love to book a session for May 15th. My group is 2 people.`,
+    message: `Hi! I'm looking for a relaxing experience in the Sacred Valley. I found ${businessName} through VALLECITO and I'd love to book a session for May 15th. My group is 2 people.`,
   }
 
   const whatsappReply = businessWhatsapp
@@ -106,7 +106,7 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
                   </a>
                 ) : null}
                 <a
-                  href={`mailto:${lead.email}?subject=INKAPORTAL Booking - ${businessName}&body=Hi ${lead.name}!`}
+                  href={`mailto:${lead.email}?subject=VALLECITO Booking - ${businessName}&body=Hi ${lead.name}!`}
                   className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors"
                 >
                   <Mail className="w-4 h-4" /> Email

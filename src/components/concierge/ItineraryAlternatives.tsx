@@ -44,7 +44,7 @@ export default function ItineraryAlternatives({ plans }: { plans: Plan[] }) {
   return (
     <div className="w-full my-6 flex flex-col gap-5">
       <div className="text-rose-600 text-[10px] uppercase font-semibold tracking-widest flex items-center gap-2 mb-2">
-        <MapPin size={12} className="text-rose-600" /> INKAPORTAL Smart Routes
+        <MapPin size={12} className="text-rose-600" /> VALLECITO Smart Routes
       </div>
       {plans.map((plan, index) => (
         <div

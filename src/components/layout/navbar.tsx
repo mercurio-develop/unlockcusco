@@ -21,7 +21,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 group shrink-0">
           <Sparkles className="w-4 h-4 text-rose-600" />
           <span className="text-slate-900 font-bold text-sm tracking-wide">
-            InkaPortal
+            Vallecito
           </span>
         </Link>
 

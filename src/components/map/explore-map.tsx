@@ -26,16 +26,58 @@ interface ExploreMapProps {
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const [popupBusiness, setPopupBusiness] = useState<Business | null>(null)
-  const { activeRelay, panelMode } = useItinerary()
+  const { activeRelay, setActiveRelay, panelMode, swapModeCategory, setSwapModeCategory, setPanelMode } = useItinerary()
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+
+  const handleReplace = (e: React.MouseEvent, business: Business) => {
+    e.stopPropagation();
+    if (!activeRelay || !swapModeCategory) return;
+
+    const newRelay = { ...activeRelay };
+
+    if (swapModeCategory === "food") {
+      newRelay.food = {
+        id: business.id,
+        name: business.name,
+        rating: business.rating || 4.5,
+        whatsapp: business.whatsapp || undefined,
+        lat: business.lat,
+        lng: business.lng,
+      };
+      newRelay.foodCost = 25;
+    } else if (swapModeCategory === "transit") {
+      newRelay.transit = {
+        id: business.id,
+        name: business.name,
+        driver: "Assigned Driver",
+        rating: business.rating || 4.5,
+        whatsapp: business.whatsapp || undefined,
+        lat: business.lat,
+        lng: business.lng,
+      };
+    } else if (swapModeCategory === "stay") {
+      newRelay.stay = {
+        id: business.id,
+        name: business.name,
+        rating: business.rating || 4.5,
+        lat: business.lat,
+        lng: business.lng,
+      };
+    }
+
+    newRelay.totalCost = newRelay.foodCost + newRelay.transitCost;
+    setActiveRelay(newRelay);
+    setSwapModeCategory(null);
+    setPanelMode("itinerary");
+    setPopupBusiness(null);
+  };
 
   const activeRouteGeoJSON = useMemo(() => {
     if (panelMode !== "itinerary" || !activeRelay) return null;
     
-    // We try to use the coordinates of the chosen food/transit/stay from the relay payload.
+    // We try to use the coordinates of the chosen origin/food/stay from the relay payload.
     // If exact coordinates aren't returned, we skip drawing the line.
-    // For MVP, we'll try to find the businesses in the passed prop if they exist, or use defaults.
     const getCoords = (node: any) => {
         if (node?.lng && node?.lat) return [node.lng, node.lat];
         // fallback to businesses array lookup if available
@@ -43,16 +85,35 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         return b ? [b.lng, b.lat] : null;
     }
 
-    const c1 = getCoords(activeRelay.food);
-    const c2 = getCoords(activeRelay.stay);
+    // Default coords mapped similarly to chrono-relay for origin lookup
+    const coordsMap: Record<string, { lat: number, lng: number }> = {
+      "urubamba": { lat: -13.3047, lng: -72.1167 },
+      "cusco": { lat: -13.5226, lng: -71.9673 },
+      "pisac": { lat: -13.2995, lng: -71.8491 },
+      "ollantaytambo": { lat: -13.2588, lng: -72.2633 }
+    };
+    
+    let originCoords = null;
+    const originLower = activeRelay.origin.toLowerCase();
+    for (const [key, coords] of Object.entries(coordsMap)) {
+        if (originLower.includes(key)) {
+            originCoords = [coords.lng, coords.lat];
+            break;
+        }
+    }
 
-    if (c1 && c2) {
+    const foodCoords = getCoords(activeRelay.food);
+    const stayCoords = getCoords(activeRelay.stay);
+
+    const validCoords = [originCoords, foodCoords, stayCoords].filter(Boolean) as number[][];
+
+    if (validCoords.length >= 2) {
       return {
         type: 'Feature',
         properties: {},
         geometry: {
           type: 'LineString',
-          coordinates: [c1, c2]
+          coordinates: validCoords
         }
       } as GeoJSON.Feature<GeoJSON.LineString>;
     }
@@ -290,6 +351,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                   </>
                 )}
               </div>
+              {swapModeCategory && (
+                <div className="mt-2 pt-2 border-t border-white/20 w-full flex justify-center">
+                  <button 
+                    onClick={(e) => handleReplace(e, popupBusiness)}
+                    className="bg-[#D4AF37] hover:bg-[#C5A059] text-black text-[11px] font-bold px-3 py-1.5 rounded-md shadow-sm w-full transition-colors"
+                  >
+                    Replace in Itinerary
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </Popup>

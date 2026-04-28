@@ -1,16 +1,16 @@
-# InkaPortal - Project Context & Deep Thinking Brief
+# Vallecito - Project Context & Deep Thinking Brief
 
-This document serves as a comprehensive context brief for Gemini Deep Thinking, detailing the current state, architecture, recent accomplishments, and missing features of the **InkaPortal** MVP.
+This document serves as a comprehensive context brief for Gemini Deep Thinking, detailing the current state, architecture, recent accomplishments, and missing features of the **Vallecito** MVP.
 
 ## 1. Project Overview
-**InkaPortal** is an AI-powered local business discovery platform for the Sacred Valley, Peru. 
+**Vallecito** is an AI-powered local business discovery platform for the Sacred Valley, Peru. 
 - **User Flow:** Tourists search and book experiences via an AI Concierge or Explore Map.
 - **Business Flow:** Local businesses claim their shadow profile to receive direct WhatsApp leads.
 - **MVP Monetization:** S/5 one-time identity validation + S/49/month subscription.
 - **Tech Stack:** Next.js 16 (App Router), React, TailwindCSS v4, Mapbox GL (3D terrain), Prisma (SQLite), Google GenAI SDK (Gemini 2.5 Flash/Pro).
 
 ## 2. Recent Accomplishments & Stabilizations
-- **Branding Unification:** Completely transitioned all legacy "Valle" and "OpenClaw" references to "InkaPortal".
+- **Branding Unification:** Completely transitioned all legacy "Valle" and "OpenClaw" references to "Vallecito".
 - **Apple-Level UI/UX:** Refactored the Navbar to a fixed, full-width frosted glass header (`backdrop-blur-xl`). Addressed layout overlaps and ensured Next.js `<Image>` component optimizations across all pages.
 - **Smart Data Sorting:** Replaced basic sorting with a weighted algorithm `(rating * log10(reviewsCount + 10))` and implemented category interleaving to ensure diverse, high-quality experiences surface first.
 - **Live Taxi Dispatch Integration:** Upgraded the AI Concierge's `estimateTaxiFare` tool. It now calculates distance/time, estimates costs, queries the live SQLite database for top-rated local transport, and generates a one-click WhatsApp booking link.

@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   })
 
   if (!business) {
-    return { title: 'Not Found | InkaPortal' }
+    return { title: 'Not Found | Vallecito' }
   }
 
   return {
-    title: `${business.name} — InkaPortal Sacred Valley`,
+    title: `${business.name} — Vallecito Sacred Valley`,
     description: `Read reviews and book ${business.name} in the Sacred Valley directly without commissions.`,
     openGraph: {
-      title: `${business.name} | InkaPortal`,
+      title: `${business.name} | Vallecito`,
       description: `Verified experience in the Sacred Valley. Average rating: ${business.rating} stars.`,
       images: [business.imageUrl],
     },
@@ -42,7 +42,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   // Format WhatsApp message
   const whatsappMsg = encodeURIComponent(
-    `Hello ${business.name}! 👋 I saw your profile on InkaPortal and I'd like to make a reservation. When do you have availability?`
+    `Hello ${business.name}! 👋 I saw your profile on Vallecito and I'd like to make a reservation. When do you have availability?`
   )
 
   return (
@@ -189,7 +189,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                     Check Availability
                   </Link>
                   <p className="text-center text-[10px] text-white/40 uppercase tracking-wide font-semibold mt-2">
-                    Operated by InkaPortal Concierge
+                    Operated by Vallecito Concierge
                   </p>
                 </div>
               )}

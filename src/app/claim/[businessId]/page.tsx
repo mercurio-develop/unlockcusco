@@ -54,10 +54,10 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
           <div className="md:col-span-3 space-y-6">
             <div>
               <h1 className="text-4xl font-extrabold text-white tracking-tight">
-                Don&apos;t lose any more clients in the Sacred Valley with INKAPORTAL.
+                Don&apos;t lose any more clients in the Sacred Valley with VALLECITO.
               </h1>
               <p className="mt-4 text-lg text-white/60 leading-relaxed">
-                INKAPORTAL is the AI-powered directory tourists use to plan their trips. Claim your profile now to unlock client contacts and activate the &quot;Instant Booking&quot; button.
+                VALLECITO is the AI-powered directory tourists use to plan their trips. Claim your profile now to unlock client contacts and activate the &quot;Instant Booking&quot; button.
               </p>
             </div>
 

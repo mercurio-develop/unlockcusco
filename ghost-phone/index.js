@@ -90,7 +90,7 @@ app.post('/api/message/ask-availability', async (req, res) => {
         return res.status(400).json({ error: 'Missing required fields: phone, vendorName.' });
     }
 
-    const message = `Hello ${vendorName}! 🛎️\n\nInkaportal Concierge here. We have a client requesting a booking:\nTime: ${requestedTime || 'As soon as possible'}\nParty Size: ${partySize || '1'}\n\nPlease reply YES to confirm availability or NO if you are full.`;
+    const message = `Hello ${vendorName}! 🛎️\n\nVallecito Concierge here. We have a client requesting a booking:\nTime: ${requestedTime || 'As soon as possible'}\nParty Size: ${partySize || '1'}\n\nPlease reply YES to confirm availability or NO if you are full.`;
 
     try {
         const formattedPhone = `${phone.replace(/\D/g, '')}@c.us`;

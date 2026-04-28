@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 // Using the same structure returned by buildChronoRelay
 export type RelayPayload = {
   origin: string;
+  foodLocation?: string;
   destination: string;
   food: { name: string; rating: number; distance?: string; whatsapp?: string; lat?: number; lng?: number; id?: string };
   transit: { name: string; driver: string; rating: number; whatsapp?: string; lat?: number; lng?: number; id?: string };

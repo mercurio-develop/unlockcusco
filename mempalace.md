@@ -1,6 +1,6 @@
 # Memory Palace
 
-Centralized context repo (Memory Palace) for INKAPORTAL. Compressible for token savings.
+Centralized context repo (Memory Palace) for VALLECITO. Compressible for token savings.
 
 ## Architecture
 - Next.js 16.2.4 App Router

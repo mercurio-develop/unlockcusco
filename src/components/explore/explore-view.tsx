@@ -127,7 +127,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         <div className="px-6 pt-6 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-serif tracking-tight text-slate-900">
-              Explore the INKAPORTAL
+              Explore the VALLECITO
             </h1>
             <button
               onClick={() => setShowDesktopMap(!showDesktopMap)}

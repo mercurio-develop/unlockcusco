@@ -86,7 +86,7 @@ export function CinematicTimeline({ relay }: { relay: any }) {
         {/* Food */}
         <div className="relative">
           <div className="absolute -left-[29px] top-1 w-2.5 h-2.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
-          <h4 className="text-sm font-semibold text-white/90 tracking-wide">1. TASTE <span className="text-white/40 font-normal">({relay.origin})</span></h4>
+          <h4 className="text-sm font-semibold text-white/90 tracking-wide">1. TASTE <span className="text-white/40 font-normal">({relay.foodLocation || relay.origin})</span></h4>
           <p className="text-sm text-white/70 mt-1">{relay.food.name}</p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white/60">★ {relay.food.rating}</span>

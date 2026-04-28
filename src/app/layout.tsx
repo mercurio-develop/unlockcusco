@@ -17,7 +17,7 @@ const fontSerif = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "INKAPORTAL | Sacred Valley Discoveries",
+  title: "VALLECITO | Sacred Valley Discoveries",
   description: "Curated experiences and local businesses in the Sacred Valley.",
 };
 

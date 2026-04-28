@@ -165,7 +165,7 @@ def find_taxis():
     conn.close()
 
 def main():
-    parser = argparse.ArgumentParser(description="InkaPortal Database Cleaning CLI")
+    parser = argparse.ArgumentParser(description="Vallecito Database Cleaning CLI")
     parser.add_argument('--backup', action='store_true', help="Create a backup of the database before running")
     parser.add_argument('--restore', action='store_true', help="Restore the database from a previous backup")
     parser.add_argument('--clean-location', action='store_true', help="Delete experiences outside Cusco/Sacred Valley bounds")
@@ -176,7 +176,7 @@ def main():
     
     args = parser.parse_args()
     
-    print("🏔️ InkaPortal DB Manager")
+    print("🏔️ Vallecito DB Manager")
     print("=======================")
 
     if args.backup:

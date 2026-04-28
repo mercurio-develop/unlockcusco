@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: google('gemini-2.5-pro'),
-      system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay). Use findLocalExperiences to recommend specific spots. Use buildSpatialItinerary for multi-stop plans.`,
+      system: `You are the Vallecito Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay). CRITICAL: If the user asks for a relay/taxi but does not state their current location, you MUST ask "Where are you currently located?" before calling the tools. Use findLocalExperiences to recommend specific spots. Use buildSpatialItinerary for multi-stop plans.`,
       messages: await convertToModelMessages(messages),
       tools: {
         findLocalExperiences,

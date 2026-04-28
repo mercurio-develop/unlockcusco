@@ -35,7 +35,7 @@ export function ItineraryPanel() {
           <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-2 text-rose-600">
               <Coffee className="w-4 h-4" />
-              <span className="text-xs font-bold tracking-wider uppercase">1. Taste ({activeRelay.origin})</span>
+              <span className="text-xs font-bold tracking-wider uppercase">1. Taste ({(activeRelay as any).foodLocation || activeRelay.origin})</span>
             </div>
             <Button variant="ghost" size="sm" onClick={() => handleSwap("food")} className="text-slate-400 hover:text-slate-900 h-8 px-2">
               <RefreshCw className="w-3 h-3 mr-1" /> Swap

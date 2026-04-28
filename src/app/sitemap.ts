@@ -12,13 +12,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const urls: MetadataRoute.Sitemap = [
     {
-      url: 'https://inkaportal.app',
+      url: 'https://vallecito.app',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
-      url: 'https://inkaportal.app/explore',
+      url: 'https://vallecito.app/explore',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const combo of combinations) {
     if (!combo.locationSlug || !combo.categorySlug) continue
     urls.push({
-      url: `https://inkaportal.app/explore/${combo.locationSlug}/${combo.categorySlug}`,
+      url: `https://vallecito.app/explore/${combo.locationSlug}/${combo.categorySlug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const b of businesses) {
     if (!b.id) continue
     urls.push({
-      url: `https://inkaportal.app/business/${b.id}`,
+      url: `https://vallecito.app/business/${b.id}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,

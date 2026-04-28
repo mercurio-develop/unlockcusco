@@ -45,10 +45,10 @@ export async function generateMetadata({
   const loc = LOCATION_LABELS[location] ?? location
   const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
   return {
-    title: `${cat.emoji} ${cat.label} in ${loc} — INKAPORTAL Sacred Valley`,
+    title: `${cat.emoji} ${cat.label} in ${loc} — VALLECITO Sacred Valley`,
     description: `Discover the best ${cat.label} businesses in ${loc}, Sacred Valley. Book directly with zero commissions via WhatsApp.`,
     openGraph: {
-      title: `${cat.label} in ${loc} | INKAPORTAL`,
+      title: `${cat.label} in ${loc} | VALLECITO`,
       description: `The best of ${cat.label} in ${loc}, Sacred Valley, Cusco.`,
     },
   }
@@ -171,7 +171,7 @@ export default async function CategoryPage({
 
                   {business.isClaimed && business.whatsapp ? (
                     <a
-                      href={`https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}! I saw your profile on INKAPORTAL and I'd like to book. Do you have availability?`)}`}
+                      href={`https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}! I saw your profile on VALLECITO and I'd like to book. Do you have availability?`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-green-600 text-white text-sm font-semibold py-3 rounded-xl transition-colors"

@@ -24,9 +24,9 @@ export async function generateShadowLead(businessId: string, touristName: string
     throw new Error("WhatsApp number not available for this business")
   }
 
-  // Uses the public hostname instead of hardcoding INKAPORTAL.pe, using environment variable or a default
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://INKAPORTAL.pe";
-  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (INKAPORTAL) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile for free: ${baseUrl}/claim/${businessId}`
+  // Uses the public hostname instead of hardcoding vallecito.app, using environment variable or a default
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vallecito.app";
+  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (VALLECITO) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile for free: ${baseUrl}/claim/${businessId}`
   
   const encodedText = encodeURIComponent(rawText)
   

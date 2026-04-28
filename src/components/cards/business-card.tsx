@@ -14,6 +14,7 @@ import {
 import { Star, Zap } from "lucide-react"
 import Image from "next/image"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
+import { useItinerary } from "@/lib/store/itinerary-context"
 
 export type Business = {
   id: string
@@ -42,6 +43,7 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
   const [touristName, setTouristName] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+  const { activeRelay, setActiveRelay, swapModeCategory, setSwapModeCategory, setPanelMode } = useItinerary()
 
   const isHorizontal = orientation === "horizontal"
 
@@ -49,10 +51,52 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
     e.stopPropagation()
     if (!business.whatsapp) return
     const msg = encodeURIComponent(
-      `Hello ${business.name}! 👋 I saw your profile on INKAPORTAL and I'd like to make a reservation. When do you have availability?`
+      `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to make a reservation. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp}?text=${msg}`, "_blank")
   }
+
+  const handleReplace = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!activeRelay || !swapModeCategory) return;
+
+    const newRelay = { ...activeRelay };
+
+    if (swapModeCategory === "food") {
+      newRelay.food = {
+        id: business.id,
+        name: business.name,
+        rating: business.rating || 4.5,
+        whatsapp: business.whatsapp || undefined,
+        lat: business.lat,
+        lng: business.lng,
+      };
+      newRelay.foodCost = 25; // Default fixed fee or custom pricing logic
+    } else if (swapModeCategory === "transit") {
+      newRelay.transit = {
+        id: business.id,
+        name: business.name,
+        driver: "Assigned Driver", // Could be dynamic based on the business
+        rating: business.rating || 4.5,
+        whatsapp: business.whatsapp || undefined,
+        lat: business.lat,
+        lng: business.lng,
+      };
+    } else if (swapModeCategory === "stay") {
+      newRelay.stay = {
+        id: business.id,
+        name: business.name,
+        rating: business.rating || 4.5,
+        lat: business.lat,
+        lng: business.lng,
+      };
+    }
+
+    newRelay.totalCost = newRelay.foodCost + newRelay.transitCost;
+    setActiveRelay(newRelay);
+    setSwapModeCategory(null);
+    setPanelMode("itinerary");
+  };
 
   const handleConsult = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -130,7 +174,16 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
         </div>
 
         <div className={isHorizontal ? "mt-3 sm:mt-auto" : "mt-2"}>
-          {business.isClaimed ? (
+          {swapModeCategory ? (
+            <Button
+              onClick={handleReplace}
+              className={`w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-semibold rounded-xl shadow-lg transition-transform hover:scale-[1.02] ${
+                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
+              }`}
+            >
+              Replace in Itinerary
+            </Button>
+          ) : business.isClaimed ? (
             <Button
               onClick={handleBookNow}
               className={`w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all ${

@@ -24,7 +24,7 @@ export function AiConcierge() {
     {
       id: "1",
       role: "assistant",
-      parts: [{ type: 'text', text: "Welcome to InkaPortal. ✨\n\nHow can I curate your day in the Sacred Valley?" }]
+      parts: [{ type: 'text', text: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?" }]
     }
   ];
 
@@ -99,7 +99,7 @@ export function AiConcierge() {
                     <Sparkles className="w-4 h-4 text-rose-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-slate-900 tracking-wide">InkaPortal Concierge</h3>
+                    <h3 className="font-semibold text-sm text-slate-900 tracking-wide">Vallecito Concierge</h3>
                     <p className="text-xs text-slate-500 font-medium">AI Travel Assistant</p>
                   </div>
                 </div>
