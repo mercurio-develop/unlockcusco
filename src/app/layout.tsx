@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { ItineraryProvider } from "@/lib/store/itinerary-context";
 import { AiConcierge } from "@/components/chat/ai-concierge";
+import { Suspense } from "react";
 
 const fontSans = Manrope({
   variable: "--font-sans",
@@ -36,7 +37,9 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col pt-14">
             {children}
           </main>
-          <AiConcierge />
+          <Suspense fallback={null}>
+            <AiConcierge />
+          </Suspense>
         </ItineraryProvider>
       </body>
     </html>

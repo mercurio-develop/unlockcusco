@@ -14,6 +14,7 @@ const CATEGORY_STYLE: Record<string, { bg: string; emoji: string }> = {
   Adventure:    { bg: "#16A34A", emoji: "🥾" },
   Stays:    { bg: "#2563EB", emoji: "🛌" },
   Culture:     { bg: "#D97706", emoji: "🏺" },
+  Boleto: { bg: "#be185d", emoji: "🎫" } // Special style for Boleto Turistico
 }
 
 interface ExploreMapProps {

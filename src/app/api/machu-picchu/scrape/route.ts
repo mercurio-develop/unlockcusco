@@ -3,7 +3,32 @@ import { chromium } from 'playwright';
 
 export const maxDuration = 60; // Allow more time for scraping
 
+// Basic in-memory rate limiter
+const rateLimit = new Map<string, { count: number, timestamp: number }>();
+const RATE_LIMIT_MAX_REQUESTS = 3; // 3 requests
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // per minute
+
 export async function GET(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') || 'unknown-ip';
+  const now = Date.now();
+  const record = rateLimit.get(ip);
+
+  if (record) {
+    if (now - record.timestamp < RATE_LIMIT_WINDOW_MS) {
+      if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please wait a minute before checking live availability again.' },
+          { status: 429 }
+        );
+      }
+      record.count++;
+    } else {
+      rateLimit.set(ip, { count: 1, timestamp: now });
+    }
+  } else {
+    rateLimit.set(ip, { count: 1, timestamp: now });
+  }
+
   const { searchParams } = new URL(req.url);
   const date = searchParams.get('date');
 

@@ -48,7 +48,7 @@ async function main() {
       data: {
         name: place.name,
         slug,
-        category: "Culture", // We keep it Culture for Mapbox pins
+        category: "Boleto", // Special Boleto category
         lat: place.lat,
         lng: place.lng,
         rating: 4.8, // Arbitrary high rating for official sites

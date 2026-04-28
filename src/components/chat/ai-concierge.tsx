@@ -42,7 +42,16 @@ export function AiConcierge() {
       setIsOpen(true);
       // Wait a tiny bit for UI to mount before sending message
       setTimeout(() => {
-        sendMessage({ text: aiPrompt });
+        sendMessage(
+          { text: aiPrompt },
+          {
+            body: {
+              userLat: -13.3047, // Defaulting to Urubamba for now
+              userLng: -72.1167,
+              localTime: new Date().toLocaleTimeString()
+            }
+          }
+        );
       }, 300);
       
       // Clean up the URL
@@ -58,7 +67,16 @@ export function AiConcierge() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
-    sendMessage({ text: input.trim() })
+    sendMessage(
+      { text: input.trim() },
+      {
+        body: {
+          userLat: -13.3047,
+          userLng: -72.1167,
+          localTime: new Date().toLocaleTimeString()
+        }
+      }
+    )
     setInput("")
   }
 

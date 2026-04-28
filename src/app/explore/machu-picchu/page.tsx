@@ -21,11 +21,11 @@ export default function MachuPicchuPage() {
 
     try {
       const res = await fetch(`/api/machu-picchu/scrape?date=${date}`);
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setResults(data);
       } else {
-        alert("Failed to fetch availability.");
+        alert(data.error || "Failed to fetch availability.");
       }
     } catch (err) {
       console.error(err);

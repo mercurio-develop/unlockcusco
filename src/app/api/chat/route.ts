@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toTextStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error("Error in AI Chat Route:", error);
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500 });
