@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages } from 'ai';
 import { findLocalExperiences } from '@/lib/ai/tools/local-experiences';
 import { buildSpatialItinerary } from '@/lib/ai/tools/itinerary-builder';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: google('gemini-2.5-pro'),
       system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay). Use findLocalExperiences to recommend specific spots. Use buildSpatialItinerary for multi-stop plans.`,
-      messages,
+      messages: await convertToModelMessages(messages),
       tools: {
         findLocalExperiences,
         buildSpatialItinerary,

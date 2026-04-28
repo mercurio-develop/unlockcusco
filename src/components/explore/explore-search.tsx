@@ -30,7 +30,7 @@ const SACRED_VALLEY_LOCATIONS = [
 export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [value, setValue] = useState(initialQuery)
+  const [value, setValue] = useState("")
   const [filterOpen, setFilterOpen] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -41,18 +41,27 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
   const [selectedLoc, setSelectedLoc] = useState(currentLoc)
   const [selectedCat, setSelectedCat] = useState(currentCat)
 
-  const navigate = (q: string, loc?: string, cat?: string) => {
+  const navigateFilters = (loc?: string, cat?: string) => {
     const params = new URLSearchParams()
-    if (q.trim()) params.set("q", q.trim())
+    // Keep the current 'q' param if it exists, otherwise just loc/cat
+    const q = searchParams.get("q")
+    if (q) params.set("q", q)
     if (loc) params.set("loc", loc)
     if (cat) params.set("cat", cat)
     
     router.push(`/explore?${params.toString()}`)
   }
 
+  const handleAiSearch = () => {
+    if (value.trim()) {
+      router.push(`/explore?ai_prompt=${encodeURIComponent(value.trim())}`)
+      setValue("")
+    }
+  }
+
   const applyFilters = () => {
     setFilterOpen(false)
-    navigate(value, selectedLoc, selectedCat)
+    navigateFilters(selectedLoc, selectedCat)
   }
 
   const handleCategoryQuickFilter = (catValue: string) => {
@@ -60,10 +69,9 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
       (initialQuery && initialQuery.toLowerCase().includes(catValue.toLowerCase())) ||
       currentCat === catValue
     ) {
-      const newQ = initialQuery.toLowerCase() === catValue.toLowerCase() ? "" : initialQuery
-      navigate(newQ, currentLoc, "")
+      navigateFilters(currentLoc, "")
     } else {
-      navigate(value, currentLoc, catValue)
+      navigateFilters(currentLoc, catValue)
     }
   }
 
@@ -94,8 +102,13 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
             onChange={(e) => setValue(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            onKeyDown={(e) => e.key === 'Enter' && navigate(value, currentLoc, currentCat)}
-            placeholder="Describe your perfect day (e.g. massage and good food)..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleAiSearch()
+              }
+            }}
+            placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
             className="w-full py-5 pl-12 pr-16 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
           />
           
