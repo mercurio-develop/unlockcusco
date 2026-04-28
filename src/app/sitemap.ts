@@ -6,6 +6,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     by: ['locationSlug', 'categorySlug'],
   })
 
+  const businesses = await prisma.business.findMany({
+    select: { slug: true },
+  })
+
   const urls: MetadataRoute.Sitemap = [
     {
       url: 'https://INKAPORTAL.app',
@@ -28,6 +32,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
+    })
+  }
+
+  for (const b of businesses) {
+    if (!b.slug) continue
+    urls.push({
+      url: `https://INKAPORTAL.app/business/${b.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
     })
   }
 

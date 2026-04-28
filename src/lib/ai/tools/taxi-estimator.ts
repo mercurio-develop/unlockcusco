@@ -45,12 +45,26 @@ export const estimateTaxiFare = tool({
      const cost = Math.max(5, Math.round(dist * 1.5));
      const timeMins = Math.max(5, Math.round(dist * 1.2)); // assuming ~50km/h avg speed on mountain roads
      
+     // Find a top-rated taxi service
+     const recommendedTaxi = await prisma.business.findFirst({
+       where: {
+         name: { contains: "taxi" },
+         whatsapp: { not: null },
+       },
+       orderBy: { rating: "desc" }
+     });
+     
      return {
        destinationName: dest.name,
        originGuessed: originMatched ? origin : "Urubamba (Default)",
        distanceKm: dist.toFixed(1),
        estimatedCostUSD: cost,
        estimatedTimeMinutes: timeMins,
+       taxi: recommendedTaxi ? {
+         name: recommendedTaxi.name,
+         whatsapp: recommendedTaxi.whatsapp,
+         rating: recommendedTaxi.rating
+       } : undefined
      };
   }
 });

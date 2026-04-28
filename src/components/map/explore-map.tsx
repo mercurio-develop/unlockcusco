@@ -5,6 +5,7 @@ import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import Image from "next/image"
+import Link from "next/link"
 import { Star, Zap, ArrowUpRight, MapPin } from "lucide-react"
 import type { Business } from "@/components/explore/explore-view"
 
@@ -231,12 +232,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               </div>
 
               <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => onSelectBusiness(popupBusiness.id)}
+                <Link
+                  href={`/business/${popupBusiness.slug}`}
                   className="flex-1 flex items-center justify-center gap-1.5 bg-[#D4AF37] hover:bg-[#C5A059] text-black text-xs font-bold py-2.5 rounded-xl transition-colors"
                 >
                   View Details <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
+                </Link>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(popupBusiness.name)}`}
                   target="_blank"

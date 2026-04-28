@@ -15,10 +15,12 @@ import {
 } from "@/components/ui/dialog"
 import { Star, Zap, MapPin } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { generateShadowLead } from "@/app/actions/shadow-lead"
 
 type Business = {
   id: string
+  slug: string
   name: string
   category: string
   lat: number
@@ -107,16 +109,26 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
         </div>
 
         <div className="mt-auto pt-4">
-          {/* Google Maps link */}
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs mb-4 transition-colors w-fit"
-          >
-            <MapPin className="w-3 h-3" /> View on Google Maps
-          </a>
+          <div className="flex items-center justify-between mb-4">
+            {/* Google Maps link */}
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition-colors w-fit"
+            >
+              <MapPin className="w-3 h-3" /> View on Map
+            </a>
+            
+            <Link 
+              href={`/business/${business.slug}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[#D4AF37] text-xs font-semibold hover:text-[#C5A059] transition-colors"
+            >
+              View Profile & Reviews →
+            </Link>
+          </div>
 
           {business.isClaimed ? (
             <Button

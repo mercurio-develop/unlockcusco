@@ -6,13 +6,13 @@ import type { Metadata } from "next"
 import { Star, MapPin, Zap, ArrowLeft, MessageCircle, Clock, ShieldCheck } from "lucide-react"
 
 interface BusinessPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: BusinessPageProps): Promise<Metadata> {
-  const { id } = await params
-  const business = await prisma.business.findUnique({
-    where: { id },
+  const { slug } = await params
+  const business = await prisma.business.findFirst({
+    where: { OR: [{ slug }, { id: slug }] },
   })
 
   if (!business) {
@@ -31,10 +31,10 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
 }
 
 export default async function BusinessPage({ params }: BusinessPageProps) {
-  const { id } = await params
+  const { slug } = await params
 
-  const business = await prisma.business.findUnique({
-    where: { id },
+  const business = await prisma.business.findFirst({
+    where: { OR: [{ slug }, { id: slug }] },
     include: { reviews: true },
   })
 

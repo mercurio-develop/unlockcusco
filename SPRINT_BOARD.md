@@ -16,6 +16,7 @@ This document tracks atomic tasks for the current sprint. The Project Manager sk
 - [ ] *None currently.*
 
 ### ✅ Done (Recent)
+- [x] **Features:** Integrated live database taxi dispatch to the AI Concierge; the `estimateTaxiFare` tool now fetches top-rated local drivers and generates a one-click WhatsApp booking button.
 - [x] **Data:** Added Python CLI script (`scripts/clean_db.py`) to purge out-of-bounds locations and low-review experiences, plus implemented infinite scroll "Load More" functionality on the landing page.
 - [x] **Data:** Update sorting algorithm to use a weighted score (rating * log(reviews)) and interleave categories to shuffle experiences on the landing and explore pages.
 - [x] **UI/UX:** Redesign Navbar to a minimal, floating glass "Apple-level" aesthetic with Framer Motion.

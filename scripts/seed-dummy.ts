@@ -80,11 +80,13 @@ async function main() {
   ];
 
   for (const b of dummyBusinesses) {
-    const existing = await prisma.business.findFirst({ where: { name: b.name } });
+    const existing = await prisma.business.findFirst({ where: { name: b.name } })
     if (!existing) {
+      const slug = b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
       await prisma.business.create({
         data: {
           name: b.name,
+          slug,
           category: b.category,
           lat: b.lat,
           lng: b.lng,

@@ -9,6 +9,10 @@ type TaxiResult = {
   estimatedCostUSD?: number;
   estimatedTimeMinutes?: number;
   error?: string;
+  taxi?: {
+    name: string;
+    whatsapp: string;
+  };
 };
 
 export default function TaxiEstimate({ result }: { result: TaxiResult }) {
@@ -66,9 +70,20 @@ export default function TaxiEstimate({ result }: { result: TaxiResult }) {
         </div>
       </div>
 
-      <button className="w-full bg-white hover:bg-zinc-200 text-black font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.1)] text-sm">
-        Request Driver <ArrowRight size={14} />
-      </button>
+      {result.taxi ? (
+        <a
+          href={`https://wa.me/51${result.taxi.whatsapp}?text=${encodeURIComponent(`¡Hola! Quisiera pedir un taxi desde ${result.originGuessed} hasta ${result.destinationName}. Vi su contacto en InkaPortal.`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full bg-[#25D366] hover:bg-[#1DA851] text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(37,211,102,0.2)] text-sm"
+        >
+          Message {result.taxi.name} <ArrowRight size={14} />
+        </a>
+      ) : (
+        <button className="w-full bg-white hover:bg-zinc-200 text-black font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.1)] text-sm opacity-50 cursor-not-allowed">
+          No Taxis Available <ArrowRight size={14} />
+        </button>
+      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { BusinessCard } from "@/components/cards/business-card"
 
 export type Business = {
   id: string
+  slug: string
   name: string
   category: string
   lat: number

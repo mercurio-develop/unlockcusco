@@ -109,9 +109,12 @@ async function main() {
               rating: Number(r.stars),
             }));
 
+          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
+
           await prisma.business.create({
             data: {
               name,
+              slug,
               category,
               lat: location.lat,
               lng: location.lng,
