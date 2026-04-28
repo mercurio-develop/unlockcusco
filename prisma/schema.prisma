@@ -19,9 +19,12 @@ model Business {
   imageUrl     String
   whatsapp     String?
   isClaimed    Boolean  @default(false)
-  locationSlug String   @default("")
-  categorySlug String   @default("")
-  reviews      Review[]
+  locationSlug       String   @default("")
+  categorySlug       String   @default("")
+  instagramHandle    String?
+  instagramFollowers Int      @default(0)
+  heroImages         String   @default("[]")
+  reviews            Review[]
 }
 
 model Review {

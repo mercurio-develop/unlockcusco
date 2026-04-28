@@ -48,7 +48,7 @@ async function main() {
       // Parse the first valid Instagram profile URL
       for (const result of searchResults) {
         if (result.organicResults && Array.isArray(result.organicResults)) {
-          const firstHit = result.organicResults.find((r: any) => r.url.includes("instagram.com/"));
+          const firstHit = result.organicResults.find((r: { url?: string }) => r.url && r.url.includes("instagram.com/"));
           if (firstHit) {
             const url = new URL(firstHit.url);
             // Example URL: https://www.instagram.com/kawsay_spa/
@@ -84,16 +84,16 @@ async function main() {
         continue;
       }
 
-      const profile = igProfiles[0] as any;
+      const profile = igProfiles[0] as { followersCount?: number, biography?: string, latestPosts?: { displayUrl?: string, imageUrl?: string }[] };
       const followers = profile.followersCount || 0;
       const biography = profile.biography || "";
       
       // Extract latest 3 high-res photos
       const latestPosts = profile.latestPosts || [];
       const extractedHighResPhotos = latestPosts
-        .filter((post: any) => post.displayUrl || post.imageUrl)
+        .filter((post: Record<string, unknown>) => post.displayUrl || post.imageUrl)
         .slice(0, 3)
-        .map((post: any) => post.displayUrl || post.imageUrl);
+        .map((post: Record<string, unknown>) => post.displayUrl || post.imageUrl);
 
       console.log(`   📊 Followers: ${followers}`);
       console.log(`   🖼️  High-Res Photos Extracted: ${extractedHighResPhotos.length}`);

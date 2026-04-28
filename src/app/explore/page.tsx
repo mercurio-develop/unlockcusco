@@ -61,10 +61,10 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     take: 100, // Limit payload to client
   })
 
-  // Sort by a weighted score (rating * log10(reviewsCount + 10))
+  // Sort by a weighted score (rating * log10(reviewsCount + 10)) + (instagramFollowers * 0.001)
   businesses.sort((a, b) => {
-    const scoreA = (a.rating || 0) * Math.log10(a.reviewsCount + 10) + (a.isClaimed ? 2 : 0)
-    const scoreB = (b.rating || 0) * Math.log10(b.reviewsCount + 10) + (b.isClaimed ? 2 : 0)
+    const scoreA = (a.rating || 0) * Math.log10(a.reviewsCount + 10) + (a.isClaimed ? 2 : 0) + ((a.instagramFollowers || 0) * 0.001)
+    const scoreB = (b.rating || 0) * Math.log10(b.reviewsCount + 10) + (b.isClaimed ? 2 : 0) + ((b.instagramFollowers || 0) * 0.001)
     return scoreB - scoreA
   })
 
@@ -85,10 +85,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     }
   }
 
-  // Take top 5 if there's a search
-  if (q) {
-    businesses = businesses.slice(0, 5)
-  }
+  // Removed the 5 result limit so quick filters show all matching experiences
 
   return (
     <div className="relative">

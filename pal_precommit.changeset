@@ -1,0 +1,56 @@
+AGENTS.md              | 13 ++++++++++---
+ DEEP_THINKING_BRIEF.md |  1 +
+ prisma/schema.prisma   |  9 ++++++---
+ 3 files changed, 17 insertions(+), 6 deletions(-)
+
+--- Changes ---
+
+AGENTS.md
+  @@ -145,15 +145,22 @@
+  +### 1. Feature-Sliced Architecture & Centralized Routes
+  +- **Domain-Driven:** We are migrating to a feature-sliced architecture in `src/features/`. Code should be organized by business domain (e.g., `business`, `concierge`, `leads`), NOT by technical type.
+  +- **Internal Feature Structure:** Inside a feature (e.g., `src/features/ticket/`), strictly separate: `actions/` (mutations), `queries/` (fetching), `components/` (UI), and `types.ts`.
+  +- **Pure Global Components:** `src/components/` is strictly for pure, global UI primitives (like shadcn) and generic helpers. Domain-specific components belong in `src/features/*/components`.
+  +- **Centralized Routing:** NEVER hardcode route strings (e.g., `href="/explore"`). Always use the route functions defined in `src/paths.ts` (e.g., `explorePath()`).
+  +
+  +### 2. Server Actions & Components
+   ```tsx
+  -// Server action
+  +// Server action (inside src/features/domain/actions/do-something.ts)
+   "use server"
+   import { prisma } from "@/lib/prisma"
+   export async function doSomething(id: string) { ... }
+   
+  -// Client component using server action
+  +// Client component using server action (inside src/features/domain/components/my-component.tsx)
+   "use client"
+  -import { doSomething } from "@/app/actions/something"
+  +import { doSomething } from "@/features/domain/actions/do-something"
+   // call directly: await doSomething(id)
+   
+   // Dialog (Base UI, NOT Radix)
+  +10 -3
+
+DEEP_THINKING_BRIEF.md
+  @@ -17,6 +17,7 @@
+  +- **Enterprise Architecture Migration:** Transitioning the codebase to a Feature-Sliced Architecture (`src/features/`) grouped by business domain, with centralized route management (`src/paths.ts`) to eliminate hardcoded URL strings.
+   
+   ## 3. Pending Features (The Backlog)
+   These are the immediate next steps required for MVP launch:
+  +1 -0
+
+prisma/schema.prisma
+  @@ -19,9 +19,12 @@
+  -  locationSlug String   @default("")
+  -  categorySlug String   @default("")
+  -  reviews      Review[]
+  +  locationSlug       String   @default("")
+  +  categorySlug       String   @default("")
+  +  instagramHandle    String?
+  +  instagramFollowers Int      @default(0)
+  +  heroImages         String   @default("[]")
+  +  reviews            Review[]
+   }
+   
+   model Review {
+  +6 -3

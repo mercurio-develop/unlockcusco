@@ -6,9 +6,9 @@ import Image from "next/image"
 import { MapIcon, MapPinOff } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { BusinessCard } from "@/components/cards/business-card"
-
 export type Business = {
   id: string
+  slug: string
   name: string
   category: string
   lat: number
@@ -18,6 +18,9 @@ export type Business = {
   imageUrl: string
   whatsapp: string | null
   isClaimed: boolean
+  instagramHandle?: string | null
+  instagramFollowers?: number
+  heroImages?: string
 }
 
 interface ExploreViewProps {

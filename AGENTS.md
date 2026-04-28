@@ -1,7 +1,9 @@
+> **CRITICAL CONTEXT**: ALWAYS read `mempalace.md` before starting any task to get the latest compressed project context, architectural rules, and roadmap.
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+Breaking changes — APIs, conventions, file structure may differ from training data. Read relevant guide in `node_modules/next/dist/docs/` before writing code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 ---
@@ -10,7 +12,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## What this is
 
-**INKAPORTAL** is an AI-powered local business discovery platform for the Sacred Valley, Peru. Tourists search and book experiences; local businesses claim their profile for direct WhatsApp leads. MVP monetization: S/5 one-time identity validation + S/49/month subscription.
+**INKAPORTAL** = AI-powered local business discovery platform, Sacred Valley, Peru. Tourists search + book experiences; local businesses claim profiles for direct WhatsApp leads. MVP monetization: S/5 one-time identity validation + S/49/month subscription.
 
 ---
 
@@ -46,9 +48,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - [x] Landing page with animated search
 - [x] Explore page: full-text + category search via `?q=` param
-- [x] **Interactive map**: clicking a card flies the map there; clicking a marker scrolls+highlights the card. Bidirectional state in `ExploreView`.
-- [x] **Category markers**: each category has a distinct color + emoji pin (see `CATEGORY_STYLE` in `explore-map.tsx`)
-- [x] **BusinessCard**: highlights gold when selected, "Book Now" opens WhatsApp for claimed businesses, "Check Availability" triggers shadow lead flow for unclaimed ones
+- [x] **Interactive map**: clicking card flies map there; clicking marker scrolls+highlights card. Bidirectional state in `ExploreView`.
+- [x] **Category markers**: distinct color + emoji pin per category (see `CATEGORY_STYLE` in `explore-map.tsx`)
+- [x] **BusinessCard**: highlights gold when selected, "Book Now" opens WhatsApp for claimed businesses, "Check Availability" triggers shadow lead flow for unclaimed
 - [x] Shadow lead flow: generates pre-filled WhatsApp message to business owner
 - [x] Claim page with blurred lead teaser
 - [x] Checkout / payment flow (simulated — calls `claimBusiness` server action on success)
@@ -57,9 +59,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - [x] AI Concierge: Gemini 2.5 Flash, floating chat UI, graceful fallback if no API key
 - [x] Prisma singleton at `src/lib/prisma.ts`
 - [x] Shared `Business` type defined once in `src/components/explore/explore-view.tsx` — import from there
-- [x] **Agentic Spatial RAG**: Tool calling to query Prisma and calculate Haversine distance, generating multi-stop alternative itineraries.
-- [x] **Vercel AI SDK Migration**: Uses `@ai-sdk/google` (Gemini 2.5 Pro) with `streamText`, `useChat`, and strict type-safe tool invocations (`inputSchema`, `parts`).
-- [x] **3D Map**: Mapbox satellite-streets with 3D terrain and dynamic glassmorphism pulsing markers.
+- [x] **Agentic Spatial RAG**: Tool calling to query Prisma + calculate Haversine distance, generating multi-stop alternative itineraries.
+- [x] **Vercel AI SDK Migration**: Uses `@ai-sdk/google` (Gemini 2.5 Pro) with `streamText`, `useChat`, strict type-safe tool invocations (`inputSchema`, `parts`).
+- [x] **3D Map**: Mapbox satellite-streets with 3D terrain + dynamic glassmorphism pulsing markers.
 
 ---
 
@@ -68,39 +70,39 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### P0 — Core gaps
 
 1. **The Deterministic Ghost Phone (whatsapp-web.js)**
-   - Build a simple, standalone Express/Node.js microservice using whatsapp-web.js (No LLMs).
-   - It will listen for webhooks from Next.js to send programmatic text alerts to local businesses and admin Yape payout alerts.
+   - Simple standalone Express/Node.js microservice using whatsapp-web.js (no LLMs).
+   - Listens for webhooks from Next.js to send programmatic text alerts to local businesses and admin Yape payout alerts.
 
 2. **RAG Integration & Generative UI Refactor**
-   - Refactor the Taxi tool to stream Apple Pay components instead of WhatsApp links. We collect the USD via Stripe, and our backend triggers the WhatsApp notification to the driver.
+   - Refactor Taxi tool to stream Apple Pay components instead of WhatsApp links. Collect USD via Stripe; backend triggers WhatsApp notification to driver.
 
 3. **Infrastructure & Stability**
-   - Setup Vercel deployment and Husky pre-commit hooks to protect the zero-error codebase.
+   - Setup Vercel deployment + Husky pre-commit hooks to protect zero-error codebase.
 
 4. **The B2B Onboarding Pivot (Free Flow)**
-   - Remove the S/5 checkout flow for local businesses claiming profiles.
-   - B2B acquisition relies 100% on a free flow: they just upload their Yape QR code.
+   - Remove S/5 checkout flow for local businesses claiming profiles.
+   - B2B acquisition = 100% free flow: upload Yape QR code only.
 
 ### P1 — Polish
 
 5. **Real leads tracking**
    - Add `Lead` model to Prisma schema (`id`, `businessId`, `touristName`, `touristEmail`, `date`, `createdAt`)
-   - Save a lead row when "Check Availability" form is submitted.
-   - Dashboard "Leads y Mensajes" section should list real lead rows.
+   - Save lead row when "Check Availability" form submitted.
+   - Dashboard "Leads y Mensajes" section lists real lead rows.
 
 6. **SEO meta tags**
    - Add `metadata` export to each page (`/`, `/explore`, `/claim/[id]`)
    - OG image, description, title
 
 7. **Auth (lightweight)**
-   - "Sign In" on landing currently just routes to `/dashboard`
-   - A simple magic-link or PIN auth for business owners to access their dashboard
+   - "Sign In" on landing currently routes to `/dashboard`
+   - Simple magic-link or PIN auth for business owners to access dashboard
 
 ### P2 — Nice to have
 
-8. Show all businesses on map even when list is filtered (dim non-matching, highlight matching)
+8. Show all businesses on map when list filtered (dim non-matching, highlight matching)
 9. Search on-type with debounce (currently only submits on Enter)
-10. Dashboard reviews feed (show recent reviews for the claimed business)
+10. Dashboard reviews feed (recent reviews for claimed business)
 
 ---
 
@@ -146,10 +148,10 @@ scripts/
 ## Patterns to follow
 
 ### 1. Feature-Sliced Architecture & Centralized Routes
-- **Domain-Driven:** We are migrating to a feature-sliced architecture in `src/features/`. Code should be organized by business domain (e.g., `business`, `concierge`, `leads`), NOT by technical type.
-- **Internal Feature Structure:** Inside a feature (e.g., `src/features/ticket/`), strictly separate: `actions/` (mutations), `queries/` (fetching), `components/` (UI), and `types.ts`.
-- **Pure Global Components:** `src/components/` is strictly for pure, global UI primitives (like shadcn) and generic helpers. Domain-specific components belong in `src/features/*/components`.
-- **Centralized Routing:** NEVER hardcode route strings (e.g., `href="/explore"`). Always use the route functions defined in `src/paths.ts` (e.g., `explorePath()`).
+- **Domain-Driven:** Migrating to feature-sliced architecture in `src/features/`. Organize by business domain (e.g., `business`, `concierge`, `leads`), NOT technical type.
+- **Internal Feature Structure:** Inside feature (e.g., `src/features/ticket/`), strictly separate: `actions/` (mutations), `queries/` (fetching), `components/` (UI), `types.ts`.
+- **Pure Global Components:** `src/components/` = strictly pure, global UI primitives (shadcn) + generic helpers. Domain-specific components belong in `src/features/*/components`.
+- **Centralized Routing:** NEVER hardcode route strings (e.g., `href="/explore"`). Always use route functions from `src/paths.ts` (e.g., `explorePath()`).
 
 ### 2. Server Actions & Components
 ```tsx
