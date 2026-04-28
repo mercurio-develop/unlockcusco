@@ -88,7 +88,7 @@ export function BusinessGrid({ businesses }: BusinessGridProps) {
               hidden: { opacity: 0, y: 24 },
               visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
             }}
-            onClick={() => router.push(`/explore?q=${encodeURIComponent(business.category)}`)}
+            onClick={() => router.push(`/explore?q=${encodeURIComponent(business.name)}`)}
             className={`group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 ${
               i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-[3/4]"
             }`}

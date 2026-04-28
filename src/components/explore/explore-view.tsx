@@ -23,6 +23,7 @@ export type Business = {
 interface ExploreViewProps {
   businesses: Business[]
   initialQuery: string
+  initialSelectedId?: string | null
 }
 
 const ExploreMap = dynamic(() => import("@/components/map/explore-map"), {
@@ -34,8 +35,8 @@ const ExploreMap = dynamic(() => import("@/components/map/explore-map"), {
   ),
 })
 
-export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+export function ExploreView({ businesses, initialQuery, initialSelectedId }: ExploreViewProps) {
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null)
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
   const [showDesktopMap, setShowDesktopMap] = useState(businesses.length > 0)
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())

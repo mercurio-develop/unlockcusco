@@ -4,7 +4,7 @@ import { AiConcierge } from "@/components/chat/ai-concierge"
 import { Business } from "@prisma/client"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; id?: string }>
 }
 
 // Helper to interleave categories while maintaining relative rating sort
@@ -33,7 +33,7 @@ function interleaveCategories(sortedBusinesses: Business[]) {
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q } = await searchParams
+  const { q, id } = await searchParams
   const query = q?.toLowerCase() || ""
 
   let targetCategory = ""
@@ -58,8 +58,21 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
 
   let businesses = await prisma.business.findMany({
     where: whereClause,
-    orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
     take: 100, // Limit payload to client
+  })
+
+  if (id && !businesses.find(b => b.id === id)) {
+    const selectedBusiness = await prisma.business.findUnique({ where: { id } })
+    if (selectedBusiness) {
+      businesses.unshift(selectedBusiness)
+    }
+  }
+
+  // Sort by a weighted score (rating * log10(reviewsCount + 10))
+  businesses.sort((a, b) => {
+    const scoreA = (a.rating || 0) * Math.log10(a.reviewsCount + 10) + (a.isClaimed ? 2 : 0)
+    const scoreB = (b.rating || 0) * Math.log10(b.reviewsCount + 10) + (b.isClaimed ? 2 : 0)
+    return scoreB - scoreA
   })
 
   // Interleave categories
@@ -72,7 +85,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
 
   return (
     <div className="relative">
-      <ExploreView businesses={businesses} initialQuery={q ?? ""} />
+      <ExploreView businesses={businesses} initialQuery={q ?? ""} initialSelectedId={id ?? null} />
       <AiConcierge />
     </div>
   )

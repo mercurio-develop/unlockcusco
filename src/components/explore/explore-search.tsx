@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
 import { SlidersHorizontal, Sparkles } from "lucide-react"
 
 const CATEGORIES = [

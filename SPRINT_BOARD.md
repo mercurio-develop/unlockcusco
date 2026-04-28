@@ -16,6 +16,7 @@ This document tracks atomic tasks for the current sprint. The Project Manager sk
 - [ ] *None currently.*
 
 ### ✅ Done (Recent)
+- [x] **Data:** Update sorting algorithm to use a weighted score (rating * log(reviews)) and interleave categories to shuffle experiences on the landing and explore pages.
 - [x] **UI/UX:** Redesign Navbar to a minimal, floating glass "Apple-level" aesthetic with Framer Motion.
 - [x] **Branding:** Transitioned all references from "Valle" and "OpenClaw" to "INKAPORTAL".
 - [x] **Project Management:** Upgraded Secretary skill to Project Manager.
