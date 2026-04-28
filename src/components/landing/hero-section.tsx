@@ -44,8 +44,7 @@ export function HeroSection() {
           The Sacred Valley&apos;s first AI intelligence. Skip the tourist traps. We connect you to verified local experiences in milliseconds.
         </p>
 
-        <form
-          onSubmit={handleSearch}
+        <div
           className="w-full max-w-3xl mt-12 p-2 rounded-full bg-[#09090B]/40 backdrop-blur-2xl border border-white/10 flex flex-col md:flex-row items-center gap-2 shadow-2xl transition-all mx-auto group focus-within:bg-[#09090B]/60 focus-within:border-white/20"
         >
           <div className="flex-1 w-full relative flex items-center px-4">
@@ -53,18 +52,20 @@ export function HeroSection() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
               placeholder="Describe your perfect day in the Sacred Valley..."
               className="bg-transparent border-none text-white focus:outline-none focus:ring-0 w-full py-3 text-base md:text-lg placeholder:text-white/40 font-light"
              />
           </div>
           
           <button
-            type="submit"
+            type="button"
+            onClick={() => handleSearch()}
             className="bg-white text-black font-medium rounded-full px-8 py-3.5 flex items-center gap-2 hover:bg-zinc-200 transition-colors flex-shrink-0 w-full md:w-auto justify-center shadow-lg"
           >
             Design Trip <ArrowRight className="w-4 h-4" />
           </button>
-        </form>
+        </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-3 max-w-3xl">
           {[

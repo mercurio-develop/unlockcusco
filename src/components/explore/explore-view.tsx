@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import Image from "next/image"
+import { MapIcon, MapPinOff } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { BusinessCard } from "@/components/cards/business-card"
 
@@ -36,6 +37,7 @@ const ExploreMap = dynamic(() => import("@/components/map/explore-map"), {
 export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
+  const [showDesktopMap, setShowDesktopMap] = useState(businesses.length > 0)
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   const handleMarkerClick = (id: string) => {
@@ -62,11 +64,20 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
       </div>
 
       {/* Card list panel */}
-      <div className={`w-full md:w-[55%] lg:w-[60%] flex flex-col h-full relative z-10 border-r border-white/10 bg-[#09090B]/80 backdrop-blur-xl ${viewMode === "map" ? "hidden md:flex" : ""}`}>
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[55%] lg:w-[60%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-white/10 bg-[#09090B]/80 backdrop-blur-xl ${viewMode === "map" ? "hidden md:flex" : ""}`}>
         <div className="px-8 pt-8 pb-4 bg-transparent z-10 sticky top-0 border-b border-white/10">
-          <h1 className="text-3xl font-serif tracking-tight text-white mb-6">
-            Explore the INKAPORTAL
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-serif tracking-tight text-white">
+              Explore the INKAPORTAL
+            </h1>
+            <button
+              onClick={() => setShowDesktopMap(!showDesktopMap)}
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium text-white/80 hover:text-white transition-colors"
+            >
+              {showDesktopMap ? <MapPinOff className="w-4 h-4" /> : <MapIcon className="w-4 h-4" />}
+              {showDesktopMap ? "Hide Map" : "Show Map"}
+            </button>
+          </div>
           <ExploreSearch initialQuery={initialQuery} />
         </div>
 
@@ -77,7 +88,7 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
               <p className="text-sm">Try &quot;massage&quot;, &quot;ATV&quot;, or &quot;restaurant&quot;.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pb-20">
+            <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-8 pb-20 transition-all duration-500`}>
               {businesses.map((business, i) => (
                 <div
                   key={`${business.id}-${i}`}
@@ -99,12 +110,14 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
       </div>
 
       {/* Map panel */}
-      <div className={`w-full md:w-[45%] lg:w-[40%] flex flex-col relative z-10 border-l border-white/10 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
-        <ExploreMap
-          businesses={businesses}
-          selectedId={selectedId}
-          onSelectBusiness={handleMarkerClick}
-        />
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"} flex flex-col relative z-10 border-l border-white/10 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
+        {showDesktopMap && (
+          <ExploreMap
+            businesses={businesses}
+            selectedId={selectedId}
+            onSelectBusiness={handleMarkerClick}
+          />
+        )}
       </div>
 
       {/* Mobile view toggle */}

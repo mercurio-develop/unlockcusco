@@ -55,9 +55,9 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
             initialQuery &&
             initialQuery.toLowerCase().includes(cat.value.toLowerCase())
           return (
-            <Badge
+            <button
               key={cat.value}
-              variant="secondary"
+              type="button"
               onClick={() => navigate(cat.value)}
               className={`px-5 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all text-sm font-medium border ${
                 isActive
@@ -66,7 +66,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
               }`}
             >
               {cat.label}
-            </Badge>
+            </button>
           )
         })}
       </div>

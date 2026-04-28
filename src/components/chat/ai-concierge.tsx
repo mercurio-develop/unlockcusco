@@ -51,20 +51,20 @@ export function AiConcierge() {
           >
             <Card className="flex flex-col h-[600px] shadow-2xl border-white/10 overflow-hidden bg-[#09090B]/95 backdrop-blur-xl">
               {/* Header */}
-              <div className="bg-[#D4AF37] p-4 text-black flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="bg-black/10 p-1.5 rounded-lg">
-                    <Sparkles className="w-5 h-5" />
+              <div className="bg-white/5 border-b border-white/10 p-4 flex justify-between items-center shrink-0 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <div className="bg-black/40 border border-white/10 p-2 rounded-xl shadow-inner">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm font-serif tracking-tight">INKAPORTAL Concierge</h3>
-                    <p className="text-xs text-black/70">Khipu AI Assistant</p>
+                    <h3 className="font-semibold text-sm text-white tracking-wide">InkaPortal Concierge</h3>
+                    <p className="text-xs text-white/40 font-medium">Khipu AI Assistant</p>
                   </div>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-black/70 hover:text-black hover:bg-black/10 rounded-full"
+                  className="text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   <X className="w-5 h-5" />
@@ -149,6 +149,7 @@ export function AiConcierge() {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
+            data-testid="ai-chat-trigger"
             className="absolute bottom-6 right-6 z-50 h-14 w-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 group transition-all"
           >
             <Sparkles className="w-6 h-6 text-[#D4AF37] group-hover:animate-pulse" />
