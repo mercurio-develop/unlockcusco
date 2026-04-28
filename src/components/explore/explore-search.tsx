@@ -1,10 +1,11 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { SlidersHorizontal, Sparkles, MapPin, Tag } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 const CATEGORIES = [
   { label: "🥾 Adventure", value: "Adventure" },
@@ -22,11 +23,17 @@ const LOCATIONS = [
   { label: "Chinchero", value: "chinchero" },
 ]
 
+const SACRED_VALLEY_LOCATIONS = [
+  "Urubamba", "Pisac", "Maras", "Ollantaytambo", "Chinchero", "Calca", "Cusco", "Machu Picchu"
+];
+
 export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [value, setValue] = useState(initialQuery)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Local state for the filter dialog
   const currentLoc = searchParams.get("loc") || ""
@@ -60,24 +67,65 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
     }
   }
 
+  const lastWord = value.split(' ').pop() || "";
+  const suggestions = (isFocused && lastWord.length >= 2) 
+    ? SACRED_VALLEY_LOCATIONS.filter(l => l.toLowerCase().startsWith(lastWord.toLowerCase()) && l.toLowerCase() !== lastWord.toLowerCase())
+    : [];
+
+  const handleSuggestionClick = (suggestion: string) => {
+    const words = value.split(' ');
+    words.pop();
+    words.push(suggestion);
+    setValue(words.join(' ') + ' ');
+    inputRef.current?.focus();
+  };
+
   return (
     <>
       <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
           <Sparkles className="h-5 w-5 text-rose-500" />
         </div>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && navigate(value, currentLoc, currentCat)}
-          placeholder="Describe your perfect day (e.g. massage and good food)..."
-          className="w-full py-5 pl-12 pr-16 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
-        />
+        <div className="relative z-0">
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            onKeyDown={(e) => e.key === 'Enter' && navigate(value, currentLoc, currentCat)}
+            placeholder="Describe your perfect day (e.g. massage and good food)..."
+            className="w-full py-5 pl-12 pr-16 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
+          />
+          
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
+              >
+                {suggestions.map(suggestion => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    <MapPin className="w-4 h-4 text-rose-400" />
+                    <span className="font-medium">{suggestion}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         
         <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
           <DialogTrigger render={
-            <button type="button" className={`absolute inset-y-0 right-4 flex items-center transition-colors ${currentLoc || currentCat ? 'text-rose-600' : 'text-gray-400 hover:text-slate-900'}`}>
+            <button type="button" className={`absolute inset-y-0 right-4 flex items-center transition-colors z-10 ${currentLoc || currentCat ? 'text-rose-600' : 'text-gray-400 hover:text-slate-900'}`}>
               <SlidersHorizontal className="h-5 w-5" />
             </button>
           } />

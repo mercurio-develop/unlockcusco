@@ -1,15 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { ArrowRight, ChevronDown } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ArrowRight, ChevronDown, MapPin } from "lucide-react"
 import Image from "next/image"
+
+const SACRED_VALLEY_LOCATIONS = [
+  "Urubamba", "Pisac", "Maras", "Ollantaytambo", "Chinchero", "Calca", "Cusco", "Machu Picchu"
+];
 
 export function HeroSection() {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const router = useRouter()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = (e?: React.FormEvent, directPrompt?: string) => {
     if (e) e.preventDefault()
@@ -23,6 +29,19 @@ export function HeroSection() {
       router.push(`/explore?ai_prompt=${encodeURIComponent(finalQuery)}`)
     }, 400)
   }
+
+  const lastWord = query.split(' ').pop() || "";
+  const suggestions = (isFocused && lastWord.length >= 2) 
+    ? SACRED_VALLEY_LOCATIONS.filter(l => l.toLowerCase().startsWith(lastWord.toLowerCase()) && l.toLowerCase() !== lastWord.toLowerCase())
+    : [];
+
+  const handleSuggestionClick = (suggestion: string) => {
+    const words = query.split(' ');
+    words.pop();
+    words.push(suggestion);
+    setQuery(words.join(' ') + ' ');
+    inputRef.current?.focus();
+  };
 
   return (
     <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-white">
@@ -62,31 +81,60 @@ export function HeroSection() {
         </p>
 
         {/* Airbnb-style white search bar */}
-        <form
-          onSubmit={handleSearch}
-          className="w-full max-w-2xl bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.12)] flex items-center gap-2 p-2 border border-gray-100"
-        >
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
-            className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-base placeholder:text-gray-400"
-          />
-          <button
-            type="submit"
-            disabled={isSearching}
-            className="bg-rose-600 text-white font-semibold rounded-full px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px] justify-center"
+        <div className="w-full max-w-2xl relative">
+          <form
+            onSubmit={handleSearch}
+            className="w-full bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.12)] flex items-center gap-2 p-2 border border-gray-100 relative z-20"
           >
-            {isSearching ? (
-              <span className="flex items-center gap-2 text-sm">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Working...
-              </span>
-            ) : (
-              <ArrowRight className="w-4 h-4" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
+              placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
+              className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-base placeholder:text-gray-400"
+            />
+            <button
+              type="submit"
+              disabled={isSearching}
+              className="bg-rose-600 text-white font-semibold rounded-full px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px] justify-center"
+            >
+              {isSearching ? (
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Working...
+                </span>
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
+            </button>
+          </form>
+
+          {/* Autocomplete Dropdown */}
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-10 p-2 text-left"
+              >
+                {suggestions.map(suggestion => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    <MapPin className="w-4 h-4 text-rose-400" />
+                    <span className="font-medium">{suggestion}</span>
+                  </button>
+                ))}
+              </motion.div>
             )}
-          </button>
-        </form>
+          </AnimatePresence>
+        </div>
 
         {/* Quick search pills */}
         <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl">
