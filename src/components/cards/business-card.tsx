@@ -104,7 +104,7 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
           {business.isClaimed && (
             <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md flex items-center gap-1">
               <Zap className="w-3 h-3 fill-rose-600 text-rose-600" />
-              <span className={isHorizontal ? "hidden sm:inline" : ""}>Verified</span>
+              <span className={isHorizontal ? "hidden sm:inline" : ""}>100% Confiable</span>
             </span>
           )}
         </div>

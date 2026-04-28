@@ -136,7 +136,7 @@ export default async function CategoryPage({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 {business.isClaimed && (
                   <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#25D366] text-white text-[10px] font-bold px-2 py-1 rounded-full">
-                    <Zap className="w-2.5 h-2.5 fill-current" /> Instant
+                    <Zap className="w-2.5 h-2.5 fill-current" /> 100% Confiable
                   </div>
                 )}
               </div>

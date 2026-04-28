@@ -65,7 +65,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                 <h3 className="text-slate-500 font-medium text-sm">Subscription Status</h3>
                 <p className="text-xl font-extrabold text-slate-900 mt-2">
-                  {business?.isClaimed ? "Verified ✓" : "Free Trial"}
+                  {business?.isClaimed ? "100% Confiable ✓" : "Free Trial"}
                 </p>
                 <div className={`text-xs font-medium mt-2 w-max px-2 py-1 rounded-md ${business?.isClaimed ? "text-green-600 bg-green-50" : "text-yellow-600 bg-yellow-50"}`}>
                   {business?.isClaimed ? "Active Profile" : "14 days remaining"}

@@ -70,7 +70,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           
           {business.isClaimed && (
             <div className="flex items-center gap-1.5 bg-[#25D366]/20 backdrop-blur-md border border-[#25D366]/30 text-[#25D366] text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-              <ShieldCheck className="w-3.5 h-3.5" /> Verified Partner
+              <ShieldCheck className="w-3.5 h-3.5" /> 100% Confiable
             </div>
           )}
         </div>

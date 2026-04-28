@@ -73,9 +73,9 @@ export const buildChronoRelay = tool({
     return {
       origin,
       destination,
-      food: food ? { name: food.name, rating: food.rating || 4.8, distance: '400m', whatsapp: food.whatsapp } : { name: 'Apu Organic Kitchen', rating: 4.9, distance: '400m', whatsapp: '+51999999999' },
-      transit: taxi ? { name: taxi.name, driver: 'Mateo', rating: taxi.rating || 4.9, whatsapp: taxi.whatsapp } : { name: 'Valle Safe SUV', driver: 'Mateo', rating: 4.9, whatsapp: '+51999999999' },
-      stay: stay ? { name: stay.name, rating: stay.rating || 4.9 } : { name: 'El Albergue', rating: 4.9 },
+      food: food ? { id: food.id, name: food.name, rating: food.rating || 4.8, distance: '400m', whatsapp: food.whatsapp, lat: food.lat, lng: food.lng } : { name: 'Apu Organic Kitchen', rating: 4.9, distance: '400m', whatsapp: '+51999999999', lat: oLat, lng: oLng },
+      transit: taxi ? { id: taxi.id, name: taxi.name, driver: 'Mateo', rating: taxi.rating || 4.9, whatsapp: taxi.whatsapp, lat: taxi.lat, lng: taxi.lng } : { name: 'Valle Safe SUV', driver: 'Mateo', rating: 4.9, whatsapp: '+51999999999' },
+      stay: stay ? { id: stay.id, name: stay.name, rating: stay.rating || 4.9, lat: stay.lat, lng: stay.lng } : { name: 'El Albergue', rating: 4.9, lat: dLat, lng: dLng },
       transitCost,
       foodCost,
       totalCost: transitCost + foodCost,
