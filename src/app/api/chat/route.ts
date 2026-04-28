@@ -3,6 +3,8 @@ import { streamText } from 'ai';
 import { findNearbyBusinesses } from '@/lib/ai/tools/find-nearby';
 import { buildItinerary } from '@/lib/ai/tools/build-itinerary';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
+import { buildChronoRelay } from '@/lib/ai/tools/chrono-relay';
+import { askAvailability } from '@/lib/ai/tools/ask-availability';
 
 export const maxDuration = 30;
 
@@ -20,16 +22,18 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: google('gemini-2.5-pro'),
-      system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components.`,
+      system: `You are the Inkaportal Concierge. Current time: ${localTime}. User coords: ${userLat}, ${userLng}. NEVER output outbound WhatsApp links. ALWAYS use tools to render Generative UI components. For complex journeys, use buildChronoRelay to offer a complete relay sequence (food + transit + stay).`,
       messages,
       tools: {
         findNearbyBusinesses,
         buildItinerary,
         estimateTaxiFare,
+        buildChronoRelay,
+        askAvailability,
       },
     });
 
-    return result.toTextStreamResponse();
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error("Error in AI Chat Route:", error);
     return new Response(JSON.stringify({ error: "Internal server error." }), { status: 500 });

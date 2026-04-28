@@ -11,6 +11,8 @@ import { DefaultChatTransport, type UIMessage } from 'ai'
 import ItineraryAlternatives from "@/components/concierge/ItineraryAlternatives"
 import { TaxiPaymentCard } from "@/features/concierge/components/TaxiPaymentCard"
 import ExperienceRecommendations from "@/components/concierge/ExperienceRecommendations"
+import { CinematicTimeline } from "@/features/concierge/components/CinematicTimeline"
+import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
 
 export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)

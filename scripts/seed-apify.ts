@@ -1,9 +1,15 @@
 import { ApifyClient } from 'apify-client';
 import { PrismaClient } from '@prisma/client';
+import { generateObject } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
 import 'dotenv/config';
 
 const apifyClient = new ApifyClient({ token: process.env.APIFY_API_TOKEN });
 const prisma = new PrismaClient();
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
+});
 
 const FALLBACK_IMAGES: Record<string, string> = {
   Dining: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=1000&auto=format&fit=crop',
@@ -15,10 +21,11 @@ const FALLBACK_IMAGES: Record<string, string> = {
 
 function mapCategory(googleCategory: string): string {
   const c = googleCategory.toLowerCase();
-  if (c.match(/restaurant|cafe|food|picantería|pizza|bar|brewery|bakery|comida/)) return "Dining";
-  if (c.match(/spa|massage|yoga|wellness|therapist|sauna|retreat|meditation/))    return "Wellness";
-  if (c.match(/tour|travel|agency|hiking|atv|rafting|zipline|adventure|trekking/)) return "Adventure";
-  if (c.match(/hotel|hostel|lodge|inn|camping|alojamiento|airbnb|resort/))        return "Stays";
+  if (c.match(/restaurant|cafe|food|picantería|pizza|bar|brewery|bakery|comida|restaurante|chifa|polleria|cevicheria|cafeteria/)) return "Dining";
+  if (c.match(/spa|massage|yoga|wellness|therapist|sauna|retreat|meditation|masaje|terapia|bienestar/))    return "Wellness";
+  if (c.match(/tour|travel|agency|hiking|atv|rafting|zipline|adventure|trekking|agencia|turismo|aventura|cuatrimotos|caminata/)) return "Adventure";
+  if (c.match(/hotel|hostel|lodge|inn|camping|alojamiento|airbnb|resort|hospedaje/))        return "Stays";
+  if (c.match(/textile|artisan|artesanía|market|clothing|souvenir|textil|tejido|mercado|artesano/)) return "Culture";
   return "Culture";
 }
 
@@ -41,35 +48,63 @@ function enhanceImageUrl(url: string | undefined): string | null {
 }
 
 const SEARCHES = [
-  "Spa and wellness Urubamba, Cusco, Peru",
-  "Specialty coffee cafe Urubamba, Cusco, Peru",
-  "Vegan and organic restaurant Urubamba, Cusco, Peru",
-  "Private taxi transport Urubamba, Cusco, Peru",
-  "Private tours agency Urubamba, Cusco, Peru",
-  
+  // --- TEXTILES & ARTISANS (English & Spanish) ---
+  // Pisac
   "Textiles authentic market Pisac, Cusco, Peru",
-  "Yoga and spiritual retreat Pisac, Cusco, Peru",
-  "Shaman plant medicine Pisac, Cusco, Peru",
-  "Cultural community tours Pisac, Cusco, Peru",
-  
-  "ATV tour Cuatrimotos Maras, Cusco, Peru",
-  "ATV quad biking private tours Maras, Cusco, Peru",
-  "Salt mines tour Maras, Cusco, Peru",
-  "Adventure tour outfitter Maras, Cusco, Peru",
-  
-  "Boutique hotel Ollantaytambo, Cusco, Peru",
-  "Restaurant near train station Ollantaytambo, Cusco, Peru",
-  "Private guide Ollantaytambo, Cusco, Peru",
-  "Local tour guide Ollantaytambo, Cusco, Peru",
-  
-  "Artisan weaving workshop Chinchero, Cusco, Peru",
-  
-  "Boutique tour operator Cusco, Peru",
-  "Local trekking outfitter Cusco, Peru",
-  "Alternative experiential tour agency Cusco, Peru",
-  "Luxury travel agency Cusco, Peru",
-  "Horseback riding tours Sacred Valley, Peru",
-  "Eco tourism agency Sacred Valley, Peru"
+  "Mercado de artesania Pisac, Cusco, Peru",
+  "Centro de textiles tradicionales Pisac, Cusco, Peru",
+  "Tejidos artesanales Pisac, Cusco, Peru",
+  // Urubamba
+  "Alpaca textiles Urubamba, Cusco, Peru",
+  "Taller de tejido Urubamba, Cusco, Peru",
+  "Artesania local Urubamba, Cusco, Peru",
+  "Ceramica y textiles Urubamba, Cusco, Peru",
+  // Calca
+  "Mercado de artesania Calca, Cusco, Peru",
+  "Tejidos tradicionales Calca, Cusco, Peru",
+  "Asociacion de artesanos Calca, Cusco, Peru",
+  // Ollantaytambo
+  "Weaving cooperative Ollantaytambo, Cusco, Peru",
+  "Textiles tradicionales Ollantaytambo, Cusco, Peru",
+  "Mercado artesanal Ollantaytambo, Cusco, Peru",
+  "Taller de artesania Ollantaytambo, Cusco, Peru",
+  // Chinchero
+  "Centro de textiles Chinchero, Cusco, Peru",
+  "Tejedoras tradicionales Chinchero, Cusco, Peru",
+  "Mercado de artesania Chinchero, Cusco, Peru",
+  "Taller de tejido andino Chinchero, Cusco, Peru",
+
+  // --- RESTAURANTS & DINING (English & Spanish) ---
+  // Pisac
+  "Best restaurant Pisac, Cusco, Peru",
+  "Restaurante local Pisac, Cusco, Peru",
+  "Picanteria tradicional Pisac, Cusco, Peru",
+  "Comida tipica Pisac, Cusco, Peru",
+  "Cafeteria especialidad Pisac, Cusco, Peru",
+  "Restaurante vegetariano Pisac, Cusco, Peru",
+  // Urubamba
+  "Restaurante campestre Urubamba, Cusco, Peru",
+  "Picanteria local Urubamba, Cusco, Peru",
+  "Comida tradicional Urubamba, Cusco, Peru",
+  "Cafe specialty coffee Urubamba, Cusco, Peru",
+  "Restaurante organico Urubamba, Cusco, Peru",
+  // Calca
+  "Restaurante Calca, Cusco, Peru",
+  "Picanteria Calca, Cusco, Peru",
+  "Comida local Calca, Cusco, Peru",
+  "Cafeteria Calca, Cusco, Peru",
+  "Caldo de gallina Calca, Cusco, Peru", // Very local search term
+  // Ollantaytambo
+  "Restaurant near ruins Ollantaytambo, Cusco, Peru",
+  "Restaurante tipico Ollantaytambo, Cusco, Peru",
+  "Comida local Ollantaytambo, Cusco, Peru",
+  "Cafeteria estacion de tren Ollantaytambo, Cusco, Peru",
+  "Cerveceria artesanal Ollantaytambo, Cusco, Peru",
+  // Chinchero
+  "Restaurante turistico Chinchero, Cusco, Peru",
+  "Comida tipica Chinchero, Cusco, Peru",
+  "Picanteria Chinchero, Cusco, Peru",
+  "Restaurante campestre Chinchero, Cusco, Peru"
 ];
 
 async function main() {
@@ -82,8 +117,8 @@ async function main() {
     try {
       const run = await apifyClient.actor("compass/google-maps-extractor").call({
         searchStringsArray: [search],
-        maxCrawledPlacesPerSearch: 15,
-        language: "en",
+        maxCrawledPlacesPerSearch: 20, // Increased to capture more local places
+        language: "es", // Set to Spanish to get the most authentic local results
         maxImages: 4,
         maxReviews: 5,
         reviewsSort: "newest",
@@ -146,20 +181,40 @@ async function main() {
 
           const whatsapp = extractWhatsApp(item.phoneUnformatted as string | undefined);
 
-          const reviewsData = ((item.reviews as Record<string, unknown>[]) || [])
-            .filter((r) => r.text && r.stars)
-            .slice(0, 5)
-            .map((r) => ({
-              text: String(r.text),
-              author: "Google Reviewer",
-              rating: Number(r.stars),
-            }));
+          const originalReviews = ((item.reviews as Record<string, unknown>[]) || [])
+            .filter((r) => r.textTranslated || r.text)
+            .slice(0, 5);
+            
+          let finalName = name;
+          let finalReviews = originalReviews.map(r => String(r.textTranslated || r.text));
 
-          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
+          try {
+            console.log(`   🗣 Translating to English with Gemini...`);
+            const { object: translatedData } = await generateObject({
+              model: google('gemini-2.5-flash'),
+              schema: z.object({
+                name: z.string().describe("The business name translated to English. Keep brand names intact. Only translate descriptive nouns (e.g. 'Mercado de Artesania' -> 'Artisan Market')."),
+                reviews: z.array(z.string()).describe("The translated reviews in perfect natural English.")
+              }),
+              prompt: `Translate this Peruvian business data into English for an American/European tourist audience. Keep brand names intact.\n\nJSON Data to translate:\n${JSON.stringify({ name, reviews: finalReviews })}`
+            });
+            finalName = translatedData.name;
+            finalReviews = translatedData.reviews;
+          } catch (translationErr) {
+            console.warn(`   ⚠️ Translation failed, using original text.`);
+          }
+
+          const reviewsData = originalReviews.map((r, index) => ({
+            text: finalReviews[index] || String(r.textTranslated || r.text),
+            author: "Google Reviewer",
+            rating: Number(r.stars),
+          }));
+
+          const slug = finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
 
           await prisma.business.create({
             data: {
-              name,
+              name: finalName,
               slug,
               category,
               lat: location.lat,

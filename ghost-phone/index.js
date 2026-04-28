@@ -42,7 +42,7 @@ client.on('disconnected', (reason) => {
 });
 
 // Express Webhook Receiver
-app.post('/webhook/send', async (req, res) => {
+app.post('/api/message/send', async (req, res) => {
     // Basic API Key authentication
     const authHeader = req.headers.authorization;
     if (!authHeader || authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
@@ -69,6 +69,36 @@ app.post('/webhook/send', async (req, res) => {
         return res.status(200).json({ success: true, status: 'Message sent successfully.' });
     } catch (error) {
         console.error('❌ Error sending message:', error);
+        return res.status(500).json({ error: 'Failed to send message via WhatsApp.', details: error.message });
+    }
+});
+
+app.post('/api/message/ask-availability', async (req, res) => {
+    // Basic API Key authentication
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
+        return res.status(401).json({ error: 'Unauthorized. Invalid or missing Bearer token.' });
+    }
+
+    if (!isReady) {
+        return res.status(503).json({ error: 'WhatsApp client is not ready yet.' });
+    }
+
+    const { phone, vendorName, requestedTime, partySize } = req.body;
+
+    if (!phone || !vendorName) {
+        return res.status(400).json({ error: 'Missing required fields: phone, vendorName.' });
+    }
+
+    const message = `Hello ${vendorName}! 🛎️\n\nInkaportal Concierge here. We have a client requesting a booking:\nTime: ${requestedTime || 'As soon as possible'}\nParty Size: ${partySize || '1'}\n\nPlease reply YES to confirm availability or NO if you are full.`;
+
+    try {
+        const formattedPhone = `${phone.replace(/\D/g, '')}@c.us`;
+        await client.sendMessage(formattedPhone, message);
+        console.log(`📩 Sent availability request to ${formattedPhone}`);
+        return res.status(200).json({ success: true, status: 'Availability request sent.' });
+    } catch (error) {
+        console.error('❌ Error sending availability request:', error);
         return res.status(500).json({ error: 'Failed to send message via WhatsApp.', details: error.message });
     }
 });
