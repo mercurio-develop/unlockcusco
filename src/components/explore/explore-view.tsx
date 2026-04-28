@@ -1,11 +1,15 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import dynamic from "next/dynamic"
 import Image from "next/image"
-import { MapIcon, MapPinOff } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { MapIcon, MapPinOff, Loader2 } from "lucide-react"
+import { useInView } from "react-intersection-observer"
 import { ExploreSearch } from "./explore-search"
 import { BusinessCard } from "@/components/cards/business-card"
+import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
+
 export type Business = {
   id: string
   slug: string
@@ -24,7 +28,8 @@ export type Business = {
 }
 
 interface ExploreViewProps {
-  businesses: Business[]
+  initialBusinesses: Business[]
+  initialHasMore: boolean
   initialQuery: string
   initialSelectedId?: string | null
 }
@@ -38,11 +43,54 @@ const ExploreMap = dynamic(() => import("@/components/map/explore-map"), {
   ),
 })
 
-export function ExploreView({ businesses, initialQuery, initialSelectedId }: ExploreViewProps) {
+export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, initialSelectedId }: ExploreViewProps) {
+  const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [page, setPage] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null)
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
-  const [showDesktopMap, setShowDesktopMap] = useState(businesses.length > 0)
+  const [showDesktopMap, setShowDesktopMap] = useState(initialBusinesses.length > 0)
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  
+  const searchParams = useSearchParams()
+  const { ref, inView } = useInView()
+
+  // Sync state when props change due to Server Component re-rendering from search params
+  useEffect(() => {
+    setBusinesses(initialBusinesses)
+    setHasMore(initialHasMore)
+    setPage(0)
+    setShowDesktopMap(initialBusinesses.length > 0)
+  }, [initialBusinesses, initialHasMore])
+
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return
+    setIsLoading(true)
+    const nextPage = page + 1
+    
+    const query = searchParams.get("q") || ""
+    const category = searchParams.get("cat") || ""
+    const loc = searchParams.get("loc") || ""
+
+    try {
+      const res = await fetchBusinesses({ query, category, loc, page: nextPage, limit: 20 })
+      setBusinesses(prev => [...prev, ...res.businesses])
+      setPage(nextPage)
+      setHasMore(res.hasMore)
+    } catch (error) {
+      console.error("Failed to fetch more businesses:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, hasMore, isLoading, searchParams])
+
+  useEffect(() => {
+    if (inView) {
+      loadMore()
+    }
+  }, [inView, loadMore])
 
   // Fix for Mapbox "half black" rendering when container size changes
   useEffect(() => {
@@ -100,23 +148,30 @@ export function ExploreView({ businesses, initialQuery, initialSelectedId }: Exp
               <p className="text-sm">Try &quot;massage&quot;, &quot;ATV&quot;, or &quot;restaurant&quot;.</p>
             </div>
           ) : (
-            <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-8 pb-20 transition-all duration-500`}>
-              {businesses.map((business, i) => (
-                <div
-                  key={`${business.id}-${i}`}
-                  ref={(el) => {
-                    if (el) cardRefs.current.set(business.id, el)
-                    else cardRefs.current.delete(business.id)
-                  }}
-                >
-                  <BusinessCard
-                    business={business}
-                    isHighlighted={selectedId === business.id}
-                    onSelect={() => handleCardSelect(business.id)}
-                  />
-                </div>
-              ))}
-            </div>
+            <>
+              <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-8 pb-8 transition-all duration-500`}>
+                {businesses.map((business, i) => (
+                  <div
+                    key={`${business.id}-${i}`}
+                    ref={(el) => {
+                      if (el) cardRefs.current.set(business.id, el)
+                      else cardRefs.current.delete(business.id)
+                    }}
+                  >
+                    <BusinessCard
+                      business={business}
+                      isHighlighted={selectedId === business.id}
+                      onSelect={() => handleCardSelect(business.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Infinite Scroll Trigger */}
+              <div ref={ref} className="flex justify-center items-center h-16 pb-20">
+                {isLoading && <Loader2 className="w-6 h-6 text-[#D4AF37] animate-spin" />}
+              </div>
+            </>
           )}
         </div>
       </div>

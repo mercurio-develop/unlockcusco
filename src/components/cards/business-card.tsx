@@ -79,7 +79,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           : "border-white/10 hover:border-white/20"
       }`}
     >
-      <div className="relative overflow-hidden h-56 w-full">
+      <div className="relative overflow-hidden h-36 md:h-48 w-full">
         <Image
           src={displayImage}
           alt={business.name}
@@ -101,26 +101,27 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
         )}
       </div>
 
-      <div className="p-6 flex flex-col flex-1 relative z-10">
-        <div className="flex justify-between items-start mb-3 gap-4">
+      <div className="p-4 md:p-5 flex flex-col flex-1 relative z-10">
+        <div className="flex flex-col gap-2 mb-3">
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="text-lg md:text-xl font-serif tracking-tight line-clamp-1 text-white group-hover:text-[#D4AF37] transition-colors flex-1">{business.name}</h3>
+            {business.rating !== null && (
+              <div className="flex items-center gap-1 bg-black/40 px-1.5 py-1 rounded-lg border border-white/10 shrink-0 backdrop-blur-sm">
+                <Star className="h-3 w-3 fill-[#D4AF37] text-[#D4AF37]" />
+                <span className="font-bold text-xs text-white">{business.rating}</span>
+                <span className="text-[10px] text-white/50 font-medium">({business.reviewsCount})</span>
+              </div>
+            )}
+          </div>
           <div>
-            <h3 className="text-xl font-serif tracking-tight line-clamp-1 text-white group-hover:text-[#D4AF37] transition-colors">{business.name}</h3>
-            <Badge variant="secondary" className="mt-2 text-white/70 bg-white/5 border border-white/10 font-medium px-3 py-1">
+            <Badge variant="secondary" className="text-white/70 bg-white/5 border border-white/10 font-medium px-2.5 py-0.5 text-[10px] md:text-xs">
               {business.category}
             </Badge>
           </div>
-          {business.rating !== null && (
-            <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1.5 rounded-lg border border-white/10 shrink-0 backdrop-blur-sm">
-              <Star className="h-4 w-4 fill-[#D4AF37] text-[#D4AF37]" />
-              <span className="font-bold text-sm text-white">{business.rating}</span>
-              <span className="text-xs text-white/50 font-medium">({business.reviewsCount})</span>
-            </div>
-          )}
         </div>
 
-        <div className="mt-auto pt-4">
-          <div className="flex items-center justify-between mb-4">
-            {/* Google Maps link */}
+        <div className="mt-auto pt-3">
+          <div className="flex flex-col gap-2 mb-4">
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
               target="_blank"
@@ -134,7 +135,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
             <Link 
               href={`/business/${business.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="text-[#D4AF37] text-xs font-semibold hover:text-[#C5A059] transition-colors"
+              className="text-[#D4AF37] text-xs font-semibold hover:text-[#C5A059] transition-colors inline-block"
             >
               View Profile & Reviews →
             </Link>
@@ -143,14 +144,14 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           {business.isClaimed ? (
             <Button
               onClick={handleBookNow}
-              className="w-full bg-[#25D366] hover:bg-green-600 text-white font-semibold py-6 rounded-xl shadow-md shadow-green-500/20 transition-all hover:-translate-y-0.5"
+              className="w-full bg-[#25D366] hover:bg-green-600 text-white text-sm font-semibold py-4 md:py-5 rounded-xl shadow-md shadow-green-500/20 transition-all hover:-translate-y-0.5"
             >
               Book Now
             </Button>
           ) : (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger render={
-                <Button variant="outline" className="w-full text-white bg-white/5 border-white/10 hover:bg-white/10 hover:text-white font-medium py-6 rounded-xl transition-all hover:-translate-y-0.5 shadow-sm backdrop-blur-sm">
+                <Button variant="outline" className="w-full text-white bg-white/5 border-white/10 hover:bg-white/10 hover:text-white text-sm font-semibold py-4 md:py-5 rounded-xl transition-all hover:-translate-y-0.5 shadow-sm backdrop-blur-sm">
                   Check Availability
                 </Button>
               } />
