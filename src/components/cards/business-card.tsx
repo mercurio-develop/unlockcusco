@@ -29,6 +29,9 @@ type Business = {
   imageUrl: string
   whatsapp: string | null
   isClaimed: boolean
+  instagramHandle?: string | null
+  instagramFollowers?: number
+  heroImages?: string | null
 }
 
 interface BusinessCardProps {
@@ -64,6 +67,9 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
     }
   }
 
+  const parsedHeroImages = business.heroImages && business.heroImages !== "[]" ? JSON.parse(business.heroImages) : []
+  const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl
+
   return (
     <Card
       onClick={onSelect}
@@ -75,7 +81,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
     >
       <div className="relative overflow-hidden h-56 w-full">
         <Image
-          src={business.imageUrl}
+          src={displayImage}
           alt={business.name}
           fill
           unoptimized
@@ -86,6 +92,11 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
           <Badge className="absolute top-4 right-4 bg-[#25D366] hover:bg-green-500 text-white font-bold border-none shadow-lg flex items-center gap-1.5 px-3 py-1.5 z-10 backdrop-blur-sm">
             <Zap className="h-3.5 w-3.5 fill-current" />
             Instant Booking
+          </Badge>
+        )}
+        {business.instagramHandle && (
+           <Badge className="absolute top-4 left-4 bg-black/60 hover:bg-black/80 text-white font-bold border-white/20 shadow-lg flex items-center gap-1.5 px-3 py-1.5 z-10 backdrop-blur-md">
+            {business.instagramHandle}
           </Badge>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Map, { Marker, Popup, Source, Layer } from "react-map-gl/mapbox"
+import Map, { Marker, Popup, Source, Layer, NavigationControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import Image from "next/image"
@@ -251,6 +251,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           </div>
         </Popup>
       )}
+
+      <NavigationControl position="bottom-right" showCompass={false} />
     </Map>
   )
 }
