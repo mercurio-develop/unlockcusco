@@ -73,13 +73,13 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
   return (
     <Card
       onClick={onSelect}
-      className={`overflow-hidden relative flex flex-col rounded-3xl shadow-xl transition-all duration-300 group bg-white/5 backdrop-blur-md cursor-pointer ${
+      className={`relative flex flex-col rounded-3xl shadow-xl transition-all duration-300 group bg-[#09090B]/60 backdrop-blur-xl cursor-pointer p-1.5 ${
         isHighlighted
           ? "border-[#D4AF37]/80 shadow-[0_0_24px_-4px_rgba(212,175,55,0.4)] scale-[1.01]"
-          : "border-white/10 hover:border-white/20"
+          : "border-white/10 hover:border-white/20 hover:bg-[#09090B]/80"
       }`}
     >
-      <div className="relative overflow-hidden h-36 md:h-48 w-full">
+      <div className="relative overflow-hidden h-36 md:h-48 w-full rounded-[1.25rem]">
         <Image
           src={displayImage}
           alt={business.name}

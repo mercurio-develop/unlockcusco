@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import Image from "next/image"
-import Link from "next/link"
-import { Star, Zap, ArrowUpRight, MapPin } from "lucide-react"
+import { Star, Zap } from "lucide-react"
 import type { Business } from "@/components/explore/explore-view"
 
 const CATEGORY_STYLE: Record<string, { bg: string; emoji: string }> = {
@@ -194,58 +192,34 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           offset={40}
         >
           <div
-            className="overflow-hidden rounded-2xl bg-[#09090B] border border-white/20 text-white shadow-2xl backdrop-blur-xl"
+            className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#09090B]/90 border border-white/20 text-white shadow-2xl backdrop-blur-xl cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative">
-              <Image
-                src={popupBusiness.imageUrl}
-                alt={popupBusiness.name}
-                width={260}
-                height={128}
-                unoptimized
-                className="w-full h-32 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] to-transparent opacity-60" />
-              {popupBusiness.isClaimed && (
-                <div className="absolute top-2 right-2 bg-[#D4AF37] text-black text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                  <Zap className="w-3 h-3 fill-current" /> Verified
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 relative -mt-4">
-              <h3 className="font-extrabold text-base leading-tight line-clamp-1 text-white">
-                {popupBusiness.name}
-              </h3>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[11px] text-white/60 font-medium px-2 py-0.5 bg-white/5 rounded-full border border-white/10">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-sm leading-tight text-white whitespace-nowrap">
+                  {popupBusiness.name}
+                </h3>
+                {popupBusiness.isClaimed && (
+                  <div className="bg-[#D4AF37] text-black text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shrink-0 shadow-sm">
+                    <Zap className="w-2.5 h-2.5 fill-current" /> Verified
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-white/70">
+                <span className="text-[11px] font-medium flex items-center gap-1">
                   {CATEGORY_STYLE[popupBusiness.category]?.emoji}{" "}
                   {popupBusiness.category}
                 </span>
                 {popupBusiness.rating !== null && (
-                  <span className="flex items-center gap-1 text-[12px] text-[#D4AF37] font-bold">
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    {popupBusiness.rating}
-                  </span>
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                    <span className="flex items-center gap-0.5 text-[11px] font-bold">
+                      <Star className="w-3 h-3 fill-[#D4AF37] text-[#D4AF37]" />
+                      {popupBusiness.rating}
+                    </span>
+                  </>
                 )}
-              </div>
-
-              <div className="flex gap-2 mt-4">
-                <Link
-                  href={`/business/${popupBusiness.id}`}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[#D4AF37] hover:bg-[#C5A059] text-black text-xs font-bold py-2.5 rounded-xl transition-colors"
-                >
-                  View Details <ArrowUpRight className="w-3.5 h-3.5" />
-                </Link>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(popupBusiness.name)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/80 hover:text-white rounded-xl transition-colors border border-white/10"
-                >
-                  <MapPin className="w-4 h-4" />
-                </a>
               </div>
             </div>
           </div>

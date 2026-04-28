@@ -32,7 +32,7 @@ test.describe('InkaPortal App End-to-End', () => {
     await diningBadge.click();
     
     // Verify URL
-    await expect(page).toHaveURL(/.*\/explore\?q=Dining/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*\/explore\?cat=Dining/, { timeout: 10000 });
   });
 
   test('AI Concierge chat opens and can send messages', async ({ page }) => {

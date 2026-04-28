@@ -1,10 +1,12 @@
 "use client"
 
-import {useState} from "react"
+import {useState, useEffect, useCallback} from "react"
 import {useRouter} from "next/navigation"
 import {motion} from "framer-motion"
 import Image from "next/image"
-import {Star, Zap, ArrowUpRight} from "lucide-react"
+import {Star, Zap, ArrowUpRight, Loader2} from "lucide-react"
+import {useInView} from "react-intersection-observer"
+import {fetchBusinesses} from "@/features/business/actions/fetch-businesses"
 
 type Business = {
   id: string
@@ -27,18 +29,59 @@ const CATEGORY_EMOJI: Record<string, string> = {
 }
 
 interface BusinessGridProps {
-  businesses: Business[]
+  initialBusinesses: Business[]
+  initialHasMore: boolean
 }
 
-export function BusinessGrid({businesses}: BusinessGridProps) {
+export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridProps) {
   const [active, setActive] = useState("All")
-  const [visibleCount, setVisibleCount] = useState(20)
+  const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [isLoading, setIsLoading] = useState(false)
+  
   const router = useRouter()
+  const {ref, inView} = useInView()
 
-  const filtered =
-    active === "All" ? businesses : businesses.filter((b) => b.category === active)
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return
+    setIsLoading(true)
+    const nextPage = page + 1
+    const categoryFilter = active === "All" ? "" : active
+    
+    try {
+      const res = await fetchBusinesses({ category: categoryFilter, page: nextPage, limit: 20 })
+      setBusinesses(prev => [...prev, ...res.businesses])
+      setPage(nextPage)
+      setHasMore(res.hasMore)
+    } catch (error) {
+      console.error("Failed to fetch more businesses:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, hasMore, isLoading, active])
 
-  const displayed = filtered.slice(0, visibleCount)
+  useEffect(() => {
+    if (inView) {
+      loadMore()
+    }
+  }, [inView, loadMore])
+
+  const handleCategoryChange = async (cat: string) => {
+    if (cat === active) return
+    setActive(cat)
+    setIsLoading(true)
+    setPage(0)
+    try {
+      const res = await fetchBusinesses({ category: cat === "All" ? "" : cat, page: 0, limit: 20 })
+      setBusinesses(res.businesses)
+      setHasMore(res.hasMore)
+    } catch (error) {
+      console.error("Failed to fetch businesses by category:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <section className="bg-[#09090B] px-6 md:px-12 py-20">
@@ -65,12 +108,13 @@ export function BusinessGrid({businesses}: BusinessGridProps) {
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
-            onClick={() => setActive(cat)}
+            onClick={() => handleCategoryChange(cat)}
+            disabled={isLoading && active !== cat}
             className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all border ${
               active === cat
                 ? "bg-[#D4AF37] text-black border-[#D4AF37]"
                 : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
-            }`}
+            } ${isLoading && active !== cat ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {cat !== "All" ? `${CATEGORY_EMOJI[cat]} ` : ""}{cat}
           </button>
@@ -85,7 +129,7 @@ export function BusinessGrid({businesses}: BusinessGridProps) {
         variants={{visible: {transition: {staggerChildren: 0.07}}}}
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4"
       >
-        {displayed.map((business, i) => (
+        {businesses.map((business, i) => (
           <motion.div
             key={`${business.id}-${i}`}
             variants={{
@@ -93,9 +137,7 @@ export function BusinessGrid({businesses}: BusinessGridProps) {
               visible: {opacity: 1, y: 0, transition: {duration: 0.4}},
             }}
             onClick={() => router.push(`/explore?id=${business.id}`)}
-            className={`group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 ${
-              i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-[3/4]"
-            }`}
+            className="group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 aspect-[3/4]"
           >
             <Image
               src={business.imageUrl}
@@ -124,8 +166,7 @@ export function BusinessGrid({businesses}: BusinessGridProps) {
 
             {/* Bottom info */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
-              <h3
-                className={`font-bold text-white leading-tight line-clamp-2 ${i === 0 ? "text-2xl md:text-3xl font-serif" : "text-sm md:text-base"}`}>
+              <h3 className="font-bold text-white leading-tight line-clamp-2 text-sm md:text-base">
                 {business.name}
               </h3>
 
@@ -151,16 +192,13 @@ export function BusinessGrid({businesses}: BusinessGridProps) {
         ))}
       </motion.div>
 
+      {/* Infinite Scroll Trigger */}
+      <div ref={ref} className="mt-8 flex justify-center h-16 items-center">
+        {isLoading && <Loader2 className="w-6 h-6 text-[#D4AF37] animate-spin" />}
+      </div>
+
       {/* Bottom CTA */}
-      <div className="mt-16 text-center flex flex-col items-center gap-6">
-        {visibleCount < filtered.length && (
-          <button
-            onClick={() => setVisibleCount((prev) => prev + 20)}
-            className="inline-flex items-center gap-2 bg-transparent border border-white/20 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-white/5 transition-all"
-          >
-            Load More Experiences
-          </button>
-        )}
+      <div className="mt-8 text-center flex flex-col items-center gap-6">
         <button
           onClick={() => router.push("/explore")}
           className="inline-flex items-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full text-sm font-medium hover:bg-white/10 transition-all hover:border-white/20"

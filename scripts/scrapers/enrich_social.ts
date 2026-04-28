@@ -14,7 +14,10 @@ async function main() {
   // Select a small batch of top-rated businesses that don't have an Instagram handle yet.
   // Using a small batch (e.g., 5) to avoid burning all Apify credits during testing.
   const businesses = await prisma.business.findMany({
-    where: { instagramHandle: null },
+    where: { 
+      instagramHandle: null,
+      category: { in: ['Adventure', 'Dining'] } // Only target travel agencies and restaurants
+    },
     orderBy: { rating: 'desc' },
     take: 5,
   });

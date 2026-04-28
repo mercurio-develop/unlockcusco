@@ -128,3 +128,14 @@
     @apply font-sans;
   }
 }
+
+/* Mapbox Popup Overrides */
+.mapboxgl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}
