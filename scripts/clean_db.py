@@ -110,25 +110,12 @@ def clean_titles(dry_run=False):
     
     updates = []
     
-    # Patterns to remove: " - Restaurant", " | Hotel", ", Cusco", " (Sacred Valley)", etc.
-    patterns_to_remove = [
-        r'\s*[-|]\s*Restaurant.*$',
-        r'\s*[-|]\s*Hotel.*$',
-        r'\s*[-|]\s*Hostel.*$',
-        r'\s*[-|]\s*Lodge.*$',
-        r'\s*[-|]\s*Boutique.*$',
-        r'\s*[-|]\s*Peruvian.*$',
-        r',\s*Cusco.*$',
-        r',\s*Urubamba.*$',
-        r',\s*Peru.*$',
-        r'\s*\(Sacred Valley\).*$',
-        r'\s*\(Valle Sagrado\).*$'
-    ]
-    
+    # We only want to convert titles that are completely UPPERCASE to capitalize only the first letter
     for b_id, name in businesses:
         clean_name = name
-        for pattern in patterns_to_remove:
-            clean_name = re.sub(pattern, '', clean_name, flags=re.IGNORECASE)
+        # Check if the title is entirely uppercase (and contains at least some letters)
+        if clean_name.isupper():
+            clean_name = clean_name.capitalize()
             
         if clean_name != name:
             updates.append((clean_name, b_id, name))
@@ -179,6 +166,8 @@ def find_taxis():
 
 def main():
     parser = argparse.ArgumentParser(description="InkaPortal Database Cleaning CLI")
+    parser.add_argument('--backup', action='store_true', help="Create a backup of the database before running")
+    parser.add_argument('--restore', action='store_true', help="Restore the database from a previous backup")
     parser.add_argument('--clean-location', action='store_true', help="Delete experiences outside Cusco/Sacred Valley bounds")
     parser.add_argument('--min-reviews', type=int, help="Delete experiences with fewer than MIN_REVIEWS reviews")
     parser.add_argument('--clean-titles', action='store_true', help="Clean messy titles from Google Maps")
@@ -187,13 +176,21 @@ def main():
     
     args = parser.parse_args()
     
-    if not any([args.clean_location, args.min_reviews is not None, args.clean_titles, args.find_taxis]):
-        parser.print_help()
-        print("\n❌ Error: Please specify an action.")
-        sys.exit(1)
-        
     print("🏔️ InkaPortal DB Manager")
     print("=======================")
+
+    if args.backup:
+        create_backup()
+        
+    if args.restore:
+        restore_backup()
+        return
+
+    if not any([args.clean_location, args.min_reviews is not None, args.clean_titles, args.find_taxis]):
+        if not args.backup and not args.restore:
+            parser.print_help()
+            print("\n❌ Error: Please specify an action.")
+        sys.exit(1)
     
     if args.clean_location:
         print("\n--- Running Location Cleanup ---")

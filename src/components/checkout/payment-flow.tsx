@@ -11,6 +11,7 @@ import { claimBusiness } from "@/app/actions/claim-business"
 
 type Business = {
   id: string
+  slug: string
   name: string
 }
 
@@ -50,12 +51,12 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
           >
             <CheckCircle2 className="w-10 h-10 text-green-600" />
           </motion.div>
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Perfil Activado</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-4">Profile Activated</h2>
           <p className="text-slate-600 mb-8 leading-relaxed">
-            Tu perfil para <strong>{business.name}</strong> está ahora verificado y en línea. El cliente ha sido notificado y el contacto ha sido desbloqueado.
+            Your profile for <strong>{business.name}</strong> is now verified and online. The client has been notified and contact details are unlocked.
           </p>
           <Button className="w-full bg-slate-900 text-white rounded-xl py-6 hover:bg-slate-800" onClick={() => window.location.href = `/dashboard?businessId=${business.id}`}>
-            Ir al Panel de Control
+            Go to Dashboard
           </Button>
         </Card>
       </motion.div>
@@ -68,32 +69,32 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
       {/* Left Column: Order Summary */}
       <div className="space-y-8">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Completa tu Activación</h1>
-          <p className="mt-3 text-lg text-slate-600">Activa tu perfil de <strong>{business.name}</strong> para recibir reservas directas sin comisiones.</p>
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Complete Activation</h1>
+          <p className="mt-3 text-lg text-slate-600">Activate your profile for <strong>{business.name}</strong> to receive direct bookings commission-free.</p>
         </div>
 
         <Card className="p-6 rounded-3xl bg-slate-50 border-none shadow-inner">
           <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
             <Building className="w-4 h-4 text-slate-400" />
-            Resumen del Plan
+            Plan Summary
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-4">
               <div>
-                <p className="font-medium text-slate-900">Suscripción INKAPORTAL Premium</p>
-                <p className="text-sm text-slate-500">Prueba gratuita por 14 días</p>
+                <p className="font-medium text-slate-900">INKAPORTAL Premium Subscription</p>
+                <p className="text-sm text-slate-500">14-day free trial</p>
               </div>
               <p className="font-bold text-slate-900">S/ 0.00</p>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-4">
               <div>
-                <p className="font-medium text-slate-900">Validación de Identidad</p>
-                <p className="text-sm text-slate-500">Pago único, no reembolsable</p>
+                <p className="font-medium text-slate-900">Identity Validation</p>
+                <p className="text-sm text-slate-500">One-time payment, non-refundable</p>
               </div>
               <p className="font-bold text-slate-900">S/ 5.00</p>
             </div>
             <div className="flex justify-between items-center pt-2">
-              <p className="font-bold text-lg text-slate-900">Total a Pagar Hoy</p>
+              <p className="font-bold text-lg text-slate-900">Total Due Today</p>
               <p className="font-extrabold text-2xl text-[#D4AF37]">S/ 5.00</p>
             </div>
           </div>
@@ -111,7 +112,7 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-6"
             >
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Selecciona un método de pago</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Select a payment method</h2>
               
               <button
                 onClick={() => setMethod("yape")}
@@ -122,8 +123,8 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                     <Smartphone className="w-7 h-7" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-[#742183] transition-colors">Yape o Plin</h3>
-                    <p className="text-sm text-slate-500">Solo para Perú (QR 100% digital)</p>
+                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-[#742183] transition-colors">Yape or Plin</h3>
+                    <p className="text-sm text-slate-500">Peru only (100% digital QR)</p>
                   </div>
                 </div>
                 <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-[#742183]"></div>
@@ -138,8 +139,8 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                     <CreditCard className="w-7 h-7" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">Tarjeta de Crédito / Débito</h3>
-                    <p className="text-sm text-slate-500">Pagos internacionales (Stripe)</p>
+                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">Credit / Debit Card</h3>
+                    <p className="text-sm text-slate-500">International payments (Stripe)</p>
                   </div>
                 </div>
                 <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-indigo-600"></div>
@@ -156,7 +157,7 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                 onClick={() => setMethod(null)}
                 className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-medium mb-6 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" /> Volver a métodos de pago
+                <ArrowLeft className="w-4 h-4" /> Back to payment methods
               </button>
 
               {method === "yape" && (
@@ -168,29 +169,29 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                       <QrCode className="w-8 h-8" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900">Escanea con Yape o Plin</h3>
-                      <p className="text-slate-600 mt-2">Monto exacto: <strong>S/ 5.00</strong></p>
+                      <h3 className="text-2xl font-bold text-slate-900">Scan with Yape or Plin</h3>
+                      <p className="text-slate-600 mt-2">Exact amount: <strong>S/ 5.00</strong></p>
                     </div>
                     
                     {/* Placeholder for real QR code */}
                     <div className="w-48 h-48 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center p-4">
                       <div className="text-slate-400 text-sm font-medium opacity-60 flex flex-col items-center">
                         <QrCode className="w-10 h-10 mb-2" />
-                        [QR de Yape Aquí]
+                        [Yape QR Here]
                       </div>
                     </div>
 
                     <form onSubmit={handleSimulatePayment} className="w-full space-y-4 pt-4">
                       <div className="space-y-2 text-left">
-                        <Label htmlFor="yape-ref" className="text-slate-700">Número de Operación (Opcional)</Label>
-                        <Input id="yape-ref" placeholder="Ej. 123456789" className="rounded-xl py-6" />
+                        <Label htmlFor="yape-ref" className="text-slate-700">Operation Number (Optional)</Label>
+                        <Input id="yape-ref" placeholder="e.g. 123456789" className="rounded-xl py-6" />
                       </div>
                       <Button 
                         type="submit" 
                         disabled={isProcessing}
                         className="w-full bg-[#742183] hover:bg-[#5b1966] text-white py-6 rounded-xl font-bold text-lg shadow-lg shadow-purple-900/20"
                       >
-                        {isProcessing ? "Verificando Pago..." : "Ya realicé el pago"}
+                        {isProcessing ? "Verifying Payment..." : "I have paid"}
                       </Button>
                     </form>
                   </div>
@@ -201,22 +202,22 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                 <Card className="p-8 rounded-3xl bg-white border-slate-100 shadow-xl">
                   <div className="flex items-center gap-3 mb-8">
                     <CreditCard className="w-6 h-6 text-slate-900" />
-                    <h3 className="text-2xl font-bold text-slate-900">Pago con Tarjeta</h3>
+                    <h3 className="text-2xl font-bold text-slate-900">Card Payment</h3>
                   </div>
 
                   <form onSubmit={handleSimulatePayment} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="cc-name" className="text-slate-700">Nombre en la tarjeta</Label>
-                      <Input id="cc-name" placeholder="Ej. Juan Pérez" required className="rounded-xl py-6" />
+                      <Label htmlFor="cc-name" className="text-slate-700">Name on card</Label>
+                      <Input id="cc-name" placeholder="e.g. John Doe" required className="rounded-xl py-6" />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="cc-number" className="text-slate-700">Número de Tarjeta</Label>
+                      <Label htmlFor="cc-number" className="text-slate-700">Card Number</Label>
                       <Input id="cc-number" placeholder="0000 0000 0000 0000" required className="rounded-xl py-6 font-mono" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="cc-exp" className="text-slate-700">Vencimiento</Label>
-                        <Input id="cc-exp" placeholder="MM/AA" required className="rounded-xl py-6 font-mono" />
+                        <Label htmlFor="cc-exp" className="text-slate-700">Expiration</Label>
+                        <Input id="cc-exp" placeholder="MM/YY" required className="rounded-xl py-6 font-mono" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="cc-cvc" className="text-slate-700">CVC</Label>
@@ -228,13 +229,13 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
                       disabled={isProcessing}
                       className="w-full bg-slate-900 hover:bg-slate-800 text-white py-6 rounded-xl font-bold text-lg shadow-lg mt-4 flex items-center justify-center gap-2"
                     >
-                      {isProcessing ? "Procesando..." : <>Pagar S/ 5.00 <Send className="w-4 h-4" /></>}
+                      {isProcessing ? "Processing..." : <>Pay S/ 5.00 <Send className="w-4 h-4" /></>}
                     </Button>
                   </form>
                   
                   <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
                     <Lock className="w-3 h-3" />
-                    Pagos seguros procesados por Stripe
+                    Secure payments processed by Stripe
                   </div>
                 </Card>
               )}
