@@ -16,7 +16,7 @@ export function HeroSection() {
   }
 
   return (
-    <div className="h-screen w-full relative flex flex-col items-center justify-center overflow-hidden bg-[#09090B]">
+    <div className="h-[calc(100vh-56px)] w-full relative flex flex-col items-center justify-center overflow-hidden bg-[#09090B]">
       <div className="absolute inset-0 z-0 opacity-60 mix-blend-overlay">
         <Image
           src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"

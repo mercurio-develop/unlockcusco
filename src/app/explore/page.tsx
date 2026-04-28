@@ -34,33 +34,32 @@ function interleaveCategories(sortedBusinesses: Business[]) {
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const { q } = await searchParams
-  let businesses = await prisma.business.findMany({
-    orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
-    take: 100, // Limit payload to client
-  })
+  const query = q?.toLowerCase() || ""
 
-  if (q) {
-    const query = q.toLowerCase()
-    let targetCategory = ""
+  let targetCategory = ""
+  if (query) {
     if (query.includes("massage") || query.includes("spa") || query.includes("wellness") || query.includes("recovery")) targetCategory = "Wellness"
     else if (query.includes("atv") || query.includes("hiking") || query.includes("adventure") || query.includes("tour") || query.includes("trail")) targetCategory = "Adventure"
     else if (query.includes("picantería") || query.includes("restaurant") || query.includes("food") || query.includes("dining") || query.includes("eat")) targetCategory = "Dining"
     else if (query.includes("hotel") || query.includes("stays") || query.includes("sleep")) targetCategory = "Stays"
     else if (query.includes("market") || query.includes("culture") || query.includes("art")) targetCategory = "Culture"
-
-    businesses = targetCategory
-      ? businesses.filter((b) => b.category === targetCategory)
-      : businesses.filter((b) =>
-          b.name.toLowerCase().includes(query) || b.category.toLowerCase().includes(query)
-        )
   }
 
-  // Sort by rating (desc) and reviewsCount (desc)
-  businesses.sort((a, b) => {
-    if (a.rating !== b.rating) {
-      return (b.rating || 0) - (a.rating || 0)
-    }
-    return (b.reviewsCount || 0) - (a.reviewsCount || 0)
+  const whereClause = targetCategory
+    ? { category: targetCategory }
+    : query
+    ? {
+        OR: [
+          { name: { contains: query } },
+          { category: { contains: query } },
+        ],
+      }
+    : {}
+
+  let businesses = await prisma.business.findMany({
+    where: whereClause,
+    orderBy: [{ rating: "desc" }, { reviewsCount: "desc" }],
+    take: 100, // Limit payload to client
   })
 
   // Interleave categories
