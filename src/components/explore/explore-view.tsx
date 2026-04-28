@@ -65,7 +65,7 @@ export function ExploreView({ businesses, initialQuery }: ExploreViewProps) {
       <div className={`w-full md:w-[55%] lg:w-[60%] flex flex-col h-full relative z-10 border-r border-white/10 bg-[#09090B]/80 backdrop-blur-xl ${viewMode === "map" ? "hidden md:flex" : ""}`}>
         <div className="px-8 pt-8 pb-4 bg-transparent z-10 sticky top-0 border-b border-white/10">
           <h1 className="text-3xl font-serif tracking-tight text-white mb-6">
-            Explore the InkaPortal
+            Explore the INKAPORTAL
           </h1>
           <ExploreSearch initialQuery={initialQuery} />
         </div>

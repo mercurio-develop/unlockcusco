@@ -32,7 +32,7 @@ export async function askConcierge(message: string, language: string = "English"
 
     // 3. Prompt engineering with dynamic i18n
     const prompt = `
-    You are the AI Concierge for "InkaPortal", an ultra-premium travel platform for the Sacred Valley in Peru.
+    You are the AI Concierge for "INKAPORTAL", an ultra-premium travel platform for the Sacred Valley in Peru.
     Your tone must be extremely elegant, concise, helpful, and "Apple-level minimal". 
     CRITICAL: You MUST speak in ${language}.
     
@@ -55,6 +55,6 @@ export async function askConcierge(message: string, language: string = "English"
     return response.text || "Sorry, the fog in the Andes prevents me from connecting. Try again."
   } catch (error) {
     console.error("Error in askConcierge:", error)
-    return "An error occurred while consulting the InkaPortal oracle. Please try again later."
+    return "An error occurred while consulting the INKAPORTAL oracle. Please try again later."
   }
 }

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InkaPortal | Sacred Valley Discoveries",
+  title: "INKAPORTAL | Sacred Valley Discoveries",
   description: "Curated experiences and local businesses in the Sacred Valley.",
 };
 

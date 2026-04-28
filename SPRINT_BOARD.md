@@ -1,9 +1,9 @@
-# InkaPortal Sprint Board
+# INKAPORTAL Sprint Board
 
 This document tracks atomic tasks for the current sprint. The Project Manager skill will update this board as tasks are planned, executed, and completed.
 
 ## Current Sprint: MVP Stabilization & Launch Prep
-**Goal:** Ensure the InkaPortal MVP is fully functional, styled correctly, and ready for production deployment.
+**Goal:** Ensure the INKAPORTAL MVP is fully functional, styled correctly, and ready for production deployment.
 
 ### 📋 To Do (Backlog)
 - [ ] **Infrastructure:** Setup Vercel deployment configuration.
@@ -17,7 +17,7 @@ This document tracks atomic tasks for the current sprint. The Project Manager sk
 
 ### ✅ Done (Recent)
 - [x] **UI/UX:** Redesign Navbar to a minimal, floating glass "Apple-level" aesthetic with Framer Motion.
-- [x] **Branding:** Transitioned all references from "Valle" and "OpenClaw" to "InkaPortal".
+- [x] **Branding:** Transitioned all references from "Valle" and "OpenClaw" to "INKAPORTAL".
 - [x] **Project Management:** Upgraded Secretary skill to Project Manager.
 - [x] **Code Quality:** Fixed all TypeScript `any` types and unescaped entities; Next.js linter passes with 0 errors.
 

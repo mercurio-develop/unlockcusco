@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Sparkles, ArrowRight, ChevronDown } from "lucide-react"
+import { ArrowRight, ChevronDown } from "lucide-react"
 import Image from "next/image"
 
 export function HeroSection() {
@@ -33,43 +33,40 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 w-full px-4 flex flex-col items-center"
       >
-        <div className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md flex items-center justify-center mx-auto w-max mb-8">
-          <span className="text-xs text-white/80 uppercase tracking-widest flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> Powered by Khipu AI
-          </span>
-        </div>
-
-        <h1 className="text-6xl md:text-8xl font-serif tracking-tight text-white mb-6 text-center drop-shadow-xl">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 mb-6 text-center drop-shadow-2xl">
           Unlock the Andes.
         </h1>
 
-        <p className="text-lg md:text-xl text-white/70 font-light max-w-2xl text-center leading-relaxed mx-auto">
+        <p className="text-lg md:text-xl text-white/60 font-light max-w-2xl text-center leading-relaxed mx-auto">
           The Sacred Valley&apos;s first AI intelligence. Skip the tourist traps. We connect you to verified local experiences in milliseconds.
         </p>
 
         <form
           onSubmit={handleSearch}
-          className="w-full max-w-3xl mt-12 p-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex flex-col md:flex-row items-center gap-2 shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)] focus-within:shadow-[0_0_60px_-15px_rgba(212,175,55,0.15)] transition-all mx-auto"
+          className="w-full max-w-3xl mt-12 p-2 rounded-full bg-[#09090B]/40 backdrop-blur-2xl border border-white/10 flex flex-col md:flex-row items-center gap-2 shadow-2xl transition-all mx-auto group focus-within:bg-[#09090B]/60 focus-within:border-white/20"
         >
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Describe your perfect day in the Sacred Valley..."
-            className="bg-transparent border-none text-white focus:outline-none focus:ring-0 w-full p-4 text-lg placeholder:text-white/40 font-light"
-          />
+          <div className="flex-1 w-full relative flex items-center px-4">
+             <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Describe your perfect day in the Sacred Valley..."
+              className="bg-transparent border-none text-white focus:outline-none focus:ring-0 w-full py-3 text-base md:text-lg placeholder:text-white/40 font-light"
+             />
+          </div>
+          
           <button
             type="submit"
-            className="bg-[#D4AF37] text-black font-medium rounded-full px-8 py-4 flex items-center gap-2 hover:bg-[#C5A059] transition-colors flex-shrink-0 w-full md:w-auto justify-center"
+            className="bg-white text-black font-medium rounded-full px-8 py-3.5 flex items-center gap-2 hover:bg-zinc-200 transition-colors flex-shrink-0 w-full md:w-auto justify-center shadow-lg"
           >
             Design Trip <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
+        <div className="mt-10 flex flex-wrap justify-center gap-3 max-w-3xl">
           {[
             { emoji: "🌿", text: "Recovery massage after the Inca Trail" },
             { emoji: "🛵", text: "Hidden ATV routes in Maras" },
@@ -78,9 +75,9 @@ export function HeroSection() {
             <div
               key={text}
               onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
-              className="bg-white/5 border border-white/10 text-white/70 px-4 py-2 rounded-full text-sm flex items-center hover:bg-white/10 transition cursor-pointer"
+              className="bg-[#09090B]/40 border border-white/10 text-white/60 px-5 py-2.5 rounded-full text-sm font-light flex items-center gap-2 hover:bg-white/10 hover:text-white transition-all cursor-pointer backdrop-blur-2xl shadow-xl shadow-black/20"
             >
-              {emoji} {text}
+              <span>{emoji}</span> {text}
             </div>
           ))}
         </div>
@@ -88,14 +85,14 @@ export function HeroSection() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-white/30"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-white/30"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
       >
-        <span className="text-xs uppercase tracking-widest">Discover</span>
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
-          <ChevronDown className="w-5 h-5" />
+        <span className="text-[10px] font-medium uppercase tracking-[0.3em]">Discover</span>
+        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}>
+          <ChevronDown className="w-4 h-4" />
         </motion.div>
       </motion.div>
     </div>

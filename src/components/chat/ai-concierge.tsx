@@ -57,7 +57,7 @@ export function AiConcierge() {
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm font-serif tracking-tight">InkaPortal Concierge</h3>
+                    <h3 className="font-bold text-sm font-serif tracking-tight">INKAPORTAL Concierge</h3>
                     <p className="text-xs text-black/70">Khipu AI Assistant</p>
                   </div>
                 </div>
@@ -149,9 +149,9 @@ export function AiConcierge() {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
-            className="absolute bottom-6 right-6 z-50 h-16 w-16 bg-[#D4AF37] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:bg-[#C5A059] focus:outline-none focus:ring-4 focus:ring-[#D4AF37]/30 group transition-colors"
+            className="absolute bottom-6 right-6 z-50 h-14 w-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 group transition-all"
           >
-            <Sparkles className="w-8 h-8 text-black group-hover:animate-pulse" />
+            <Sparkles className="w-6 h-6 text-[#D4AF37] group-hover:animate-pulse" />
           </motion.button>
         )}
       </AnimatePresence>

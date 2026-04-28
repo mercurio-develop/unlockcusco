@@ -6,11 +6,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-# InkaPortal — Agent Handoff Brief
+# INKAPORTAL — Agent Handoff Brief
 
 ## What this is
 
-**InkaPortal** is an AI-powered local business discovery platform for the Sacred Valley, Peru. Tourists search and book experiences; local businesses claim their profile for direct WhatsApp leads. MVP monetization: S/5 one-time identity validation + S/49/month subscription.
+**INKAPORTAL** is an AI-powered local business discovery platform for the Sacred Valley, Peru. Tourists search and book experiences; local businesses claim their profile for direct WhatsApp leads. MVP monetization: S/5 one-time identity validation + S/49/month subscription.
 
 ---
 

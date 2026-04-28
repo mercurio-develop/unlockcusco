@@ -15,7 +15,7 @@ export async function generateShadowLead(businessId: string, touristName: string
     throw new Error("WhatsApp number not available for this business")
   }
 
-  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (InkaPortal) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile for free: https://inkaportal.pe/claim/${businessId}`
+  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (INKAPORTAL) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile for free: https://INKAPORTAL.pe/claim/${businessId}`
   
   const encodedText = encodeURIComponent(rawText)
   

@@ -80,7 +80,7 @@ export function PaymentFlow({ business }: PaymentFlowProps) {
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-4">
               <div>
-                <p className="font-medium text-slate-900">Suscripción InkaPortal Premium</p>
+                <p className="font-medium text-slate-900">Suscripción INKAPORTAL Premium</p>
                 <p className="text-sm text-slate-500">Prueba gratuita por 14 días</p>
               </div>
               <p className="font-bold text-slate-900">S/ 0.00</p>

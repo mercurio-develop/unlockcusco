@@ -21,15 +21,15 @@ export function Navbar() {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="fixed top-0 w-full z-[100] flex justify-center p-4 md:p-6 pointer-events-none"
     >
-      <div className="pointer-events-auto flex items-center justify-between w-full max-w-5xl bg-white/5 dark:bg-black/40 backdrop-blur-2xl border border-white/10 dark:border-white/10 rounded-full px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+      <div className="pointer-events-auto flex items-center justify-between w-full max-w-5xl bg-[#09090B]/60 backdrop-blur-2xl border border-white/10 rounded-full px-6 py-3 shadow-2xl">
         
         {/* Brand/Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-zinc-200 to-zinc-500 dark:from-zinc-800 dark:to-zinc-500 flex items-center justify-center border border-white/20 shadow-inner">
-            <Sparkles className="w-4 h-4 text-white dark:text-zinc-200" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-white/20 to-white/5 flex items-center justify-center border border-white/10 shadow-inner">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <span className="text-zinc-900 dark:text-zinc-100 font-serif tracking-wide font-medium text-sm sm:text-base hidden sm:block">
-            InkaPortal
+          <span className="text-white font-serif tracking-wide font-medium text-sm sm:text-base hidden sm:block">
+            INKAPORTAL
           </span>
         </Link>
 
@@ -42,13 +42,13 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-full ${
-                  isActive ? "text-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  isActive ? "text-white" : "text-white/60 hover:text-white"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="navbar-active-pill"
-                    className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-full -z-10"
+                    className="absolute inset-0 bg-white/10 rounded-full -z-10"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -67,13 +67,13 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`relative p-2.5 transition-colors rounded-full ${
-                  isActive ? "text-zinc-900 dark:text-white" : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  isActive ? "text-white" : "text-white/60 hover:text-white"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="navbar-active-pill-mobile"
-                    className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-full -z-10"
+                    className="absolute inset-0 bg-white/10 rounded-full -z-10"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}

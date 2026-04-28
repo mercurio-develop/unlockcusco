@@ -44,7 +44,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
   const handleBookNow = () => {
     if (!business.whatsapp) return
     const msg = encodeURIComponent(
-      `Hello ${business.name}! 👋 I saw your profile on InkaPortal and I'd like to make a reservation. When do you have availability?`
+      `Hello ${business.name}! 👋 I saw your profile on INKAPORTAL and I'd like to make a reservation. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp}?text=${msg}`, "_blank")
   }
