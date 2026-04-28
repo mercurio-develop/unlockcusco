@@ -14,13 +14,13 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-black/80 backdrop-blur-xl border-b border-white/10 h-14 flex items-center justify-center transition-all">
+    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-14 flex items-center justify-center transition-all shadow-sm">
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <Sparkles className="w-4 h-4 text-white/90" />
-          <span className="text-white/90 font-medium text-sm tracking-wide">
+          <Sparkles className="w-4 h-4 text-rose-600" />
+          <span className="text-slate-900 font-bold text-sm tracking-wide">
             InkaPortal
           </span>
         </Link>
@@ -33,8 +33,8 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-xs tracking-wide transition-colors ${
-                  isActive ? "text-white" : "text-white/50 hover:text-white"
+                className={`text-xs font-semibold tracking-wide transition-colors ${
+                  isActive ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 {item.label}
@@ -52,7 +52,7 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`transition-colors ${
-                  isActive ? "text-white" : "text-white/50 hover:text-white"
+                  isActive ? "text-rose-600" : "text-slate-400 hover:text-slate-900"
                 }`}
               >
                 <item.icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />

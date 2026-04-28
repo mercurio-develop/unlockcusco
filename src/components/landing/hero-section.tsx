@@ -86,7 +86,7 @@ export function HeroSection() {
             <div
               key={text}
               onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
-              className="bg-black/30 border border-white/20 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white hover:text-slate-900 transition-all cursor-pointer backdrop-blur-md shadow-lg"
+              className="bg-black/30 border border-white/20 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white hover:text-slate-900 transition-all cursor-pointer backdrop-blur-md shadow-lg whitespace-nowrap"
             >
               <span>{emoji}</span> {text}
             </div>
