@@ -86,13 +86,13 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               </div>
 
               <div className="mt-6 text-center">
-                <Link href={`/claim/${business.id}/checkout`}>
+                <Link href={`/claim/${business.id}/activate`}>
                   <Button className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
-                    Claim Profile & View Contact
+                    Claim Profile for Free
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <p className="text-xs text-white/40 mt-3">Free 30-day trial. Then $49/month.</p>
+                <p className="text-xs text-white/40 mt-3">100% free. Just upload your Yape QR code.</p>
               </div>
             </Card>
           </div>

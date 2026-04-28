@@ -67,37 +67,34 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### P0 — Core gaps
 
-1. **Business detail page** (`/business/[id]`)
-   - Full page for a single business: photos, reviews, map embed, booking CTA
-   - BusinessCard "Book Now" / "Check Availability" should also link here
+1. **The Deterministic Ghost Phone (whatsapp-web.js)**
+   - Build a simple, standalone Express/Node.js microservice using whatsapp-web.js (No LLMs).
+   - It will listen for webhooks from Next.js to send programmatic text alerts to local businesses and admin Yape payout alerts.
 
-2. **Real leads tracking**
-   - Add `Lead` model to Prisma schema (`id`, `businessId`, `touristName`, `touristEmail`, `date`, `createdAt`)
-   - Save a lead row when "Check Availability" form is submitted (currently just opens WhatsApp)
-   - Dashboard "Leads y Mensajes" section should list real lead rows
+2. **RAG Integration & Generative UI Refactor**
+   - Refactor the Taxi tool to stream Apple Pay components instead of WhatsApp links. We collect the USD via Stripe, and our backend triggers the WhatsApp notification to the driver.
 
-3. **Language toggle in AI Concierge**
-   - Backend `askConcierge(message, language)` already supports it
-   - Add a 🇺🇸 / 🇪🇸 toggle button in the chat header
-   - Pass selected language to `askConcierge`
+3. **Infrastructure & Stability**
+   - Setup Vercel deployment and Husky pre-commit hooks to protect the zero-error codebase.
+
+4. **The B2B Onboarding Pivot (Free Flow)**
+   - Remove the S/5 checkout flow for local businesses claiming profiles.
+   - B2B acquisition relies 100% on a free flow: they just upload their Yape QR code.
 
 ### P1 — Polish
 
-4. **Mobile map view**
-   - Map is `hidden md:block` — mobile users see no map
-   - Add a "Map" tab toggle on mobile that swaps between card list and map
+5. **Real leads tracking**
+   - Add `Lead` model to Prisma schema (`id`, `businessId`, `touristName`, `touristEmail`, `date`, `createdAt`)
+   - Save a lead row when "Check Availability" form is submitted.
+   - Dashboard "Leads y Mensajes" section should list real lead rows.
 
-5. **SEO meta tags**
+6. **SEO meta tags**
    - Add `metadata` export to each page (`/`, `/explore`, `/claim/[id]`)
    - OG image, description, title
 
-6. **Auth (lightweight)**
+7. **Auth (lightweight)**
    - "Sign In" on landing currently just routes to `/dashboard`
    - A simple magic-link or PIN auth for business owners to access their dashboard
-
-7. **Real Stripe payment**
-   - Currently `handleSimulatePayment` just waits 1.5s then calls `claimBusiness`
-   - Wire up Stripe Checkout or Payment Element
 
 ### P2 — Nice to have
 
@@ -155,6 +152,21 @@ import { prisma } from "@/lib/prisma"
 export async function doSomething(id: string) { ... }
 
 // Client component using server action
+"use client"
+import { doSomething } from "@/app/actions/something"
+// call directly: await doSomething(id)
+
+// Dialog (Base UI, NOT Radix)
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog"
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogTrigger render={<Button />}>Open</DialogTrigger>
+  <DialogContent>...</DialogContent>
+</Dialog>
+
+// Shared Business type
+import type { Business } from "@/components/explore/explore-view"
+```
+rver action
 "use client"
 import { doSomething } from "@/app/actions/something"
 // call directly: await doSomething(id)

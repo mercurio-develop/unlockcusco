@@ -16,7 +16,7 @@ import {
 import { Star, Zap, MapPin } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { generateShadowLead } from "@/app/actions/shadow-lead"
+import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 
 type Business = {
   id: string
