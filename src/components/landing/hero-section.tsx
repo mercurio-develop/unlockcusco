@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, ChevronDown } from "lucide-react"
+import { ChevronDown, Sparkles } from "lucide-react"
 import Image from "next/image"
 
 export function HeroSection() {
@@ -20,19 +20,19 @@ export function HeroSection() {
   }
 
   return (
-    <div className="h-[calc(100vh-56px)] w-full relative flex flex-col items-center justify-center overflow-hidden bg-white">
-      <div className="absolute inset-0 z-0">
+    <div className="h-[calc(100vh-56px)] w-full relative flex flex-col items-center justify-center overflow-hidden bg-[#09090B]">
+      <div className="absolute inset-0 z-0 opacity-60">
         <Image
-          src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=3000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
           className="object-cover"
-          alt="Sacred Valley, Peru"
+          alt="Sacred Valley, Andes Mountains"
           fill
           priority
           unoptimized
         />
       </div>
-      {/* Gradient to make text readable and blend into the white section below */}
-      <div className="bg-gradient-to-t from-white via-black/40 to-black/20 absolute inset-0 z-0" />
+      {/* Gradient to make text readable and blend into the dark section below */}
+      <div className="bg-gradient-to-t from-[#09090B] via-[#09090B]/60 to-transparent absolute inset-0 z-0" />
 
       {/* Hero */}
       <motion.div
@@ -41,16 +41,21 @@ export function HeroSection() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 w-full px-4 flex flex-col items-center"
       >
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif tracking-tight text-white mb-6 text-center drop-shadow-2xl">
-          Unlock the Andes.
+        <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] uppercase tracking-[0.3em] mb-4 font-bold bg-[#09090B]/40 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-md shadow-lg">
+          <Sparkles className="w-3.5 h-3.5" />
+          INKAPORTAL OS
+        </div>
+
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-[#D4AF37]/70 mb-6 text-center drop-shadow-2xl">
+          Beyond the Map.
         </h1>
 
-        <p className="text-lg md:text-xl text-white/90 font-medium max-w-2xl text-center leading-relaxed mx-auto drop-shadow-md">
-          The Sacred Valley&apos;s first AI intelligence. Skip the tourist traps. We connect you to verified local experiences in milliseconds.
+        <p className="text-lg md:text-xl text-white/60 font-sans max-w-xl text-center leading-relaxed mx-auto drop-shadow-md">
+          The definitive gateway to the true Sacred Valley. Access an exclusive, unlisted network of master artisans, private sanctuaries, and trusted local transit.
         </p>
 
         <div
-          className="w-full max-w-3xl mt-12 p-2 rounded-full bg-white flex flex-col md:flex-row items-center gap-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] transition-all mx-auto group focus-within:ring-4 focus-within:ring-rose-500/20"
+          className="w-full max-w-3xl mt-12 p-2 rounded-full bg-[#09090B]/60 backdrop-blur-2xl border border-white/10 flex flex-col md:flex-row items-center gap-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] transition-all mx-auto group focus-within:border-white/30 focus-within:shadow-[0_0_30px_rgba(212,175,55,0.15)]"
         >
           <div className="flex-1 w-full relative flex items-center px-4">
              <input
@@ -59,16 +64,16 @@ export function HeroSection() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
               placeholder="Describe your perfect day in the Sacred Valley..."
-              className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full py-3 text-base md:text-lg placeholder:text-gray-400 font-medium"
+              className="bg-transparent border-none text-white focus:outline-none focus:ring-0 w-full py-3 text-base md:text-lg placeholder:text-white/40 font-sans"
              />
           </div>
           
           <button
             type="button"
             onClick={() => handleSearch()}
-            className="bg-rose-600 text-white font-bold rounded-full px-8 py-3.5 flex items-center gap-2 hover:bg-rose-700 transition-colors flex-shrink-0 w-full md:w-auto justify-center shadow-md"
+            className="bg-[#D4AF37] text-black font-bold rounded-full px-8 py-3.5 flex items-center gap-2 hover:bg-[#C5A059] transition-colors flex-shrink-0 w-full md:w-auto justify-center shadow-[0_0_20px_rgba(212,175,55,0.3)]"
           >
-            Design Trip <ArrowRight className="w-4 h-4" />
+            Enter the Portal <Sparkles className="w-4 h-4" />
           </button>
         </div>
 
@@ -86,7 +91,7 @@ export function HeroSection() {
             <div
               key={text}
               onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
-              className="bg-black/30 border border-white/20 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white hover:text-slate-900 transition-all cursor-pointer backdrop-blur-md shadow-lg whitespace-nowrap"
+              className="bg-[#09090B]/60 border border-white/10 text-white/80 px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-white/10 hover:text-white transition-all cursor-pointer backdrop-blur-md shadow-lg whitespace-nowrap"
             >
               <span>{emoji}</span> {text}
             </div>
@@ -96,7 +101,7 @@ export function HeroSection() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-slate-400 cursor-pointer"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-white/40 cursor-pointer hover:text-white transition-colors"
         onClick={scrollToDiscover}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -9,14 +9,14 @@ test('Check for browser console errors', async ({ page }) => {
     }
   });
 
-  await page.goto('http://127.0.0.1:3000/');
+  await page.goto('http://127.0.0.1:9005/');
   await page.waitForTimeout(3000);
   
   if (errors.length > 0) {
     console.error('BROWSER ERRORS FOUND:', errors);
   }
   
-  await page.goto('http://127.0.0.1:3000/explore');
+  await page.goto('http://127.0.0.1:9005/explore');
   await page.waitForTimeout(3000);
   
   if (errors.length > 0) {

@@ -116,10 +116,10 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   return (
     <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative">
       {/* Card list panel */}
-      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[55%] lg:w-[60%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-gray-200 bg-white ${viewMode === "map" ? "hidden md:flex" : ""}`}>
-        <div className="px-8 pt-8 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm">
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] xl:w-[35%]" : "w-full"} flex flex-col h-full relative z-10 border-r border-gray-200 bg-white ${viewMode === "map" ? "hidden md:flex" : ""}`}>
+        <div className="px-6 pt-6 pb-4 bg-white z-10 sticky top-0 border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-serif tracking-tight text-slate-900">
+            <h1 className="text-2xl font-serif tracking-tight text-slate-900">
               Explore the INKAPORTAL
             </h1>
             <button
@@ -133,7 +133,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
           <ExploreSearch initialQuery={initialQuery} />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
           {businesses.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
               <p className="text-xl font-medium text-slate-600">No places found for this search.</p>
@@ -141,7 +141,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
             </div>
           ) : (
             <>
-              <div className={`grid grid-cols-1 ${showDesktopMap ? "xl:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"} gap-x-6 gap-y-10 pb-8 transition-all duration-500`}>
+              <div className={`grid grid-cols-1 ${showDesktopMap ? "2xl:grid-cols-2" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"} gap-x-6 gap-y-8 pb-8 transition-all duration-500`}>
                 {businesses.map((business, i) => (
                   <div
                     key={`${business.id}-${i}`}
@@ -169,7 +169,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       </div>
 
       {/* Map panel */}
-      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[45%] lg:w-[40%] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"} flex flex-col relative z-10 bg-slate-100 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
+      <div className={`transition-all duration-500 ease-in-out ${showDesktopMap ? "w-full md:w-[55%] lg:w-[60%] xl:w-[65%] translate-x-0 opacity-100" : "w-0 translate-x-full opacity-0"} flex flex-col relative z-10 bg-slate-100 ${viewMode === "list" ? "hidden md:flex" : ""}`}>
         {showDesktopMap && (
           <ExploreMap
             businesses={businesses}

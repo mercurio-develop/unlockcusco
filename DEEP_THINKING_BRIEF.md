@@ -31,7 +31,14 @@ These are the immediate next steps required for MVP launch:
 - **The "Ghost Phone" Architecture:** To bypass the prohibitive costs of the official Meta WhatsApp API, the system relies on a localized hardware hack—a Node.js microservice connected to a physical 5-Soles Peruvian prepaid SIM card. 
 - **Manual Payouts (Geographic Arbitrage):** When a tourist pays in USD via Stripe, the platform captures a forex spread. However, the payout to the local business owner requires an admin to manually scan a Yape QR code.
 
-## 5. Future Roadmap (Project Khipu)
-- **Enterprise BCP/Yape API:** Automate the manual payout flow once processing $10k+/month.
-- **IoT Telemetry:** Deploy $4 ESP32 Wi-Fi sniffers in local cafes to generate real-time 3D density maps of tourist crowds.
-- **Algorithmic Arbitrage:** Utilize telemetry data (e.g., train delays) to trigger "Surge Pricing" or send WhatsApp flash-sale rescue offers to stranded tourists.
+## 6. UI/UX & Design Theme (The "Apple-Level" Obsidian Aesthetic)
+To maintain visual cohesion, the application strictly adheres to the following luxury, minimalist aesthetic:
+- **Color Palette:** 
+  - **Obsidian Dark Mode:** The primary background is an absolute dark `#09090B`. 
+  - **Inca Gold Accents:** The primary accent color is `#D4AF37`. Use this sparingly for interactive highlights, active states, and premium borders. 
+- **Typography:**
+  - Headers (`h1`, `h2`, `h3`): `font-serif` with `tracking-tight`. 
+  - Body Text: `font-sans` using varying opacities of white (e.g., `text-white/60`, `text-white/90`) rather than gray colors, for better blending.
+  - Eyebrows & Micro-copy: Uppercase, `tracking-[0.3em]`, `text-[10px]` or `text-xs`.
+- **Glassmorphism:** Heavy use of `bg-white/5` or `bg-black/40` combined with `backdrop-blur-xl` or `backdrop-blur-2xl` and `border-white/10` to create floating, frosted glass cards and navbars.
+- **Brand Voice:** High-end private concierge (minimalist, authoritative). Use words like *Curated, Sanctuary, Expedition, Frictionless*. Avoid *tourist traps, cheap, AI intelligence*.
