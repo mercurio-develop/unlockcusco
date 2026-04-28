@@ -61,13 +61,6 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     take: 100, // Limit payload to client
   })
 
-  if (id && !businesses.find(b => b.id === id)) {
-    const selectedBusiness = await prisma.business.findUnique({ where: { id } })
-    if (selectedBusiness) {
-      businesses.unshift(selectedBusiness)
-    }
-  }
-
   // Sort by a weighted score (rating * log10(reviewsCount + 10))
   businesses.sort((a, b) => {
     const scoreA = (a.rating || 0) * Math.log10(a.reviewsCount + 10) + (a.isClaimed ? 2 : 0)
@@ -77,6 +70,20 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
 
   // Interleave categories
   businesses = interleaveCategories(businesses)
+
+  // Ensure selected business is exactly at the top
+  if (id) {
+    const selectedIndex = businesses.findIndex(b => b.id === id)
+    if (selectedIndex > 0) {
+      const [selectedBusiness] = businesses.splice(selectedIndex, 1)
+      businesses.unshift(selectedBusiness)
+    } else if (selectedIndex === -1) {
+      const selectedBusiness = await prisma.business.findUnique({ where: { id } })
+      if (selectedBusiness) {
+        businesses.unshift(selectedBusiness)
+      }
+    }
+  }
 
   // Take top 5 if there's a search
   if (q) {

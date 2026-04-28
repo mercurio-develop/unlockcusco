@@ -45,8 +45,8 @@ export default async function HomePage() {
   // Interleave by category so the landing page isn't just one category
   businesses = interleaveCategories(businesses)
 
-  // Take top 20 for the landing page grid
-  businesses = businesses.slice(0, 20)
+  // Pass all interleaved businesses to the client for "Load More" functionality
+  // businesses = businesses.slice(0, 20)
 
   return (
     <div className="bg-[#09090B]">

@@ -32,10 +32,13 @@ interface BusinessGridProps {
 
 export function BusinessGrid({ businesses }: BusinessGridProps) {
   const [active, setActive] = useState("All")
+  const [visibleCount, setVisibleCount] = useState(20)
   const router = useRouter()
 
   const filtered =
     active === "All" ? businesses : businesses.filter((b) => b.category === active)
+
+  const displayed = filtered.slice(0, visibleCount)
 
   return (
     <section className="bg-[#09090B] px-6 md:px-12 py-20">
@@ -81,14 +84,14 @@ export function BusinessGrid({ businesses }: BusinessGridProps) {
         variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4"
       >
-        {filtered.map((business, i) => (
+        {displayed.map((business, i) => (
           <motion.div
             key={`${business.id}-${i}`}
             variants={{
               hidden: { opacity: 0, y: 24 },
               visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
             }}
-            onClick={() => router.push(`/explore?q=${encodeURIComponent(business.name)}`)}
+            onClick={() => router.push(`/explore?id=${business.id}`)}
             className={`group relative overflow-hidden rounded-2xl cursor-pointer bg-slate-900 ${
               i === 0 ? "col-span-2 row-span-2 aspect-square" : "aspect-[3/4]"
             }`}
@@ -143,7 +146,15 @@ export function BusinessGrid({ businesses }: BusinessGridProps) {
       </motion.div>
 
       {/* Bottom CTA */}
-      <div className="mt-16 text-center">
+      <div className="mt-16 text-center flex flex-col items-center gap-6">
+        {visibleCount < filtered.length && (
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 20)}
+            className="inline-flex items-center gap-2 bg-transparent border border-white/20 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-white/5 transition-all"
+          >
+            Load More Experiences
+          </button>
+        )}
         <button
           onClick={() => router.push("/explore")}
           className="inline-flex items-center gap-3 bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full text-sm font-medium hover:bg-white/10 transition-all hover:border-white/20"
