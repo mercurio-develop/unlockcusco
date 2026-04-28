@@ -19,7 +19,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6 lg:px-8 font-sans flex items-center">
-      <PaymentFlow business={{ id: business.id, name: business.name, slug: business.slug }} />
+      <PaymentFlow business={{ id: business.id, name: business.name }} />
     </div>
   )
 }

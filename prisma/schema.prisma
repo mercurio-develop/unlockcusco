@@ -9,7 +9,7 @@ datasource db {
 
 model Business {
   id           String   @id @default(uuid())
-  slug         String   @unique
+  slug         String   @unique @default(uuid())
   name         String
   category     String
   lat          Float

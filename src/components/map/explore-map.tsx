@@ -233,7 +233,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
               <div className="flex gap-2 mt-4">
                 <Link
-                  href={`/business/${popupBusiness.slug}`}
+                  href={`/business/${popupBusiness.id}`}
                   className="flex-1 flex items-center justify-center gap-1.5 bg-[#D4AF37] hover:bg-[#C5A059] text-black text-xs font-bold py-2.5 rounded-xl transition-colors"
                 >
                   View Details <ArrowUpRight className="w-3.5 h-3.5" />

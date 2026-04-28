@@ -8,7 +8,6 @@ import { Star, Zap, ArrowUpRight } from "lucide-react"
 
 type Business = {
   id: string
-  slug: string
   name: string
   category: string
   imageUrl: string

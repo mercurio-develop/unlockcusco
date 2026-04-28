@@ -7,18 +7,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   const businesses = await prisma.business.findMany({
-    select: { slug: true },
+    select: { id: true },
   })
 
   const urls: MetadataRoute.Sitemap = [
     {
-      url: 'https://INKAPORTAL.app',
+      url: 'https://inkaportal.app',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
-      url: 'https://INKAPORTAL.app/explore',
+      url: 'https://inkaportal.app/explore',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const combo of combinations) {
     if (!combo.locationSlug || !combo.categorySlug) continue
     urls.push({
-      url: `https://INKAPORTAL.app/explore/${combo.locationSlug}/${combo.categorySlug}`,
+      url: `https://inkaportal.app/explore/${combo.locationSlug}/${combo.categorySlug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -36,9 +36,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   for (const b of businesses) {
-    if (!b.slug) continue
+    if (!b.id) continue
     urls.push({
-      url: `https://INKAPORTAL.app/business/${b.slug}`,
+      url: `https://inkaportal.app/business/${b.id}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,

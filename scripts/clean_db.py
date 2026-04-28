@@ -2,6 +2,7 @@ import sqlite3
 import argparse
 import sys
 import os
+import re
 
 # Database path based on Prisma configuration
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'prisma', 'dev.db')
@@ -99,20 +100,99 @@ def clean_reviews(min_reviews, dry_run=False):
     
     print(f"🗑️ Deleted {deleted_businesses} businesses and {deleted_reviews} associated reviews due to low review count.")
 
+def clean_titles(dry_run=False):
+    """Cleans up messy business titles from Google Maps scraping."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT id, name FROM Business")
+    businesses = cursor.fetchall()
+    
+    updates = []
+    
+    # Patterns to remove: " - Restaurant", " | Hotel", ", Cusco", " (Sacred Valley)", etc.
+    patterns_to_remove = [
+        r'\s*[-|]\s*Restaurant.*$',
+        r'\s*[-|]\s*Hotel.*$',
+        r'\s*[-|]\s*Hostel.*$',
+        r'\s*[-|]\s*Lodge.*$',
+        r'\s*[-|]\s*Boutique.*$',
+        r'\s*[-|]\s*Peruvian.*$',
+        r',\s*Cusco.*$',
+        r',\s*Urubamba.*$',
+        r',\s*Peru.*$',
+        r'\s*\(Sacred Valley\).*$',
+        r'\s*\(Valle Sagrado\).*$'
+    ]
+    
+    for b_id, name in businesses:
+        clean_name = name
+        for pattern in patterns_to_remove:
+            clean_name = re.sub(pattern, '', clean_name, flags=re.IGNORECASE)
+            
+        if clean_name != name:
+            updates.append((clean_name, b_id, name))
+            
+    if not updates:
+        print("✅ All business titles are already clean.")
+        return
+        
+    print(f"Found {len(updates)} businesses with messy titles:")
+    for clean_name, _, old_name in updates[:10]:
+        print(f"  - '{old_name}'  -->  '{clean_name}'")
+    if len(updates) > 10:
+        print(f"  ... and {len(updates) - 10} more.")
+        
+    if dry_run:
+        print("Dry run enabled. No titles were updated.")
+        return
+        
+    for clean_name, b_id, _ in updates:
+        cursor.execute("UPDATE Business SET name = ? WHERE id = ?", (clean_name, b_id))
+        
+    conn.commit()
+    conn.close()
+    
+    print(f"✨ Cleaned {len(updates)} business titles.")
+
+def find_taxis():
+    """Finds all transport/taxi services in the database."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT name, whatsapp, rating, reviewsCount FROM Business 
+        WHERE name LIKE '%taxi%' OR name LIKE '%transport%' OR name LIKE '%tour%'
+        ORDER BY rating DESC, reviewsCount DESC
+    """
+    cursor.execute(query)
+    taxis = cursor.fetchall()
+    
+    print(f"\n🚕 Found {len(taxis)} Transport & Taxi Services:")
+    print("-" * 50)
+    for t in taxis:
+        has_wa = "✅ WA" if t[1] else "❌ No WA"
+        print(f"{t[0][:30]:<30} | {t[2] or 'N/A'}⭐ ({t[3]} revs) | {has_wa}")
+    print("-" * 50)
+    
+    conn.close()
+
 def main():
     parser = argparse.ArgumentParser(description="InkaPortal Database Cleaning CLI")
     parser.add_argument('--clean-location', action='store_true', help="Delete experiences outside Cusco/Sacred Valley bounds")
     parser.add_argument('--min-reviews', type=int, help="Delete experiences with fewer than MIN_REVIEWS reviews")
-    parser.add_argument('--dry-run', action='store_true', help="Preview what would be deleted without actually deleting")
+    parser.add_argument('--clean-titles', action='store_true', help="Clean messy titles from Google Maps")
+    parser.add_argument('--find-taxis', action='store_true', help="List all transport services")
+    parser.add_argument('--dry-run', action='store_true', help="Preview what would be deleted/changed without actually executing")
     
     args = parser.parse_args()
     
-    if not args.clean_location and args.min_reviews is None:
+    if not any([args.clean_location, args.min_reviews is not None, args.clean_titles, args.find_taxis]):
         parser.print_help()
-        print("\n❌ Error: Please specify an action (--clean-location or --min-reviews).")
+        print("\n❌ Error: Please specify an action.")
         sys.exit(1)
         
-    print("🏔️ InkaPortal DB Cleaner")
+    print("🏔️ InkaPortal DB Manager")
     print("=======================")
     
     if args.clean_location:
@@ -122,6 +202,13 @@ def main():
     if args.min_reviews is not None:
         print(f"\n--- Running Review Count Cleanup (Min: {args.min_reviews}) ---")
         clean_reviews(args.min_reviews, args.dry_run)
+        
+    if args.clean_titles:
+        print("\n--- Running Title Cleanup ---")
+        clean_titles(args.dry_run)
+        
+    if args.find_taxis:
+        find_taxis()
 
 if __name__ == "__main__":
     main()

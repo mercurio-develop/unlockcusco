@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import Image from "next/image"
 import { MapIcon, MapPinOff } from "lucide-react"
@@ -9,7 +9,6 @@ import { BusinessCard } from "@/components/cards/business-card"
 
 export type Business = {
   id: string
-  slug: string
   name: string
   category: string
   lat: number
@@ -41,6 +40,14 @@ export function ExploreView({ businesses, initialQuery, initialSelectedId }: Exp
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
   const [showDesktopMap, setShowDesktopMap] = useState(businesses.length > 0)
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  // Fix for Mapbox "half black" rendering when container size changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 550) // Wait for CSS transition to finish
+    return () => clearTimeout(timer)
+  }, [viewMode, showDesktopMap])
 
   const handleMarkerClick = (id: string) => {
     setSelectedId(id)

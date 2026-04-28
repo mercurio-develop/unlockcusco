@@ -31,6 +31,15 @@ function extractWhatsApp(phone: string | undefined): string | null {
   return null;
 }
 
+function enhanceImageUrl(url: string | undefined): string | null {
+  if (!url) return null;
+  // Replace typical Google Maps size parameters (e.g. =w400-h300-k-no) with high-res equivalents
+  if (url.includes('=w')) {
+    return url.replace(/=w\d+-h\d+-k-no/g, '=s1600');
+  }
+  return url;
+}
+
 const SEARCHES = [
   "Spa and wellness Urubamba, Cusco, Peru",
   "Vegan and organic restaurant Urubamba, Cusco, Peru",
@@ -90,12 +99,33 @@ async function main() {
 
           const category = mapCategory((item.categoryName as string) || '');
           const imageUrls = item.imageUrls as string[] | undefined;
-          const imageUrl = imageUrls?.[0] ?? FALLBACK_IMAGES[category];
+          let imageUrl = enhanceImageUrl(imageUrls?.[0]) ?? FALLBACK_IMAGES[category];
           const rating = (item.totalScore as number) ?? null
           
           if (rating !== null && rating < 4.5) {
             console.log(`   ⏭  Skipped (rating ${rating} < 4.5): ${name}`)
             continue
+          }
+
+          // Try Instagram extraction for high-quality authenticated photos
+          try {
+            console.log(`   📸 Searching Instagram for: ${name}`);
+            const igRun = await apifyClient.actor("apify/instagram-scraper").call({
+              search: `${name} peru`,
+              searchType: "hashtag",
+              searchLimit: 1,
+              resultsType: "posts",
+              resultsLimit: 1,
+            });
+            const { items: igItems } = await apifyClient.dataset(igRun.defaultDatasetId).listItems();
+            if (igItems.length > 0 && (igItems[0] as Record<string, unknown>).displayUrl) {
+              imageUrl = (igItems[0] as Record<string, unknown>).displayUrl as string;
+              console.log(`   ✨ Found authentic Instagram image!`);
+            } else {
+              console.log(`   ⚠️ No IG image, using enhanced Google Maps photo.`);
+            }
+          } catch {
+            console.log(`   ⚠️ IG scraper failed, using enhanced Google Maps photo.`);
           }
 
           const whatsapp = extractWhatsApp(item.phoneUnformatted as string | undefined);

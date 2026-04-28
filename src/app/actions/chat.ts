@@ -50,6 +50,10 @@ export async function askConcierge(message: string, language: string = "English"
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
+      config: {
+        maxOutputTokens: 150, // Cost control: severely limit output tokens for this budget phase
+        temperature: 0.2, // Keep responses deterministic and grounded
+      }
     })
 
     return response.text || "Sorry, the fog in the Andes prevents me from connecting. Try again."

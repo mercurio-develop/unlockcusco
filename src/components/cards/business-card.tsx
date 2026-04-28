@@ -20,7 +20,6 @@ import { generateShadowLead } from "@/app/actions/shadow-lead"
 
 type Business = {
   id: string
-  slug: string
   name: string
   category: string
   lat: number
@@ -122,7 +121,7 @@ export function BusinessCard({ business, isHighlighted, onSelect }: BusinessCard
             </a>
             
             <Link 
-              href={`/business/${business.slug}`}
+              href={`/business/${business.id}`}
               onClick={(e) => e.stopPropagation()}
               className="text-[#D4AF37] text-xs font-semibold hover:text-[#C5A059] transition-colors"
             >

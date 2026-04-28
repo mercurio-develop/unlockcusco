@@ -11,8 +11,8 @@ interface BusinessPageProps {
 
 export async function generateMetadata({ params }: BusinessPageProps): Promise<Metadata> {
   const { slug } = await params
-  const business = await prisma.business.findFirst({
-    where: { OR: [{ slug }, { id: slug }] },
+  const business = await prisma.business.findUnique({
+    where: { id: slug },
   })
 
   if (!business) {
@@ -33,8 +33,8 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
 export default async function BusinessPage({ params }: BusinessPageProps) {
   const { slug } = await params
 
-  const business = await prisma.business.findFirst({
-    where: { OR: [{ slug }, { id: slug }] },
+  const business = await prisma.business.findUnique({
+    where: { id: slug },
     include: { reviews: true },
   })
 

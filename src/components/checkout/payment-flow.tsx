@@ -11,7 +11,6 @@ import { claimBusiness } from "@/app/actions/claim-business"
 
 type Business = {
   id: string
-  slug: string
   name: string
 }
 

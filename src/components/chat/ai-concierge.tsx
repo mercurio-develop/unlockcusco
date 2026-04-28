@@ -19,7 +19,7 @@ export function AiConcierge() {
     {
       id: "1",
       role: "assistant",
-      parts: [{ type: 'text', text: "Welcome to Valle. ✨\n\nHow can I curate your day in the Sacred Valley?" }]
+      parts: [{ type: 'text', text: "Welcome to InkaPortal. ✨\n\nHow can I curate your day in the Sacred Valley?" }]
     }
   ];
 

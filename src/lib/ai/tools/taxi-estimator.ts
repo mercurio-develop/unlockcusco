@@ -8,18 +8,25 @@ export const estimateTaxiFare = tool({
   inputSchema: z.object({
     origin: z.string().describe('The user\'s current location (e.g. Urubamba, Cusco, Pisac, Ollantaytambo, a specific hotel name). If unknown, ask the user where they are currently located.'),
     destinationId: z.string().optional().describe('The ID of the business the user wants to go to (if known).'),
-    destinationName: z.string().optional().describe('The name of the destination if ID is unknown.'),
+    destinationName: z.string().optional().describe('The strict, exact name of the destination business, stripped of town names or extra adjectives (e.g. use "Kampu" instead of "urubamba kampu").'),
   }),
   execute: async ({ origin, destinationId, destinationName }) => {
      let dest;
-     if (destinationId) dest = await prisma.business.findUnique({ where: { id: destinationId } });
-     else if (destinationName) dest = await prisma.business.findFirst({ where: { name: { contains: destinationName } } });
+     if (destinationId) {
+       dest = await prisma.business.findUnique({ where: { id: destinationId } });
+     } else if (destinationName) {
+       // Search using just the first significant word to improve messy matching
+       const cleanName = destinationName.trim().split(" ")[0];
+       dest = await prisma.business.findFirst({ where: { name: { contains: cleanName } } });
+     }
      
      if (!dest) return { error: "Destination not found. Please clarify the name of the place." };
      
      // Mock a distance between towns since we might not have exact coordinates of 'origin' string.
      const originCoords: Record<string, { lat: number, lng: number }> = {
        "urubamba": { lat: -13.3047, lng: -72.1167 },
+       "huaycho": { lat: -13.3100, lng: -72.0900 },
+       "huycho": { lat: -13.3100, lng: -72.0900 },
        "cusco": { lat: -13.5226, lng: -71.9673 },
        "pisac": { lat: -13.2995, lng: -71.8491 },
        "ollantaytambo": { lat: -13.2588, lng: -72.2633 },
