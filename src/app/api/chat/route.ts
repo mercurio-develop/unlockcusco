@@ -2,6 +2,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { findNearbyBusinesses } from '@/lib/ai/tools/find-nearby';
 import { buildItinerary } from '@/lib/ai/tools/build-itinerary';
+import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 
 export const maxDuration = 30;
 
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
       tools: {
         findNearbyBusinesses,
         buildItinerary,
+        estimateTaxiFare,
       },
     });
 
