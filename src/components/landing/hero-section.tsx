@@ -73,17 +73,24 @@ export function HeroSection() {
         </form>
 
         {/* Quick search pills */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl">
           {[
+            { emoji: "🚕", text: "I need a taxi from Urubamba to Pisac" },
+            { emoji: "🦙", text: "Authentic Alpaca textiles in Chinchero" },
+            { emoji: "🗺️", text: "Build a 1-day family itinerary in the Valley" },
             { emoji: "🌿", text: "Recovery massage after the Inca Trail" },
-            { emoji: "🛵", text: "Hidden ATV routes in Maras" },
             { emoji: "🍽️", text: "Authentic local Picantería near me" },
+            { emoji: "🛵", text: "Hidden ATV routes in Maras" },
+            { emoji: "☕", text: "Specialty coffee with fast Wi-Fi" },
+            { emoji: "🏔️", text: "Local guides for off-beaten treks" },
+            { emoji: "🛖", text: "Quiet boutique stays in Ollantaytambo" },
+            { emoji: "🧘", text: "Yoga and sound healing retreats" },
           ].map(({ emoji, text }) => (
             <button
               key={text}
               type="button"
               onClick={() => router.push(`/explore?q=${encodeURIComponent(text)}`)}
-              className="bg-white border border-gray-200 text-slate-600 px-4 py-2 rounded-full text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
+              className="bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-4 py-2 rounded-full text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm"
             >
               {emoji} {text}
             </button>
