@@ -52,11 +52,30 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
     router.push(`/explore?${params.toString()}`)
   }
 
-  const handleAiSearch = () => {
-    if (value.trim()) {
-      router.push(`/explore?ai_prompt=${encodeURIComponent(value.trim())}`)
-      setValue("")
+  const handleSearch = () => {
+    if (!value.trim()) return
+
+    let finalQ = value.trim()
+    let finalLoc = currentLoc
+
+    // Smart extract location from query
+    for (const loc of SACRED_VALLEY_LOCATIONS) {
+      const locLower = loc.toLowerCase()
+      if (finalQ.toLowerCase().includes(locLower)) {
+        finalLoc = locLower
+        // Remove the location and optional preceding prepositions
+        const regex = new RegExp(`\\s*(?:in|near|at|to)?\\s*\\b${locLower}\\b`, 'i')
+        finalQ = finalQ.replace(regex, '').trim()
+        break
+      }
     }
+
+    const params = new URLSearchParams()
+    if (finalQ) params.set("q", finalQ)
+    if (finalLoc) params.set("loc", finalLoc)
+    if (currentCat) params.set("cat", currentCat)
+    
+    router.push(`/explore?${params.toString()}`)
   }
 
   const applyFilters = () => {
@@ -105,7 +124,7 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
-                handleAiSearch()
+                handleSearch()
               }
             }}
             placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
