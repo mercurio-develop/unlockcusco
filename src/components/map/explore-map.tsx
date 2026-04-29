@@ -122,9 +122,15 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
   // Fly to selected business
   useEffect(() => {
-    if (!selectedId) return
+    if (!selectedId) {
+      setPopupBusiness(null)
+      return
+    }
     const b = businesses.find((b) => b.id === selectedId)
-    if (!b) return
+    if (!b) {
+      setPopupBusiness(null)
+      return
+    }
     mapRef.current?.flyTo({
       center: [b.lng, b.lat],
       zoom: 14,
