@@ -6,14 +6,14 @@ import { calculateDistance } from '@/lib/utils/geo';
 export const buildChronoRelay = tool({
   description: 'Generates a Chrono-Spatial Relay (multi-stop itinerary) for a user who needs food, transit across the valley, and a place to stay. Use this when the user needs to travel between towns and wants a complete logistical plan.',
   inputSchema: z.object({
-    currentLocation: z.string().describe('The user\'s current starting location. If unknown, you MUST ask the user where they are first.'),
-    foodLocation: z.string().describe('The town or location where they want to eat (e.g. Urubamba)'),
-    destination: z.string().describe('The final destination town or location to sleep (e.g. Ollantaytambo)'),
+    currentLocation: z.string().optional().default("").describe('The user\'s current starting location. If unknown, default to empty string.'),
+    foodLocation: z.string().optional().default("").describe('The town or location where they want to eat (e.g. Urubamba)'),
+    destination: z.string().optional().default("").describe('The final destination town or location to sleep (e.g. Ollantaytambo)'),
   }),
   execute: async ({ currentLocation, foodLocation, destination }) => {
-    const currentLower = currentLocation.toLowerCase();
-    const foodLower = foodLocation.toLowerCase();
-    const destLower = destination.toLowerCase();
+    const currentLower = (currentLocation || "").toLowerCase();
+    const foodLower = (foodLocation || "").toLowerCase();
+    const destLower = (destination || "").toLowerCase();
 
     // Find food at foodLocation
     let food = await prisma.business.findFirst({

@@ -33,9 +33,14 @@ async function main() {
       const { items } = await apifyClient.dataset(run.defaultDatasetId).listItems();
       console.log(`   → ${items.length} listings found`);
 
+      if (items.length > 0) {
+        console.log("Sample Item keys:", Object.keys(items[0]));
+        console.log("Sample Item name/title/id:", items[0].name, items[0].title, items[0].id);
+      }
+
       for (const item of items) {
         try {
-          const name = item.name as string;
+          const name = (item.name || item.title || item.roomType) as string;
           if (!name) continue;
 
           // Check if already exists in DB

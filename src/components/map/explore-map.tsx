@@ -94,7 +94,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     };
     
     let originCoords = null;
-    const originLower = activeRelay.origin.toLowerCase();
+    const originLower = (activeRelay.origin || "").toLowerCase();
     for (const [key, coords] of Object.entries(coordsMap)) {
         if (originLower.includes(key)) {
             originCoords = [coords.lng, coords.lat];
@@ -234,6 +234,22 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
       {activeRouteGeoJSON && (
         <Source id="active-route" type="geojson" data={activeRouteGeoJSON}>
+          {/* Glowing outline/shadow for visibility */}
+          <Layer
+            id="active-route-line-glow"
+            type="line"
+            layout={{
+              "line-join": "round",
+              "line-cap": "round"
+            }}
+            paint={{
+              "line-color": "#ffffff",
+              "line-width": 10,
+              "line-opacity": 0.4,
+              "line-blur": 4
+            }}
+          />
+          {/* Solid main line */}
           <Layer
             id="active-route-line"
             type="line"
@@ -244,8 +260,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
             paint={{
               "line-color": "#D4AF37",
               "line-width": 6,
-              "line-opacity": 0.8,
-              "line-dasharray": [1, 2]
+              "line-opacity": 0.9,
             }}
           />
         </Source>

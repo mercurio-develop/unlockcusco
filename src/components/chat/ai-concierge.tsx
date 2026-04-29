@@ -20,11 +20,11 @@ export function AiConcierge() {
   const [input, setInput] = useState("")
   const searchParams = useSearchParams()
 
-  const initialMessages: UIMessage[] = [
+  const initialMessages: any[] = [
     {
       id: "1",
       role: "assistant",
-      parts: [{ type: 'text', text: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?" }]
+      content: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?"
     }
   ];
 
@@ -130,35 +130,58 @@ export function AiConcierge() {
                             : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
                         }`}
                       >
-                        {msg.parts?.map((p: { type: string, text?: string }) => p.type === 'text' ? p.text : '').join('')}
+                        {(msg as any).content || msg.parts?.map((p: { type: string, text?: string }) => p.type === 'text' ? p.text : '').join('')}
                       </div>
                     </div>
-                    {msg.parts?.map((part: { type: string, toolInvocation?: { toolName: string, state: string, toolCallId: string, result: unknown } }) => {
+                    {(msg as any).toolInvocations?.map((toolInvocation: any) => {
+                      if (toolInvocation.toolName === 'buildChronoRelay' && toolInvocation.state === 'result') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        return <CinematicTimeline key={toolInvocation.toolCallId} relay={toolInvocation.result as any} />
+                      }
+                      if (toolInvocation.toolName === 'askAvailability') {
+                        if (toolInvocation.state === 'result') {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          return <PendingAvailability key={toolInvocation.toolCallId} message={(toolInvocation.result as any).message} />
+                        } else {
+                          return <PendingAvailability key={toolInvocation.toolCallId} message="Contacting vendor via Ghost Phone..." />
+                        }
+                      }
+                      if (toolInvocation.toolName === 'buildSpatialItinerary' && toolInvocation.state === 'result') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result as any} />
+                      }
+                      if (toolInvocation.toolName === 'estimateTaxiFare' && toolInvocation.state === 'result') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        return <TaxiPaymentCard key={toolInvocation.toolCallId} taxi={toolInvocation.result as any} />
+                      }
+                      if (toolInvocation.toolName === 'findLocalExperiences' && toolInvocation.state === 'result') {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        return <ExperienceRecommendations key={toolInvocation.toolCallId} result={toolInvocation.result as any} />
+                      }
+                      return null;
+                    })}
+                    {/* Fallback for parts if used by alternative transport */}
+                    {msg.parts && msg.parts.map((part: any, idx: number) => {
                       if (part.type === 'tool-invocation') {
                         const toolInvocation = part.toolInvocation;
                         if (toolInvocation?.toolName === 'buildChronoRelay' && toolInvocation?.state === 'result') {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          return <CinematicTimeline key={toolInvocation.toolCallId} relay={toolInvocation.result as any} />
+                          return <CinematicTimeline key={toolInvocation.toolCallId || idx} relay={toolInvocation.result as any} />
                         }
                         if (toolInvocation?.toolName === 'askAvailability') {
                           if (toolInvocation?.state === 'result') {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            return <PendingAvailability key={toolInvocation.toolCallId} message={(toolInvocation.result as any).message} />
+                            return <PendingAvailability key={toolInvocation.toolCallId || idx} message={(toolInvocation.result as any).message} />
                           } else {
-                            return <PendingAvailability key={toolInvocation.toolCallId} message="Contacting vendor via Ghost Phone..." />
+                            return <PendingAvailability key={toolInvocation.toolCallId || idx} message="Contacting vendor via Ghost Phone..." />
                           }
                         }
                         if (toolInvocation?.toolName === 'buildSpatialItinerary' && toolInvocation?.state === 'result') {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result as any} />
+                          return <ItineraryAlternatives key={toolInvocation.toolCallId || idx} plans={toolInvocation.result as any} />
                         }
                         if (toolInvocation?.toolName === 'estimateTaxiFare' && toolInvocation?.state === 'result') {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          return <TaxiPaymentCard key={toolInvocation.toolCallId} taxi={toolInvocation.result as any} />
+                          return <TaxiPaymentCard key={toolInvocation.toolCallId || idx} taxi={toolInvocation.result as any} />
                         }
                         if (toolInvocation?.toolName === 'findLocalExperiences' && toolInvocation?.state === 'result') {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          return <ExperienceRecommendations key={toolInvocation.toolCallId} result={toolInvocation.result as any} />
+                          return <ExperienceRecommendations key={toolInvocation.toolCallId || idx} result={toolInvocation.result as any} />
                         }
                       }
                       return null;

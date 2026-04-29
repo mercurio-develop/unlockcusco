@@ -7,15 +7,18 @@ export const buildSpatialItinerary = tool({
   description:
     'Generates multi-stop alternative itineraries by pairing a morning activity with an afternoon meal. Filters the database for the highest-rated places and calculates the geographic distance between them.',
   inputSchema: z.object({
-    morningIntent: z.string().describe('Search keyword for morning'),
-    afternoonIntent: z.string().describe('Search keyword for afternoon'),
+    morningIntent: z.string().optional().default("").describe('Search keyword for morning'),
+    afternoonIntent: z.string().optional().default("").describe('Search keyword for afternoon'),
   }),
   execute: async ({ morningIntent, afternoonIntent }) => {
+    const mIntent = morningIntent || "";
+    const aIntent = afternoonIntent || "";
+
     const morningItems = await prisma.business.findMany({
       where: {
         OR: [
-          { name: { contains: morningIntent } },
-          { category: { contains: morningIntent } },
+          { name: { contains: mIntent } },
+          { category: { contains: mIntent } },
         ],
       },
       orderBy: { rating: 'desc' },

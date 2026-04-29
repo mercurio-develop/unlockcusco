@@ -109,56 +109,56 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
 
   return (
     <>
-      <div className="relative mb-6">
+      <div className="relative mb-6 z-0">
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
           <Sparkles className="h-5 w-5 text-rose-500" />
         </div>
-        <div className="relative z-0">
-          <input
-            ref={inputRef}
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleSearch()
-              }
-            }}
-            placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
-            className="w-full py-5 pl-12 pr-16 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
-          />
-          
-          <AnimatePresence>
-            {suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
-              >
-                {suggestions.map(suggestion => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
-                  >
-                    <MapPin className="w-4 h-4 text-rose-400" />
-                    <span className="font-medium">{suggestion}</span>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              handleSearch()
+            }
+          }}
+          placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
+          className="w-full py-5 pl-12 pr-6 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
+        />
         
+        <AnimatePresence>
+          {suggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
+            >
+              {suggestions.map(suggestion => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
+                >
+                  <MapPin className="w-4 h-4 text-rose-400" />
+                  <span className="font-medium">{suggestion}</span>
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide items-center">
         <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
           <DialogTrigger render={
-            <button type="button" className={`absolute inset-y-0 right-4 flex items-center transition-colors z-10 ${currentLoc || currentCat ? 'text-rose-600' : 'text-gray-400 hover:text-slate-900'}`}>
-              <SlidersHorizontal className="h-5 w-5" />
+            <button type="button" className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-colors whitespace-nowrap shadow-sm ${currentLoc || currentCat ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-50'}`}>
+              <SlidersHorizontal className="h-4 w-4" /> Filters
             </button>
           } />
           <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200 shadow-2xl">
@@ -242,10 +242,9 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide items-center">
-        <span className="text-slate-400 text-sm font-bold whitespace-nowrap mr-2">Quick Filters:</span>
+        <div className="w-[1px] h-6 bg-gray-200 mx-1 shrink-0"></div>
+
         {CATEGORIES.map((cat) => {
           const isActive =
             currentCat === cat.value ||
