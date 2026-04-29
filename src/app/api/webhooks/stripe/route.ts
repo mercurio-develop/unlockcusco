@@ -29,11 +29,12 @@ export async function POST(req: Request) {
     // If it's a multi-stop chrono-relay payment
     if (paymentIntent.metadata.type === 'chrono-relay') {
       try {
-        await fetch('http://localhost:4000/api/message/send', {
+        const ghostPhoneUrl = process.env.GHOST_PHONE_URL || 'http://localhost:4000';
+        await fetch(`${ghostPhoneUrl}/api/message/send`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer dev-secret'
+            'Authorization': `Bearer ${process.env.GHOST_PHONE_SECRET || 'dev-secret'}`
           },
           body: JSON.stringify({
             phone: '+51999999999', // Admin phone placeholder

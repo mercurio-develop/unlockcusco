@@ -67,12 +67,14 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       setHasMore(initialHasMore)
       setPage(0)
       setShowDesktopMap(initialBusinesses.length > 0)
-      if (initialSelectedId && initialSelectedId !== selectedId) {
+      if (initialSelectedId) {
          setSelectedId(initialSelectedId)
+      } else {
+         setSelectedId(null)
       }
     }, 0)
     return () => clearTimeout(timer)
-  }, [initialBusinesses, initialHasMore, initialSelectedId, selectedId, setSelectedId])
+  }, [initialBusinesses, initialHasMore, initialSelectedId, setSelectedId])
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return

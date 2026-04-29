@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { chromium } from 'playwright';
 
 export const maxDuration = 60; // Allow more time for scraping
 
@@ -36,16 +35,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Date is required (YYYY-MM-DD)' }, { status: 400 });
   }
 
-  let browser;
   try {
-    // Note: Live scraping official ticketing sites is difficult due to Cloudflare & Recaptcha.
-    // In a true production app, this would be an offline job or use official travel agency APIs.
-    // For this prototype, we'll try a headless browser and provide simulated fallback data.
-    browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
-    
     // Create a mock dataset as our "scraped" result because real live scraping tuboleto.cultura.pe
     // usually requires solving captchas that a headless browser alone cannot bypass easily without extra services.
     const simulateScraping = async () => {
@@ -74,9 +64,5 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Scraping error:", error);
     return NextResponse.json({ error: "Failed to scrape availability." }, { status: 500 });
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
 }
