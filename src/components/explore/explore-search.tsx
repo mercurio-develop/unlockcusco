@@ -154,116 +154,71 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
         </AnimatePresence>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide items-center">
-        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
-          <DialogTrigger render={
-            <button type="button" className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-colors whitespace-nowrap shadow-sm ${currentLoc || currentCat ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-50'}`}>
-              <SlidersHorizontal className="h-4 w-4" /> Filters
-            </button>
-          } />
-          <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200 shadow-2xl">
-            <DialogHeader className="mb-6 border-b border-gray-100 pb-4 relative">
-              <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900 flex items-center gap-2">
-                <SlidersHorizontal className="w-5 h-5 text-slate-400" /> Filters
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-8">
-              {/* Location Filter */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-500 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
-                  <MapPin className="w-4 h-4" /> Location
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSelectedLoc("")}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                      selectedLoc === "" 
-                        ? "bg-slate-900 text-white shadow-md" 
-                        : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-                    }`}
-                  >
-                    Anywhere
-                  </button>
-                  {LOCATIONS.map((loc) => (
-                    <button
-                      key={loc.value}
-                      onClick={() => setSelectedLoc(loc.value)}
-                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                        selectedLoc === loc.value 
-                          ? "bg-slate-900 text-white shadow-md" 
-                          : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-                      }`}
-                    >
-                      {loc.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-500 flex items-center gap-1.5 mb-3 uppercase tracking-wider">
-                  <Tag className="w-4 h-4" /> Category
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSelectedCat("")}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                      selectedCat === "" 
-                        ? "bg-slate-900 text-white shadow-md" 
-                        : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-                    }`}
-                  >
-                    All Experiences
-                  </button>
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.value}
-                      onClick={() => setSelectedCat(cat.value)}
-                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                        selectedCat === cat.value 
-                          ? "bg-slate-900 text-white shadow-md" 
-                          : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <Button 
-                onClick={applyFilters} 
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-6 rounded-xl text-lg mt-4 shadow-lg transition-transform hover:scale-[1.02]"
-              >
-                Show Results
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <div className="w-[1px] h-6 bg-gray-200 mx-1 shrink-0"></div>
-
-        {CATEGORIES.map((cat) => {
-          const isActive =
-            currentCat === cat.value ||
-            (initialQuery && initialQuery.toLowerCase().includes(cat.value.toLowerCase()))
-          return (
+      <div className="flex flex-col gap-4">
+        {/* Location Filters */}
+        <div className="flex flex-col gap-2">
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Location</span>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
             <button
-              key={cat.value}
-              type="button"
-              onClick={() => handleCategoryQuickFilter(cat.value)}
-              className={`px-5 py-2.5 rounded-full whitespace-nowrap cursor-pointer transition-all text-sm font-semibold border ${
-                isActive
-                  ? "bg-slate-900 text-white border-slate-900 shadow-md"
-                  : "bg-white text-slate-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+              onClick={() => navigateFilters("", currentCat)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                currentLoc === "" 
+                  ? "bg-slate-900 text-white shadow-md" 
+                  : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
               }`}
             >
-              {cat.label}
+              Anywhere
             </button>
-          )
-        })}
+            {LOCATIONS.map((loc) => (
+              <button
+                key={loc.value}
+                onClick={() => navigateFilters(loc.value, currentCat)}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                  currentLoc === loc.value 
+                    ? "bg-slate-900 text-white shadow-md" 
+                    : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
+                {loc.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex flex-col gap-2">
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Category</span>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
+            <button
+              onClick={() => navigateFilters(currentLoc, "")}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                currentCat === "" && !CATEGORIES.some(c => initialQuery?.toLowerCase().includes(c.value.toLowerCase()))
+                  ? "bg-slate-900 text-white shadow-md" 
+                  : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
+              }`}
+            >
+              All Experiences
+            </button>
+            {CATEGORIES.map((cat) => {
+              const isActive =
+                currentCat === cat.value ||
+                (initialQuery && initialQuery.toLowerCase().includes(cat.value.toLowerCase()))
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => handleCategoryQuickFilter(cat.value)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                    isActive 
+                      ? "bg-slate-900 text-white shadow-md" 
+                      : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </>
   )
