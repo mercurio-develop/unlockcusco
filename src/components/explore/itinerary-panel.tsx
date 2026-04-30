@@ -282,7 +282,8 @@ export function ItineraryPanel() {
               isEditMode ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             )}
           >
-            {isEditMode ? <><CheckCircle2 className="w-3.5 h-3.5" /> Done</> : <><Edit2 className="w-3.5 h-3.5" /> Edit</>}
+            {isEditMode ? <><CheckCircle2 className="w-3.5 h-3.5" /> Done</> : <><
+              Edit2 className="w-3.5 h-3.5" /> Edit</>}
           </button>
         </div>
         <h2 className="text-xl font-serif font-semibold text-slate-900">{(activeItinerary as any).title ?? `${origin.title} → ${destination.title}`}</h2>

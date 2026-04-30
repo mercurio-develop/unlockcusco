@@ -28,7 +28,7 @@ test.describe('Inkaportal Core Flows', () => {
     await page.goto('http://localhost:3000/explore');
     
     // Check header
-    await expect(page.getByText('Explore the VALLECITO')).toBeVisible();
+    await expect(page.getByText('Explore Vallecito')).toBeVisible();
 
     // Check if the quick filters are present
     const diningFilter = page.getByRole('button', { name: /Dining/i });
