@@ -1,4 +1,4 @@
-import { getAgencyBySlug } from "@/lib/agencies-data"
+import { getAgencyBySlug } from "@/features/agencies/queries"
 import type { Metadata } from "next"
 
 interface AgencyLayoutProps {
@@ -8,7 +8,7 @@ interface AgencyLayoutProps {
 
 export async function generateMetadata({ params }: AgencyLayoutProps): Promise<Metadata> {
   const { slug } = await params
-  const agency = getAgencyBySlug(slug)
+  const agency = await getAgencyBySlug(slug)
 
   if (!agency) {
     return { title: 'Agency Not Found | Vallecito' }
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: AgencyLayoutProps): Promise<M
       description,
       images: [
         {
-          url: agency.coverPhoto || "/images/og-default.jpg",
+          url: agency.imageUrl || "/images/og-default.jpg",
           width: 1200,
           height: 630,
           alt: agency.name,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: AgencyLayoutProps): Promise<M
       card: "summary_large_image",
       title,
       description,
-      images: [agency.coverPhoto || "/images/og-default.jpg"],
+      images: [agency.imageUrl || "/images/og-default.jpg"],
     },
   }
 }

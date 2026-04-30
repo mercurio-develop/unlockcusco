@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {ArrowRight, ChevronDown, MapPin, Sparkles} from "lucide-react"
 import Image from "next/image"
-import { architectPath } from "@/paths"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
 export function HeroSection() {

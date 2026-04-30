@@ -5,7 +5,7 @@ export const explorePath = (query?: string) =>
 
 export const servicesPath = () => "/explore?mode=service";
 
-export const designPath = () => "/design";
+export const travelDesignPath = () => "/travel-design";
 
 export const exploreCategoryPath = (locationSlug: string, categorySlug: string) => 
   `/explore/${locationSlug}/${categorySlug}`;

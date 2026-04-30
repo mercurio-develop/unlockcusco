@@ -14,12 +14,6 @@ export interface DayItinerary {
   accommodationEn?: string;
 }
 
-export interface GalleryItem {
-  id: string;
-  type: "image" | "video";
-  url?: string;
-}
-
 export interface Package {
   id: string;
   categories: ActivityCategory[];
@@ -60,7 +54,6 @@ export interface Package {
   requirements: string[];
   requirementsEn: string[];
   itinerary: DayItinerary[];
-  gallery: GalleryItem[];
 }
 
 export const packages: Package[] = [
@@ -69,7 +62,7 @@ export const packages: Package[] = [
     categories: ["comunidad", "rutas"],
     name: "Cancha Cancha",
     nameEn: "Cancha Cancha",
-    heroImage: "/images/cancha-cancha/cancha-cancha-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/hero.jpg",
     tagline: "Caminata y Encuentro con una Comunidad Altoandina",
     taglineEn: "Hike and encounter with a high Andean community",
     duration: "Día completo",
@@ -139,21 +132,6 @@ export const packages: Package[] = [
         accommodationEn: "N/A"
       }
     ],
-    gallery: [
-      { id: "cancha-cancha-gallery-1", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-1.jpg" },
-      { id: "cancha-cancha-gallery-2", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-2.jpg" },
-      { id: "cancha-cancha-gallery-3", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-3.jpg" },
-      { id: "cancha-cancha-gallery-4", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-4.jpg" },
-      { id: "cancha-cancha-gallery-5", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-5.jpg" },
-      { id: "cancha-cancha-gallery-6", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-6.jpg" },
-      { id: "cancha-cancha-gallery-7", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-7.jpg" },
-      { id: "cancha-cancha-gallery-8", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-8.jpg" },
-      { id: "cancha-cancha-gallery-9", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-9.jpg" },
-      { id: "cancha-cancha-gallery-10", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-10.jpg" },
-      { id: "cancha-cancha-gallery-11", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-11.jpg" },
-      { id: "cancha-cancha-gallery-12", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-12.jpg" },
-      { id: "cancha-cancha-gallery-13", type: "image", url: "/images/cancha-cancha/cancha-cancha-gallery-13.jpg" },
-    ]
   },
 
   {
@@ -161,7 +139,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Inti Punku",
     nameEn: "Inti Punku",
-    heroImage: "/images/inti-punku/inti-punku-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/inti-punku/inti-punku-hero.jpg",
     tagline: "Camina hacia el portal sagrado de los incas",
     taglineEn: "Hike to the sacred Inca portal",
     duration: "Día completo",
@@ -231,14 +209,6 @@ export const packages: Package[] = [
         accommodationEn: ""
       }
     ],
-    gallery: [
-      { id: "inti-punku-gallery-1", type: "image", url: "/images/inti-punku/inti-punku-gallery-1.jpg" },
-      { id: "inti-punku-gallery-2", type: "image", url: "/images/inti-punku/inti-punku-gallery-2.jpg" },
-      { id: "inti-punku-gallery-3", type: "image", url: "/images/inti-punku/inti-punku-gallery-3.jpg" },
-      { id: "inti-punku-gallery-4", type: "image", url: "/images/inti-punku/inti-punku-gallery-4.jpg" },
-      { id: "inti-punku-gallery-5", type: "image", url: "/images/inti-punku/inti-punku-gallery-5.jpg" },
-      { id: "inti-punku-gallery-6", type: "image", url: "/images/inti-punku/inti-punku-gallery-6.jpg" },
-    ]
   },
 
   {
@@ -246,7 +216,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Ñaupa Waka",
     nameEn: "Ñaupa Waka",
-    heroImage: "/images/naupa-waka/naupa-waka-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/naupa-waka/naupa-waka-hero.jpg",
     tagline: "Centro ceremonial Inca",
     taglineEn: "Inca ceremonial center",
     duration: "Medio día",
@@ -307,15 +277,6 @@ export const packages: Package[] = [
         accommodation: "",
         accommodationEn: ""
       }
-    ],
-    gallery: [
-      { id: "naupa-waka-gallery-1", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-1.jpg" },
-      { id: "naupa-waka-gallery-2", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-2.jpg" },
-      { id: "naupa-waka-gallery-3", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-3.jpg" },
-      { id: "naupa-waka-gallery-4", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-4.jpg" },
-      { id: "naupa-waka-gallery-5", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-5.jpg" },
-      { id: "naupa-waka-gallery-6", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-6.jpg" },
-      { id: "naupa-waka-gallery-7", type: "image", url: "/images/naupa-waka/naupa-waka-gallery-7.jpg" }
     ]
   },
 
@@ -324,7 +285,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Pumamarca",
     nameEn: "Pumamarca",
-    heroImage: "/images/pumamarca/pumamarca-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/pumamarca/pumamarca-hero.jpg",
     tagline: "Explora un sitio preinca con vistas impresionantes",
     taglineEn: "Explore a pre-Inca site with stunning views",
     duration: "Día completo",
@@ -393,20 +354,6 @@ export const packages: Package[] = [
         accommodation: "",
         accommodationEn: ""
       }
-    ],
-    gallery: [
-      { id: "pumamarca-gallery-1", type: "image", url: "/images/pumamarca/pumamarca-gallery-1.jpg" },
-      { id: "pumamarca-gallery-2", type: "image", url: "/images/pumamarca/pumamarca-gallery-2.jpg" },
-      { id: "pumamarca-gallery-3", type: "image", url: "/images/pumamarca/pumamarca-gallery-3.jpg" },
-      { id: "pumamarca-gallery-4", type: "image", url: "/images/pumamarca/pumamarca-gallery-4.jpg" },
-      { id: "pumamarca-gallery-5", type: "image", url: "/images/pumamarca/pumamarca-gallery-5.jpg" },
-      { id: "pumamarca-gallery-6", type: "image", url: "/images/pumamarca/pumamarca-gallery-6.jpg" },
-      { id: "pumamarca-gallery-7", type: "image", url: "/images/pumamarca/pumamarca-gallery-7.jpg" },
-      { id: "pumamarca-gallery-8", type: "image", url: "/images/pumamarca/pumamarca-gallery-8.jpg" },
-      { id: "pumamarca-gallery-9", type: "image", url: "/images/pumamarca/pumamarca-gallery-9.jpg" },
-      { id: "pumamarca-gallery-10", type: "image", url: "/images/pumamarca/pumamarca-gallery-10.jpg" },
-      { id: "pumamarca-gallery-11", type: "image", url: "/images/pumamarca/pumamarca-gallery-11.jpg" },
-      { id: "pumamarca-gallery-12", type: "image", url: "/images/pumamarca/pumamarca-gallery-12.jpg" }
     ]
   },
 
@@ -415,7 +362,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Pumawanka",
     nameEn: "Pumawanka",
-    heroImage: "/images/pumawanka/pumawanka-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/pumawanka/pumawanka-hero.jpg",
     tagline: "Camino Inca  entre los Andes y la selva",
     taglineEn: "Ancient Inca trail connecting the Andes to the jungle",
     duration: "Día completo",
@@ -480,19 +427,6 @@ export const packages: Package[] = [
         accommodation: "",
         accommodationEn: ""
       }
-    ],
-    gallery: [
-      { id: "pumawanka-gallery-1", type: "image", url: "/images/pumawanka/pumawanka-gallery-1.jpg" },
-      { id: "pumawanka-gallery-2", type: "image", url: "/images/pumawanka/pumawanka-gallery-2.jpg" },
-      { id: "pumawanka-gallery-3", type: "image", url: "/images/pumawanka/pumawanka-gallery-3.jpg" },
-      { id: "pumawanka-gallery-4", type: "image", url: "/images/pumawanka/pumawanka-gallery-4.jpg" },
-      { id: "pumawanka-gallery-5", type: "image", url: "/images/pumawanka/pumawanka-gallery-5.jpg" },
-      { id: "pumawanka-gallery-6", type: "image", url: "/images/pumawanka/pumawanka-gallery-6.jpg" },
-      { id: "pumawanka-gallery-7", type: "image", url: "/images/pumawanka/pumawanka-gallery-7.jpg" },
-      { id: "pumawanka-gallery-8", type: "image", url: "/images/pumawanka/pumawanka-gallery-8.jpg" },
-      { id: "pumawanka-gallery-9", type: "image", url: "/images/pumawanka/pumawanka-gallery-9.jpg" },
-      { id: "pumawanka-gallery-10", type: "image", url: "/images/pumawanka/pumawanka-gallery-10.jpg" },
-      { id: "pumawanka-gallery-11", type: "image", url: "/images/pumawanka/pumawanka-gallery-11.jpg" }
     ]
   },
 
@@ -501,7 +435,7 @@ export const packages: Package[] = [
     categories: ["comunidad", "rutas"],
     name: "Ausangate",
     nameEn: "Ausangate",
-    heroImage: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/ausangate-trek-3d2n/ausangate-trek-3d2n-hero.jpg",
     tagline: "Descubre al Apu más importante de la region andina, sus hermosas lagunas y paisajes alto andinos.",
     taglineEn: "Discover the most important Apu of Andean region, its beautiful lagoons and high Andean landscapes.",
     duration: "3 días / 2 noches",
@@ -600,26 +534,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "ausangate-trek-3d2n-gallery-1", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-1.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-2", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-2.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-3", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-3.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-4", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-4.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-5", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-5.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-6", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-6.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-7", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-7.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-8", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-8.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-9", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-9.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-10", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-10.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-11", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-11.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-12", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-12.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-13", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-13.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-14", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-14.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-18", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-18.jpg"},
-      { id: "ausangate-trek-3d2n-gallery-15", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-15.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-16", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-16.jpg" },
-      { id: "ausangate-trek-3d2n-gallery-17", type: "image", url: "/images/ausangate-trek-3d2n/ausangate-trek-3d2n-gallery-17.jpg" },
     ]
   },
 
@@ -628,7 +542,7 @@ export const packages: Package[] = [
     categories: ["rutas", "comunidad"],
     name: "Lares",
     nameEn: "Lares",
-    heroImage: "/images/lares-trek-3d2n/lares-trek-3d2n-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/lares-trek-3d2n/lares-trek-3d2n-hero.jpg",
     tagline: "Explora la cordillera de Urubamba en contacto con comunidades nativas y la cultura viva de los andes del Perú.",
     taglineEn: "Explore the Urubamba mountain range in contact with native communities and the living culture of the Peruvian Andes.",
     duration: "3 días / 2 noches",
@@ -729,46 +643,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "lares-trek-3d2n-gallery-1", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-1.jpg" },
-      { id: "lares-trek-3d2n-gallery-2", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-2.jpg" },
-      { id: "lares-trek-3d2n-gallery-3", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-3.jpg" },
-      { id: "lares-trek-3d2n-gallery-4", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-4.jpg" },
-      { id: "lares-trek-3d2n-gallery-25", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-25.jpg"},
-      { id: "lares-trek-3d2n-gallery-5", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-5.jpg" },
-      { id: "lares-trek-3d2n-gallery-6", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-6.jpg" },
-      { id: "lares-trek-3d2n-gallery-7", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-7.jpg" },
-      { id: "lares-trek-3d2n-gallery-8", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-8.jpg" },
-      { id: "lares-trek-3d2n-gallery-9", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-9.jpg" },
-      { id: "lares-trek-3d2n-gallery-10", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-10.jpg" },
-      { id: "lares-trek-3d2n-gallery-11", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-11.jpg" },
-      { id: "lares-trek-3d2n-gallery-12", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-12.jpg" },
-      { id: "lares-trek-3d2n-gallery-13", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-13.jpg" },
-      { id: "lares-trek-3d2n-gallery-14", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-14.jpg" },
-      { id: "lares-trek-3d2n-gallery-15", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-15.jpg" },
-      { id: "lares-trek-3d2n-gallery-16", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-16.jpg" },
-      { id: "lares-trek-3d2n-gallery-17", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-17.jpg" },
-      { id: "lares-trek-3d2n-gallery-18", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-18.jpg" },
-      { id: "lares-trek-3d2n-gallery-19", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-19.jpg" },
-      { id: "lares-trek-3d2n-gallery-20", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-20.jpg" },
-      { id: "lares-trek-3d2n-gallery-21", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-21.jpg" },
-      { id: "lares-trek-3d2n-gallery-22", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-22.jpg" },
-      { id: "lares-trek-3d2n-gallery-23", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-23.jpg" },
-      { id: "lares-trek-3d2n-gallery-24", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-24.jpg" },
-      { id: "lares-trek-3d2n-gallery-25", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-25.jpg" },
-      { id: "lares-trek-3d2n-gallery-26", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-26.jpg" },
-      { id: "lares-trek-3d2n-gallery-27", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-27.jpg" },
-      { id: "lares-trek-3d2n-gallery-28", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-28.jpg" },
-      { id: "lares-trek-3d2n-gallery-29", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-29.jpg" },
-      { id: "lares-trek-3d2n-gallery-30", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-30.jpg" },
-      { id: "lares-trek-3d2n-gallery-31", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-31.jpg" },
-      { id: "lares-trek-3d2n-gallery-32", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-32.jpg" },
-      { id: "lares-trek-3d2n-gallery-33", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-33.jpg" },
-      { id: "lares-trek-3d2n-gallery-34", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-34.jpg" },
-      { id: "lares-trek-3d2n-gallery-35", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-35.jpg" },
-      { id: "lares-trek-3d2n-gallery-36", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-36.jpg" },
-      { id: "lares-trek-3d2n-gallery-37", type: "image", url: "/images/lares-trek-3d2n/lares-trek-3d2n-gallery-37.jpg" },
     ]
   },
   {
@@ -776,7 +650,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Selva del Manu",
     nameEn: "Manu Rainforest",
-    heroImage: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/manu-rainforest-5d4n/manu-rainforest-5d4n-hero.jpg",
     tagline: "Aventura en una de las zonas con mayor biodiversidad del planeta",
     taglineEn: "Adventure in one of the most biodiverse areas on Earth",
     duration: "5 días / 4 noches",
@@ -895,58 +769,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "manu-rainforest-5d4n-gallery-1", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-1.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-2", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-2.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-3", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-3.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-4", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-4.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-5", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-5.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-6", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-6.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-7", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-7.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-8", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-8.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-9", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-9.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-10", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-10.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-11", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-11.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-12", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-12.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-13", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-13.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-14", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-14.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-15", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-15.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-16", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-16.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-17", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-17.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-18", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-18.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-19", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-19.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-20", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-20.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-21", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-21.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-22", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-22.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-23", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-23.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-24", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-24.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-25", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-25.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-26", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-26.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-27", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-27.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-28", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-28.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-29", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-29.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-30", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-30.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-31", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-31.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-32", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-32.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-33", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-33.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-34", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-34.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-35", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-35.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-36", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-36.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-37", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-37.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-38", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-38.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-39", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-39.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-40", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-40.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-41", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-41.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-42", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-42.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-43", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-43.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-44", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-44.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-45", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-45.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-46", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-46.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-47", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-47.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-48", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-48.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-49", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-49.jpg" },
-      { id: "manu-rainforest-5d4n-gallery-50", type: "image", url: "/images/manu-rainforest-5d4n/manu-rainforest-5d4n-gallery-50.jpg" },
     ]
   },
 
@@ -955,7 +777,7 @@ export const packages: Package[] = [
     categories: ["rutas"],
     name: "Choquequirao",
     nameEn: "Choquequirao",
-    heroImage: "/images/choquequirao-trek/choquequirao-trek-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/choquequirao-trek/choquequirao-trek-hero.jpg",
     tagline: "Descubre la mitica ciudad perdida de los Incas y su misterio ancestral.",
     taglineEn: "Discover the mythical lost city of the Incas and its ancestral mystery.",
     duration: "4 días / 3 noches",
@@ -1061,43 +883,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "choquequirao-trek-gallery-1", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-1.jpg" },
-      { id: "choquequirao-trek-gallery-2", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-2.jpg" },
-      { id: "choquequirao-trek-gallery-3", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-3.jpg" },
-      { id: "choquequirao-trek-gallery-4", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-4.jpg" },
-      { id: "choquequirao-trek-gallery-5", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-5.jpg" },
-      { id: "choquequirao-trek-gallery-6", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-6.jpg" },
-      { id: "choquequirao-trek-gallery-7", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-7.jpg" },
-      { id: "choquequirao-trek-gallery-8", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-8.jpg" },
-      { id: "choquequirao-trek-gallery-9", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-9.jpg" },
-      { id: "choquequirao-trek-gallery-10", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-10.jpg" },
-      { id: "choquequirao-trek-gallery-11", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-11.jpg" },
-      { id: "choquequirao-trek-gallery-12", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-12.jpg" },
-      { id: "choquequirao-trek-gallery-13", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-13.jpg" },
-      { id: "choquequirao-trek-gallery-14", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-14.jpg" },
-      { id: "choquequirao-trek-gallery-15", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-15.jpg" },
-      { id: "choquequirao-trek-gallery-16", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-16.jpg" },
-      { id: "choquequirao-trek-gallery-17", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-17.jpg" },
-      { id: "choquequirao-trek-gallery-18", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-18.jpg" },
-      { id: "choquequirao-trek-gallery-19", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-19.jpg" },
-      { id: "choquequirao-trek-gallery-20", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-20.jpg" },
-      { id: "choquequirao-trek-gallery-21", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-21.jpg" },
-      { id: "choquequirao-trek-gallery-22", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-22.jpg" },
-      { id: "choquequirao-trek-gallery-23", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-23.jpg" },
-      { id: "choquequirao-trek-gallery-24", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-24.jpg" },
-      { id: "choquequirao-trek-gallery-25", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-25.jpg" },
-      { id: "choquequirao-trek-gallery-26", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-26.jpg" },
-      { id: "choquequirao-trek-gallery-27", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-27.jpg" },
-      { id: "choquequirao-trek-gallery-28", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-28.jpg" },
-      { id: "choquequirao-trek-gallery-29", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-29.jpg" },
-      { id: "choquequirao-trek-gallery-30", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-30.jpg" },
-      { id: "choquequirao-trek-gallery-31", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-31.jpg" },
-      { id: "choquequirao-trek-gallery-32", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-32.jpg" },
-      { id: "choquequirao-trek-gallery-33", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-33.jpg" },
-      { id: "choquequirao-trek-gallery-34", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-34.jpg" },
-      { id: "choquequirao-trek-gallery-35", type: "image", url: "/images/choquequirao-trek/choquequirao-trek-gallery-35.jpg" }
     ]
   },
   {
@@ -1105,7 +890,7 @@ export const packages: Package[] = [
     categories: ["comunidad", "rutas"],
     name: "Quishuarani",
     nameEn: "Quishuarani",
-    heroImage: "/images/quishuarani-2d1n/quishuarani-2d1n-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/quishuarani-2d1n/quishuarani-2d1n-hero.jpg",
     tagline: "Se parte de una experiencia autentica con familias de comunidades alto andinas.",
     taglineEn: "Be part of an authentic experience with families from high Andean communities.",
     duration: "2 días / 1 noche",
@@ -1189,23 +974,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "quishuarani-2d1n-gallery-1", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-1.jpg" },
-      { id: "quishuarani-2d1n-gallery-2", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-2.jpg" },
-      { id: "quishuarani-2d1n-gallery-3", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-3.jpg" },
-      { id: "quishuarani-2d1n-gallery-4", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-4.jpg" },
-      { id: "quishuarani-2d1n-gallery-5", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-5.jpg" },
-      { id: "quishuarani-2d1n-gallery-6", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-6.jpg" },
-      { id: "quishuarani-2d1n-gallery-7", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-7.jpg" },
-      { id: "quishuarani-2d1n-gallery-8", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-8.jpg" },
-      { id: "quishuarani-2d1n-gallery-9", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-9.jpg" },
-      { id: "quishuarani-2d1n-gallery-10", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-10.jpg" },
-      { id: "quishuarani-2d1n-gallery-11", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-11.jpg" },
-      { id: "quishuarani-2d1n-gallery-12", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-12.jpg" },
-      { id: "quishuarani-2d1n-gallery-13", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-13.jpg" },
-      { id: "quishuarani-2d1n-gallery-14", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-14.jpg" },
-      { id: "quishuarani-2d1n-gallery-15", type: "image", url: "/images/quishuarani-2d1n/quishuarani-2d1n-gallery-15.jpg" },
     ]
   },
   {
@@ -1213,7 +981,7 @@ export const packages: Package[] = [
     categories: ["comunidad", "rutas"],
     name: "Cancha Cancha - 2 dias 1 Noche",
     nameEn: "Cancha Cancha 2D1N",
-    heroImage: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/cancha-cancha-2d1n/cancha-cancha-2d1n-hero.jpg",
     tagline: "Se parte de una experiencia autentica con familias de comunidades alto andinas.",
     taglineEn: "Be part of an authentic experience with families from high Andean communities.",
     duration: "2 días / 1 noche",
@@ -1297,26 +1065,6 @@ export const packages: Package[] = [
         accommodation: "Fin del tour",
         accommodationEn: "End of tour"
       }
-    ],
-    gallery: [
-      { id: "cancha-cancha-2d1n-gallery-1", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-1.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-2", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-2.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-3", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-3.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-4", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-4.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-5", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-5.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-6", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-6.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-7", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-7.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-8", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-8.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-9", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-9.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-10", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-10.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-11", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-11.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-12", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-12.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-13", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-13.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-14", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-14.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-15", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-15.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-16", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-16.jpg" },
-      { id: "cancha-cancha-2d1n-gallery-17", type: "image", url: "/images/cancha-cancha-2d1n/cancha-cancha-2d1n-gallery-17.jpg" },
-
     ]
   },
   {
@@ -1324,7 +1072,7 @@ export const packages: Package[] = [
     categories: ["ceremonias"],
     name: " Ofrenda Andina y Temazcali",
     nameEn: "Temezcali and Andean Offering",
-    heroImage: "/images/full-day-spiritual/full-day-spiritual-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/full-day-spiritual/full-day-spiritual-hero.jpg",
     heroImagePosition: "center 25%",
     tagline: "Conecta con rituales ancestrales de purificación y conexión con el mundo espiritual de los Andes.",
     taglineEn: "Connect with ancestral purification rituals and the spiritual world of the Andes.",
@@ -1388,22 +1136,6 @@ export const packages: Package[] = [
         accommodation: "",
         accommodationEn: ""
       }
-    ],
-    gallery: [
-      { id: "full-day-spiritual-gallery-1", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-1.jpg" },
-      { id: "full-day-spiritual-gallery-2", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-2.jpg" },
-      { id: "full-day-spiritual-gallery-3", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-3.jpg" },
-      { id: "full-day-spiritual-gallery-4", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-4.jpg" },
-      { id: "full-day-spiritual-gallery-5", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-5.jpg" },
-      { id: "full-day-spiritual-gallery-6", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-6.jpg" },
-      { id: "full-day-spiritual-gallery-7", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-7.jpg" },
-      { id: "full-day-spiritual-gallery-8", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-8.jpg" },
-      { id: "full-day-spiritual-gallery-9", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-9.jpg" },
-      { id: "full-day-spiritual-gallery-10", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-10.jpg" },
-      { id: "full-day-spiritual-gallery-11", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-11.jpg" },
-      { id: "full-day-spiritual-gallery-12", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-12.jpg" },
-      { id: "full-day-spiritual-gallery-13", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-13.jpg" },
-      { id: "full-day-spiritual-gallery-14", type: "image", url: "/images/full-day-spiritual/full-day-spiritual-gallery-14.jpg" },
     ]
   },
   {
@@ -1411,7 +1143,7 @@ export const packages: Package[] = [
     categories: ["ceremonias"],
     name: "Ofrenda Ancestral Andina",
     nameEn: "Ancestral Andean Offering",
-    heroImage: "/images/half-day-spiritual/half-day-spiritual-hero.jpg",
+    heroImage: "/agencies/jaguarllaqta/half-day-spiritual/half-day-spiritual-hero.jpg",
     tagline: "Se parte de una ceremonia ancestral de conexión con el mundo andino.",
     taglineEn: "Be part of an ancestral ceremony of connection with the Andean world.",
     duration: "Medio día",
@@ -1467,29 +1199,6 @@ export const packages: Package[] = [
         accommodation: "",
         accommodationEn: ""
       }
-    ],
-    gallery: [
-      { id: "half-day-spiritual-gallery-1", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-1.jpg" },
-      { id: "half-day-spiritual-gallery-2", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-2.jpg" },
-      { id: "half-day-spiritual-gallery-3", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-3.jpg" },
-      { id: "half-day-spiritual-gallery-4", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-4.jpg" },
-      { id: "half-day-spiritual-gallery-5", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-5.jpg" },
-      { id: "half-day-spiritual-gallery-6", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-6.jpg" },
-      { id: "half-day-spiritual-gallery-7", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-7.jpg" },
-      { id: "half-day-spiritual-gallery-8", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-8.jpg" },
-      { id: "half-day-spiritual-gallery-9", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-9.jpg" },
-      { id: "half-day-spiritual-gallery-10", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-10.jpg" },
-      { id: "half-day-spiritual-gallery-11", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-11.jpg" },
-      { id: "half-day-spiritual-gallery-12", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-12.jpg" },
-      { id: "half-day-spiritual-gallery-13", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-13.jpg" },
-      { id: "half-day-spiritual-gallery-14", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-14.jpg" },
-      { id: "half-day-spiritual-gallery-15", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-15.jpg" },
-      { id: "half-day-spiritual-gallery-16", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-16.jpg" },
-      { id: "half-day-spiritual-gallery-17", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-17.jpg" },
-      { id: "half-day-spiritual-gallery-18", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-18.jpg" },
-      { id: "half-day-spiritual-gallery-19", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-19.jpg" },
-      { id: "half-day-spiritual-gallery-20", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-20.jpg" },
-      { id: "half-day-spiritual-gallery-21", type: "image", url: "/images/half-day-spiritual/half-day-spiritual-gallery-21.jpg" },
     ]
   },
 

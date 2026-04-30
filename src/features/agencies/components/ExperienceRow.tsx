@@ -1,9 +1,33 @@
 "use client"
 
+import { useState, useRef, MouseEvent } from "react"
 import { ArrowRight, Clock } from "lucide-react"
 
 export function ExperienceRow({ packages }: { packages: any[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+
   if (packages.length === 0) return null
+
+  const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return
+    setIsDragging(true)
+    setStartX(e.pageX - scrollRef.current.offsetLeft)
+    setScrollLeft(scrollRef.current.scrollLeft)
+  }
+
+  const onMouseLeave = () => setIsDragging(false)
+  const onMouseUp = () => setIsDragging(false)
+  
+  const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollRef.current) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX) * 2
+    scrollRef.current.scrollLeft = scrollLeft - walk
+  }
 
   return (
     <section className="bg-white py-24 px-6 md:px-12 overflow-hidden">
@@ -22,10 +46,17 @@ export function ExperienceRow({ packages }: { packages: any[] }) {
           </span>
         </div>
 
-        <div className="flex gap-6 overflow-x-auto pb-12 scrollbar-hide snap-x -mx-6 px-6">
+        <div 
+          ref={scrollRef}
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseUp={onMouseUp}
+          onMouseMove={onMouseMove}
+          className={`flex gap-6 overflow-x-auto pb-12 scrollbar-hide snap-x -mx-6 px-6 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        >
           {packages.map((exp) => {
             const gallery = JSON.parse(exp.galleryJson || "[]")
-            const mainImage = gallery[0]?.url || "/images/og-default.jpg"
+            const mainImage = exp.heroImage || gallery[0]?.url || "/images/og-default.jpg"
             
             return (
               <div 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Send, CheckCircle2, MessageCircle } from "lucide-react"
 import { sendAvailabilityRequest } from "../actions/send-availability-request"
 
@@ -9,22 +9,30 @@ export function AvailabilityForm({
   agencyName, 
   agencyEmail, 
   whatsapp, 
-  packages 
+  packages,
+  selectedExperienceId = ""
 }: { 
   agencyId: string;
   agencyName: string;
   agencyEmail?: string;
   whatsapp: string;
   packages: any[];
+  selectedExperienceId?: string;
 }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [formData, setForm] = useState({
     userName: "",
     userWhatsapp: "",
     date: "",
-    experienceId: "",
+    experienceId: selectedExperienceId,
     notes: ""
   })
+
+  useEffect(() => {
+    if (selectedExperienceId) {
+      setForm(f => ({ ...f, experienceId: selectedExperienceId }))
+    }
+  }, [selectedExperienceId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

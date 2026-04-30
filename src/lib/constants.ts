@@ -3,7 +3,7 @@ export const DEFAULT_COORDS = {
   lng: -72.1167,
 };
 
-export const AI_CONCIERGE_INITIAL_MESSAGE = "Welcome to Vallecito. ✨\n\nI am your AI Journey Architect. Are you looking to plan a single day, or an extended expedition spanning multiple days? If multiple days, please share your expected arrival and departure dates.";
+export const AI_CONCIERGE_INITIAL_MESSAGE = "Welcome to Vallecito. ✨\n\nI am your AI Journey Designer. Are you looking to plan a single day, or an extended expedition spanning multiple days? If multiple days, please share your expected arrival and departure dates.";
 
 export const SACRED_VALLEY_LOCATIONS = [
   "Urubamba", "Pisac", "Maras", "Ollantaytambo", "Chinchero", "Calca", "Cusco", "Machu Picchu"

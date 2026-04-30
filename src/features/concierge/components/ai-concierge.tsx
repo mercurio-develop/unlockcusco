@@ -48,7 +48,7 @@ export function AiConcierge() {
       if (aiPrompt === "macro_trip" && data) {
         try {
           const parsedData = JSON.parse(decodeURIComponent(data));
-          promptText = `I have completed the Journey Architect. Here is my profile:\n
+          promptText = `I have completed the Journey Designer. Here is my profile:\n
 Dates: ${parsedData.dates?.start} to ${parsedData.dates?.end}
 Travelers: ${parsedData.pax}
 Exertion Profile: ${parsedData.exertionProfile}
@@ -57,7 +57,7 @@ Autonomy Ratio: ${parsedData.autonomy}
 Needs Hotels: ${parsedData.needsHotels ? 'Yes' : 'No'}\n
 Please generate my macro trip plan.`;
         } catch (e) {
-          console.error("Failed to parse journey architect data", e);
+          console.error("Failed to parse journey designer data", e);
         }
       }
 
@@ -111,7 +111,7 @@ Please generate my macro trip plan.`;
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-24 right-6 z-50 w-[350px] sm:w-[450px]"
+            className="fixed bottom-24 right-6 z-50 w-[350px] sm:w-[450px]"
           >
             <Card className="flex flex-col h-[600px] shadow-2xl border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
               {/* Header */}
@@ -194,7 +194,7 @@ Please generate my macro trip plan.`;
                         <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
                       </div>
                     </div>
-                    {(messages[messages.length - 1] as any)?.content?.includes("I have completed the Journey Architect") && (
+                    {(messages[messages.length - 1] as any)?.content?.includes("I have completed the Journey Designer") && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -202,12 +202,12 @@ Please generate my macro trip plan.`;
                       >
                         <img 
                           src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop" 
-                          alt="Architecting Journey" 
+                          alt="Designing Journey" 
                           className="absolute inset-0 w-full h-full object-cover filter brightness-75"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex flex-col justify-end p-4">
                           <Sparkles className="w-6 h-6 text-rose-400 mb-2 animate-pulse" />
-                          <h4 className="text-white font-serif font-bold text-lg leading-tight">Architecting your expedition...</h4>
+                          <h4 className="text-white font-serif font-bold text-lg leading-tight">Designing your expedition...</h4>
                           <p className="text-slate-300 text-xs mt-1">Consulting the ancestral routes.</p>
                         </div>
                       </motion.div>
@@ -249,7 +249,7 @@ Please generate my macro trip plan.`;
             exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
             data-testid="ai-chat-trigger"
-            className="absolute bottom-6 right-6 z-50 h-14 w-14 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 group transition-all"
+            className="fixed bottom-6 right-6 z-50 h-14 w-14 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 group transition-all"
           >
             <Sparkles className="w-6 h-6 text-rose-600 group-hover:animate-pulse" />
           </motion.button>

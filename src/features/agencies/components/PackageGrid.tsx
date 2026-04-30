@@ -31,7 +31,7 @@ function PackageCard({ pkg }: { pkg: any }) {
   const [expanded, setExpanded] = useState(false)
   const included = JSON.parse(pkg.included || "[]")
   const gallery = JSON.parse(pkg.galleryJson || "[]")
-  const mainImage = gallery[0]?.url || "/images/og-default.jpg"
+  const mainImage = pkg.heroImage || gallery[0]?.url || "/images/og-default.jpg"
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 flex flex-col group hover:shadow-xl transition-all duration-500">

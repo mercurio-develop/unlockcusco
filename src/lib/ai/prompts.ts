@@ -41,7 +41,7 @@ Analyze the user's input and execute the EXACT matching state:
 
 - STATE 1: MULTI-DAY INTAKE (Missing Info)
   If they want a multi-day trip via text but lack details, gracefully ask for: 1. Dates, 2. Pax, 3. Exertion Profile, 4. Lenses of Discovery.
-  **UI BYPASS:** If the user's prompt is a structured payload coming from the Journey Architect UI, DO NOT ask questions. Assume STATE 2.
+  **UI BYPASS:** If the user's prompt is a structured payload coming from the Journey Designer UI, DO NOT ask questions. Assume STATE 2.
 
 - STATE 2: MULTI-DAY GENERATION (Info Provided)
   If you have Dates and Profile, IMMEDIATELY call \`buildMacroTrip\`.

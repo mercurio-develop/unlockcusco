@@ -86,14 +86,19 @@ model Agency {
   id             String   @id @default(cuid())
   slug           String   @unique
   name           String
+  category       String   @default("agency")
   tagline        String   @default("")
   description    String   @default("")
   location       String   @default("Sacred Valley")
   imageUrl       String   @default("")
+  logoUrl        String?
   guideName      String   @default("")
   specialties    String   @default("[]") // JSON array of strings
   contactPhone   String
   contactEmail   String   @default("")
+  aboutHtml      String?  
+  seoMetaTitle   String?
+  seoMetaDesc    String?
   themeConfig    String   @default("{}") // JSON for primary/accent colors, fonts
   commissionRate Float    @default(0.05) // Vallecito takes 5%
   trips          Trip[]
@@ -116,6 +121,7 @@ model TourPackage {
   durationStr       String    @default("")
   elevation         String    @default("")
   bestSeason        String    @default("")
+  packageType       String    @default("SINGLE_DAY") // 'SINGLE_DAY', 'MULTI_DAY', 'TREATMENT'
   tags              String    @default("") // CSV: "atv, culture, ruins"
   included          String    @default("[]") // JSON array
   notIncluded       String    @default("[]") // JSON array
@@ -123,6 +129,7 @@ model TourPackage {
   requirements      String    @default("[]") // JSON array
   itineraryJson     String    @default("[]") // Full JSON for daily breakdown
   galleryJson       String    @default("[]") // JSON array of image objects
+  heroImage         String?   // Explicit hero image for the package
   tripDays          TripDay[]
 }
 

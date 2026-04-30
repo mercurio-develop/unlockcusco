@@ -127,13 +127,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     const isItineraryId = selectedId === 'itin-start' || selectedId === 'itin-arrival';
     const pitch = isItineraryId ? 0 : (mapMode === "satellite" ? 60 : 0);
     
-    if (selectedId === 'itin-start' && activeItinerary?.startAnchor.lat && activeItinerary?.startAnchor.lng) {
+    if (selectedId === 'itin-start' && activeItinerary?.startAnchor?.lat && activeItinerary?.startAnchor?.lng) {
       mapRef.current?.flyTo({ center: [activeItinerary.startAnchor.lng as number, activeItinerary.startAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
 
-    if (selectedId === 'itin-arrival' && activeItinerary?.endAnchor.lat && activeItinerary?.endAnchor.lng) {
+    if (selectedId === 'itin-arrival' && activeItinerary?.endAnchor?.lat && activeItinerary?.endAnchor?.lng) {
       mapRef.current?.flyTo({ center: [activeItinerary.endAnchor.lng as number, activeItinerary.endAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
