@@ -1,21 +1,22 @@
 import { z } from 'zod';
 
-export const optimizedPlanSchema = z.object({
-  origin: z.object({
+export const microDaySchema = z.object({
+  startAnchor: z.object({
     title: z.string(),
     locationStr: z.string(),
     time: z.string().optional(),
+    type: z.enum(['AIRPORT', 'HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
   }),
-  destination: z.object({
+  endAnchor: z.object({
     title: z.string(),
     locationStr: z.string(),
     time: z.string().optional(),
+    type: z.enum(['HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
   }),
-  needsAccommodationUpsell: z.boolean(),
   waypoints: z.array(
     z.object({
       id: z.string(),
@@ -52,6 +53,25 @@ export const optimizedPlanSchema = z.object({
       ).optional(),
     })
   ),
+  needsAccommodationUpsell: z.boolean(),
 });
 
-export type OptimizedPlan = z.infer<typeof optimizedPlanSchema>;
+export type OptimizedPlan = z.infer<typeof microDaySchema>;
+
+export const macroTripSchema = z.object({
+  tripTitle: z.string().describe("A cinematic, luxury title for the overall journey."),
+  narrativeArc: z.string().describe("A 2-sentence summary of the trip's emotional, physical, and altitude progression"),
+  totalDays: z.number(),
+  baseCampStrategy: z.string().describe("Explanation of where they will sleep to avoid altitude sickness (e.g., '2 Nights Urubamba, 1 Night Aguas Calientes, 1 Night Cusco')."),
+  days: z.array(z.object({
+    dayNumber: z.number(),
+    date: z.string(),
+    sleepTown: z.string().describe("The exact town they sleep in this night."),
+    basecampHotelId: z.string().optional().describe("The ID of the selected basecamp hotel if already chosen."),
+    suggestedTourSector: z.enum(['EAST_VALLEY', 'URUBAMBA', 'MACHU_PICCHU', 'CUSCO_CITY', 'ANY', 'OTHER']),
+    tourPackageId: z.string().optional().describe("The ID of the curated TourPackage selected for this day."),
+    tourPackageTitle: z.string().optional().describe("The title of the curated TourPackage selected for this day."),
+    documentaryChapterTitle: z.string().describe("A one-sentence pitch of the day's vibe."),
+    expertOpportunity: z.string().optional().describe("Suggest a specific local expert.")
+  }))
+});

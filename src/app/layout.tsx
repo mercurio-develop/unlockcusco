@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Manrope, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { ItineraryProvider } from "@/lib/store/itinerary-context";
-import { AiConcierge } from "@/components/chat/ai-concierge";
+import { AiConcierge } from "@/features/concierge/components/ai-concierge";
 import { Suspense } from "react";
 
-const fontSans = Manrope({
+import { siteConfig } from "@/lib/config/site";
+
+const fontSans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
 });
@@ -17,8 +19,34 @@ const fontSerif = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "VALLECITO | Sacred Valley Discoveries",
-  description: "Curated experiences and local businesses in the Sacred Valley.",
+  title: {
+    template: "%s | VALLECITO",
+    default: "VALLECITO | Sacred Valley Discoveries",
+  },
+  description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
+  openGraph: {
+    title: "VALLECITO | Sacred Valley Discoveries",
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: "VALLECITO",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/images/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Vallecito Sacred Valley",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VALLECITO | Sacred Valley Discoveries",
+    description: siteConfig.description,
+    images: ["/images/og-default.jpg"],
+  },
 };
 
 export default function RootLayout({

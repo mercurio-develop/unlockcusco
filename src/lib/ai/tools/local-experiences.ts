@@ -54,15 +54,27 @@ export const findLocalExperiences = tool({
       ];
     }
 
-    const businesses = await prisma.business.findMany({
+    let businesses = await prisma.business.findMany({
       where: whereClause,
       orderBy: { rating: 'desc' },
       take: 3,
     });
 
+    let exactLocationFound = true;
+    if (businesses.length === 0) {
+      exactLocationFound = false;
+      delete whereClause.locationSlug;
+      businesses = await prisma.business.findMany({
+        where: whereClause,
+        orderBy: { rating: 'desc' },
+        take: 3,
+      });
+    }
+
     return {
       targetLocation: targetLocation,
       userLocation: userLocSlug,
+      exactLocationFound,
       distanceKm: distanceKm.toFixed(1),
       estimatedTimeMinutes: timeMins,
       estimatedTaxiCostUSD: taxiCost,

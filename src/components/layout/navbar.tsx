@@ -2,16 +2,20 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Home, Map, Sparkles } from "lucide-react"
+import { Compass, Home, Map, Sparkles, Route, Building2 } from "lucide-react"
+import { homePath, explorePath, servicesPath, dashboardPath, architectPath, agenciesPath, therapistsPath } from "@/paths"
 
 export function Navbar() {
   const pathname = usePathname()
 
   const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/explore", label: "Places", icon: Compass },
-    { href: "/explore?mode=service", label: "Services", icon: Sparkles },
-    { href: "/dashboard", label: "For Business", icon: Map },
+    { href: homePath(), label: "Home", icon: Home },
+    { href: explorePath(), label: "Places", icon: Compass },
+    { href: servicesPath(), label: "Services", icon: Sparkles },
+    { href: therapistsPath(), label: "Healers", icon: Sparkles },
+    { href: architectPath(), label: "Architect", icon: Route },
+    { href: agenciesPath(), label: "Agencies", icon: Building2 },
+    { href: dashboardPath(), label: "For Business", icon: Map },
   ]
 
   return (

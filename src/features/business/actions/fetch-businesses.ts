@@ -102,7 +102,12 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
 
   const whereClause: Record<string, unknown> = {}
   if (targetCategory) {
-    whereClause.category = targetCategory
+    const categories = targetCategory.split(',').map(c => c.trim()).filter(Boolean)
+    if (categories.length > 1) {
+      whereClause.category = { in: categories }
+    } else {
+      whereClause.category = categories[0]
+    }
   }
   if (loc) {
     whereClause.locationSlug = loc

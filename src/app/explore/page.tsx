@@ -1,8 +1,43 @@
-import { ExploreView } from "@/components/explore/explore-view"
+import type { Metadata } from "next"
+import { ExploreView } from "@/features/explore/components/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
   searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; mode?: string }>
+}
+
+export async function generateMetadata({ searchParams }: ExplorePageProps): Promise<Metadata> {
+  const { q, loc, cat, mode } = await searchParams
+  
+  let title = "Explore"
+  let description = "Find the best places and services in the Sacred Valley."
+  
+  if (q) {
+    title = `Search results for "${q}"`
+    description = `Discover businesses and services matching "${q}" in the Sacred Valley.`
+  } else if (loc || cat) {
+    const locName = loc ? loc.charAt(0).toUpperCase() + loc.slice(1) : "the Sacred Valley"
+    const catName = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : "Places"
+    title = `${catName} in ${locName}`
+    description = `Explore the best ${catName.toLowerCase()} in ${locName}, curated by Vallecito.`
+  } else if (mode === 'service') {
+    title = "Local Services & Experts"
+    description = "Connect with top local guides, drivers, and service providers."
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | Vallecito`,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Vallecito`,
+      description,
+    },
+  }
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {

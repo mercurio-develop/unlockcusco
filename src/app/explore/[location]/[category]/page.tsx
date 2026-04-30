@@ -44,12 +44,31 @@ export async function generateMetadata({
   const { location, category } = await params
   const loc = LOCATION_LABELS[location] ?? location
   const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
+  
+  const title = `${cat.emoji} ${cat.label} in ${loc} — VALLECITO Sacred Valley`
+  const description = `Discover the best ${cat.label} businesses in ${loc}, Sacred Valley. Book directly with zero commissions via WhatsApp.`
+
   return {
-    title: `${cat.emoji} ${cat.label} in ${loc} — VALLECITO Sacred Valley`,
-    description: `Discover the best ${cat.label} businesses in ${loc}, Sacred Valley. Book directly with zero commissions via WhatsApp.`,
+    title,
+    description,
     openGraph: {
-      title: `${cat.label} in ${loc} | VALLECITO`,
-      description: `The best of ${cat.label} in ${loc}, Sacred Valley, Cusco.`,
+      title,
+      description,
+      type: "website",
+      images: [
+        {
+          url: "/images/og-default.jpg",
+          width: 1200,
+          height: 630,
+          alt: title,
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/images/og-default.jpg"],
     },
   }
 }

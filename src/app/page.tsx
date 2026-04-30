@@ -1,5 +1,7 @@
-import { HeroSection } from "@/components/landing/hero-section"
-// import { BusinessGrid } from "@/components/landing/business-grid"
+import { HeroSection } from "@/features/landing/components/hero-section"
+import { FeaturesSection } from "@/features/landing/components/features-section"
+import { ArchitectCta } from "@/features/landing/components/architect-cta"
+// import { BusinessGrid } from "@/features/landing/components/business-grid"
 // import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 export default async function HomePage() {
@@ -8,6 +10,8 @@ export default async function HomePage() {
   return (
     <div className="bg-white">
       <HeroSection />
+      <ArchitectCta />
+      <FeaturesSection />
       {/* 
       <BusinessGrid initialBusinesses={businesses} initialHasMore={hasMore} />
       */}

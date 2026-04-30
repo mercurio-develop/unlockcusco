@@ -19,13 +19,34 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
     return { title: 'Not Found | Vallecito' }
   }
 
+  const categoryName = business.categorySlug ? business.categorySlug.charAt(0).toUpperCase() + business.categorySlug.slice(1) : business.category
+  const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : "the Sacred Valley"
+  const title = `${business.name} — ${categoryName} in ${locationName}`
+  const description = `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`
+
   return {
-    title: `${business.name} — Vallecito Sacred Valley`,
-    description: `Read reviews and book ${business.name} in the Sacred Valley directly without commissions.`,
+    title,
+    description,
     openGraph: {
-      title: `${business.name} | Vallecito`,
-      description: `Verified experience in the Sacred Valley. Average rating: ${business.rating} stars.`,
-      images: [business.imageUrl],
+      title,
+      description,
+      url: `/business/${business.id}`,
+      siteName: "Vallecito",
+      images: [
+        {
+          url: business.imageUrl || "/images/og-default.jpg",
+          width: 1200,
+          height: 630,
+          alt: `${business.name} - ${categoryName}`,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [business.imageUrl || "/images/og-default.jpg"],
     },
   }
 }

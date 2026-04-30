@@ -2,6 +2,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDetourKm } from '@/lib/geo/math';
+import { kv } from '@vercel/kv';
 
 export const searchDatabase = tool({
   description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries.',
@@ -12,6 +13,19 @@ export const searchDatabase = tool({
     routeEnd: z.object({ lat: z.number(), lng: z.number() }).optional(),
   }),
   execute: async ({ query, location, routeStart, routeEnd }) => {
+    // 1. Normalize the query for caching
+    const cacheKey = `vallecito:search:${query.toLowerCase().trim()}:${location ?? 'any'}:${routeStart?.lat ?? 'none'}`;
+    
+    // 2. Check KV Cache safely
+    try {
+      if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        const cached = await kv.get(cacheKey);
+        if (cached) return cached;
+      }
+    } catch (e) {
+      console.warn("KV Cache read failed:", e);
+    }
+
     const whereClause: any = {
       OR: [
         { name: { contains: query } },
@@ -24,10 +38,36 @@ export const searchDatabase = tool({
       whereClause.locationSlug = { contains: location.toLowerCase() };
     }
 
-    const businesses = await prisma.business.findMany({
+    let businesses = await prisma.business.findMany({
       where: whereClause,
       orderBy: { rating: 'desc' }
     });
+
+    // Fallback if no exact location match
+    if (businesses.length === 0 && location) {
+      delete whereClause.locationSlug;
+      const fallbackBusinesses = await prisma.business.findMany({
+        where: whereClause,
+        orderBy: { rating: 'desc' }
+      });
+      
+      const result = {
+        foundInRequestedLocation: false,
+        requestedLocation: location,
+        alternatives: fallbackBusinesses.slice(0, 5)
+      };
+
+      try {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+          await kv.set(cacheKey, result, { ex: 86400 });
+        }
+      } catch (e) {
+        console.warn("KV Cache write failed:", e);
+      }
+      return result;
+    }
+
+    let finalResult;
 
     if (routeStart && routeEnd) {
       const scored = businesses.map(business => {
@@ -53,9 +93,20 @@ export const searchDatabase = tool({
 
       scored.sort((a, b) => b.vallecitoScore - a.vallecitoScore);
 
-      return scored.slice(0, 3);
+      finalResult = scored.slice(0, 3);
+    } else {
+      finalResult = businesses.slice(0, 5);
     }
 
-    return businesses.slice(0, 5);
+    // 4. Cache the final scored array for 24 hours
+    try {
+      if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        await kv.set(cacheKey, finalResult, { ex: 86400 });
+      }
+    } catch (e) {
+      console.warn("KV Cache write failed:", e);
+    }
+    
+    return finalResult;
   }
 });

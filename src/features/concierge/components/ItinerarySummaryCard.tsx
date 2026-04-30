@@ -23,7 +23,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
         </div>
         <div>
           <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">Your Plan</p>
-          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{(itinerary as any).title ?? `${itinerary.origin.title} → ${itinerary.destination.title}`}</h3>
+          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{(itinerary as any).title ?? `${itinerary.startAnchor.title} → ${itinerary.endAnchor.title}`}</h3>
         </div>
       </div>
 

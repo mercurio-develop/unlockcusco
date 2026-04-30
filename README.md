@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Messaging Configuration
+
+Vallecito uses a hybrid messaging system for WhatsApp notifications.
+
+### Production (Twilio)
+For reliable cloud delivery from Vercel, configure Twilio:
+- `TWILIO_ACCOUNT_SID`: Your Twilio SID
+- `TWILIO_AUTH_TOKEN`: Your Twilio Auth Token
+- `TWILIO_WHATSAPP_NUMBER`: Your approved Twilio WhatsApp Sender (e.g., `+14155238886`)
+
+### Local / Mass Campaigns (Ghost Phone)
+For free local testing or mass outbound campaigns, use the `ghost-phone` microservice:
+1. `cd ghost-phone && npm install`
+2. `npm start`
+3. Scan the QR code in the terminal with your physical phone.
+4. Configure the main app:
+   - `GHOST_PHONE_URL`: `http://localhost:4000`
+   - `WEBHOOK_SECRET`: A shared secret key
+
+### Running Campaigns
+To send mass invitations to businesses:
+```bash
+npx tsx scripts/campaign-invite.ts
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

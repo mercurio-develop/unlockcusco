@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +10,44 @@ import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star } from "l
 
 interface ClaimPageProps {
   params: Promise<{ businessId: string }>
+}
+
+export async function generateMetadata({ params }: ClaimPageProps): Promise<Metadata> {
+  const { businessId } = await params
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { name: true, imageUrl: true }
+  })
+
+  if (!business) {
+    return { title: 'Claim Profile | Vallecito' }
+  }
+
+  const title = `Claim your profile: ${business.name} | Vallecito`
+  const description = `Claim ${business.name} on Vallecito to receive direct reservations and leads without commissions.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: business.imageUrl || "/images/og-default.jpg",
+          width: 1200,
+          height: 630,
+          alt: business.name,
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [business.imageUrl || "/images/og-default.jpg"],
+    },
+  }
 }
 
 export default async function ClaimPage({ params }: ClaimPageProps) {

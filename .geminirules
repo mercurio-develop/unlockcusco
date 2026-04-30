@@ -1,5 +1,30 @@
-BRAND VOICE: Tone is high-end private concierge (minimalist, authoritative). Use words like Curated, Sanctuary, Expedition, Frictionless. NEVER use terms like tourist traps, cheap, AI intelligence, or milliseconds.
+# [PROJECT CONTEXT] 
+Project Name: Vallecito OS (vallecito.app)
+Purpose: An elite, autonomous AI Travel Agency and Live Pocket-Concierge for the Sacred Valley and Cusco, Peru.
+Audience: Wealthy expats and international tourists seeking a frictionless, stress-free escape.
 
-# Output Rules
-- CHANGELOG FIRST: Always start your response with a brief, 3-bullet-point "Executive Resume" explaining exactly what logic you are fixing or implementing.
-- DIFFS SECOND: After the summary, provide ONLY the necessary code blocks or diffs to make the changes. No long tutorials or apologies.
+# [THE DUAL-MODE PHILOSOPHY]
+Every feature you build must support one of these two core modes:
+1. THE PRE-TRIP ARCHITECT (Macro): Used weeks in advance. The user wants "Frictionless Certainty" and "Peace of Mind." We secure tickets, handle altitude pacing (start low, end high), and curate daily rhythms (1 adventure, 1 cultural event, 1 relaxing evening). The motto is: "Everything is perfectly ready before you even pack your bags."
+2. THE LIVE POCKET FIXER (Micro): Used live, on the ground in Peru. The user wants instant solutions to real-time friction. We provide localized RAG searches ("coffee near me"), instant taxi dispatches (Transit Edges), and rapid itinerary pivots (changing plans due to rain). 
+
+# [EMPATHY & TONE]
+Vallecito is built by expats and seasoned travelers who deeply understand the anxiety of cultural transition, the language barrier, and altitude sickness. The AI persona and the app copy must radiate "Protective Relief." We don't use tech jargon (like "Algorithms", "RAG", or "Curated"). We use human benefits ("Your Offline Lifeline," "Guaranteed Access," "The Logistics Shield", "The Cultural Bridge").
+
+# [TECH STACK & COST FORTRESS]
+- Frontend: Next.js (App Router), TailwindCSS, Framer Motion (for fluid, luxury animations).
+- Offline/PWA: Next.js configured with `@serwist/next` for offline caching.
+- Maps: Mapbox Static Images (to save costs) with opt-in interactive `react-map-gl`.
+- Backend/DB: Prisma (SQLite for dev).
+- AI: Vercel AI SDK (React Server Components, Generative UI, `streamText`).
+- Spatial Math: LLMs hallucinate geography. We NEVER ask the AI to calculate distances. We use strict Next.js TypeScript algorithms (Breadth-First Search, Haversine Detour penalties) to filter the database *before* passing data to the AI.
+- Caching: Vercel KV (Redis) to cache common semantic searches and minimize API costs.
+
+# [UI / UX DESIGN SYSTEM]
+- Luxury Glassmorphism: Use subtle blurs (`backdrop-blur-md`), dark/muted Andean tones, and elegant typography.
+- Generative UI: The AI must return interactive React components (Cards, Timeline Edges, Action Buttons), not long walls of text. Text replies must be 1-2 powerful sentences.
+
+# [OUTPUT RULES FOR GEMINI CLI] - CRITICAL
+1. EXECUTIVE RESUME FIRST: Always begin your response with a 3-to-4 bullet point "Changelog" explaining exactly what architectural logic or UI you are implementing.
+2. SKELETONS & DIFFS SECOND: After the summary, provide ONLY the necessary code blocks or diffs. 
+3. NO YAPPING: Zero conversational filler. Do not explain the code after writing it. Output the code and stop.

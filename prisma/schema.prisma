@@ -54,3 +54,130 @@ model Review {
   rating     Int
   business   Business @relation(fields: [businessId], references: [id])
 }
+
+model Therapist {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  tagline        String   @default("")
+  bio            String   @default("")
+  location       String   @default("Sacred Valley")
+  imageUrl       String   @default("") // Profile picture
+  heroImage      String   @default("") // Space/Atmosphere picture
+  specialties    String   @default("[]") // JSON array
+  whatsapp       String
+  rating         Float?
+  reviewsCount   Int      @default(0)
+  services       TherapistService[]
+}
+
+model TherapistService {
+  id               String    @id @default(cuid())
+  therapistId      String
+  therapist        Therapist @relation(fields: [therapistId], references: [id])
+  title            String
+  description      String
+  priceUsd         Float
+  durationMins     Int       @default(60)
+  imageUrl         String?
+}
+
+model Agency {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  tagline        String   @default("")
+  description    String   @default("")
+  location       String   @default("Sacred Valley")
+  imageUrl       String   @default("")
+  guideName      String   @default("")
+  specialties    String   @default("[]") // JSON array of strings
+  contactPhone   String
+  contactEmail   String   @default("")
+  themeConfig    String   @default("{}") // JSON for primary/accent colors, fonts
+  commissionRate Float    @default(0.05) // Vallecito takes 5%
+  trips          Trip[]
+  tourPackages   TourPackage[]
+}
+
+model TourPackage {
+  id                String    @id @default(cuid())
+  agencyId          String?
+  agency            Agency?   @relation(fields: [agencyId], references: [id])
+  title             String
+  tagline           String    @default("")
+  sector            String    // e.g., "EAST_VALLEY", "URUBAMBA", "MACHU_PICCHU"
+  pace              String    @default("BALANCED") // "FAST", "BALANCED", "SLOW"
+  description       String
+  basePriceUsd      Float
+  difficulty        String    @default("MODERATE")
+  maxAltitude       String    @default("")
+  durationDays      Int       @default(1)
+  durationStr       String    @default("")
+  elevation         String    @default("")
+  bestSeason        String    @default("")
+  tags              String    @default("") // CSV: "atv, culture, ruins"
+  included          String    @default("[]") // JSON array
+  notIncluded       String    @default("[]") // JSON array
+  highlights        String    @default("[]") // JSON array
+  requirements      String    @default("[]") // JSON array
+  itineraryJson     String    @default("[]") // Full JSON for daily breakdown
+  galleryJson       String    @default("[]") // JSON array of image objects
+  tripDays          TripDay[]
+}
+
+model Trip {
+  id               String    @id @default(cuid())
+  userId           String?   // The tourist's ID (once claimed)
+  agencyId         String?   
+  agency           Agency?   @relation(fields: [agencyId], references: [id])
+  tripTitle        String
+  startDate        DateTime
+  endDate          DateTime
+  paxCount         Int       @default(1)
+  baseCampStrategy String
+  shareToken       String?   @unique // The magic link token
+  status           String    @default("DRAFT") // DRAFT, PROPOSED, PENDING_AGENCY, CONFIRMED_UNPAID, BOOKED, ACTIVE
+  totalPriceUsd    Float     @default(0)
+  days             TripDay[]
+  travelers        Traveler[]
+  createdAt        DateTime  @default(now())
+
+  // Trip Recycling Schema
+  isVerifiedTemplate Boolean @default(false)
+  templateVibeTags   String?   // e.g., "wellness, family, adventure"
+  clonedFromId       String?   // To track popularity
+}
+
+model Traveler {
+  id                  String   @id @default(cuid())
+  tripId              String
+  trip                Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  isLeadGuest         Boolean  @default(false)
+  firstName           String
+  lastName            String
+  passportNumber      String
+  nationality         String
+  dateOfBirth         DateTime
+  whatsappNumber      String?  // Crucial for the Lead Guest for live support
+  dietaryRestrictions String?  // e.g., "Vegan, Gluten-Free"
+  medicalNotes        String?  // e.g., "Mild asthma, bad knees"
+  createdAt           DateTime @default(now())
+}
+
+model TripDay {
+  id               String       @id @default(cuid())
+  tripId           String
+  trip             Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  dayNumber        Int
+  date             DateTime
+  sleepTown        String       
+  tourPackageId    String?
+  tourPackage      TourPackage? @relation(fields: [tourPackageId], references: [id])
+  dayTheme         String
+  guideNotes       String?      // Custom instructions from the guide
+  startTime        String       @default("08:00 AM")
+  meetingPoint     String?      // E.g., "Hotel Lobby"
+  isAgencyLocked   Boolean      @default(true) // Prevents AI from overwriting
+  isCustomized     Boolean      @default(false)
+}

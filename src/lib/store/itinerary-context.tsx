@@ -3,11 +3,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 
-type PanelMode = "categories" | "itinerary";
+type PanelMode = "categories" | "itinerary" | "macro";
 
 interface ItineraryContextType {
   activeItinerary: OptimizedPlan | null;
   setActiveItinerary: (i: OptimizedPlan | null) => void;
+  macroTrip: any | null;
+  setMacroTrip: (trip: any | null) => void;
   panelMode: PanelMode;
   setPanelMode: (mode: PanelMode) => void;
   selectedId: string | null;
@@ -21,12 +23,14 @@ interface ItineraryContextType {
   insertWaypoint: (business: any) => void;
   dismissAccommodation: () => void;
   addAccommodation: (accommodationAlts: any[]) => void;
+  selectBasecamp: (hotel: any) => void;
 }
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(undefined);
 
 export function ItineraryProvider({ children }: { children: ReactNode }) {
   const [activeItinerary, setActiveItinerary] = useState<OptimizedPlan | null>(null);
+  const [macroTrip, setMacroTrip] = useState<any | null>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>("categories");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -121,11 +125,13 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       locationSlug: business.locationSlug,
     };
     
+    const destination = newItinerary.endAnchor || (newItinerary as any).destination;
+
     newItinerary.waypoints = [...newItinerary.waypoints, {
       id: business.id,
       category: business.category,
       title: business.name,
-      locationStr: business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : newItinerary.destination.title,
+      locationStr: business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : destination.title,
       priceUsd: 15,
       lat: business.lat,
       lng: business.lng,
@@ -154,11 +160,13 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     const newItinerary = { ...activeItinerary };
     
     const alt = accommodationAlts[0];
+    const destination = newItinerary.endAnchor || (newItinerary as any).destination;
+
     newItinerary.waypoints = [...newItinerary.waypoints, {
       id: alt.id,
       category: 'STAY',
       title: alt.name,
-      locationStr: alt.locationSlug ? (alt.locationSlug.charAt(0).toUpperCase() + alt.locationSlug.slice(1)) : newItinerary.destination.title,
+      locationStr: alt.locationSlug ? (alt.locationSlug.charAt(0).toUpperCase() + alt.locationSlug.slice(1)) : destination.title,
       priceUsd: alt.cost ?? 60,
       lat: alt.lat,
       lng: alt.lng,
@@ -172,26 +180,53 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     setActiveItinerary(newItinerary);
   };
 
+  const selectBasecamp = (hotel: any) => {
+    if (!activeItinerary) return;
+    const newItinerary = { ...activeItinerary };
+    
+    if (newItinerary.endAnchor) {
+      newItinerary.endAnchor = {
+        ...newItinerary.endAnchor,
+        title: hotel.name,
+        type: 'HOTEL',
+        lat: hotel.lat,
+        lng: hotel.lng,
+        locationStr: hotel.locationSlug ? (hotel.locationSlug.charAt(0).toUpperCase() + hotel.locationSlug.slice(1)) : newItinerary.endAnchor.locationStr,
+      };
+    } else if ((newItinerary as any).destination) {
+       (newItinerary as any).destination = {
+        ...(newItinerary as any).destination,
+        title: hotel.name,
+        lat: hotel.lat,
+        lng: hotel.lng,
+      };
+    }
+    
+    setActiveItinerary(newItinerary);
+    setSelectedId('itin-arrival');
+  };
+
   return (
-    <ItineraryContext.Provider
-      value={{
-        activeItinerary,
-        setActiveItinerary,
-        panelMode,
-        setPanelMode,
-        selectedId,
-        setSelectedId,
-        isEditMode,
-        setIsEditMode,
-        swapWaypointAlternative,
-        swapDriverAlternative,
-        removeWaypoint,
-        moveWaypoint,
-        insertWaypoint,
-        dismissAccommodation,
-        addAccommodation,
-      }}
-    >
+    <ItineraryContext.Provider value={{
+      activeItinerary,
+      setActiveItinerary,
+      macroTrip,
+      setMacroTrip,
+      panelMode,
+      setPanelMode,
+      selectedId,
+      setSelectedId,
+      isEditMode,
+      setIsEditMode,
+      swapWaypointAlternative,
+      swapDriverAlternative,
+      removeWaypoint,
+      moveWaypoint,
+      insertWaypoint,
+      dismissAccommodation,
+      addAccommodation,
+      selectBasecamp
+    }}>
       {children}
     </ItineraryContext.Provider>
   );
