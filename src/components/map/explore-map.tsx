@@ -132,10 +132,40 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
       return;
     }
 
+    let targetLat: number | null = null;
+    let targetLng: number | null = null;
+    let targetBusiness: Business | null = null;
+
     const b = businesses.find(b => b.id === selectedId);
-    if (!b || b.lat === null || b.lng === null) { setPopupBusiness(null); return; }
-    mapRef.current?.flyTo({ center: [b.lng, b.lat], zoom: 15, pitch: 60, duration: 1200, essential: true });
-    setPopupBusiness(b);
+    if (b && b.lat !== null && b.lng !== null) {
+      targetLat = b.lat;
+      targetLng = b.lng;
+      targetBusiness = b;
+    } else if (activeItinerary) {
+      // Check waypoints and their alternatives
+      for (const wp of activeItinerary.waypoints) {
+        if (wp.id === selectedId && wp.lat !== undefined && wp.lng !== undefined) {
+          targetLat = wp.lat;
+          targetLng = wp.lng;
+          break;
+        }
+        if (wp.alternatives) {
+          const alt = wp.alternatives.find(a => a.id === selectedId);
+          if (alt && alt.lat !== undefined && alt.lng !== undefined) {
+            targetLat = alt.lat;
+            targetLng = alt.lng;
+            break;
+          }
+        }
+      }
+    }
+
+    if (targetLat !== null && targetLng !== null) {
+      mapRef.current?.flyTo({ center: [targetLng, targetLat], zoom: 15, pitch: 60, duration: 1200, essential: true });
+      setPopupBusiness(targetBusiness);
+    } else {
+      setPopupBusiness(null);
+    }
   }, [selectedId, businesses, activeItinerary]);
 
   // Fit bounds to route or businesses
