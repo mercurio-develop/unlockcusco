@@ -1,8 +1,10 @@
-import { AGENCIES } from "@/features/agencies/data"
+import { getAllAgencies } from "@/features/agencies/queries"
 import { AgencyCard, ComingSoonCard } from "@/features/agencies/components/AgencyCard"
 import { Navbar } from "@/components/layout/navbar"
 
-export default function AgenciesPage() {
+export default async function AgenciesPage() {
+  const agencies = await getAllAgencies()
+
   return (
     <div className="bg-white min-h-screen">
       <Navbar />
@@ -24,8 +26,8 @@ export default function AgenciesPage() {
 
         {/* Agency Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {AGENCIES.map((agency) => (
-            <AgencyCard key={agency.slug} agency={agency} />
+          {agencies.map((agency) => (
+            <AgencyCard key={agency.slug} agency={agency as any} />
           ))}
           <ComingSoonCard />
         </div>

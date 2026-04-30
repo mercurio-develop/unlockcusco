@@ -17,22 +17,22 @@ function score(rating: number, distKm: number) {
   return rating * 0.6 + Math.max(0, 10 - distKm) * 0.4;
 }
 
-const DESIRE_MAP: Record<string, { category: string; icon: string; cost: number }> = {
-  coffee:     { category: 'TASTE',     icon: '☕', cost: 12 },
-  cafe:       { category: 'TASTE',     icon: '☕', cost: 12 },
-  breakfast:  { category: 'TASTE',     icon: '🥐', cost: 15 },
-  lunch:      { category: 'TASTE',     icon: '🍽️', cost: 20 },
-  dinner:     { category: 'TASTE',     icon: '🍽️', cost: 25 },
-  food:       { category: 'TASTE',     icon: '🍽️', cost: 20 },
-  restaurant: { category: 'TASTE',     icon: '🍽️', cost: 25 },
-  market:     { category: 'CULTURE',   icon: '🛍️', cost: 0  },
-  ruins:      { category: 'CULTURE',   icon: '🏺', cost: 10 },
-  culture:    { category: 'CULTURE',   icon: '🏺', cost: 10 },
-  hike:       { category: 'ADVENTURE', icon: '🥾', cost: 15 },
-  atv:        { category: 'ADVENTURE', icon: '🏍️', cost: 40 },
-  adventure:  { category: 'ADVENTURE', icon: '🥾', cost: 20 },
-  massage:    { category: 'WELLNESS',  icon: '🧘', cost: 35 },
-  spa:        { category: 'WELLNESS',  icon: '🧘', cost: 35 },
+const DESIRE_MAP: Record<string, { category: string; icon: string; cost: number; keywords: string[] }> = {
+  coffee:     { category: 'Dining',   icon: '☕', cost: 12, keywords: ['coffee', 'cafe', 'cafeteria'] },
+  cafe:       { category: 'Dining',   icon: '☕', cost: 12, keywords: ['coffee', 'cafe', 'cafeteria'] },
+  breakfast:  { category: 'Dining',   icon: '🥐', cost: 15, keywords: ['breakfast', 'desayuno', 'brunch'] },
+  lunch:      { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['lunch', 'almuerzo', 'restaurant', 'food'] },
+  dinner:     { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['dinner', 'cena', 'restaurant', 'food'] },
+  food:       { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['food', 'comida', 'restaurant'] },
+  restaurant: { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['restaurant', 'comida', 'food'] },
+  market:     { category: 'Culture',  icon: '🛍️', cost: 0,  keywords: ['market', 'mercado', 'artisan', 'textiles'] },
+  ruins:      { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['ruins', 'ruinas', 'archeological', 'site'] },
+  culture:    { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['culture', 'cultura', 'tradition', 'village'] },
+  hike:       { category: 'Adventure', icon: '🥾', cost: 15, keywords: ['hike', 'trek', 'walk', 'mountain'] },
+  atv:        { category: 'Adventure', icon: '🏍️', cost: 40, keywords: ['atv', 'quad', 'motorcycle'] },
+  adventure:  { category: 'Adventure', icon: '🥾', cost: 20, keywords: ['adventure', 'aventura', 'trek', 'climb'] },
+  massage:    { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['massage', 'masaje', 'spa', 'therapy'] },
+  spa:        { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['spa', 'wellness', 'relaxation', 'massage'] },
 };
 
 function resolveDesire(desire: string) {
@@ -40,7 +40,7 @@ function resolveDesire(desire: string) {
   for (const [pattern, meta] of Object.entries(DESIRE_MAP)) {
     if (key.includes(pattern)) return meta;
   }
-  return { category: 'TASTE', icon: '📍', cost: 15 };
+  return { category: 'Dining', icon: '📍', cost: 15, keywords: [key] };
 }
 
 export const buildItinerary = tool({
@@ -91,23 +91,28 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
 
     const waypoints = [];
     const recommendedIds = new Set<string>();
+    const usedLocationSlugs = new Set<string>();
+    const usedBusinessIds = new Set<string>();
 
     // --- Activity steps (Nodes) ---
     for (const desire of desires) {
-      const { category, cost } = resolveDesire(desire);
+      const { category, cost, keywords } = resolveDesire(desire);
 
       const candidates = await prisma.business.findMany({
         where: {
           businessType: 'place',
           locationSlug: { in: corridor },
+          id: { notIn: Array.from(usedBusinessIds) },
           OR: [
-            { category: { contains: category } },
-            { categorySlug: { contains: desire.toLowerCase() } },
+            { category: { equals: category } },
+            { categorySlug: { in: keywords } },
             { name: { contains: desire } },
+            ...keywords.map(kw => ({ name: { contains: kw } })),
+            ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
           ],
         },
         orderBy: { rating: 'desc' },
-        take: 30,
+        take: 50,
       });
 
       const alts = candidates
@@ -116,7 +121,11 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
           const lat = b.lat as number;
           const lng = b.lng as number;
           const dist = calculateDistance(originCoords.lat, originCoords.lng, lat, lng);
-          return { b, dist, s: score(b.rating!, dist) };
+          
+          // Boost score if the town hasn't been used yet to encourage distribution
+          let locationBoost = usedLocationSlugs.has(b.locationSlug) ? 0 : 0.5;
+          
+          return { b, dist, s: score(b.rating! + locationBoost, dist) };
         })
         .sort((a, b) => b.s - a.s)
         .slice(0, 3)
@@ -135,7 +144,11 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
 
       if (alts.length === 0) continue;
 
-      const primaryLoc = alts[0].locationSlug ? (alts[0].locationSlug.charAt(0).toUpperCase() + alts[0].locationSlug.slice(1)) : originLocation;
+      const selected = alts[0];
+      usedLocationSlugs.add(selected.locationSlug);
+      usedBusinessIds.add(selected.id);
+      
+      const primaryLoc = selected.locationSlug ? (selected.locationSlug.charAt(0).toUpperCase() + selected.locationSlug.slice(1)) : originLocation;
       const actualLocation = primaryLoc.toLowerCase() !== originLocation.toLowerCase() ? primaryLoc : originLocation;
 
       alts.forEach(a => recommendedIds.add(a.id));
@@ -143,15 +156,15 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const displayCategory = desire.charAt(0).toUpperCase() + desire.slice(1);
 
       waypoints.push({
-        id: alts[0].id,
+        id: selected.id,
         category: displayCategory,
-        title: alts[0].name,
+        title: selected.name,
         locationStr: actualLocation,
         durationMins: 90,
         priceUsd: cost,
-        lat: alts[0].lat,
-        lng: alts[0].lng,
-        rating: alts[0].rating,
+        lat: selected.lat,
+        lng: selected.lng,
+        rating: selected.rating,
         alternatives: alts
       });
     }

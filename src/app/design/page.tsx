@@ -4,7 +4,7 @@ import { useState } from "react"
 import { JourneyArchitect } from "@/features/wizard/components/JourneyArchitect"
 import { Sparkles, Map, Compass, ShieldCheck } from "lucide-react"
 
-export default function ArchitectPage() {
+export default function DesignPage() {
   const [isStarted, setIsStarted] = useState(false)
 
   if (isStarted) {

@@ -7,6 +7,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🛠️ Starting Data Restoration from Backup JSONs...");
 
+  const loadJson = (filename: string) => {
+    const filePath = path.join(process.cwd(), 'prisma', filename);
+    if (!fs.existsSync(filePath)) {
+      console.log(`⚠️ File not found: ${filePath}`);
+      return [];
+    }
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    console.log(`✅ Loaded ${data.length} records from ${filename}`);
+    return data;
+  };
+
   // 1. Clear existing data to avoid conflicts
   console.log("🗑️ Clearing current database...");
   await prisma.review.deleteMany();
@@ -17,19 +28,12 @@ async function main() {
   await prisma.business.deleteMany();
   await prisma.agency.deleteMany();
 
-  const loadJson = (filename: string) => {
-    const filePath = path.join(process.cwd(), 'prisma', filename);
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  };
-
   // 2. Restore Agencies
   const backupAgencies = loadJson('backup_agency.json');
-  console.log(`🏢 Restoring ${backupAgencies.length} Agencies...`);
   for (const a of backupAgencies) {
-    let slug = a.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    let slug = a.slug || a.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
-    // Check for slug collision
+    // Ensure unique slug
     const existing = await prisma.agency.findUnique({ where: { slug } });
     if (existing) {
       slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
@@ -42,75 +46,96 @@ async function main() {
         slug: slug,
         contactPhone: a.contactPhone,
         commissionRate: a.commissionRate,
-        description: "", // Default for old data
-        location: "Sacred Valley",
-        imageUrl: "",
-        specialties: "[]"
+        tagline: a.tagline || "",
+        description: a.description || "",
+        location: a.location || "Sacred Valley",
+        imageUrl: a.imageUrl || "",
+        guideName: a.guideName || "",
+        specialties: a.specialties || "[]",
+        contactEmail: a.contactEmail || "",
+        themeConfig: a.themeConfig || "{}"
       }
     });
   }
 
   // 3. Restore Businesses
   const backupBusinesses = loadJson('backup_business.json');
-  console.log(`🏪 Restoring ${backupBusinesses.length} Businesses...`);
-  // Use createMany for speed if supported, but SQLite has limits on params.
-  // We'll do chunks of 50.
-  const businessChunks = [];
+  // Chunks of 50 to avoid SQLite limits
   for (let i = 0; i < backupBusinesses.length; i += 50) {
-    businessChunks.push(backupBusinesses.slice(i, i + 50));
-  }
-  for (const chunk of businessChunks) {
+    const chunk = backupBusinesses.slice(i, i + 50);
     await prisma.business.createMany({
       data: chunk.map((b: any) => ({
-        ...b,
-        isClaimed: b.isClaimed === 1 || b.isClaimed === true
+        id: b.id,
+        slug: b.slug,
+        name: b.name,
+        category: b.category,
+        lat: b.lat,
+        lng: b.lng,
+        rating: b.rating,
+        reviewsCount: b.reviewsCount || 0,
+        imageUrl: b.imageUrl,
+        whatsapp: b.whatsapp,
+        isClaimed: b.isClaimed === 1 || b.isClaimed === true,
+        locationSlug: b.locationSlug || "",
+        categorySlug: b.categorySlug || "",
+        instagramHandle: b.instagramHandle,
+        instagramFollowers: b.instagramFollowers || 0,
+        heroImages: b.heroImages || "[]",
+        businessType: b.businessType || "place",
+        serviceZones: b.serviceZones || "[]",
+        elevationMeters: b.elevationMeters,
+        avgDwellTimeMins: b.avgDwellTimeMins || 60,
+        marginTier: b.marginTier || "STANDARD",
+        viewsCount: b.viewsCount || 0,
+        whatsappClicksCount: b.whatsappClicksCount || 0,
+        aiRecommendationsCount: b.aiRecommendationsCount || 0
       }))
     });
   }
 
   // 4. Restore Reviews
   const backupReviews = loadJson('backup_review.json');
-  console.log(`⭐ Restoring ${backupReviews.length} Reviews...`);
-  
   // Get valid business IDs to avoid FK violations
   const validBusinessIds = new Set((await prisma.business.findMany({ select: { id: true } })).map(b => b.id));
   const filteredReviews = backupReviews.filter((r: any) => validBusinessIds.has(r.businessId));
   
-  console.log(`⭐ Found ${filteredReviews.length} valid reviews out of ${backupReviews.length}.`);
-
-  const reviewChunks = [];
   for (let i = 0; i < filteredReviews.length; i += 50) {
-    reviewChunks.push(filteredReviews.slice(i, i + 50));
-  }
-  for (const chunk of reviewChunks) {
+    const chunk = filteredReviews.slice(i, i + 50);
     await prisma.review.createMany({ data: chunk });
   }
 
   // 5. Restore TourPackages
   const backupPackages = loadJson('backup_tourpackage.json');
-  console.log(`📦 Restoring ${backupPackages.length} TourPackages...`);
   for (const p of backupPackages) {
     await prisma.tourPackage.create({
       data: {
         id: p.id,
+        agencyId: p.agencyId,
         title: p.title,
+        tagline: p.tagline || "",
         sector: p.sector,
-        pace: p.pace,
+        pace: p.pace || "BALANCED",
         description: p.description,
         basePriceUsd: p.basePriceUsd,
-        tags: p.tags,
-        agencyId: p.agencyId, // Might be null
         difficulty: p.difficulty || "MODERATE",
-        maxAltitude: p.maxAltitude,
+        maxAltitude: String(p.maxAltitude || ""),
         durationDays: p.durationDays || 1,
-        included: p.included || "[]"
+        durationStr: p.durationStr || "",
+        elevation: p.elevation || "",
+        bestSeason: p.bestSeason || "",
+        tags: p.tags || "",
+        included: p.included || "[]",
+        notIncluded: p.notIncluded || "[]",
+        highlights: p.highlights || "[]",
+        requirements: p.requirements || "[]",
+        itineraryJson: p.itineraryJson || "[]",
+        galleryJson: p.galleryJson || "[]"
       }
     });
   }
 
   // 6. Restore Trips
   const backupTrips = loadJson('backup_trip.json');
-  console.log(`🗺️ Restoring ${backupTrips.length} Trips...`);
   for (const t of backupTrips) {
     await prisma.trip.create({
       data: {
@@ -125,7 +150,6 @@ async function main() {
 
   // 7. Restore TripDays
   const backupTripDays = loadJson('backup_tripday.json');
-  console.log(`📅 Restoring ${backupTripDays.length} TripDays...`);
   for (const d of backupTripDays) {
     await prisma.tripDay.create({
       data: {
@@ -147,8 +171,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    // Cleanup JSON files
-    ['backup_agency.json', 'backup_business.json', 'backup_review.json', 'backup_tourpackage.json', 'backup_trip.json', 'backup_tripday.json'].forEach(f => {
-      try { fs.unlinkSync(path.join(process.cwd(), 'prisma', f)); } catch(e) {}
-    });
   });

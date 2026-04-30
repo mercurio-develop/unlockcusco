@@ -1,9 +1,12 @@
 import { ArrowRight, MapPin } from "lucide-react"
 import Link from "next/link"
-import { AGENCIES } from "../data"
 import { agencyPath } from "@/paths"
 
-export function AgencyCard({ agency }: { agency: typeof AGENCIES[0] }) {
+export function AgencyCard({ agency }: { agency: any }) {
+  const specialties = JSON.parse(agency.specialties || "[]")
+  const trekCount = agency.tourPackages?.filter((p: any) => p.durationDays > 1).length || 0
+  const experienceCount = agency.tourPackages?.filter((p: any) => p.durationDays <= 1).length || 0
+
   return (
     <Link 
       href={agencyPath(agency.slug)}
@@ -12,7 +15,7 @@ export function AgencyCard({ agency }: { agency: typeof AGENCIES[0] }) {
       {/* Photo with Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={agency.imageUrl} 
+          src={agency.imageUrl || "/images/og-default.jpg"} 
           alt={agency.name} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
         />
@@ -24,7 +27,7 @@ export function AgencyCard({ agency }: { agency: typeof AGENCIES[0] }) {
         <div className="flex items-center gap-2 mb-2">
           <MapPin className="w-3.5 h-3.5 text-rose-400" />
           <span className="text-[10px] font-bold text-rose-400 uppercase tracking-[0.2em]">
-            {agency.location}
+            {agency.location || "Sacred Valley"}
           </span>
         </div>
         
@@ -34,7 +37,7 @@ export function AgencyCard({ agency }: { agency: typeof AGENCIES[0] }) {
 
         {/* Specialty Tags */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {agency.specialties.map(tag => (
+          {specialties.slice(0, 3).map((tag: string) => (
             <span key={tag} className="bg-slate-50 text-slate-900 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
               {tag}
             </span>
@@ -44,11 +47,11 @@ export function AgencyCard({ agency }: { agency: typeof AGENCIES[0] }) {
         <div className="flex items-center justify-between border-t border-white/20 pt-6">
           <div className="flex gap-4">
             <div className="flex flex-col">
-              <span className="text-white font-bold text-lg">{agency.trekCount}</span>
+              <span className="text-white font-bold text-lg">{trekCount}</span>
               <span className="text-white/60 text-[9px] uppercase font-bold tracking-widest">Treks</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-bold text-lg">{agency.experienceCount}</span>
+              <span className="text-white font-bold text-lg">{experienceCount}</span>
               <span className="text-white/60 text-[9px] uppercase font-bold tracking-widest">Days</span>
             </div>
           </div>

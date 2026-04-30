@@ -12,7 +12,6 @@ export function DayExplorer() {
 
   if (!activeItinerary) return null
 
-  // Support for both old and new schema during transition
   const startAnchor = (activeItinerary as any).startAnchor || (activeItinerary as any).origin
   const endAnchor = (activeItinerary as any).endAnchor || (activeItinerary as any).destination
   const waypoints = activeItinerary.waypoints || []
@@ -23,16 +22,13 @@ export function DayExplorer() {
 
   return (
     <div className="dark flex-1 overflow-y-auto bg-background text-foreground p-6 scrollbar-hide">
-      
-      {/* The Golden Thread Container */}
+
       <div className="relative border-l-2 border-primary/20 ml-4 pl-8 space-y-12 py-4">
-        
-        {/* START ANCHOR */}
+
         <div 
           className="relative group cursor-pointer"
           onClick={() => setSelectedId('itin-start')}
         >
-          {/* Node */}
           <div className="absolute -left-[43px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-background border-2 border-primary shadow-[0_0_15px_rgba(201,162,77,0.4)] z-20 flex items-center justify-center">
             {startAnchor?.type === 'AIRPORT' ? <Plane className="w-3 h-3 text-primary" /> : <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
           </div>
@@ -49,9 +45,7 @@ export function DayExplorer() {
           </div>
         </div>
 
-        {/* MACRO EXPERIENCE SEEDING */}
         <div className="relative group mt-12 mb-12">
-          {/* Node */}
           <div className="absolute -left-[43px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-background border-2 border-primary shadow-[0_0_15px_rgba(201,162,77,0.4)] z-20 flex items-center justify-center">
             <Star className="w-3 h-3 text-primary" />
           </div>
@@ -84,11 +78,10 @@ export function DayExplorer() {
         {/* WAYPOINTS & TRANSIT */}
         {waypoints.map((wp: any, idx: number) => {
           const edge = transitEdges[idx]
-          
+
           return (
-            <div key={wp.id} className="space-y-12">
-              
-              {/* Transit Edge (Line Label) */}
+            <div key={`${wp.id}-${idx}`} className="space-y-12">
+
               {edge && (
                 <div className="relative">
                   <div className="absolute -left-[48px] top-0 bottom-0 flex flex-col justify-center">
@@ -102,12 +95,10 @@ export function DayExplorer() {
                 </div>
               )}
 
-              {/* Waypoint Node */}
               <div 
                 className="relative group cursor-pointer"
                 onClick={() => setSelectedId(wp.id)}
               >
-                {/* Node */}
                 <div className="absolute -left-[41px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-background border-2 border-primary/60 shadow-[0_0_10px_rgba(201,162,77,0.3)] z-20 group-hover:scale-125 transition-transform" />
 
                 <div className="bg-secondary/30 backdrop-blur-xl border border-border/50 rounded-2xl p-4 hover:border-primary/50 transition-all">
@@ -136,9 +127,7 @@ export function DayExplorer() {
           )
         })}
 
-        {/* END ANCHOR */}
         <div className="space-y-8">
-           {/* Final Transit Edge */}
            {transitEdges.length > waypoints.length && (
               <div className="relative">
                 <div className="absolute -left-[48px] top-0 bottom-0 flex flex-col justify-center">
@@ -156,7 +145,6 @@ export function DayExplorer() {
             className="relative group cursor-pointer"
             onClick={() => setSelectedId('itin-arrival')}
           >
-            {/* Node */}
             <div className="absolute -left-[43px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-background border-2 border-primary shadow-[0_0_15px_rgba(201,162,77,0.4)] z-20 flex items-center justify-center">
               <Moon className="w-3 h-3 text-primary" />
             </div>
@@ -172,7 +160,6 @@ export function DayExplorer() {
             </div>
           </div>
 
-          {/* Hotel Discovery Upsell */}
           {endAnchor?.type === 'GENERIC_TOWN' && (
             <div className="mt-8 p-6 border border-primary/30 rounded-3xl bg-secondary/30 backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="flex items-center gap-3 mb-4">
