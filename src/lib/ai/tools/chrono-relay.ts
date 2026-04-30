@@ -55,7 +55,7 @@ export const buildChronoRelay = tool({
     const coordsMap: Record<string, { lat: number, lng: number }> = {
       "urubamba": { lat: -13.3047, lng: -72.1167 },
       "cusco": { lat: -13.5226, lng: -71.9673 },
-      "pisac": { lat: -13.2995, lng: -71.8491 },
+      "pisac": { lat: -13.4225, lng: -71.8488 },
       "ollantaytambo": { lat: -13.2588, lng: -72.2633 }
     };
     

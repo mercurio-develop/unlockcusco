@@ -15,7 +15,7 @@ export const findLocalExperiences = tool({
     const townCoords: Record<string, { lat: number, lng: number }> = {
       "urubamba": { lat: -13.3047, lng: -72.1167 },
       "cusco": { lat: -13.5226, lng: -71.9673 },
-      "pisac": { lat: -13.2995, lng: -71.8491 },
+      "pisac": { lat: -13.4225, lng: -71.8488 },
       "ollantaytambo": { lat: -13.2588, lng: -72.2633 },
       "maras": { lat: -13.3323, lng: -72.1554 },
       "chinchero": { lat: -13.3908, lng: -72.0494 }

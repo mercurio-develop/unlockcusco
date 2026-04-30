@@ -8,30 +8,49 @@ datasource db {
 }
 
 model Business {
-  id           String   @id @default(uuid())
-  slug         String   @unique
-  name         String
-  category     String
-  lat          Float
-  lng          Float
-  rating       Float?
-  reviewsCount Int      @default(0)
-  imageUrl     String
-  whatsapp     String?
-  isClaimed    Boolean  @default(false)
+  id                 String   @id @default(uuid())
+  slug               String   @unique
+  name               String
+  category           String
+  lat                Float?
+  lng                Float?
+  rating             Float?
+  reviewsCount       Int      @default(0)
+  imageUrl           String
+  whatsapp           String?
+  isClaimed          Boolean  @default(false)
   locationSlug       String   @default("")
   categorySlug       String   @default("")
   instagramHandle    String?
   instagramFollowers Int      @default(0)
   heroImages         String   @default("[]")
+  businessType       String   @default("place")    // 'place' | 'service'
+  serviceZones       String   @default("[]")        // JSON: ["pisac","urubamba"]
+  elevationMeters    Int?
+  avgDwellTimeMins   Int      @default(60)
+  marginTier         String   @default("STANDARD")
   reviews            Review[]
+  viewsCount         Int      @default(0)
+  whatsappClicksCount Int     @default(0)
+  aiRecommendationsCount Int  @default(0)
+  leads              Lead[]
+}
+
+model Lead {
+  id           String   @id @default(uuid())
+  businessId   String
+  business     Business @relation(fields: [businessId], references: [id])
+  touristName  String
+  touristEmail String
+  date         DateTime
+  createdAt    DateTime @default(now())
 }
 
 model Review {
   id         String   @id @default(uuid())
   businessId String
-  business   Business @relation(fields: [businessId], references: [id])
   text       String
   author     String
   rating     Int
+  business   Business @relation(fields: [businessId], references: [id])
 }

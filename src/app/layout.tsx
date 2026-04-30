@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#09090B] text-white font-sans">
         <ItineraryProvider>
           <Navbar />
-          <main className="flex-1 flex flex-col pt-14">
+          <main className="flex-1 flex flex-col pt-14 bg-white">
             {children}
           </main>
           <Suspense fallback={null}>

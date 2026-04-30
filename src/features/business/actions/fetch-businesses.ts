@@ -49,9 +49,10 @@ export interface FetchBusinessesParams {
   loc?: string
   page: number
   limit: number
+  businessType?: 'place' | 'service'
 }
 
-export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20 }: FetchBusinessesParams) {
+export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20, businessType }: FetchBusinessesParams) {
   const google = createGoogleGenerativeAI({ 
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY 
   });
@@ -106,6 +107,8 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   if (loc) {
     whereClause.locationSlug = loc
   }
+  // Scope to place OR service — default to 'place' when not specified
+  whereClause.businessType = businessType ?? 'place'
 
   // Combine OR queries
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,1 +1,5 @@
 BRAND VOICE: Tone is high-end private concierge (minimalist, authoritative). Use words like Curated, Sanctuary, Expedition, Frictionless. NEVER use terms like tourist traps, cheap, AI intelligence, or milliseconds.
+
+# Output Rules
+- CHANGELOG FIRST: Always start your response with a brief, 3-bullet-point "Executive Resume" explaining exactly what logic you are fixing or implementing.
+- DIFFS SECOND: After the summary, provide ONLY the necessary code blocks or diffs to make the changes. No long tutorials or apologies.

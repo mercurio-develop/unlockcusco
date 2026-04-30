@@ -9,7 +9,8 @@ export function Navbar() {
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
-    { href: "/explore", label: "Explore", icon: Compass },
+    { href: "/explore", label: "Places", icon: Compass },
+    { href: "/explore?mode=service", label: "Services", icon: Sparkles },
     { href: "/dashboard", label: "For Business", icon: Map },
   ]
 

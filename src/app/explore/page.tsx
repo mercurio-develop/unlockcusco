@@ -2,19 +2,21 @@ import { ExploreView } from "@/components/explore/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string }>
+  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; mode?: string }>
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id, loc, cat } = await searchParams
+  const { q, id, loc, cat, mode } = await searchParams
   const query = q?.toLowerCase() || ""
+  const businessType = mode === 'service' ? 'service' : 'place'
 
   const { businesses, hasMore } = await fetchBusinesses({
     query,
     category: cat,
     loc,
     page: 0,
-    limit: 20
+    limit: 20,
+    businessType,
   })
 
   // Ensure selected business is exactly at the top
@@ -33,11 +35,12 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
 
   return (
     <div className="relative">
-      <ExploreView 
-        initialBusinesses={businesses} 
+      <ExploreView
+        initialBusinesses={businesses}
         initialHasMore={hasMore}
-        initialQuery={q ?? ""} 
-        initialSelectedId={id ?? null} 
+        initialQuery={q ?? ""}
+        initialSelectedId={id ?? null}
+        initialMode={businessType}
       />
     </div>
   )

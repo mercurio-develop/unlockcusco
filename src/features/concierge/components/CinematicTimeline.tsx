@@ -54,20 +54,17 @@ function RelayCheckoutForm({ clientSecret, totalCostUSD, onComplete }: { clientS
 export function CinematicTimeline({ relay }: { relay: any }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const { setActiveRelay, setPanelMode } = useItinerary();
+  const { setPanelMode } = useItinerary();
 
   useEffect(() => {
-    // Sync the generated relay to the global context so the explore page can react
-    setActiveRelay(relay);
     setPanelMode("itinerary");
-
     createRelayPaymentIntent({
         totalCostUSD: relay.totalCost,
         relayId: `${relay.origin}-${relay.destination}`,
     }).then((res) => {
         if (res.clientSecret) setClientSecret(res.clientSecret);
     });
-  }, [relay, setActiveRelay, setPanelMode]);
+  }, [relay, setPanelMode]);
 
   return (
     <div className="bg-[#09090B]/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-5 w-full my-4 text-white font-sans">

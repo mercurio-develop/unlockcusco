@@ -11,10 +11,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const { businessId } = await searchParams
 
   const business = businessId
-    ? await prisma.business.findUnique({ where: { id: businessId } })
-    : await prisma.business.findFirst({ where: { isClaimed: true } })
+    ? await prisma.business.findUnique({ where: { id: businessId }, include: { leads: true } })
+    : await prisma.business.findFirst({ where: { isClaimed: true }, include: { leads: true } })
 
-  const profileViews = business ? Math.round((business.reviewsCount ?? 0) * 2.4) : 124
+  const profileViews = business?.viewsCount ?? 0
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-slate-50 font-sans">
@@ -49,26 +49,31 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </h1>
             <p className="text-slate-600 mb-8 text-lg">Your profile is now visible and you are ready to receive tourists from all around the world.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                 <h3 className="text-slate-500 font-medium text-sm">Profile Views</h3>
                 <p className="text-3xl font-extrabold text-slate-900 mt-2">{profileViews}</p>
                 <div className="text-green-600 text-xs font-medium mt-2 bg-green-50 w-max px-2 py-1 rounded-md">+12% this week</div>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 className="text-slate-500 font-medium text-sm">Total Reviews</h3>
-                <p className="text-3xl font-extrabold text-indigo-600 mt-2">{business?.reviewsCount ?? 0}</p>
+                <h3 className="text-slate-500 font-medium text-sm">WhatsApp Clicks</h3>
+                <p className="text-3xl font-extrabold text-indigo-600 mt-2">{business?.whatsappClicksCount ?? 0}</p>
                 <div className="text-slate-500 text-xs font-medium mt-2 bg-slate-50 w-max px-2 py-1 rounded-md">
-                  {business?.rating ? `⭐ ${business.rating} average` : "No reviews yet"}
+                  High Intent
                 </div>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <h3 className="text-slate-500 font-medium text-sm">Subscription Status</h3>
-                <p className="text-xl font-extrabold text-slate-900 mt-2">
-                  {business?.isClaimed ? "100% Confiable ✓" : "Free Trial"}
-                </p>
-                <div className={`text-xs font-medium mt-2 w-max px-2 py-1 rounded-md ${business?.isClaimed ? "text-green-600 bg-green-50" : "text-yellow-600 bg-yellow-50"}`}>
-                  {business?.isClaimed ? "Active Profile" : "14 days remaining"}
+                <h3 className="text-slate-500 font-medium text-sm">AI Recommend</h3>
+                <p className="text-3xl font-extrabold text-slate-900 mt-2">{business?.aiRecommendationsCount ?? 0}</p>
+                <div className="text-slate-500 text-xs font-medium mt-2 bg-slate-50 w-max px-2 py-1 rounded-md">
+                  In itineraries
+                </div>
+              </div>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <h3 className="text-slate-500 font-medium text-sm">Total Leads</h3>
+                <p className="text-3xl font-extrabold text-indigo-600 mt-2">{business?.leads?.length ?? 0}</p>
+                <div className="text-slate-500 text-xs font-medium mt-2 bg-slate-50 w-max px-2 py-1 rounded-md">
+                  Collected
                 </div>
               </div>
             </div>

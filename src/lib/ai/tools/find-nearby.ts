@@ -24,14 +24,16 @@ export const findNearbyBusinesses = tool({
       });
 
       // 2. Sort by distance, rating, and igFollowers. Limit to 5.
-      const withDistance = candidates.map(b => {
+      const withDistance = candidates.filter(b => b.lat !== null && b.lng !== null).map(b => {
         const R = 6371;
-        const dLat = ((b.lat - userLat) * Math.PI) / 180;
-        const dLon = ((b.lng - userLng) * Math.PI) / 180;
+        const lat = b.lat as number;
+        const lng = b.lng as number;
+        const dLat = ((lat - userLat) * Math.PI) / 180;
+        const dLon = ((lng - userLng) * Math.PI) / 180;
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((userLat * Math.PI) / 180) *
-            Math.cos((b.lat * Math.PI) / 180) *
+            Math.cos((lat * Math.PI) / 180) *
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
         const distance = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));

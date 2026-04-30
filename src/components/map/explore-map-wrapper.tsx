@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import type { Business } from "@/components/explore/explore-view"
+import type { Business } from "@prisma/client"
 
 interface ExploreMapProps {
   businesses: Business[]

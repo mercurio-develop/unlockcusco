@@ -24,20 +24,9 @@ type Plan = {
 };
 
 export default function ItineraryAlternatives({ plans }: { plans: Plan[] }) {
-  const { setActiveRelay, setPanelMode } = useItinerary();
+  const { setPanelMode } = useItinerary();
 
-  const handleSelectPlan = (plan: Plan) => {
-    setActiveRelay({
-      origin: "Morning Activity",
-      destination: "Afternoon Activity",
-      food: { ...plan.morning, distance: "0 km" },
-      transit: { name: "Local Transfer", driver: "Pending", rating: 5.0, whatsapp: "" },
-      stay: { ...plan.afternoon },
-      transitCost: 15,
-      foodCost: 0,
-      totalCost: 15,
-      distanceKm: plan.totalDistanceKm,
-    });
+  const handleSelectPlan = (_plan: Plan) => {
     setPanelMode("itinerary");
   };
 

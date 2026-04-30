@@ -6,7 +6,8 @@ import {motion} from "framer-motion"
 import {ArrowRight, Loader2} from "lucide-react"
 import {useInView} from "react-intersection-observer"
 import {fetchBusinesses} from "@/features/business/actions/fetch-businesses"
-import {BusinessCard, Business} from "@/components/cards/business-card"
+import {BusinessCard} from "@/components/cards/business-card"
+import type { Business } from "@prisma/client"
 
 const CATEGORIES = ["All", "Adventure", "Wellness", "Dining", "Culture", "Stays"]
 

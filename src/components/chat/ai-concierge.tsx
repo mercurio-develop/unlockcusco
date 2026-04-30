@@ -9,11 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
-import ItineraryAlternatives from "@/components/concierge/ItineraryAlternatives"
-import { TaxiPaymentCard } from "@/features/concierge/components/TaxiPaymentCard"
-import ExperienceRecommendations from "@/components/concierge/ExperienceRecommendations"
-import { CinematicTimeline } from "@/features/concierge/components/CinematicTimeline"
+import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
+import { SearchResultsCard } from "@/features/concierge/components/SearchResultsCard"
 
 export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
@@ -133,56 +131,22 @@ export function AiConcierge() {
                         {(msg as any).content || msg.parts?.map((p: { type: string, text?: string }) => p.type === 'text' ? p.text : '').join('')}
                       </div>
                     </div>
-                    {(msg as any).toolInvocations?.map((toolInvocation: any) => {
-                      if (toolInvocation.toolName === 'buildChronoRelay' && toolInvocation.state === 'result') {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return <CinematicTimeline key={toolInvocation.toolCallId} relay={toolInvocation.result as any} />
-                      }
-                      if (toolInvocation.toolName === 'askAvailability') {
-                        if (toolInvocation.state === 'result') {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          return <PendingAvailability key={toolInvocation.toolCallId} message={(toolInvocation.result as any).message} />
-                        } else {
-                          return <PendingAvailability key={toolInvocation.toolCallId} message="Contacting vendor via Ghost Phone..." />
-                        }
-                      }
-                      if (toolInvocation.toolName === 'buildSpatialItinerary' && toolInvocation.state === 'result') {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return <ItineraryAlternatives key={toolInvocation.toolCallId} plans={toolInvocation.result as any} />
-                      }
-                      if (toolInvocation.toolName === 'estimateTaxiFare' && toolInvocation.state === 'result') {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return <TaxiPaymentCard key={toolInvocation.toolCallId} taxi={toolInvocation.result as any} />
-                      }
-                      if (toolInvocation.toolName === 'findLocalExperiences' && toolInvocation.state === 'result') {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return <ExperienceRecommendations key={toolInvocation.toolCallId} result={toolInvocation.result as any} />
-                      }
-                      return null;
-                    })}
-                    {/* Fallback for parts if used by alternative transport */}
+                      {/* AI SDK v6: ToolUIPart uses type `tool-${toolName}`, state 'output-available', field `output` */}
                     {msg.parts && msg.parts.map((part: any, idx: number) => {
-                      if (part.type === 'tool-invocation') {
-                        const toolInvocation = part.toolInvocation;
-                        if (toolInvocation?.toolName === 'buildChronoRelay' && toolInvocation?.state === 'result') {
-                          return <CinematicTimeline key={toolInvocation.toolCallId || idx} relay={toolInvocation.result as any} />
+                      const key = part.toolCallId || idx;
+                      if (part.state === 'output-available') {
+                        if (part.type === 'tool-buildItinerary') {
+                          return <ItinerarySummaryCard key={key} itinerary={part.output as any} />
                         }
-                        if (toolInvocation?.toolName === 'askAvailability') {
-                          if (toolInvocation?.state === 'result') {
-                            return <PendingAvailability key={toolInvocation.toolCallId || idx} message={(toolInvocation.result as any).message} />
-                          } else {
-                            return <PendingAvailability key={toolInvocation.toolCallId || idx} message="Contacting vendor via Ghost Phone..." />
-                          }
+                        if (part.type === 'tool-searchDatabase') {
+                          return <SearchResultsCard key={key} businesses={part.output as any[]} />
                         }
-                        if (toolInvocation?.toolName === 'buildSpatialItinerary' && toolInvocation?.state === 'result') {
-                          return <ItineraryAlternatives key={toolInvocation.toolCallId || idx} plans={toolInvocation.result as any} />
+                        if (part.type === 'tool-askAvailability') {
+                          return <PendingAvailability key={key} message={(part.output as any).message} />
                         }
-                        if (toolInvocation?.toolName === 'estimateTaxiFare' && toolInvocation?.state === 'result') {
-                          return <TaxiPaymentCard key={toolInvocation.toolCallId || idx} taxi={toolInvocation.result as any} />
-                        }
-                        if (toolInvocation?.toolName === 'findLocalExperiences' && toolInvocation?.state === 'result') {
-                          return <ExperienceRecommendations key={toolInvocation.toolCallId || idx} result={toolInvocation.result as any} />
-                        }
+                      }
+                      if (part.type === 'tool-askAvailability' && part.state !== 'output-available') {
+                        return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
                       }
                       return null;
                     })}

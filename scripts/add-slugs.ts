@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 const TOWNS = [
   { slug: 'urubamba',      lat: -13.3047, lng: -72.1167 },
-  { slug: 'pisac',         lat: -13.2995, lng: -71.8480 },
+  { slug: 'pisac',         lat: -13.4225, lng: -71.8488 },
   { slug: 'ollantaytambo', lat: -13.2570, lng: -72.2630 },
   { slug: 'chinchero',     lat: -13.3864, lng: -72.0428 },
   { slug: 'maras',         lat: -13.3350, lng: -72.1600 },
@@ -39,7 +39,7 @@ async function main() {
 
   let updated = 0
   for (const b of businesses) {
-    const locSlug = locationSlug(b.lat, b.lng)
+    const locSlug = locationSlug(b.lat ?? 0, b.lng ?? 0)
     const catSlug = categorySlug(b.category)
     await prisma.business.update({
       where: { id: b.id },

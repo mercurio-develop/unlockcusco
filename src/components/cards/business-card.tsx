@@ -11,26 +11,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap } from "lucide-react"
+import { Star, Zap, Plus } from "lucide-react"
 import Image from "next/image"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
+import { trackWhatsappClick } from "@/features/business/actions/track-click"
+import { trackBusinessView } from "@/features/business/actions/track-view"
+import { submitLead } from "@/features/leads/actions/submit-lead"
+import type { Business } from "@prisma/client"
 import { useItinerary } from "@/lib/store/itinerary-context"
-
-export type Business = {
-  id: string
-  name: string
-  category: string
-  lat: number
-  lng: number
-  rating: number | null
-  reviewsCount: number
-  imageUrl: string
-  whatsapp: string | null
-  isClaimed: boolean
-  instagramHandle?: string | null
-  instagramFollowers?: number
-  heroImages?: string | null
-}
+import { cn } from "@/lib/utils"
 
 interface BusinessCardProps {
   business: Business
@@ -43,67 +32,33 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
   const [touristName, setTouristName] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const { activeRelay, setActiveRelay, swapModeCategory, setSwapModeCategory, setPanelMode } = useItinerary()
-
+  const { activeItinerary, insertWaypoint } = useItinerary()
   const isHorizontal = orientation === "horizontal"
 
-  const handleBookNow = (e: React.MouseEvent) => {
+  const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!business.whatsapp) return
+    await trackWhatsappClick(business.id)
     const msg = encodeURIComponent(
       `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to make a reservation. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp}?text=${msg}`, "_blank")
   }
 
-  const handleReplace = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!activeRelay || !swapModeCategory) return;
-
-    const newRelay = { ...activeRelay };
-
-    if (swapModeCategory === "food") {
-      newRelay.food = {
-        id: business.id,
-        name: business.name,
-        rating: business.rating || 4.5,
-        whatsapp: business.whatsapp || undefined,
-        lat: business.lat,
-        lng: business.lng,
-      };
-      newRelay.foodCost = 25; // Default fixed fee or custom pricing logic
-    } else if (swapModeCategory === "transit") {
-      newRelay.transit = {
-        id: business.id,
-        name: business.name,
-        driver: "Assigned Driver", // Could be dynamic based on the business
-        rating: business.rating || 4.5,
-        whatsapp: business.whatsapp || undefined,
-        lat: business.lat,
-        lng: business.lng,
-      };
-    } else if (swapModeCategory === "stay") {
-      newRelay.stay = {
-        id: business.id,
-        name: business.name,
-        rating: business.rating || 4.5,
-        lat: business.lat,
-        lng: business.lng,
-      };
-    }
-
-    newRelay.totalCost = newRelay.foodCost + newRelay.transitCost;
-    setActiveRelay(newRelay);
-    setSwapModeCategory(null);
-    setPanelMode("itinerary");
-  };
-
   const handleConsult = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!touristName || !date) return
 
     try {
+      // First generate the shadow lead WhatsApp link
       const res = await generateShadowLead(business.id, touristName, date)
+      // Record the actual lead metric in the database
+      await submitLead({
+        businessId: business.id,
+        touristName,
+        touristEmail: "tourist@example.com",
+        date: new Date(date),
+      })
       if (res.success) {
         window.open(res.url, "_blank")
         setIsOpen(false)
@@ -113,12 +68,24 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
     }
   }
 
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect()
+      trackBusinessView(business.id)
+    }
+  }
+
+  const handleAddActivity = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    insertWaypoint(business)
+  }
+
   const parsedHeroImages = business.heroImages && business.heroImages !== "[]" ? JSON.parse(business.heroImages) : []
   const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl
 
   return (
     <div
-      onClick={onSelect}
+      onClick={handleCardClick}
       className={`group cursor-pointer transition-all duration-300 ${
         isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100"
       } ${isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"}`}
@@ -173,20 +140,11 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
           </p>
         </div>
 
-        <div className={isHorizontal ? "mt-3 sm:mt-auto" : "mt-2"}>
-          {swapModeCategory ? (
-            <Button
-              onClick={handleReplace}
-              className={`w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-semibold rounded-xl shadow-lg transition-transform hover:scale-[1.02] ${
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
-              }`}
-            >
-              Replace in Itinerary
-            </Button>
-          ) : business.isClaimed ? (
+        <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
+          {business.isClaimed ? (
             <Button
               onClick={handleBookNow}
-              className={`w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all ${
+              className={`flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all ${
                 isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
               }`}
             >
@@ -198,7 +156,7 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
                 <Button 
                   onClick={(e) => e.stopPropagation()} 
                   variant="outline" 
-                  className={`w-full bg-white text-slate-900 border-gray-200 hover:bg-gray-50 hover:text-slate-900 font-semibold rounded-xl transition-all ${
+                  className={`flex-1 bg-white text-slate-900 border-gray-200 hover:bg-gray-50 hover:text-slate-900 font-semibold rounded-xl transition-all ${
                     isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
                   }`}
                 >
@@ -236,6 +194,18 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
                 </Button>
               </DialogContent>
             </Dialog>
+          )}
+
+          {activeItinerary && (
+            <Button
+              onClick={handleAddActivity}
+              className={`shrink-0 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-none rounded-xl transition-all ${
+                isHorizontal ? "w-9 h-9 p-0" : "w-10 py-5"
+              }`}
+              title="Add to Itinerary"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
           )}
         </div>
       </div>

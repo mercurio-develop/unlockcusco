@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
 const CATEGORIES = [
+  { label: "🎟️ Boleto", value: "Boleto" },
   { label: "🥾 Adventure", value: "Adventure" },
   { label: "🧘 Wellness", value: "Wellness" },
   { label: "🍽️ Dining", value: "Dining" },
@@ -27,7 +28,7 @@ const SACRED_VALLEY_LOCATIONS = [
   "Urubamba", "Pisac", "Maras", "Ollantaytambo", "Chinchero", "Calca", "Cusco", "Machu Picchu"
 ];
 
-export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
+export function ExploreSearch({ initialQuery, isItineraryMode = false }: { initialQuery: string, isItineraryMode?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [value, setValue] = useState("")
@@ -55,7 +56,19 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
   const handleSearch = () => {
     if (!value.trim()) return
 
-    let finalQ = value.trim()
+    const rawValue = value.trim()
+    const wordCount = rawValue.split(" ").length
+
+    // If we're explicitly in itinerary mode, or the user typed a conversational sentence (e.g., > 3 words)
+    if (isItineraryMode || wordCount > 3) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("ai_prompt", rawValue)
+      router.push(`/explore?${params.toString()}`)
+      setValue("") // clear input
+      return
+    }
+
+    let finalQ = rawValue
     let finalLoc = currentLoc
 
     // Smart extract location from query
@@ -107,9 +120,33 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
     inputRef.current?.focus();
   };
 
+  const handleDevAutofill = () => {
+    const queries = [
+      "I'm in Pisac heading to Ollantaytambo. I want coffee, a local market, and a nice lunch with a view.",
+      "I am in Urubamba. Train at 4 PM in Ollanta. Quick hike and vegan food before I leave.",
+      "Staying in Pisac, heading to Maras today. I want to try a good picantería for lunch while still in Pisac.",
+      "Starting in Chinchero ending in Cusco. I just want a relaxing day, wellness stuff, no adventure.",
+      "I really want to go ATV riding and get a huge dinner afterwards!"
+    ];
+    const currentIndex = queries.findIndex(q => q === value);
+    const nextIndex = (currentIndex + 1) % queries.length;
+    setValue(queries[nextIndex]);
+  };
+
   return (
     <>
       <div className="relative mb-6 z-0">
+        {process.env.NODE_ENV === 'development' && (
+          <div className="absolute -top-7 right-2 z-20">
+            <button
+              onClick={handleDevAutofill}
+              className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-colors shadow-sm"
+              title="Autofill Test Query (Dev Only)"
+            >
+              Test AI
+            </button>
+          </div>
+        )}
         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
           <Sparkles className="h-5 w-5 text-rose-500" />
         </div>
@@ -154,72 +191,74 @@ export function ExploreSearch({ initialQuery }: { initialQuery: string }) {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {/* Location Filters */}
-        <div className="flex flex-col gap-2">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Location</span>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
-            <button
-              onClick={() => navigateFilters("", currentCat)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                currentLoc === "" 
-                  ? "bg-slate-900 text-white shadow-md" 
-                  : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-              }`}
-            >
-              Anywhere
-            </button>
-            {LOCATIONS.map((loc) => (
+      {!isItineraryMode && (
+        <div className="flex flex-col gap-4">
+          {/* Location Filters */}
+          <div className="flex flex-col gap-2">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Location</span>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
               <button
-                key={loc.value}
-                onClick={() => navigateFilters(loc.value, currentCat)}
+                onClick={() => navigateFilters("", currentCat)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                  currentLoc === loc.value 
+                  currentLoc === "" 
                     ? "bg-slate-900 text-white shadow-md" 
                     : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                 }`}
               >
-                {loc.label}
+                Anywhere
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Category Filters */}
-        <div className="flex flex-col gap-2">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Category</span>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
-            <button
-              onClick={() => navigateFilters(currentLoc, "")}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                currentCat === "" && !CATEGORIES.some(c => initialQuery?.toLowerCase().includes(c.value.toLowerCase()))
-                  ? "bg-slate-900 text-white shadow-md" 
-                  : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-              }`}
-            >
-              All Experiences
-            </button>
-            {CATEGORIES.map((cat) => {
-              const isActive =
-                currentCat === cat.value ||
-                (initialQuery && initialQuery.toLowerCase().includes(cat.value.toLowerCase()))
-              return (
+              {LOCATIONS.map((loc) => (
                 <button
-                  key={cat.value}
-                  onClick={() => handleCategoryQuickFilter(cat.value)}
+                  key={loc.value}
+                  onClick={() => navigateFilters(loc.value, currentCat)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                    isActive 
+                    currentLoc === loc.value 
                       ? "bg-slate-900 text-white shadow-md" 
                       : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
                   }`}
                 >
-                  {cat.label}
+                  {loc.label}
                 </button>
-              )
-            })}
+              ))}
+            </div>
+          </div>
+
+          {/* Category Filters */}
+          <div className="flex flex-col gap-2">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Category</span>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
+              <button
+                onClick={() => navigateFilters(currentLoc, "")}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                  currentCat === "" && !CATEGORIES.some(c => initialQuery?.toLowerCase().includes(c.value.toLowerCase()))
+                    ? "bg-slate-900 text-white shadow-md" 
+                    : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
+                All Experiences
+              </button>
+              {CATEGORIES.map((cat) => {
+                const isActive =
+                  currentCat === cat.value ||
+                  (initialQuery && initialQuery.toLowerCase().includes(cat.value.toLowerCase()))
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => handleCategoryQuickFilter(cat.value)}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
+                      isActive 
+                        ? "bg-slate-900 text-white shadow-md" 
+                        : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }
