@@ -24,11 +24,16 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
   }
 
   const handleSelect = (business: any) => {
-    if (business.businessType === 'service' || business.category === 'Taxi' || business.category === 'Guide' || business.category === 'Agency') {
-      const params = new URLSearchParams(window.location.search);
-      params.set('mode', 'service');
-      params.set('q', business.category || business.name);
-      router.push(`/explore?${params.toString()}`);
+    if (business.businessType === 'service' || business.category === 'Taxi' || business.category === 'Guide' || business.category === 'Agency' || business.category === 'Therapist') {
+      if (business.category === 'Taxi') {
+        router.push('/services/transport');
+      } else if (business.category === 'Agency') {
+        router.push('/services/agencies');
+      } else if (business.category === 'Therapist' || business.category === 'Guide') {
+        router.push('/services/healers');
+      } else {
+        router.push('/services');
+      }
     } else {
       setSelectedId(business.id);
     }

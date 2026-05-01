@@ -4,7 +4,7 @@ import { useEffect, useRef, useMemo, useState } from "react"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useItinerary } from "@/lib/store/itinerary-context"
 
@@ -27,7 +27,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const mapRef = useRef<MapRef>(null)
   const [popupBusiness, setPopupBusiness] = useState<Business | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation } = useItinerary()
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -133,14 +133,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     const isItineraryId = selectedId === 'itin-start' || selectedId === 'itin-arrival';
     const pitch = isItineraryId ? 0 : (mapMode === "satellite" ? 60 : 0);
     
-    if (selectedId === 'itin-start' && activeItinerary?.startAnchor?.lat && activeItinerary?.startAnchor?.lng) {
-      mapRef.current?.flyTo({ center: [activeItinerary.startAnchor.lng as number, activeItinerary.startAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+    const start = (activeItinerary as any)?.startAnchor || (activeItinerary as any)?.origin;
+    if (selectedId === 'itin-start' && start?.lat && start?.lng) {
+      mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
 
-    if (selectedId === 'itin-arrival' && activeItinerary?.endAnchor?.lat && activeItinerary?.endAnchor?.lng) {
-      mapRef.current?.flyTo({ center: [activeItinerary.endAnchor.lng as number, activeItinerary.endAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+    const end = (activeItinerary as any)?.endAnchor || (activeItinerary as any)?.destination;
+    if (selectedId === 'itin-arrival' && end?.lat && end?.lng) {
+      mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
@@ -267,16 +269,30 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           const start = (activeItinerary as any)?.startAnchor || (activeItinerary as any)?.origin;
           if (!start?.lat || !start?.lng) return null;
           return (
-            <Marker longitude={start.lng} latitude={start.lat} anchor="bottom">
-              <div className="cursor-pointer group/start flex flex-col items-center" onClick={e => {
-                e.stopPropagation();
-                mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
-              }}>
-                <div className="relative flex flex-col items-center">
-                  <div className="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold text-white z-10 transition-transform group-hover/start:scale-110">
-                    {start.type === 'AIRPORT' ? 'CUZ' : 'START'}
+            <Marker 
+              longitude={start.lng} 
+              latitude={start.lat} 
+              anchor="bottom"
+              draggable={true}
+              onDragEnd={(e) => {
+                setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+              }}
+            >
+              <div 
+                className="cursor-grab active:cursor-grabbing group/start flex flex-col items-center" 
+                title="Drag to change start location"
+                onClick={e => {
+                  e.stopPropagation();
+                  mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
+                }}
+              >
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />
+                <div className="relative flex flex-col items-center z-10 transition-transform group-hover/start:-translate-y-1">
+                  <div className="bg-slate-900 text-white px-3 py-1.5 rounded-full shadow-xl border-[2.5px] border-white flex items-center gap-1.5">
+                    {start.type === 'AIRPORT' ? <Plane className="w-3.5 h-3.5" /> : <Navigation className="w-3.5 h-3.5" />}
+                    <span className="text-[11px] font-bold tracking-wide">{start.type === 'AIRPORT' ? 'CUZ' : 'START'}</span>
                   </div>
-                  <div className="w-1.5 h-3 bg-slate-900 -mt-0.5 z-0 rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-slate-900 rotate-45 -mt-1.5 border-r-[2.5px] border-b-[2.5px] border-white" />
                 </div>
               </div>
             </Marker>
@@ -288,16 +304,30 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           const end = (activeItinerary as any)?.endAnchor || (activeItinerary as any)?.destination;
           if (!end?.lat || !end?.lng) return null;
           return (
-            <Marker longitude={end.lng} latitude={end.lat} anchor="bottom">
-              <div className="cursor-pointer group/start flex flex-col items-center" onClick={e => {
-                e.stopPropagation();
-                mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
-              }}>
-                <div className="relative flex flex-col items-center">
-                  <div className="w-9 h-9 rounded-full bg-rose-600 border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold text-white z-10 transition-transform group-hover/end:scale-110">
-                    {end.type === 'HOTEL' ? 'BED' : 'END'}
+            <Marker 
+              longitude={end.lng} 
+              latitude={end.lat} 
+              anchor="bottom"
+              draggable={true}
+              onDragEnd={(e) => {
+                setEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+              }}
+            >
+              <div 
+                className="cursor-grab active:cursor-grabbing group/start flex flex-col items-center" 
+                title="Drag to change end location"
+                onClick={e => {
+                  e.stopPropagation();
+                  mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
+                }}
+              >
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />
+                <div className="relative flex flex-col items-center z-10 transition-transform group-hover/start:-translate-y-1">
+                  <div className="bg-rose-600 text-white px-3 py-1.5 rounded-full shadow-xl border-[2.5px] border-white flex items-center gap-1.5">
+                    {end.type === 'HOTEL' ? <Bed className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
+                    <span className="text-[11px] font-bold tracking-wide">{end.type === 'HOTEL' ? 'BED' : 'END'}</span>
                   </div>
-                  <div className="w-1.5 h-3 bg-rose-600 -mt-0.5 z-0 rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-rose-600 rotate-45 -mt-1.5 border-r-[2.5px] border-b-[2.5px] border-white" />
                 </div>
               </div>
             </Marker>

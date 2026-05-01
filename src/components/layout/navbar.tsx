@@ -12,9 +12,7 @@ export function Navbar() {
     { href: homePath(), label: "Home", icon: Home },
     { href: explorePath(), label: "Places", icon: Compass },
     { href: servicesPath(), label: "Services", icon: Sparkles },
-    { href: therapistsPath(), label: "Healers", icon: Sparkles },
     { href: travelDesignPath(), label: "Travel Design", icon: Route },
-    { href: agenciesPath(), label: "Agencies", icon: Building2 },
     { href: dashboardPath(), label: "For Business", icon: Map },
   ]
 

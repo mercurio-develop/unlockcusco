@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { useBuilder } from "@/features/pro-builder/store/builder-context"
 import { MapPin, Plus, Check, Search, Loader2, X, Star } from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
+import { ExperienceEvent } from "../types"
 
 // Minimal type for display in picker
 type MinimizedPackage = {
@@ -20,13 +22,16 @@ interface ExperiencePickerModalProps {
 }
 
 export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: ExperiencePickerModalProps) {
-  const { draftTrip, addPackageToDay, removePackageFromDay } = useBuilder()
+  const { draftTrip, addEventToDay, removeEventFromDay } = useBuilder()
   const [packages, setPackages] = useState<MinimizedPackage[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
 
   const day = draftTrip.days.find(d => d.dayNumber === dayNumber)
-  const selectedIds = day?.packageIds || []
+  
+  // Find all existing EXPERIENCE events for this day
+  const experienceEvents = (day?.events || []).filter(e => e.type === 'EXPERIENCE') as ExperienceEvent[]
+  const selectedPackageIds = experienceEvents.map(e => e.packageId)
 
   useEffect(() => {
     if (isOpen && packages.length === 0) {
@@ -51,11 +56,22 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
     p.tags.toLowerCase().includes(search.toLowerCase())
   )
 
-  const togglePackage = (id: string) => {
-    if (selectedIds.includes(id)) {
-      removePackageFromDay(dayNumber, id)
+  const togglePackage = (pkg: MinimizedPackage) => {
+    const isSelected = selectedPackageIds.includes(pkg.id)
+    if (isSelected) {
+      // Find the event ID to remove
+      const eventToRemove = experienceEvents.find(e => e.packageId === pkg.id)
+      if (eventToRemove) {
+        removeEventFromDay(dayNumber, eventToRemove.id)
+      }
     } else {
-      addPackageToDay(dayNumber, id)
+      addEventToDay(dayNumber, {
+        id: uuidv4(),
+        type: 'EXPERIENCE',
+        startTime: "09:00", // Default time
+        packageId: pkg.id,
+        title: pkg.title
+      })
     }
   }
 
@@ -98,11 +114,11 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map(pkg => {
-                const isSelected = selectedIds.includes(pkg.id)
+                const isSelected = selectedPackageIds.includes(pkg.id)
                 return (
                   <div 
                     key={pkg.id} 
-                    onClick={() => togglePackage(pkg.id)}
+                    onClick={() => togglePackage(pkg)}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                       isSelected 
                         ? 'border-slate-900 bg-slate-50 shadow-sm' 
@@ -138,7 +154,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
         {/* Footer */}
         <div className="p-6 border-t border-slate-100 bg-white flex justify-between items-center">
           <span className="text-slate-500 text-sm font-semibold">
-            {selectedIds.length} experience{selectedIds.length !== 1 && 's'} selected for Day {dayNumber}
+            {selectedPackageIds.length} experience{selectedPackageIds.length !== 1 && 's'} selected for Day {dayNumber}
           </span>
           <button 
             onClick={onClose}

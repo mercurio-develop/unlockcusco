@@ -27,6 +27,7 @@ interface ItineraryContextType {
   addAccommodation: (accommodationAlts: any[]) => void;
   selectBasecamp: (hotel: any) => void;
   setStartAnchorLocation: (lat: number, lng: number, name?: string) => void;
+  setEndAnchorLocation: (lat: number, lng: number, name?: string) => void;
 }
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(undefined);
@@ -242,6 +243,28 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     setActiveItinerary(newItinerary);
   };
 
+  const setEndAnchorLocation = (lat: number, lng: number, name: string = "Pinned Location") => {
+    if (!activeItinerary) return;
+    const newItinerary = { ...activeItinerary };
+    if (newItinerary.endAnchor) {
+      newItinerary.endAnchor = {
+        ...newItinerary.endAnchor,
+        lat,
+        lng,
+        title: name,
+        locationStr: "Custom Location"
+      };
+    } else if ((newItinerary as any).destination) {
+      (newItinerary as any).destination = {
+        ...(newItinerary as any).destination,
+        lat,
+        lng,
+        title: name,
+      };
+    }
+    setActiveItinerary(newItinerary);
+  };
+
   return (
     <ItineraryContext.Provider value={{
       activeItinerary,
@@ -264,7 +287,8 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       dismissAccommodation,
       addAccommodation,
       selectBasecamp,
-      setStartAnchorLocation
+      setStartAnchorLocation,
+      setEndAnchorLocation
     }}>
       {children}
     </ItineraryContext.Provider>

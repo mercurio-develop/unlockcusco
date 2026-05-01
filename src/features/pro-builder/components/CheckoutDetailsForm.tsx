@@ -21,10 +21,17 @@ export function CheckoutDetailsForm() {
 
   const isValid = name.trim() !== "" && email.includes("@")
 
+  const handleMagicAutoFill = () => {
+    setName("Robert Jenkins")
+    setEmail("robert@example.com")
+    setPhone("+1 555 0192")
+    setClientNotes("Welcome to the Sacred Valley! Drink plenty of coca tea.")
+    setInternalNotes("VIP Clients. Ensure champagne in room on arrival.")
+  }
+
   const handleGenerate = async () => {
     setIsGenerating(true)
     
-    // Update context one last time
     updateTripMeta({
       leadPax: { name, email, phone },
       clientNotes,
@@ -40,7 +47,6 @@ export function CheckoutDetailsForm() {
       })
 
       if (result.success) {
-        // Clear draft and redirect to the newly created trip view
         resetBuilder()
         router.push(`/trip/${result.shareToken}`)
       }
@@ -54,7 +60,6 @@ export function CheckoutDetailsForm() {
   return (
     <div className="w-full flex bg-slate-50 min-h-[600px]">
       
-      {/* Left Sidebar - Summary */}
       <div className="w-1/3 bg-slate-900 text-white p-8 overflow-y-auto border-r border-slate-800 hidden md:block">
         <h2 className="text-3xl font-serif font-bold mb-2 leading-tight">Finalizing</h2>
         <p className="text-slate-400 mb-8">{draftTrip.title}</p>
@@ -66,15 +71,14 @@ export function CheckoutDetailsForm() {
            </div>
            
            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
-             <p className="text-xs uppercase tracking-widest font-semibold text-slate-500 mb-1">Experiences Selected</p>
+             <p className="text-xs uppercase tracking-widest font-semibold text-slate-500 mb-1">Total Events</p>
              <p className="font-medium text-white">
-               {draftTrip.days.reduce((acc, day) => acc + day.packageIds.length, 0)} Experiences
+               {draftTrip.days.reduce((acc, day) => acc + day.events.length, 0)} Timeline Blocks
              </p>
            </div>
         </div>
       </div>
 
-      {/* Right Content - Form */}
       <div className="flex-1 p-8 overflow-y-auto bg-white relative">
         {isGenerating && (
           <div className="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
@@ -86,9 +90,17 @@ export function CheckoutDetailsForm() {
 
         <div className="max-w-xl mx-auto space-y-10 pb-20">
           
-          <div className="mb-8">
-            <h2 className="text-2xl font-serif font-bold text-slate-900">Lead Passenger Details</h2>
-            <p className="text-slate-500 text-sm">Who is the primary contact for this proposal?</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-serif font-bold text-slate-900">Lead Passenger Details</h2>
+              <p className="text-slate-500 text-sm">Who is the primary contact for this proposal?</p>
+            </div>
+            <button 
+              onClick={handleMagicAutoFill}
+              className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full hover:bg-rose-100 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Auto-Fill Demo
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -153,13 +165,12 @@ export function CheckoutDetailsForm() {
           </div>
         </div>
 
-        {/* Footer Nav */}
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-slate-100 flex justify-between items-center z-10">
           <button 
-            onClick={() => setViewState('canvas')}
+            onClick={() => setViewState('workspace')}
             className="flex items-center gap-2 text-slate-500 font-semibold hover:text-slate-900 transition-colors"
           >
-            <ChevronLeft className="w-4 h-4" /> Back to Canvas
+            <ChevronLeft className="w-4 h-4" /> Back to Timeline
           </button>
 
           <button

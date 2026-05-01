@@ -5,6 +5,7 @@ import { askAvailability } from '@/lib/ai/tools/ask-availability';
 import { searchDatabase } from '@/lib/ai/tools/search-database';
 import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
+import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
 
 export const maxDuration = 30;
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
         searchDatabase,
         buildMacroTrip,
         showBoletoInfo,
+        estimateTaxiFare,
       },
     });
 

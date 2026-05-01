@@ -109,6 +109,11 @@ export function JourneyDesigner() {
   const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
+  const [generatedTrip, setGeneratedTrip] = useState<any>(null)
+  const [isUnlocking, setIsUnlocking] = useState(false)
+  const [isUnlocked, setIsUnlocked] = useState(false)
+  const [shareToken, setShareToken] = useState<string | null>(null)
+
   const [minStartDate] = useState(() => {
     const d = new Date()
     d.setDate(d.getDate() + 1)
@@ -235,13 +240,50 @@ export function JourneyDesigner() {
       })
       if (!res.ok) throw new Error("Failed")
       const data = await res.json()
-      setMacroTrip(data)
-      setPanelMode("macro")
-      router.push('/explore')
+      setGeneratedTrip(data)
+      setIsGenerating(false)
+      setStep(6)
     } catch (err) {
       console.error(err)
       alert("There was an error designing your expedition. Please try again.")
       setIsGenerating(false)
+    }
+  }
+
+  const handleUnlock = async () => {
+    setIsUnlocking(true)
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Save to DB and generate magic link
+    try {
+      const res = await fetch('/api/trip/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trip: generatedTrip, dates, pax })
+      })
+      if (!res.ok) throw new Error("Failed to save trip")
+      const data = await res.json()
+      setShareToken(data.shareToken)
+    } catch (err) {
+      console.error(err)
+      // Even if it fails, maybe proceed or show error
+      alert("There was an issue securing your itinerary. Please contact support.")
+      setIsUnlocking(false)
+      return
+    }
+
+    setIsUnlocking(false)
+    setIsUnlocked(true)
+  }
+
+  const proceedToItinerary = () => {
+    if (shareToken) {
+      router.push(`/trip/${shareToken}`)
+    } else if (generatedTrip) {
+      setMacroTrip(generatedTrip)
+      setPanelMode("macro")
+      router.push('/explore')
     }
   }
 
@@ -627,6 +669,91 @@ export function JourneyDesigner() {
               <Sparkles className="w-5 h-5" /> Curate My Journey
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Step 6: Unlock & Book Paywall */}
+      {step === 6 && (
+        <div className="max-w-2xl mx-auto text-center py-12 animate-in fade-in zoom-in duration-500">
+          {!isUnlocked ? (
+            <div className="space-y-8">
+              <div className="mx-auto w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mb-6">
+                <Sparkles className="w-10 h-10 text-rose-600" />
+              </div>
+              <h2 className="text-4xl font-serif text-slate-900 mb-4">Your Expedition is Ready</h2>
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                The AI has curated a perfect {numDays}-day journey based on your profile, balancing rest, exploration, and exclusive access to the Sacred Valley.
+              </p>
+              
+              <div className="relative rounded-3xl overflow-hidden border border-slate-200 p-8 bg-slate-50 mb-10">
+                <div className="absolute inset-0 backdrop-blur-md bg-white/40 z-10 flex items-center justify-center">
+                  <div className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-xl text-center max-w-sm">
+                    <p className="text-sm font-bold text-rose-600 uppercase tracking-widest mb-2">Premium Access</p>
+                    <p className="text-slate-900 font-medium mb-6">Unlock the full itinerary, daily schedules, and your live AI WhatsApp Concierge.</p>
+                    <button
+                      onClick={handleUnlock}
+                      disabled={isUnlocking}
+                      className="w-full bg-slate-900 text-white rounded-xl px-8 py-4 font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                    >
+                      {isUnlocking ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                      ) : (
+                        <>Unlock & Access Concierge • $29</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Teaser content underneath the blur */}
+                <div className="space-y-4 opacity-50 select-none pointer-events-none">
+                  <div className="h-12 bg-slate-200 rounded-lg w-3/4 mx-auto" />
+                  <div className="h-8 bg-slate-200 rounded-lg w-1/2 mx-auto" />
+                  <div className="grid grid-cols-3 gap-4 mt-8">
+                    <div className="h-32 bg-slate-200 rounded-xl" />
+                    <div className="h-32 bg-slate-200 rounded-xl" />
+                    <div className="h-32 bg-slate-200 rounded-xl" />
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-xs text-slate-400">Secure payment via Stripe. Satisfaction guaranteed.</p>
+            </div>
+          ) : (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="mx-auto w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+                <Check className="w-12 h-12 text-emerald-500" strokeWidth={3} />
+              </div>
+              <h2 className="text-4xl font-serif text-slate-900 mb-4">Payment Successful!</h2>
+              <p className="text-lg text-slate-600 mb-8">
+                Your journey has been unlocked and securely saved.
+              </p>
+
+              {shareToken && (
+                <div className="bg-white border border-slate-200 rounded-xl p-6 mb-10 text-left shadow-sm max-w-md mx-auto relative group">
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">Your Magic Link</p>
+                  <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <code className="text-slate-900 text-xs flex-1 overflow-x-hidden text-ellipsis whitespace-nowrap">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/trip/${shareToken}` : ''}
+                    </code>
+                    <button 
+                      onClick={() => navigator.clipboard.writeText(typeof window !== 'undefined' ? `${window.location.origin}/trip/${shareToken}` : '')}
+                      className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-md font-semibold transition-colors shrink-0 uppercase tracking-wider"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3 leading-relaxed">Save this link. You can use it to access your live itinerary from any device.</p>
+                </div>
+              )}
+
+              <button
+                onClick={proceedToItinerary}
+                className="bg-rose-600 text-white rounded-xl px-10 py-5 text-lg font-bold shadow-xl shadow-rose-600/30 hover:bg-rose-700 hover:scale-[1.02] transition-all"
+              >
+                Open My Journey &rarr;
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

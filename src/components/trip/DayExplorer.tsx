@@ -1,13 +1,13 @@
 "use client"
 
 import { useItinerary } from "@/lib/store/itinerary-context"
-import { Moon, Plane, MapPin, Star, User, ChevronRight, Clock, Car, Plus, Trash2, Repeat, Navigation } from "lucide-react"
+import { Moon, Plane, MapPin, Star, User, ChevronRight, Clock, Car, Plus, Trash2, Repeat, Navigation, ArrowUp, ArrowDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BasecampCarousel } from "./BasecampCarousel"
 import { useSearchParams } from "next/navigation"
 
 export function DayExplorer() {
-  const { activeItinerary, setSelectedId, macroTrip, setPanelMode, isEditMode, removeWaypoint, setExchangeTargetIndex, setStartAnchorLocation } = useItinerary()
+  const { activeItinerary, setSelectedId, macroTrip, setPanelMode, isEditMode, removeWaypoint, setExchangeTargetIndex, setStartAnchorLocation, swapDriverAlternative, moveWaypoint } = useItinerary()
   const searchParams = useSearchParams()
 
   if (!activeItinerary) return null
@@ -63,17 +63,15 @@ export function DayExplorer() {
               {startAnchor?.time && <div className="text-slate-500 text-xs font-mono">{startAnchor.time}</div>}
             </div>
             
-            {isEditMode && (
-              <div className="mt-4 pt-3 border-t border-gray-100">
-                <button
-                  onClick={handleUseCurrentLocation}
-                  className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
-                >
-                  <Navigation className="w-3.5 h-3.5" />
-                  Use Current Location
-                </button>
-              </div>
-            )}
+            <div className="mt-4 pt-3 border-t border-gray-100">
+              <button
+                onClick={handleUseCurrentLocation}
+                className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                Use Current Location
+              </button>
+            </div>
           </div>
         </div>
 
@@ -117,14 +115,35 @@ export function DayExplorer() {
             <div key={`${wp.id}-${idx}`} className="space-y-12">
 
               {edge && (
-                <div className="relative">
+                <div className="relative group">
                   <div className="absolute -left-[48px] top-0 bottom-0 flex flex-col justify-center">
                     <div className="bg-white border border-gray-200 p-1.5 rounded-full shadow-sm z-10">
                       <Car className="w-3 h-3 text-slate-500" />
                     </div>
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-gray-50 inline-block px-2 -ml-2">
-                    {edge.defaultDriver?.name} · {edge.fromLocation} → {edge.toLocation}
+                  <div className="bg-gray-50 inline-flex flex-col p-3 rounded-xl -ml-2 border border-gray-100 w-full max-w-sm">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
+                      {edge.fromLocation} → {edge.toLocation}
+                    </div>
+                    <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-200">
+                      <span className="text-xs font-semibold text-slate-700">{edge.defaultDriver?.name}</span>
+                      <span className="text-xs font-mono text-slate-500">${edge.defaultDriver?.priceUsd}</span>
+                    </div>
+                    {isEditMode && edge.alternativeDrivers && edge.alternativeDrivers.length > 0 && (
+                      <div className="mt-2 space-y-1.5">
+                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Alternative Options:</div>
+                        {edge.alternativeDrivers.map((alt: any, altIdx: number) => (
+                          <button
+                            key={alt.id}
+                            onClick={(e) => { e.stopPropagation(); swapDriverAlternative(idx, altIdx); }}
+                            className="text-left w-full px-2 py-1.5 text-xs text-slate-600 bg-white border border-gray-200 rounded-lg hover:border-rose-300 hover:text-rose-600 transition-colors flex justify-between items-center"
+                          >
+                            <span>{alt.name}</span>
+                            <span className="font-mono text-slate-400">${alt.priceUsd}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -162,7 +181,25 @@ export function DayExplorer() {
                 </div>
                 
                 {isEditMode && (
-                  <div className="flex items-center gap-2 mt-3 ml-2">
+                  <div className="flex flex-wrap items-center gap-2 mt-3 ml-2">
+                    {idx > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); moveWaypoint(idx, idx - 1); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-slate-900 transition-colors shadow-sm"
+                        title="Move Up"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {idx < waypoints.length - 1 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); moveWaypoint(idx, idx + 1); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-slate-900 transition-colors shadow-sm"
+                        title="Move Down"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     <button
                       onClick={(e) => { e.stopPropagation(); setExchangeTargetIndex(idx); setPanelMode("categories"); }}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-slate-900 transition-colors shadow-sm"
@@ -184,14 +221,43 @@ export function DayExplorer() {
 
         <div className="space-y-8">
            {transitEdges.length > waypoints.length && (
-              <div className="relative">
+              <div className="relative group">
                 <div className="absolute -left-[48px] top-0 bottom-0 flex flex-col justify-center">
                   <div className="bg-white border border-gray-200 p-1.5 rounded-full shadow-sm z-10">
                     <Car className="w-3 h-3 text-slate-500" />
                   </div>
                 </div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-gray-50 inline-block px-2 -ml-2">
-                  Return to Basecamp
+                <div className="bg-gray-50 inline-flex flex-col p-3 rounded-xl -ml-2 border border-gray-100 w-full max-w-sm">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
+                    Return to Basecamp
+                  </div>
+                  {(() => {
+                    const idx = transitEdges.length - 1;
+                    const edge = transitEdges[idx];
+                    return (
+                      <>
+                        <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-gray-200">
+                          <span className="text-xs font-semibold text-slate-700">{edge.defaultDriver?.name}</span>
+                          <span className="text-xs font-mono text-slate-500">${edge.defaultDriver?.priceUsd}</span>
+                        </div>
+                        {isEditMode && edge.alternativeDrivers && edge.alternativeDrivers.length > 0 && (
+                          <div className="mt-2 space-y-1.5">
+                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Alternative Options:</div>
+                            {edge.alternativeDrivers.map((alt: any, altIdx: number) => (
+                              <button
+                                key={alt.id}
+                                onClick={(e) => { e.stopPropagation(); swapDriverAlternative(idx, altIdx); }}
+                                className="text-left w-full px-2 py-1.5 text-xs text-slate-600 bg-white border border-gray-200 rounded-lg hover:border-rose-300 hover:text-rose-600 transition-colors flex justify-between items-center"
+                              >
+                                <span>{alt.name}</span>
+                                <span className="font-mono text-slate-400">${alt.priceUsd}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
            )}

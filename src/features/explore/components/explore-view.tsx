@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { MapIcon, MapPinOff, Loader2, MapPin, Briefcase } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { ExploreSearch } from "./explore-search"
-import { ServiceSearch } from "./service-search"
 import { BusinessCard } from "@/components/cards/business-card"
 import { ServiceCard } from "@/components/cards/service-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
@@ -214,28 +213,18 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
             </div>
           )}
 
-          {/* Search filters visible in Categories mode */}
-          {isServiceMode ? (
-            <ServiceSearch initialQuery={initialQuery} />
-          ) : (
-            panelMode === "categories" && (
-              <ExploreSearch initialQuery={initialQuery} isItineraryMode={false} />
-            )
-          )}
-        </div>
+        {/* Search filters visible in Categories mode */}
+        {panelMode === "categories" && (
+          <ExploreSearch initialQuery={initialQuery} isItineraryMode={false} />
+        )}
+      </div>
 
-        {/* ── Content ── */}
-        {isServiceMode ? (
-          <ServiceList
-            businesses={businesses}
-            isLoading={isLoading}
-            infiniteRef={ref}
-          />
-        ) : panelMode === "macro" && macroTrip ? (
-          <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
-            <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
-          </div>
-        ) : panelMode === "categories" ? (
+      {/* ── Content ── */}
+      {panelMode === "macro" && macroTrip ? (
+        <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
+          <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
+        </div>
+      ) : panelMode === "categories" ? (
           <PlacesList
             businesses={businesses}
             selectedId={selectedId}
