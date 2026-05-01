@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles, Loader2, Check } from "lucide-react"
+import { Sparkles, Loader2, Check, Search } from "lucide-react"
 import { useItinerary } from "@/lib/store/itinerary-context"
 
 type ExertionProfile = 'OBSERVER' | 'EXPLORER' | 'EXPEDITIONIST' | ''
@@ -16,6 +16,8 @@ type TourPackage = {
   basePriceUsd: number
   tags: string
   description: string
+  heroImage?: string | null
+  galleryJson?: string | null
   _score?: number
   agency?: {
     id: string
@@ -105,6 +107,7 @@ export function JourneyDesigner() {
   const [collapsedSectors, setCollapsedSectors] = useState<WizardSector[]>([])
   const [viewMode, setViewMode] = useState<'vallecito' | 'agencies'>('vallecito')
   const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const [minStartDate] = useState(() => {
     const d = new Date()
@@ -131,28 +134,21 @@ export function JourneyDesigner() {
     dates.start && dates.end && dates.start >= minStartDate && dates.end >= minEndDate
   )
 
-  const grouped = useMemo(() => {
-    const groups: Record<string, TourPackage[]> = {}
-    for (const pkg of availablePackages) {
-      if (pkg.agency && pkg.agency.slug !== 'vallecito-originals') continue;
-      if (!groups[pkg.sector]) groups[pkg.sector] = []
-      groups[pkg.sector].push(pkg)
-    }
-    return groups
-  }, [availablePackages])
-
-  const groupedByAgency = useMemo(() => {
-    const agencies: Record<string, { agency: any; packages: TourPackage[] }> = {}
-    for (const pkg of availablePackages) {
-      if (pkg.agency && pkg.agency.slug !== 'vallecito-originals') {
-        if (!agencies[pkg.agency.id]) {
-          agencies[pkg.agency.id] = { agency: pkg.agency, packages: [] }
-        }
-        agencies[pkg.agency.id].packages.push(pkg)
+  const filteredPackages = useMemo(() => {
+    const query = searchQuery.toLowerCase()
+    return availablePackages.filter(pkg => {
+      // Search filter
+      if (query && !pkg.title.toLowerCase().includes(query) && !pkg.tags.toLowerCase().includes(query)) return false
+      // Sector filter
+      if (!visibleSectors.includes(pkg.sector as WizardSector)) return false
+      // View mode filter
+      if (viewMode === 'vallecito') {
+        return !pkg.agency || pkg.agency.slug === 'vallecito-originals'
+      } else {
+        return pkg.agency && pkg.agency.slug !== 'vallecito-originals'
       }
-    }
-    return Object.values(agencies)
-  }, [availablePackages])
+    })
+  }, [availablePackages, searchQuery, visibleSectors, viewMode])
 
   const toggleLens = (lensId: string) => {
     setLenses(prev => {
@@ -188,6 +184,34 @@ export function JourneyDesigner() {
     setLoadingPackages(true)
     try {
       const params = new URLSearchParams({ exertion: exertionProfile, lenses: lenses.join(',') })
+      const res = await fetch(`/api/packages?${params}`)
+      if (!res.ok) throw new Error("Failed to fetch packages")
+      const text = await res.text()
+      const data = text ? JSON.parse(text) : []
+      setAvailablePackages(data)
+    } catch (err) {
+      console.error(err)
+      setAvailablePackages([])
+    } finally {
+      setLoadingPackages(false)
+    }
+  }
+
+  const handleDevAutofill = async () => {
+    // Dev only: autofill wizard to test step 5
+    const testStart = minStartDate
+    const testEnd = new Date(new Date(minStartDate).getTime() + 4 * 86400000).toISOString().split('T')[0]
+    setDates({ start: testStart, end: testEnd })
+    setPax(2)
+    setExertionProfile("EXPLORER")
+    setLenses(["CULTURE", "EPICUREAN"])
+    setAutonomy("ANCHOR_METHOD")
+    setNeedsHotels(false)
+    setStep(5)
+    
+    setLoadingPackages(true)
+    try {
+      const params = new URLSearchParams({ exertion: "EXPLORER", lenses: ["CULTURE", "EPICUREAN"].join(',') })
       const res = await fetch(`/api/packages?${params}`)
       if (!res.ok) throw new Error("Failed to fetch packages")
       const text = await res.text()
@@ -280,7 +304,13 @@ export function JourneyDesigner() {
               <button onClick={() => setPax(pax + 1)} className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-900 hover:bg-slate-200 transition-colors">+</button>
             </div>
           </div>
-          <div className="flex justify-end mt-8">
+          <div className="flex justify-between mt-8">
+            <button
+              onClick={handleDevAutofill}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-full transition-colors"
+            >
+              Dev Autofill
+            </button>
             <button
               onClick={() => setStep(2)}
               disabled={!isStep1Valid}
@@ -418,6 +448,20 @@ export function JourneyDesigner() {
             <p className="text-slate-500 mt-1">Pin the days that matter most. AI curates the rest.</p>
           </div>
 
+          {/* Search */}
+          {!loadingPackages && availablePackages.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search experiences by title or tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-200 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 outline-none transition-all text-slate-900"
+              />
+            </div>
+          )}
+
           {/* Quick picks + day counter row */}
           {!loadingPackages && availablePackages.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
@@ -502,140 +546,75 @@ export function JourneyDesigner() {
             </div>
           )}
 
-          {/* Vallecito Originals Carousel */}
-          {!loadingPackages && viewMode === 'vallecito' && WIZARD_SECTORS.filter(s => visibleSectors.includes(s) && grouped[s]?.length).map(sector => {
-            const collapsed = collapsedSectors.includes(sector)
-            return (
-              <div key={sector} className="border border-slate-100 rounded-2xl overflow-hidden">
-                {/* Section header */}
-                <button
-                  onClick={() => toggleSectorCollapse(sector)}
-                  className="w-full flex items-center justify-between px-5 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${SECTOR_GRADIENT[sector]}`} />
-                    <span className="font-semibold text-slate-900 text-sm">{SECTOR_ICON[sector]} {SECTOR_LABELS[sector]}</span>
-                    <span className="text-xs text-slate-400">{grouped[sector].length} experiences</span>
-                  </div>
-                  <span className={`text-slate-400 text-xs transition-transform duration-200 ${collapsed ? '' : 'rotate-180'}`}>▼</span>
-                </button>
+          {/* Dashboard Grid */}
+          {!loadingPackages && filteredPackages.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPackages.map(pkg => {
+                const pinned = pinnedPackageIds.includes(pkg.id)
+                const sectorIcon = SECTOR_ICON[pkg.sector as keyof typeof SECTOR_ICON] || '🗺️'
+                const sectorLabel = SECTOR_LABELS[pkg.sector as keyof typeof SECTOR_LABELS] || 'Hidden Gems'
+                const gallery = pkg.galleryJson ? JSON.parse(pkg.galleryJson) : []
+                const mainImage = pkg.heroImage || gallery[0]?.url || "/images/og-default.jpg"
 
-                {/* Horizontal scroll row */}
-                {!collapsed && (
-                  <div className="overflow-x-auto px-4 py-4">
-                    <div className="flex gap-3" style={{ width: 'max-content' }}>
-                      {grouped[sector].map(pkg => {
-                        const pinned = pinnedPackageIds.includes(pkg.id)
-                        return (
-                          <button
-                            key={pkg.id}
-                            onClick={() => togglePin(pkg.id)}
-                            className={`relative w-44 rounded-xl overflow-hidden text-left transition-all duration-200 shrink-0 ${
-                              pinned
-                                ? 'ring-2 ring-slate-900 shadow-xl scale-[1.02]'
-                                : 'ring-1 ring-slate-100 hover:ring-slate-300 hover:shadow-md'
-                            }`}
-                          >
-                            {/* Gradient photo header */}
-                            <div className={`h-24 bg-gradient-to-br ${SECTOR_GRADIENT[sector]} flex items-center justify-center relative`}>
-                              <span className="text-3xl">{SECTOR_ICON[sector]}</span>
-                              {pinned && (
-                                <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                                  <Check className="w-6 h-6 text-white" strokeWidth={3} />
-                                </div>
-                              )}
-                              <div className="absolute bottom-1.5 left-2">
-                                <span className="text-white/80 text-xs font-medium">{PACE_ICON[pkg.pace]}</span>
-                              </div>
-                            </div>
-                            {/* Info */}
-                            <div className="p-3 bg-white">
-                              <p className="font-bold text-xs text-slate-900 leading-snug line-clamp-2">{pkg.title}</p>
-                              <p className="text-xs text-slate-400 mt-1 truncate">
-                                {pkg.tags.split(',').slice(0, 3).map(t => t.trim()).filter(Boolean).join(' · ')}
-                              </p>
-                              <p className="text-xs font-semibold text-slate-600 mt-2">from ${pkg.basePriceUsd}</p>
-                            </div>
-                          </button>
-                        )
-                      })}
+                return (
+                  <button
+                    key={pkg.id}
+                    onClick={() => togglePin(pkg.id)}
+                    className={`relative w-full bg-white rounded-3xl overflow-hidden border text-left flex flex-col group transition-all duration-500 ${
+                      pinned
+                        ? 'border-slate-900 shadow-xl ring-1 ring-slate-900'
+                        : 'border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1'
+                    }`}
+                  >
+                    {/* Photo & Price */}
+                    <div className="relative h-56 overflow-hidden w-full">
+                      <img 
+                        src={mainImage} 
+                        alt={pkg.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      />
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md text-slate-900 px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                        ${pkg.basePriceUsd}
+                      </div>
+                      <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap pr-4">
+                        <span className="bg-slate-900/90 backdrop-blur-md text-white text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-sm flex items-center gap-1">
+                          {sectorIcon} {sectorLabel}
+                        </span>
+                        {pkg.agency && pkg.agency.slug !== 'vallecito-originals' && (
+                          <span className="bg-white/90 backdrop-blur-md text-slate-900 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-sm flex items-center gap-1">
+                            by {pkg.agency.name}
+                          </span>
+                        )}
+                      </div>
+                      {pinned && (
+                        <div className="absolute top-4 left-4 w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center shadow-lg">
+                          <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
 
-          {/* Elite Local Agencies Dashboard */}
-          {!loadingPackages && viewMode === 'agencies' && groupedByAgency.map(({ agency, packages }) => {
-            const isSelected = selectedAgencyId === agency.id;
-            return (
-              <div key={agency.id} className="border border-slate-100 rounded-2xl overflow-hidden mb-4">
-                <button
-                  onClick={() => setSelectedAgencyId(isSelected ? null : agency.id)}
-                  className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 hover:bg-slate-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {agency.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={agency.imageUrl} alt={agency.name} className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-serif text-slate-500 font-bold">{agency.name.charAt(0)}</div>
-                    )}
-                    <div className="text-left">
-                      <span className="font-bold text-slate-900 text-sm block">{agency.name}</span>
-                      <span className="text-xs text-slate-400">{packages.length} premium experiences</span>
+                    <div className="p-6 flex-1 flex flex-col bg-white">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{PACE_ICON[pkg.pace]} PACE</span>
+                      </div>
+                      <h3 className="text-xl font-serif font-bold text-slate-900 mb-3 group-hover:text-rose-600 transition-colors line-clamp-2">
+                        {pkg.title}
+                      </h3>
+                      <p className="text-sm text-slate-500 font-light leading-relaxed mt-auto line-clamp-3">
+                        {pkg.description}
+                      </p>
                     </div>
-                  </div>
-                  <span className={`text-slate-400 text-xs transition-transform duration-200 ${!isSelected ? '' : 'rotate-180'}`}>▼</span>
-                </button>
-                {isSelected && (
-                  <div className="overflow-x-auto px-4 py-4 bg-white">
-                    <div className="flex justify-end mb-3">
-                      <button onClick={(e) => { e.stopPropagation(); router.push(`/agencies/${agency.slug}`); }} className="text-xs text-rose-600 font-semibold hover:text-rose-700 transition-colors bg-rose-50 px-3 py-1 rounded-full">
-                        Read Full Agency Profile &rarr;
-                      </button>
-                    </div>
-                    <div className="flex gap-3" style={{ width: 'max-content' }}>
-                      {packages.map(pkg => {
-                        const pinned = pinnedPackageIds.includes(pkg.id)
-                        return (
-                          <button
-                            key={pkg.id}
-                            onClick={() => togglePin(pkg.id)}
-                            className={`relative w-44 rounded-xl overflow-hidden text-left transition-all duration-200 shrink-0 ${
-                              pinned
-                                ? 'ring-2 ring-slate-900 shadow-xl scale-[1.02]'
-                                : 'ring-1 ring-slate-100 hover:ring-slate-300 hover:shadow-md'
-                            }`}
-                          >
-                            <div className={`h-24 bg-gradient-to-br ${SECTOR_GRADIENT[pkg.sector as keyof typeof SECTOR_GRADIENT] || 'from-slate-400 to-slate-600'} flex items-center justify-center relative`}>
-                              <span className="text-3xl">{SECTOR_ICON[pkg.sector as keyof typeof SECTOR_ICON] || '🗺️'}</span>
-                              {pinned && (
-                                <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                                  <Check className="w-6 h-6 text-white" strokeWidth={3} />
-                                </div>
-                              )}
-                              <div className="absolute bottom-1.5 left-2">
-                                <span className="text-white/80 text-xs font-medium">{PACE_ICON[pkg.pace]}</span>
-                              </div>
-                            </div>
-                            <div className="p-3 bg-white">
-                              <p className="font-bold text-xs text-slate-900 leading-snug line-clamp-2">{pkg.title}</p>
-                              <p className="text-xs text-slate-400 mt-1 truncate">
-                                {pkg.tags.split(',').slice(0, 3).map(t => t.trim()).filter(Boolean).join(' · ')}
-                              </p>
-                              <p className="text-xs font-semibold text-slate-600 mt-2">from ${pkg.basePriceUsd}</p>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {!loadingPackages && filteredPackages.length === 0 && (
+            <div className="text-center py-16 text-slate-500">
+              No experiences found matching your filters.
+            </div>
+          )}
 
           {/* CTA */}
           <div className="flex justify-between items-center pt-4 border-t border-slate-100">

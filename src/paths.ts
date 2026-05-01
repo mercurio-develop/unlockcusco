@@ -3,7 +3,7 @@ export const homePath = () => "/";
 export const explorePath = (query?: string) => 
   query ? `/explore?q=${encodeURIComponent(query)}` : "/explore";
 
-export const servicesPath = () => "/explore?mode=service";
+export const servicesPath = () => "/services";
 
 export const travelDesignPath = () => "/travel-design";
 
@@ -21,10 +21,12 @@ export const checkoutPath = (businessId: string) =>
 
 export const dashboardPath = () => "/dashboard";
 
-export const agenciesPath = () => "/agencies";
+export const agenciesPath = () => "/services/agencies";
 
-export const agencyPath = (slug: string) => `/agencies/${slug}`;
+export const agencyPath = (slug: string) => `/services/agencies/${slug}`;
 
-export const therapistsPath = () => "/therapists";
+export const therapistsPath = () => "/services/healers";
 
-export const therapistPath = (slug: string) => `/therapists/${slug}`;
+export const therapistPath = (slug: string) => `/services/healers/${slug}`;
+
+export const transportPath = () => "/services/transport";

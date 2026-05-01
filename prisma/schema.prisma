@@ -100,6 +100,12 @@ model Agency {
   seoMetaTitle   String?
   seoMetaDesc    String?
   themeConfig    String   @default("{}") // JSON for primary/accent colors, fonts
+  
+  // Dynamic Page Content
+  visionMission  String?  // Text for the "Why Us" / Ethos section
+  featuresJson   String   @default("[]") // Array of { title, desc, iconName }
+  socialLinks    String   @default("{}") // { instagram, whatsapp, website }
+
   commissionRate Float    @default(0.05) // Vallecito takes 5%
   trips          Trip[]
   tourPackages   TourPackage[]

@@ -1,7 +1,11 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Phone, Mail, ChevronDown, ChevronUp, Compass, Heart, Target, Mountain, Clock, Map as MapIcon, ArrowRight } from "lucide-react"
+import { Phone, Mail, ChevronDown, ChevronUp, Compass, Heart, Target, Mountain, Clock, Map as MapIcon, ArrowRight, Star, Leaf, Users, MapPin, Zap } from "lucide-react"
 import { AvailabilityForm } from "@/features/agencies/components/AvailabilityForm"
+
+const IconMap: Record<string, React.ElementType> = {
+  Compass, Heart, Target, Mountain, Clock, MapIcon, Star, Leaf, Users, MapPin, Zap
+}
 
 function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: any, agencyPhone: string, agencyName: string, onSelectPackage: (id: string) => void }) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -56,6 +60,25 @@ function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: a
 export function ExpeditionOnePage({ agency }: { agency: any }) {
   const [filter, setFilter] = useState<'ALL' | 'MULTI_DAY' | 'SINGLE_DAY'>('ALL')
   const [selectedExperienceId, setSelectedExperienceId] = useState<string>("")
+
+  // Parse Dynamic Features
+  let features = []
+  try {
+    features = JSON.parse(agency.featuresJson || "[]")
+  } catch (e) {
+    features = []
+  }
+
+  // Fallback to Jaguar Llaqta hardcoded values if empty (for backward compatibility during migration)
+  if (features.length === 0) {
+    features = [
+      { title: "Alternative Proposals", desc: "We believe in responsible tourism as a tool for change and learning.", iconName: "Compass" },
+      { title: "Backed by Experience", desc: "We have a team of trained professionals with years of experience in the field.", iconName: "Heart" },
+      { title: "Integrating Experiences", desc: "We offer a format that allows travelers to immerse in the nature they traverse and be nourished by the native communities they interact with.", iconName: "Target" }
+    ]
+  }
+
+  const visionMission = agency.visionMission || "We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people."
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth"
@@ -171,64 +194,33 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
 
             <div className="mt-8 space-y-6 max-w-4xl mx-auto">
               <p className="text-[#d1d5db] text-lg leading-[1.8]">
-                We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people.
+                {visionMission}
               </p>
             </div>
 
             <div className="mt-20 max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                <div className="flex flex-row items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0 mt-2">
-                    <Compass className="w-6 h-6 text-[var(--accent)]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 
-                      className="text-left text-lg font-bold text-white mb-1"
-                      style={{ fontFamily: 'var(--font-display)' }}
-                    >
-                      Alternative Proposals
-                    </h4>
-                    <p className="text-[#d1d5db] text-sm text-left leading-[1.7]">
-                      We believe in responsible tourism as a tool for change and learning.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-row items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0 mt-2">
-                    <Heart className="w-6 h-6 text-[var(--accent)]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 
-                      className="text-left text-lg font-bold text-white mb-1"
-                      style={{ fontFamily: 'var(--font-display)' }}
-                    >
-                      Backed by Experience
-                    </h4>
-                    <p className="text-[#d1d5db] text-sm text-left leading-[1.7]">
-                      We have a team of trained professionals with years of experience in the field.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-row items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0 mt-2">
-                    <Target className="w-6 h-6 text-[var(--accent)]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 
-                      className="text-left text-lg font-bold text-white mb-1"
-                      style={{ fontFamily: 'var(--font-display)' }}
-                    >
-                      Integrating Experiences
-                    </h4>
-                    <p className="text-[#d1d5db] text-sm text-left leading-[1.7]">
-                      We offer a format that allows travelers to immerse in the nature they traverse and be nourished by the native communities they interact with.
-                    </p>
-                  </div>
-                </div>
-
+                {features.map((feature: any, idx: number) => {
+                  const Icon = IconMap[feature.iconName] || Star
+                  return (
+                    <div key={idx} className="flex flex-row items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0 mt-2">
+                        <Icon className="w-6 h-6 text-[var(--accent)]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 
+                          className="text-left text-lg font-bold text-white mb-1"
+                          style={{ fontFamily: 'var(--font-display)' }}
+                        >
+                          {feature.title}
+                        </h4>
+                        <p className="text-[#d1d5db] text-sm text-left leading-[1.7]">
+                          {feature.desc}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>

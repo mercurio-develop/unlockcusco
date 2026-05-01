@@ -42,19 +42,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const waypoints = useMemo(() => {
     if (panelMode !== "itinerary" || !activeItinerary) return [];
     const pts: [number, number][] = [];
-    if (activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) pts.push([activeItinerary.startAnchor.lng, activeItinerary.startAnchor.lat]);
+    const start = (activeItinerary as any).startAnchor || (activeItinerary as any).origin;
+    const end = (activeItinerary as any).endAnchor || (activeItinerary as any).destination;
+    
+    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
     for (const waypoint of activeItinerary.waypoints || []) {
       if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
     }
-    if (activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) pts.push([activeItinerary.endAnchor.lng, activeItinerary.endAnchor.lat]);
+    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
     return pts;
   }, [activeItinerary, panelMode]);
 
   const directWaypoints = useMemo(() => {
     if (panelMode !== "itinerary" || !activeItinerary) return [];
     const pts: [number, number][] = [];
-    if (activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) pts.push([activeItinerary.startAnchor.lng, activeItinerary.startAnchor.lat]);
-    if (activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) pts.push([activeItinerary.endAnchor.lng, activeItinerary.endAnchor.lat]);
+    const start = (activeItinerary as any).startAnchor || (activeItinerary as any).origin;
+    const end = (activeItinerary as any).endAnchor || (activeItinerary as any).destination;
+    
+    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
     return pts;
   }, [activeItinerary, panelMode]);
 

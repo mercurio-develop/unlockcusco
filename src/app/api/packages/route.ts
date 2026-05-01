@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
         basePriceUsd: true, 
         tags: true, 
         description: true,
+        heroImage: true,
+        galleryJson: true,
         agency: {
           select: {
             id: true,

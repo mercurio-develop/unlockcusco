@@ -16,6 +16,8 @@ interface ItineraryContextType {
   setSelectedId: (id: string | null) => void;
   isEditMode: boolean;
   setIsEditMode: (edit: boolean) => void;
+  exchangeTargetIndex: number | null;
+  setExchangeTargetIndex: (idx: number | null) => void;
   swapWaypointAlternative: (waypointIdx: number, altIdx: number) => void;
   swapDriverAlternative: (edgeIdx: number, altIdx: number) => void;
   removeWaypoint: (waypointIdx: number) => void;
@@ -24,6 +26,7 @@ interface ItineraryContextType {
   dismissAccommodation: () => void;
   addAccommodation: (accommodationAlts: any[]) => void;
   selectBasecamp: (hotel: any) => void;
+  setStartAnchorLocation: (lat: number, lng: number, name?: string) => void;
 }
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(undefined);
@@ -34,6 +37,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
   const [panelMode, setPanelMode] = useState<PanelMode>("categories");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [exchangeTargetIndex, setExchangeTargetIndex] = useState<number | null>(null);
 
   const swapWaypointAlternative = (waypointIdx: number, altIdx: number) => {
     if (!activeItinerary) return;
@@ -127,7 +131,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     
     const destination = newItinerary.endAnchor || (newItinerary as any).destination;
 
-    newItinerary.waypoints = [...newItinerary.waypoints, {
+    const newWaypoint = {
       id: business.id,
       category: business.category,
       title: business.name,
@@ -137,11 +141,21 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       lng: business.lng,
       rating: business.rating,
       alternatives: [newAlt]
-    }];
-    
-    // Quick hack for transit edges to match length
-    if (newItinerary.transitEdges.length > 0) {
-      newItinerary.transitEdges = [...newItinerary.transitEdges, newItinerary.transitEdges[newItinerary.transitEdges.length - 1]];
+    };
+
+    if (exchangeTargetIndex !== null && exchangeTargetIndex >= 0 && exchangeTargetIndex < newItinerary.waypoints.length) {
+      // Exchange logic: replace the target waypoint
+      newItinerary.waypoints = [...newItinerary.waypoints];
+      newItinerary.waypoints[exchangeTargetIndex] = newWaypoint;
+      setExchangeTargetIndex(null); // Reset after exchange
+    } else {
+      // Insert logic: append to the end
+      newItinerary.waypoints = [...newItinerary.waypoints, newWaypoint];
+      
+      // Quick hack for transit edges to match length
+      if (newItinerary.transitEdges.length > 0) {
+        newItinerary.transitEdges = [...newItinerary.transitEdges, newItinerary.transitEdges[newItinerary.transitEdges.length - 1]];
+      }
     }
     
     (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
@@ -206,6 +220,28 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     setSelectedId('itin-arrival');
   };
 
+  const setStartAnchorLocation = (lat: number, lng: number, name: string = "Current Location") => {
+    if (!activeItinerary) return;
+    const newItinerary = { ...activeItinerary };
+    if (newItinerary.startAnchor) {
+      newItinerary.startAnchor = {
+        ...newItinerary.startAnchor,
+        lat,
+        lng,
+        title: name,
+        locationStr: "Live GPS"
+      };
+    } else if ((newItinerary as any).origin) {
+      (newItinerary as any).origin = {
+        ...(newItinerary as any).origin,
+        lat,
+        lng,
+        title: name,
+      };
+    }
+    setActiveItinerary(newItinerary);
+  };
+
   return (
     <ItineraryContext.Provider value={{
       activeItinerary,
@@ -218,6 +254,8 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       setSelectedId,
       isEditMode,
       setIsEditMode,
+      exchangeTargetIndex,
+      setExchangeTargetIndex,
       swapWaypointAlternative,
       swapDriverAlternative,
       removeWaypoint,
@@ -225,7 +263,8 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       insertWaypoint,
       dismissAccommodation,
       addAccommodation,
-      selectBasecamp
+      selectBasecamp,
+      setStartAnchorLocation
     }}>
       {children}
     </ItineraryContext.Provider>

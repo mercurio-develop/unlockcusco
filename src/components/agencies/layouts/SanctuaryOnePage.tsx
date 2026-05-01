@@ -1,8 +1,21 @@
 "use client"
 import { useEffect } from "react"
-import { Phone, Mail } from "lucide-react"
+import { Phone, Mail, Compass, Heart, Target, Star, Leaf, Users, MapPin, Zap } from "lucide-react"
+
+const IconMap: Record<string, React.ElementType> = {
+  Compass, Heart, Target, Star, Leaf, Users, MapPin, Zap
+}
 
 export function SanctuaryOnePage({ agency }: { agency: any }) {
+  // Parse Dynamic Features
+  let features = []
+  try {
+    features = JSON.parse(agency.featuresJson || "[]")
+  } catch (e) {
+    features = []
+  }
+
+  const visionMission = agency.visionMission || agency.description || ""
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth"
     return () => {

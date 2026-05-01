@@ -31,14 +31,14 @@ export function ItineraryPanel() {
   const totalCost = (activeItinerary as any).totalCost ?? 0;
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 overflow-hidden">
+    <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
       {/* Header */}
-      <div className="px-6 pt-6 pb-5 bg-slate-900 border-b border-white/5">
+      <div className="px-6 pt-6 pb-5 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
           {macroTrip ? (
             <button 
               onClick={() => setPanelMode("macro")}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-400 transition-colors uppercase tracking-widest"
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-500 transition-colors uppercase tracking-widest"
             >
               <ChevronRight className="w-3.5 h-3.5 rotate-180" /> Back to Trip Plan
             </button>
@@ -51,8 +51,10 @@ export function ItineraryPanel() {
           <button 
             onClick={() => setIsEditMode(!isEditMode)}
             className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors",
-              isEditMode ? "bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30" : "bg-white/5 text-slate-400 hover:bg-white/10"
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors border",
+              isEditMode 
+                ? "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100" 
+                : "bg-white border-gray-200 text-slate-600 hover:bg-gray-50"
             )}
           >
             {isEditMode ? <><CheckCircle2 className="w-3.5 h-3.5" /> Done</> : <><Edit2 className="w-3.5 h-3.5" /> Edit</>}
@@ -62,25 +64,25 @@ export function ItineraryPanel() {
         {/* Day Indicator if applicable */}
         {searchParams.get("day") && (
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-white text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md">DAY {searchParams.get("day")}</span>
+            <span className="bg-slate-900 text-white text-[10px] font-black px-2 py-0.5 rounded-md">DAY {searchParams.get("day")}</span>
             <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Explorer View</span>
           </div>
         )}
 
-        <h2 className="text-xl font-serif font-semibold text-white">{(activeItinerary as any).title ?? "Your Expedition"}</h2>
+        <h2 className="text-xl font-serif font-semibold text-slate-900">{(activeItinerary as any).title ?? "Your Expedition"}</h2>
       </div>
 
       {/* The Golden Thread Timeline */}
       <DayExplorer />
 
       {/* Footer total */}
-      <div className="px-6 py-5 bg-slate-900 border-t border-white/5 shrink-0">
+      <div className="px-6 py-5 bg-white border-t border-gray-200 shrink-0 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs text-slate-500 font-medium">Estimated Budget</p>
-            <p className="text-2xl font-bold text-white">${totalCost}</p>
+            <p className="text-2xl font-bold text-slate-900">${totalCost}</p>
           </div>
-          <button className="bg-rose-600 text-white rounded-full px-6 py-3 text-sm font-bold hover:bg-rose-500 transition-all shadow-lg shadow-rose-600/20">
+          <button className="bg-rose-600 text-white rounded-xl px-6 py-3 text-sm font-bold hover:bg-rose-500 transition-all shadow-md">
             Book All Stops
           </button>
         </div>
