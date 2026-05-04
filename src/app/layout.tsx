@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
-import { ItineraryProvider } from "@/lib/store/itinerary-context";
+import { TripProvider } from "@/lib/store/trip-context";
 import { AiConcierge } from "@/features/concierge/components/ai-concierge";
 import { Suspense } from "react";
 
@@ -60,7 +60,7 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#09090B] text-white font-sans">
-        <ItineraryProvider>
+        <TripProvider>
           <Navbar />
           <main className="flex-1 flex flex-col pt-14 bg-white">
             {children}
@@ -68,7 +68,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <AiConcierge />
           </Suspense>
-        </ItineraryProvider>
+        </TripProvider>
       </body>
     </html>
   );
