@@ -375,7 +375,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           );
         })}
 
-        {(popupBusiness as any).&& (popupBusiness as any).lng !== null && (popupBusiness as any).lat !== null && (
+        {popupBusiness && (popupBusiness as any).lng !== null && (popupBusiness as any).lat !== null && (
           <Popup
             anchor="bottom" longitude={(popupBusiness as any).lng as number} latitude={(popupBusiness as any).lat as number}
             onClose={() => setPopupBusiness(null)} maxWidth="280px"
@@ -389,7 +389,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               )}
               <div className="p-3">
                 <div className="flex items-center justify-between gap-3 mb-1">
-                  <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || ((popupBusiness as any).as any).title}</h3>
+                  <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || (popupBusiness as any).title}</h3>
                   {(popupBusiness as any).isClaimed && <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-500 fill-emerald-500" />}
                 </div>
                 <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
@@ -410,8 +410,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                 )}
                 
                 <div className="mt-2">
-                  {((popupBusiness as any).as Record<string, any>).menuUrl ? (
-                    <a href={((popupBusiness as any).as Record<string, any>).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                  {(popupBusiness as any).menuUrl ? (
+                    <a href={(popupBusiness as any).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                       View Menu ↗
                     </a>
                   ) : (

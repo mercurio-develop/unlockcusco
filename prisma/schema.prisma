@@ -8,58 +8,58 @@ datasource db {
 }
 
 model Business {
-  id                 String   @id @default(uuid())
-  slug               String   @unique
-  name               String
-  category           String
-  lat                Float?
-  lng                Float?
-  rating             Float?
-  googleRating       Float?
-  reviewSummary      String?
-  priceTier          String   @default("$$")
-  reviewsCount       Int      @default(0)
-  imageUrl           String
-  whatsapp           String?
-  isClaimed          Boolean  @default(false)
-  locationSlug       String   @default("")
-  categorySlug       String   @default("")
-  instagramHandle    String?
-  instagramFollowers Int      @default(0)
-  heroImages         String   @default("[]")
-  elevationMeters    Int?
-  avgDwellTimeMins   Int      @default(60)
-  marginTier         String   @default("STANDARD")
-  reviews            Review[]
-  viewsCount         Int      @default(0)
-  whatsappClicksCount Int     @default(0)
-  aiRecommendationsCount Int  @default(0)
-  leads              Lead[]
+  id                     String   @id @default(uuid())
+  slug                   String   @unique
+  name                   String
+  category               String
+  lat                    Float?
+  lng                    Float?
+  rating                 Float?
+  googleRating           Float?
+  reviewSummary          String?
+  priceTier              String   @default("$$")
+  reviewsCount           Int      @default(0)
+  imageUrl               String
+  whatsapp               String?
+  isClaimed              Boolean  @default(false)
+  locationSlug           String   @default("")
+  categorySlug           String   @default("")
+  instagramHandle        String?
+  instagramFollowers     Int      @default(0)
+  heroImages             String   @default("[]")
+  elevationMeters        Int?
+  avgDwellTimeMins       Int      @default(60)
+  marginTier             String   @default("STANDARD")
+  viewsCount             Int      @default(0)
+  whatsappClicksCount    Int      @default(0)
+  aiRecommendationsCount Int      @default(0)
+  leads                  Lead[]
+  reviews                Review[]
 }
 
 model Transport {
-  id             String   @id @default(uuid())
-  slug           String   @unique
-  name           String
-  category       String   @default("Taxi") // Transport category, e.g. Taxi, Private Driver
-  vehicleType    String   @default("Sedan") // e.g., Sedan, Moto-Taxi, Van
-  capacity       Int      @default(4)
-  basePriceUsd   Float?
-  serviceZones   String   @default("[]") // JSON array of supported towns/zones
-  whatsapp       String?
-  rating         Float?
-  reviewsCount   Int      @default(0)
-  imageUrl       String?
+  id           String  @id @default(uuid())
+  slug         String  @unique
+  name         String
+  category     String  @default("Taxi")
+  vehicleType  String  @default("Sedan")
+  capacity     Int     @default(4)
+  basePriceUsd Float?
+  serviceZones String  @default("[]")
+  whatsapp     String?
+  rating       Float?
+  reviewsCount Int     @default(0)
+  imageUrl     String?
 }
 
 model Lead {
   id           String   @id @default(uuid())
   businessId   String
-  business     Business @relation(fields: [businessId], references: [id])
   touristName  String
   touristEmail String
   date         DateTime
   createdAt    DateTime @default(now())
+  business     Business @relation(fields: [businessId], references: [id])
 }
 
 model Review {
@@ -72,142 +72,137 @@ model Review {
 }
 
 model Therapist {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  name           String
-  tagline        String   @default("")
-  bio            String   @default("")
-  location       String   @default("Sacred Valley")
-  imageUrl       String   @default("") // Profile picture
-  heroImage      String   @default("") // Space/Atmosphere picture
-  specialties    String   @default("[]") // JSON array
-  whatsapp       String
-  rating         Float?
-  reviewsCount   Int      @default(0)
-  services       TherapistService[]
+  id           String             @id @default(cuid())
+  slug         String             @unique
+  name         String
+  tagline      String             @default("")
+  bio          String             @default("")
+  location     String             @default("Sacred Valley")
+  imageUrl     String             @default("")
+  heroImage    String             @default("")
+  specialties  String             @default("[]")
+  whatsapp     String
+  rating       Float?
+  reviewsCount Int                @default(0)
+  services     TherapistService[]
 }
 
 model TherapistService {
-  id               String    @id @default(cuid())
-  therapistId      String
-  therapist        Therapist @relation(fields: [therapistId], references: [id])
-  title            String
-  description      String
-  priceUsd         Float
-  durationMins     Int       @default(60)
-  imageUrl         String?
+  id           String    @id @default(cuid())
+  therapistId  String
+  title        String
+  description  String
+  priceUsd     Float
+  durationMins Int       @default(60)
+  imageUrl     String?
+  therapist    Therapist @relation(fields: [therapistId], references: [id])
 }
 
 model Agency {
-  id             String   @id @default(cuid())
-  slug           String   @unique
+  id             String        @id @default(cuid())
+  slug           String        @unique
   name           String
-  category       String   @default("agency")
-  tagline        String   @default("")
-  description    String   @default("")
-  location       String   @default("Sacred Valley")
-  imageUrl       String   @default("")
+  category       String        @default("agency")
+  tagline        String        @default("")
+  description    String        @default("")
+  location       String        @default("Sacred Valley")
+  imageUrl       String        @default("")
   logoUrl        String?
-  guideName      String   @default("")
-  specialties    String   @default("[]") // JSON array of strings
+  guideName      String        @default("")
+  specialties    String        @default("[]")
   contactPhone   String
-  contactEmail   String   @default("")
-  aboutHtml      String?  
+  contactEmail   String        @default("")
+  aboutHtml      String?
   seoMetaTitle   String?
   seoMetaDesc    String?
-  themeConfig    String   @default("{}") // JSON for primary/accent colors, fonts
-  
-  // Dynamic Page Content
-  visionMission  String?  // Text for the "Why Us" / Ethos section
-  featuresJson   String   @default("[]") // Array of { title, desc, iconName }
-  socialLinks    String   @default("{}") // { instagram, whatsapp, website }
-
-  commissionRate Float    @default(0.05) // Vallecito takes 5%
-  trips          Trip[]
+  themeConfig    String        @default("{}")
+  visionMission  String?
+  featuresJson   String        @default("[]")
+  socialLinks    String        @default("{}")
+  commissionRate Float         @default(0.05)
   tourPackages   TourPackage[]
+  trips          Trip[]
 }
 
 model TourPackage {
-  id                String    @id @default(cuid())
-  agencyId          String?
-  agency            Agency?   @relation(fields: [agencyId], references: [id])
-  title             String
-  tagline           String    @default("")
-  sector            String    // e.g., "EAST_VALLEY", "URUBAMBA", "MACHU_PICCHU"
-  pace              String    @default("BALANCED") // "FAST", "BALANCED", "SLOW"
-  description       String
-  basePriceUsd      Float
-  difficulty        String    @default("MODERATE")
-  maxAltitude       String    @default("")
-  durationDays      Int       @default(1)
-  durationStr       String    @default("")
-  elevation         String    @default("")
-  bestSeason        String    @default("")
-  packageType       String    @default("SINGLE_DAY") // 'SINGLE_DAY', 'MULTI_DAY', 'TREATMENT'
-  tags              String    @default("") // CSV: "atv, culture, ruins"
-  included          String    @default("[]") // JSON array
-  notIncluded       String    @default("[]") // JSON array
-  highlights        String    @default("[]") // JSON array
-  requirements      String    @default("[]") // JSON array
-  itineraryJson     String    @default("[]") // Full JSON for daily breakdown
-  galleryJson       String    @default("[]") // JSON array of image objects
-  heroImage         String?   // Explicit hero image for the package
-  tripDays          TripDay[]
+  id            String    @id @default(cuid())
+  agencyId      String?
+  title         String
+  tagline       String    @default("")
+  sector        String
+  pace          String    @default("BALANCED")
+  description   String
+  basePriceUsd  Float
+  difficulty    String    @default("MODERATE")
+  maxAltitude   String    @default("")
+  durationDays  Int       @default(1)
+  durationStr   String    @default("")
+  elevation     String    @default("")
+  bestSeason    String    @default("")
+  packageType   String    @default("SINGLE_DAY")
+  tags          String    @default("")
+  included      String    @default("[]")
+  notIncluded   String    @default("[]")
+  highlights    String    @default("[]")
+  requirements  String    @default("[]")
+  itineraryJson String    @default("[]")
+  galleryJson   String    @default("[]")
+  heroImage     String?
+  agency        Agency?   @relation(fields: [agencyId], references: [id])
+  tripDays      TripDay[]
 }
 
 model Trip {
-  id               String    @id @default(cuid())
-  userId           String?   // The tourist's ID (once claimed)
-  agencyId         String?   
-  agency           Agency?   @relation(fields: [agencyId], references: [id])
-  tripTitle        String
-  startDate        DateTime
-  endDate          DateTime
-  paxCount         Int       @default(1)
-  baseCampStrategy String
-  shareToken       String?   @unique // The magic link token
-  status           String    @default("DRAFT") // DRAFT, PROPOSED, PENDING_AGENCY, CONFIRMED_UNPAID, BOOKED, ACTIVE
-  totalPriceUsd    Float     @default(0)
-  days             TripDay[]
-  travelers        Traveler[]
-  createdAt        DateTime  @default(now())
-
-  // Trip Recycling Schema
-  isVerifiedTemplate Boolean @default(false)
-  templateVibeTags   String?   // e.g., "wellness, family, adventure"
-  clonedFromId       String?   // To track popularity
+  id                 String     @id @default(cuid())
+  userId             String?
+  agencyId           String?
+  tripTitle          String
+  startDate          DateTime
+  endDate            DateTime
+  paxCount           Int        @default(1)
+  baseCampStrategy   String
+  shareToken         String?    @unique
+  status             String     @default("DRAFT")
+  totalPriceUsd      Float      @default(0)
+  createdAt          DateTime   @default(now())
+  isVerifiedTemplate Boolean    @default(false)
+  templateVibeTags   String?
+  clonedFromId       String?
+  travelers          Traveler[]
+  agency             Agency?    @relation(fields: [agencyId], references: [id])
+  days               TripDay[]
 }
 
 model Traveler {
   id                  String   @id @default(cuid())
   tripId              String
-  trip                Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   isLeadGuest         Boolean  @default(false)
   firstName           String
   lastName            String
   passportNumber      String
   nationality         String
   dateOfBirth         DateTime
-  whatsappNumber      String?  // Crucial for the Lead Guest for live support
-  dietaryRestrictions String?  // e.g., "Vegan, Gluten-Free"
-  medicalNotes        String?  // e.g., "Mild asthma, bad knees"
+  whatsappNumber      String?
+  dietaryRestrictions String?
+  medicalNotes        String?
   createdAt           DateTime @default(now())
+  trip                Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
 
 model TripDay {
-  id               String       @id @default(cuid())
-  tripId           String
-  trip             Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  dayNumber        Int
-  date             DateTime
-  sleepTown        String       
-  tourPackageId    String?
-  tourPackage      TourPackage? @relation(fields: [tourPackageId], references: [id])
-  dayTheme         String
-  guideNotes       String?      // Custom instructions from the guide
-  startTime        String       @default("08:00 AM")
-  meetingPoint     String?      // E.g., "Hotel Lobby"
-  eventsJson       String       @default("[]") // JSON array of TimelineEvent
-  isAgencyLocked   Boolean      @default(true) // Prevents AI from overwriting
-  isCustomized     Boolean      @default(false)
+  id             String       @id @default(cuid())
+  tripId         String
+  dayNumber      Int
+  date           DateTime
+  sleepTown      String
+  tourPackageId  String?
+  dayTheme       String
+  guideNotes     String?
+  startTime      String       @default("08:00 AM")
+  meetingPoint   String?
+  eventsJson     String       @default("[]")
+  isAgencyLocked Boolean      @default(true)
+  isCustomized   Boolean      @default(false)
+  tourPackage    TourPackage? @relation(fields: [tourPackageId], references: [id])
+  trip           Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }

@@ -1,78 +1,92 @@
-"use client"
+import { prisma } from "@/lib/prisma"
+import { TransportCard } from "@/features/transport/components/TransportCard"
+import Link from "next/link"
+import { FilterBar } from "@/components/filters/filter-bar"
+import { Navbar } from "@/components/layout/navbar"
 
-import { Car, MapPin, Phone, CalendarPlus } from "lucide-react"
-import { useRouter } from "next/navigation"
+const LOCATIONS = ["pisac", "urubamba", "ollantaytambo", "cusco", "airport", "calca", "maras"]
+const VEHICLE_TYPES = ["Sedan", "SUV", "Van", "Moto-Taxi"]
 
-export default function TransportDirectory() {
-  const router = useRouter()
+export default async function TransportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ loc?: string; type?: string; q?: string }>
+}) {
+  const { loc, type, q } = await searchParams
+  const query = q?.trim() ?? ""
 
-  const drivers = [
-    {
-      id: "taxi-juan",
-      name: "Juan Perez - Urubamba",
-      type: "Private Taxi (Sedan)",
-      phone: "+51 987 654 321",
-      routes: "Urubamba ↔ Cusco, Urubamba ↔ Ollantaytambo",
-    },
-    {
-      id: "combi-valle",
-      name: "Asociación Valle Sagrado",
-      type: "Combi (Shared)",
-      phone: "Terminal Paradero",
-      routes: "Cusco ↔ Calca ↔ Urubamba",
-    }
-  ]
-
-  const handleAddToPlanner = (driverName: string) => {
-    const prompt = `I want to book a taxi with ${driverName}. Please add this to my planner and let me set a time to check availability.`
-    router.push(`/explore?ai_prompt=${encodeURIComponent(prompt)}`)
+  const where: Record<string, unknown> = {}
+  
+  if (loc) {
+    where.serviceZones = { contains: loc.toLowerCase() }
+  }
+  
+  if (type) {
+    where.vehicleType = type
+  }
+  
+  if (query) {
+    where.OR = [
+      { name: { contains: query } },
+      { vehicleType: { contains: query } },
+    ]
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 py-12 px-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-12">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">Transport Directory</h1>
-          <p className="text-lg text-slate-600">
-            Trusted drivers and public transit routes across the Sacred Valley.
-          </p>
-        </header>
+  const transport = await prisma.transport.findMany({
+    where,
+    orderBy: { rating: "desc" },
+  })
 
-        <div className="space-y-6">
-          {drivers.map((driver) => (
-            <div key={driver.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xl font-bold text-slate-900">{driver.name}</h3>
-                  <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full font-medium">{driver.type}</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-4 md:mb-1">
-                  <MapPin className="w-4 h-4 text-slate-400" />
-                  {driver.routes}
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 shrink-0 flex-wrap">
-                <a 
-                  href={`https://wa.me/${driver.phone.replace(/\D/g, '')}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-6 py-3 rounded-full font-medium hover:bg-slate-200 transition-colors"
-                >
-                  <Phone className="w-4 h-4" />
-                  Contact
-                </a>
-                <button
-                  onClick={() => handleAddToPlanner(driver.name)}
-                  className="inline-flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-medium hover:bg-slate-800 transition-colors"
-                >
-                  <CalendarPlus className="w-4 h-4" />
-                  Book via Planner
-                </button>
-              </div>
-            </div>
+  return (
+    <div className="bg-white min-h-screen">
+      <Navbar />
+      
+      <main className="max-w-7xl mx-auto px-6 py-24 sm:py-32">
+        {/* Header */}
+        <div className="max-w-2xl mb-12">
+          <p className="text-rose-600 text-xs uppercase tracking-[0.3em] mb-4 font-bold">
+            The Transport Network
+          </p>
+          <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight mb-6 leading-tight">
+            Reliable journeys through <br/>
+            <span className="text-slate-400 italic">the heart of the valley.</span>
+          </h1>
+          <p className="text-lg text-slate-500 leading-relaxed font-light">
+            We partner with the most trusted local drivers and transfer services. From private airport pickups to rugged 4x4 mountain exploration, we ensure your journey is as smooth as the destination.
+          </p>
+          <div className="mt-6">
+            <Link href="/services" className="text-sm font-semibold text-rose-600 hover:text-rose-700">
+              ← All Services
+            </Link>
+          </div>
+        </div>
+
+        <FilterBar 
+          basePath="/services/transport"
+          activeFilters={{ loc, type, q: query || undefined }}
+          filterGroups={[
+            { key: "loc", allLabel: "All locations", options: LOCATIONS.map(l => ({ label: l, value: l })) },
+            { key: "type", allLabel: "All vehicles", options: VEHICLE_TYPES.map(t => ({ label: t, value: t })) },
+          ]}
+          searchPlaceholder="Search drivers, routes..."
+          defaultSearchValue={query}
+          resultCount={transport.length}
+        />
+
+        {/* Transport Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {transport.map((item) => (
+            <TransportCard key={item.id} transport={item} />
           ))}
         </div>
-      </div>
+
+        {transport.length === 0 && (
+          <div className="text-center py-20 text-slate-500">
+            No transport options found matching your criteria.{" "}
+            <Link href="/services/transport" className="text-rose-600 underline">Clear filters</Link>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

@@ -215,7 +215,12 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
 
         {/* Search filters visible in Categories mode */}
         {panelMode === "categories" && (
-          <ExploreSearch initialQuery={initialQuery} isItineraryMode={false} />
+          <ExploreSearch 
+            initialQuery={initialQuery} 
+            isItineraryMode={false} 
+            localSearch={localSearch}
+            onLocalSearchChange={setLocalSearch}
+          />
         )}
       </div>
 
@@ -226,15 +231,6 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         </div>
       ) : panelMode === "categories" ? (
           <div className="flex flex-col flex-1 overflow-hidden">
-            <div className="px-6 pb-2">
-              <input 
-                type="text" 
-                placeholder="Filter experiences quickly..." 
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
-                className="w-full bg-slate-50 border border-gray-200 text-slate-800 text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:border-rose-300 focus:bg-white transition-colors placeholder:text-slate-400"
-              />
-            </div>
             <PlacesList
               businesses={sortedBusinesses}
               selectedId={selectedId}

@@ -21,6 +21,10 @@ export const checkoutPath = (businessId: string) =>
 
 export const dashboardPath = () => "/dashboard";
 
+export const restaurantsPath = () => "/services/restaurants";
+
+export const lodgingPath = () => "/services/lodging";
+
 export const agenciesPath = () => "/services/agencies";
 
 export const agencyPath = (slug: string) => `/services/agencies/${slug}`;

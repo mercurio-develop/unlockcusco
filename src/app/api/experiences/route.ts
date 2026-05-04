@@ -26,6 +26,26 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // 3. Fetch Transport
+    const transport = await prisma.transport.findMany({
+      select: {
+        id: true,
+        name: true,
+        vehicleType: true,
+        category: true,
+      }
+    })
+
+    // 4. Fetch Therapists
+    const therapists = await prisma.therapist.findMany({
+      select: {
+        id: true,
+        name: true,
+        location: true,
+        specialties: true,
+      }
+    })
+
     // Map Tour Packages
     const formattedPackages = tourPackages.map(pkg => ({
       id: pkg.id,
@@ -40,12 +60,43 @@ export async function GET(req: NextRequest) {
       id: b.id,
       title: b.name,
       sector: b.locationSlug || 'VALLE_SAGRADO',
-      pace: 'FLEXIBLE', // Places usually don't have a rigid pace
-      tags: b.category // Use category as tags
+      pace: 'FLEXIBLE',
+      tags: b.category
     }))
 
-    // Combine both arrays
-    const allExperiences = [...formattedPackages, ...formattedBusinesses]
+    // Map Transport
+    const formattedTransport = transport.map(t => ({
+      id: t.id,
+      title: t.name,
+      sector: 'VALLE_SAGRADO',
+      pace: 'FIXED',
+      tags: `transport, ${t.vehicleType}, ${t.category}`
+    }))
+
+    // Map Therapists
+    const formattedTherapists = therapists.map(th => {
+      let specialties = ""
+      try {
+        specialties = JSON.parse(th.specialties).join(', ')
+      } catch (e) {
+        specialties = "wellness"
+      }
+      return {
+        id: th.id,
+        title: th.name,
+        sector: th.location || 'VALLE_SAGRADO',
+        pace: 'RELAXED',
+        tags: `wellness, healer, ${specialties}`
+      }
+    })
+
+    // Combine all arrays
+    const allExperiences = [
+      ...formattedPackages, 
+      ...formattedBusinesses,
+      ...formattedTransport,
+      ...formattedTherapists
+    ]
 
     return Response.json(allExperiences)
   } catch (error) {
