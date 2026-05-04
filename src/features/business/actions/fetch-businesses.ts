@@ -112,8 +112,6 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   if (loc) {
     whereClause.locationSlug = loc
   }
-  // Scope to place OR service — default to 'place' when not specified
-  whereClause.businessType = businessType ?? 'place'
 
   // Combine OR queries
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

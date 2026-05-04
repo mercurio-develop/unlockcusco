@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,8 @@ export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const [lastProcessedSearch, setLastProcessedSearch] = useState<string | null>(null)
 
   const initialMessages: any[] = [
     {
@@ -83,6 +85,43 @@ Please generate my macro trip plan.`;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Sync searchDatabase tool calls to the Explore map/list UI
+  useEffect(() => {
+    // Find the latest searchDatabase tool call
+    const toolParts = messages
+      .flatMap((m: any) => m.parts || [])
+      .filter((p: any) => {
+        // AI SDK handles tool calls in different ways depending on version/config
+        const isSearch = p.type === 'tool-searchDatabase' || (p.type === 'tool-invocation' && p.toolInvocation?.toolName === 'searchDatabase');
+        const hasArgs = p.args || p.toolInvocation?.args;
+        // Wait until output is available to avoid partial streaming args
+        const isComplete = p.state === 'output-available' || p.toolInvocation?.state === 'result';
+        return isSearch && hasArgs && isComplete;
+      });
+    
+    if (toolParts.length > 0) {
+      const latest = toolParts[toolParts.length - 1];
+      const toolCallId = latest.toolCallId || latest.toolInvocation?.toolCallId || 'fallback';
+      
+      if (toolCallId !== lastProcessedSearch) {
+        setLastProcessedSearch(toolCallId);
+        
+        const args = latest.args || latest.toolInvocation?.args;
+        
+        // Push the query to the router so the main map filters
+        const params = new URLSearchParams(window.location.search);
+        if (args.query) {
+          params.set('q', args.query);
+        }
+        if (args.location) {
+          params.set('loc', args.location);
+        }
+        
+        router.push(`/explore?${params.toString()}`);
+      }
+    }
+  }, [messages, lastProcessedSearch, router]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 

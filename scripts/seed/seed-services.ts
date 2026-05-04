@@ -2,125 +2,78 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const FAKE_SERVICES = [
+const FAKE_TRANSPORTS = [
   {
-    name: "Inka Trail Experts",
-    category: "Guide",
-    categorySlug: "guide",
-    rating: 4.9,
-    reviewsCount: 120,
-    imageUrl: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
-    businessType: "service",
-    serviceZones: JSON.stringify(["cusco", "urubamba", "pisac", "ollantaytambo"]),
-    marginTier: "PREMIUM",
-    avgDwellTimeMins: 480,
-    isClaimed: true,
-    whatsapp: "51999999999"
+    name: "Juan Perez - Sacred Valley Taxi",
+    category: "Taxi",
+    vehicleType: "Sedan",
+    capacity: 4,
+    basePriceUsd: 25,
+    whatsapp: "+51999888777",
+    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGeE7Jz0AdcRqbI4So95DuYN3YHNlCZDphZcVFkKuz_Q7c6YzhILLAg2oJdz53-m_URe-H-PYHiRH6sBd7QkZxZE10tasMbgwJsx0XiBTrTEfMynqQZ-yExDpOi-xHQjBC9V1g=w1920-h1080-k-no",
+    serviceZones: JSON.stringify(["pisac", "urubamba", "calca"]),
+    reviewsCount: 142
   },
   {
-    name: "Sacred Valley Guides",
-    category: "Guide",
-    categorySlug: "guide",
-    rating: 4.7,
-    reviewsCount: 85,
-    imageUrl: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=1000&auto=format&fit=crop",
-    businessType: "service",
-    serviceZones: JSON.stringify(["urubamba", "pisac", "chinchero"]),
-    marginTier: "STANDARD",
-    avgDwellTimeMins: 240,
-    isClaimed: false,
-    whatsapp: null
+    name: "Mateo - 4x4 Explorer Taxi",
+    category: "Taxi",
+    vehicleType: "SUV",
+    capacity: 4,
+    basePriceUsd: 35,
+    whatsapp: "+51988777666",
+    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGS6AucUNBISJJrFd5uMAlg_e06ENDg2rdTNKSkbLDsNQUm6GFy0kuTZ0Mqurc5krfeV5zP1RaafcFJZxNsKCCuCRChmBXaecZ-5JPAs1gcR4Y5aduGEsGeevSQ3QQajK7O3EJO=w1920-h1080-k-no",
+    serviceZones: JSON.stringify(["ollantaytambo", "urubamba", "maras", "moray"]),
+    reviewsCount: 89
   },
   {
-    name: "Andean Wellness Spa",
-    category: "Therapy",
-    categorySlug: "therapy",
-    rating: 5.0,
-    reviewsCount: 45,
-    imageUrl: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop",
-    businessType: "service",
-    serviceZones: JSON.stringify(["cusco", "urubamba"]),
-    marginTier: "LUXURY",
-    avgDwellTimeMins: 90,
-    isClaimed: true,
-    whatsapp: "51988888888"
-  },
-  {
-    name: "Pachamama Massage Therapy",
-    category: "Therapy",
-    categorySlug: "therapy",
-    rating: 4.8,
-    reviewsCount: 60,
-    imageUrl: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1000&auto=format&fit=crop",
-    businessType: "service",
-    serviceZones: JSON.stringify(["pisac"]),
-    marginTier: "STANDARD",
-    avgDwellTimeMins: 60,
-    isClaimed: false,
-    whatsapp: null
-  },
-  {
-    name: "Cusco City Tours",
-    category: "Guide",
-    categorySlug: "guide",
-    rating: 4.6,
-    reviewsCount: 200,
-    imageUrl: "https://images.unsplash.com/photo-1511216113906-8f56bbce1693?q=80&w=1000&auto=format&fit=crop",
-    businessType: "service",
-    serviceZones: JSON.stringify(["cusco"]),
-    marginTier: "STANDARD",
-    avgDwellTimeMins: 180,
-    isClaimed: true,
-    whatsapp: "51977777777"
+    name: "Cusco to Valley Transfer (Luis)",
+    category: "Taxi",
+    vehicleType: "Van",
+    capacity: 8,
+    basePriceUsd: 50,
+    whatsapp: "+51977666555",
+    imageUrl: "https://lh3.googleusercontent.com/p/AF1QipMH23fcLbu70HwxmsIDyuV6jDF0z-9o4XS8pDFU=w1920-h1080-k-no",
+    serviceZones: JSON.stringify(["cusco", "airport", "pisac", "urubamba", "ollantaytambo"]),
+    reviewsCount: 320
   }
 ];
 
 async function main() {
-  console.log("🌿 Seeding Fake Services (Guides & Therapists)...");
+  console.log("🌿 Seeding Fake Services (Transports)...");
   
   let added = 0;
   let skipped = 0;
 
-  for (const service of FAKE_SERVICES) {
-    const slug = service.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
+  for (const transport of FAKE_TRANSPORTS) {
+    const slug = transport.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
     
     // Check if exists
-    const exists = await prisma.business.findFirst({
-      where: { name: service.name }
+    const exists = await prisma.transport.findFirst({
+      where: { name: transport.name }
     });
 
     if (exists) {
-      console.log(`⏭️ Skipped: ${service.name} (already exists)`);
+      console.log(`⏭️ Skipped: ${transport.name} (already exists)`);
       skipped++;
       continue;
     }
 
-    await prisma.business.create({
+    await prisma.transport.create({
       data: {
-        name: service.name,
         slug,
-        category: service.category,
-        categorySlug: service.categorySlug,
-        lat: null, // Services don't strictly need a central pin, they have zones
-        lng: null,
-        rating: service.rating,
-        reviewsCount: service.reviewsCount,
-        imageUrl: service.imageUrl,
-        whatsapp: service.whatsapp,
-        isClaimed: service.isClaimed,
-        businessType: service.businessType,
-        serviceZones: service.serviceZones,
-        marginTier: service.marginTier,
-        avgDwellTimeMins: service.avgDwellTimeMins,
-        reviews: {
-          create: [
-             { author: "Test User", rating: service.rating, text: "Excellent service!" }
-          ]
-        }
+        name: transport.name,
+        category: transport.category,
+        vehicleType: transport.vehicleType,
+        capacity: transport.capacity,
+        basePriceUsd: transport.basePriceUsd,
+        whatsapp: transport.whatsapp,
+        imageUrl: transport.imageUrl,
+        serviceZones: transport.serviceZones,
+        reviewsCount: transport.reviewsCount
       }
     });
 
-    console.log(`✅ Added: ${service.name}`);
+    console.log(`✅ Added: ${transport.name}`);
     added++;
   }
 

@@ -13,7 +13,7 @@ const CATEGORY_ICON: Record<string, string> = {
 
 export function ServiceCard({ business }: { business: Business }) {
   const zones: string[] = (() => {
-    try { return JSON.parse(business.serviceZones ?? "[]") } catch { return [] }
+    try { return JSON.parse((business as any).serviceZones ?? "[]") } catch { return [] }
   })()
 
   const icon = CATEGORY_ICON[business.category] ?? "🛎️"

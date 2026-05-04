@@ -52,7 +52,7 @@ async function main() {
 
           // Airbnb scraper returns location as lat/lng directly or in location object
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const loc = item.location as any;
+          const loc = item.location as Record<string, unknown>;
           const lat = (item.lat as number) || (loc?.lat as number);
           const lng = (item.lng as number) || (loc?.lng as number);
           
@@ -82,7 +82,6 @@ async function main() {
               category: "Stays",
               lat,
               lng,
-              rating,
               reviewsCount,
               imageUrl,
               heroImages,
@@ -91,7 +90,7 @@ async function main() {
               // Add a default review noting it's an Airbnb
               reviews: {
                 create: [
-                  { author: "InkaPortal Concierge", rating: 5, text: "Beautiful curated Airbnb stay in the Sacred Valley." }
+                  { author: "InkaPortal Concierge", text: "Beautiful curated Airbnb stay in the Sacred Valley." , rating: 5 }
                 ]
               }
             },

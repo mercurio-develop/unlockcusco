@@ -21,7 +21,7 @@ export const buildSpatialItinerary = tool({
           { category: { contains: mIntent } },
         ],
       },
-      orderBy: { rating: 'desc' },
+      orderBy: { rating: "desc" },
       take: 5,
     });
 
@@ -32,7 +32,7 @@ export const buildSpatialItinerary = tool({
           { category: { contains: afternoonIntent } },
         ],
       },
-      orderBy: { rating: 'desc' },
+      orderBy: { rating: "desc" },
       take: 5,
     });
 

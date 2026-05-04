@@ -27,10 +27,10 @@ const SACRED_VALLEY_LOCATIONS = [
   "Urubamba", "Pisac", "Maras", "Ollantaytambo", "Chinchero", "Calca", "Cusco", "Machu Picchu"
 ];
 
-export function ExploreSearch({ initialQuery, isItineraryMode = false }: { initialQuery: string, isItineraryMode?: boolean }) {
+export function ExploreSearch({ initialQuery, isItineraryMode = false, onSearchChange }: { initialQuery: string, isItineraryMode?: boolean, onSearchChange?: (val: string) => void }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [value, setValue] = useState("")
+  const [value, setValue] = useState(initialQuery || "")
   const [showFilters, setShowFilters] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -55,7 +55,14 @@ export function ExploreSearch({ initialQuery, isItineraryMode = false }: { initi
   }
 
   const handleSearch = () => {
-    if (!value.trim()) return
+    if (!value.trim()) {
+      if (searchParams.has("q")) {
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete("q")
+        router.push(`/explore?${params.toString()}`)
+      }
+      return
+    }
 
     const rawValue = value.trim()
     const wordCount = rawValue.split(" ").length
@@ -66,6 +73,7 @@ export function ExploreSearch({ initialQuery, isItineraryMode = false }: { initi
       params.set("ai_prompt", rawValue)
       router.push(`/explore?${params.toString()}`)
       setValue("") // clear input
+      if (onSearchChange) onSearchChange("")
       return
     }
 
@@ -111,126 +119,97 @@ export function ExploreSearch({ initialQuery, isItineraryMode = false }: { initi
     const words = value.split(' ');
     words.pop();
     words.push(suggestion);
-    setValue(words.join(' ') + ' ');
+    const newValue = words.join(' ') + ' ';
+    setValue(newValue);
+    if (onSearchChange) onSearchChange(newValue);
     inputRef.current?.focus();
   };
 
   const handleDevAutofill = () => {
-    const queries = [
-      "I'm in Pisac heading to Ollantaytambo. I want coffee, a local market, and a nice lunch with a view.",
-      "I am in Urubamba. Train at 4 PM in Ollanta. Quick hike and vegan food before I leave.",
-      "Staying in Pisac, heading to Maras today. I want to try a good picantería for lunch while still in Pisac.",
-      "Starting in Chinchero ending in Cusco. I just want a relaxing day, wellness stuff, no adventure.",
-      "I really want to go ATV riding and get a huge dinner afterwards!"
-    ];
-    const currentIndex = queries.findIndex(q => q === value);
-    const nextIndex = (currentIndex + 1) % queries.length;
-    setValue(queries[nextIndex]);
+    const testPrompt = "I'm in Pisac heading to Ollantaytambo. I want coffee, a local market, and a nice lunch with a view.";
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("ai_prompt", testPrompt)
+    router.push(`/explore?${params.toString()}`)
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setValue(val);
+    if (onSearchChange) {
+      onSearchChange(val);
+    }
   };
 
   return (
     <>
-      <div className="relative mb-6 z-0">
+      <div className="relative mb-4 z-0 flex gap-2">
         {process.env.NODE_ENV === 'development' && (
           <div className="absolute -top-7 right-2 z-20">
             <button
               onClick={handleDevAutofill}
               className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-colors shadow-sm"
-              title="Autofill Test Query (Dev Only)"
+              title="Test AI Concierge (Dev Only)"
             >
               Test AI
             </button>
           </div>
         )}
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-          <Sparkles className="h-5 w-5 text-rose-500" />
+        <div className="relative flex-1">
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={handleInputChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleSearch()
+              }
+            }}
+            placeholder="Search for an experience..."
+            className="w-full py-3 px-5 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-sm text-base placeholder:text-gray-400 font-medium"
+          />
+          
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
+              >
+                {suggestions.map(suggestion => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    <MapPin className="w-4 h-4 text-rose-400" />
+                    <span className="font-medium">{suggestion}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              handleSearch()
-            }
-          }}
-          placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
-          className="w-full py-5 pl-12 pr-6 rounded-2xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.06)] text-lg placeholder:text-gray-400 font-medium"
-        />
-        
-        <AnimatePresence>
-          {suggestions.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
-            >
-              {suggestions.map(suggestion => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
-                >
-                  <MapPin className="w-4 h-4 text-rose-400" />
-                  <span className="font-medium">{suggestion}</span>
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+        {!isItineraryMode && (
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center justify-center px-4 py-3 bg-white text-slate-700 rounded-xl hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm shrink-0 relative"
+            title="Toggle Filters"
+          >
+            <SlidersHorizontal className="w-5 h-5 text-slate-500" />
+            {(currentLoc || currentCats.length > 0) && !showFilters && <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500"></span>}
+          </button>
+        )}
       </div>
 
       {!isItineraryMode && (
-        <div className="flex flex-col gap-3 mt-2">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide items-center">
-            <button 
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 rounded-xl text-sm font-semibold whitespace-nowrap hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm shrink-0"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-slate-500" />
-              {showFilters ? "Hide Filters" : "Show Filters"} 
-              {(currentLoc || currentCats.length > 0) && !showFilters && <span className="w-2 h-2 rounded-full bg-rose-500"></span>}
-              {showFilters ? <ChevronUp className="w-4 h-4 ml-1 opacity-50" /> : <ChevronDown className="w-4 h-4 ml-1 opacity-50" />}
-            </button>
-
-            <div className="w-px h-6 bg-gray-200 shrink-0 mx-1"></div>
-
-            <button
-              onClick={() => navigateFilters(currentLoc, [])}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
-                currentCats.length === 0 && !CATEGORIES.some(c => initialQuery?.toLowerCase().includes(c.value.toLowerCase()))
-                  ? "bg-slate-900 text-white shadow-md" 
-                  : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-              }`}
-            >
-              All Experiences
-            </button>
-            {CATEGORIES.map((cat) => {
-              const isActive =
-                currentCats.includes(cat.value) ||
-                (initialQuery && initialQuery.toLowerCase().includes(cat.value.toLowerCase()))
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => handleCategoryToggle(cat.value)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
-                    isActive 
-                      ? "bg-slate-900 text-white shadow-md" 
-                      : "bg-white text-slate-600 hover:bg-gray-50 border border-gray-200"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              )
-            })}
-          </div>
-
+        <div className="flex flex-col gap-3 mb-4">
           <AnimatePresence>
             {showFilters && (
               <motion.div 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from "react"
+import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import dynamic from "next/dynamic"
 import { useRouter, useSearchParams } from "next/navigation"
 import { MapIcon, MapPinOff, Loader2, MapPin, Briefcase } from "lucide-react"
@@ -39,6 +39,17 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   const [page, setPage] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [mode, setMode] = useState<'place' | 'service'>(initialMode)
+  const [localQuery, setLocalQuery] = useState("")
+
+  const displayedBusinesses = useMemo(() => {
+    if (!localQuery.trim()) return businesses;
+    const q = localQuery.toLowerCase();
+    return businesses.filter(b => 
+      b.name.toLowerCase().includes(q) || 
+      b.category.toLowerCase().includes(q) || 
+      (b.locationSlug && b.locationSlug.toLowerCase().includes(q))
+    );
+  }, [businesses, localQuery]);
 
   const [leftWidth, setLeftWidth] = useState(40)
   const [isDragging, setIsDragging] = useState(false)
@@ -215,7 +226,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
 
         {/* Search filters visible in Categories mode */}
         {panelMode === "categories" && (
-          <ExploreSearch initialQuery={initialQuery} isItineraryMode={false} />
+          <ExploreSearch initialQuery={initialQuery} isItineraryMode={false} onSearchChange={setLocalQuery} />
         )}
       </div>
 
@@ -226,7 +237,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         </div>
       ) : panelMode === "categories" ? (
           <PlacesList
-            businesses={businesses}
+            businesses={displayedBusinesses}
             selectedId={selectedId}
             showDesktopMap={showDesktopMap}
             cardRefs={cardRefs}
@@ -259,7 +270,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         >
           {showDesktopMap && (
             <ExploreMap
-              businesses={businesses}
+              businesses={displayedBusinesses}
               selectedId={selectedId}
               onSelectBusiness={handleMarkerClick}
             />

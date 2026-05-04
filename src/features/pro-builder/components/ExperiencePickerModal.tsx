@@ -13,19 +13,23 @@ type MinimizedPackage = {
   sector: string
   pace: string
   tags: string
+  lat?: number | null
+  lng?: number | null
 }
 
 interface ExperiencePickerModalProps {
   isOpen: boolean
   onClose: () => void
   dayNumber: number
+  eventId?: string
 }
 
-export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: ExperiencePickerModalProps) {
+export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: ExperiencePickerModalProps) {
   const { draftTrip, addEventToDay, removeEventFromDay } = useBuilder()
   const [packages, setPackages] = useState<MinimizedPackage[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
+  const [filterCategory, setFilterCategory] = useState("All")
 
   const day = draftTrip.days.find(d => d.dayNumber === dayNumber)
   
@@ -37,11 +41,9 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
     if (isOpen && packages.length === 0) {
       setLoading(true)
       // Fetch packages (re-using existing endpoint)
-      fetch('/api/packages')
+      fetch('/api/experiences')
         .then(res => res.json())
         .then(data => {
-          // Filter out agencies, keep only Vallecito Originals for simplicity in this demo, or all.
-          // The API endpoint might return everything.
           setPackages(data || [])
         })
         .catch(console.error)
@@ -51,10 +53,15 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
 
   if (!isOpen) return null
 
-  const filtered = packages.filter(p => 
-    p.title.toLowerCase().includes(search.toLowerCase()) || 
-    p.tags.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = packages.filter(p => {
+    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || 
+                          p.tags.toLowerCase().includes(search.toLowerCase())
+    if (!matchesSearch) return false
+
+    if (filterCategory === "All") return true
+    if (filterCategory === "Experiences") return p.pace !== "FLEXIBLE"
+    return p.tags.includes(filterCategory)
+  })
 
   const togglePackage = (pkg: MinimizedPackage) => {
     const isSelected = selectedPackageIds.includes(pkg.id)
@@ -70,8 +77,10 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
         type: 'EXPERIENCE',
         startTime: "09:00", // Default time
         packageId: pkg.id,
-        title: pkg.title
-      })
+        title: pkg.title,
+        locationLat: pkg.lat || undefined,
+        locationLng: pkg.lng || undefined,
+      } as any)
     }
   }
 
@@ -91,7 +100,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
         </div>
 
         {/* Search */}
-        <div className="p-6 border-b border-slate-100">
+        <div className="p-6 border-b border-slate-100 space-y-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input 
@@ -101,6 +110,17 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber }: Experience
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-slate-900"
             />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+             {["All", "Experiences", "Dining", "Stays", "Wellness", "Culture"].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${filterCategory === cat ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  {cat}
+                </button>
+             ))}
           </div>
         </div>
 

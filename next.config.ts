@@ -10,6 +10,14 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
   /* config options here */
   // Force server restart to load GEMINI_API_KEY from Google AI Studio
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
   turbopack: {},
 };
 

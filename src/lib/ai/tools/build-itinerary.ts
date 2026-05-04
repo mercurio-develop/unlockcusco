@@ -14,7 +14,7 @@ function getCoords(location: string) {
 }
 
 function score(rating: number, distKm: number) {
-  return rating * 0.6 + Math.max(0, 10 - distKm) * 0.4;
+  return (rating ? rating / 20 : 0) * 0.6 + Math.max(0, 10 - distKm) * 0.4;
 }
 
 const DESIRE_MAP: Record<string, { category: string; icon: string; cost: number; keywords: string[] }> = {
@@ -98,22 +98,49 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     for (const desire of desires) {
       const { category, cost, keywords } = resolveDesire(desire);
 
-      const candidates = await prisma.business.findMany({
-        where: {
-          businessType: 'place',
-          locationSlug: { in: corridor },
-          id: { notIn: Array.from(usedBusinessIds) },
-          OR: [
-            { category: { equals: category } },
-            { categorySlug: { in: keywords } },
-            { name: { contains: desire } },
-            ...keywords.map(kw => ({ name: { contains: kw } })),
-            ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
-          ],
-        },
-        orderBy: { rating: 'desc' },
-        take: 50,
-      });
+      const sharedWhere = {
+        locationSlug: { in: corridor },
+        id: { notIn: Array.from(usedBusinessIds) },
+        OR: [
+          { name: { contains: desire } },
+          ...keywords.map(kw => ({ name: { contains: kw } })),
+        ],
+      };
+
+      // Route to the correct domain table
+      let candidates: { id: string; name: string; lat: number | null; lng: number | null; rating: number | null; locationSlug: string; whatsapp: string | null; category: string; categorySlug?: string; scoreQuality?: number }[];
+
+      if (category === 'Dining') {
+        const rows = await prisma.restaurant.findMany({
+          where: { locationSlug: { in: corridor }, id: { notIn: Array.from(usedBusinessIds) }, OR: [{ name: { contains: desire } }, ...keywords.map(kw => ({ name: { contains: kw } }))] },
+          orderBy: { rating: 'desc' },
+          take: 50,
+        });
+        candidates = rows.map(r => ({ ...r, category: 'Dining', categorySlug: 'dining' }));
+      } else if (category === 'Stays') {
+        const rows = await prisma.lodging.findMany({
+          where: { locationSlug: { in: corridor }, id: { notIn: Array.from(usedBusinessIds) }, OR: [{ name: { contains: desire } }, ...keywords.map(kw => ({ name: { contains: kw } }))] },
+          orderBy: { rating: 'desc' },
+          take: 50,
+        });
+        candidates = rows.map(r => ({ ...r, category: 'Stays', categorySlug: 'stays' }));
+      } else {
+        candidates = await prisma.business.findMany({
+          where: {
+            ...sharedWhere,
+            NOT: { category: { in: ['Dining', 'Stays', 'Descanso'] } },
+            OR: [
+              { category: { equals: category } },
+              { categorySlug: { in: keywords } },
+              { name: { contains: desire } },
+              ...keywords.map(kw => ({ name: { contains: kw } })),
+              ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
+            ],
+          },
+          orderBy: { rating: 'desc' },
+          take: 50,
+        });
+      }
 
       const alts = candidates
         .filter(b => b.lat !== null && b.lng !== null && b.rating !== null)
@@ -164,7 +191,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         priceUsd: cost,
         lat: selected.lat,
         lng: selected.lng,
-        rating: selected.rating,
+        rating: (selected as any).scoreQuality ? (selected as any).scoreQuality / 20 : 0,
         alternatives: alts
       });
     }
@@ -195,7 +222,6 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
 
       const taxiRows = await prisma.business.findMany({
         where: {
-          businessType: 'service',
           categorySlug: 'taxi',
         }
       });
@@ -204,10 +230,10 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const dLower = toNode.locationStr.toLowerCase();
 
       const validTaxis = taxiRows.filter(t => {
-        const zones = JSON.parse(t.serviceZones || "[]") as string[];
+        const zones = JSON.parse((t as any).serviceZones || "[]") as string[];
         return zones.some(z => oLower.includes(z) || dLower.includes(z));
       }).map(t => {
-        const zones = JSON.parse(t.serviceZones || "[]") as string[];
+        const zones = JSON.parse((t as any).serviceZones || "[]") as string[];
         const coversBoth = zones.some(z => oLower.includes(z)) && zones.some(z => dLower.includes(z));
         return { ...t, coversBoth, zonesCount: zones.length, zones };
       }).sort((a, b) => {
@@ -216,7 +242,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         const ratingA = a.rating ?? 0;
         const ratingB = b.rating ?? 0;
         if (ratingA !== ratingB) return ratingB - ratingA;
-        return b.zonesCount - a.zonesCount;
+        return (b as any).zonesCount - (a as any).zonesCount;
       });
 
       if (validTaxis.length > 0) {

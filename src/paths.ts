@@ -30,3 +30,7 @@ export const therapistsPath = () => "/services/healers";
 export const therapistPath = (slug: string) => `/services/healers/${slug}`;
 
 export const transportPath = () => "/services/transport";
+
+export const restaurantsPath = () => "/services/restaurants";
+
+export const lodgingPath = () => "/services/lodging";

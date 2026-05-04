@@ -81,7 +81,7 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
   }
 
   const parsedHeroImages = business.heroImages && business.heroImages !== "[]" ? JSON.parse(business.heroImages) : []
-  const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl
+  const displayImage = (parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl) || 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop'
 
   return (
     <div

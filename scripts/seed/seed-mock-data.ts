@@ -48,8 +48,7 @@ async function main() {
           categorySlug: cat.slug,
           locationSlug: town.slug,
           lat: lat,
-          lng: lng,
-          rating: 4.0 + Math.random(), // 4.0 to 5.0
+          lng: lng, // 4.0 to 5.0
           reviewsCount: Math.floor(Math.random() * 100) + 10,
           imageUrl: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
           businessType: cat.type,

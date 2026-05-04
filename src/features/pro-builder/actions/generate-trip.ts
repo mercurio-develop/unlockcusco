@@ -1,25 +1,55 @@
 "use server"
 
 import { DraftTrip } from "../types"
+import { prisma } from "@/lib/prisma"
 
-// This is a placeholder server action.
-// In a real implementation, this would map the DraftTrip into Prisma `Trip` and `TripDay` models.
 export async function generateProTrip(draft: DraftTrip) {
   // 1. Validate data
   if (!draft.title || !draft.startDate || draft.days.length === 0) {
     throw new Error("Invalid draft trip data")
   }
 
-  // 2. Simulate DB delay
-  await new Promise(resolve => setTimeout(resolve, 1500))
+  // 2. Generate a share token
+  const shareToken = "tx_" + Math.random().toString(36).substring(2, 10)
 
-  // 3. Generate a mock share token (magic link)
-  const mockToken = "tx_" + Math.random().toString(36).substring(2, 10)
+  const startDate = new Date(draft.startDate);
+  const endDate = draft.endDate ? new Date(draft.endDate) : new Date(startDate.getTime() + (draft.days.length - 1) * 24 * 60 * 60 * 1000);
 
-  // 4. Return success
-  return {
-    success: true,
-    shareToken: mockToken,
-    message: "Trip generated successfully"
+  // 3. Map to Prisma models and save
+  try {
+    const trip = await prisma.trip.create({
+      data: {
+        tripTitle: draft.title,
+        startDate,
+        endDate,
+        paxCount: draft.paxCount || 1,
+        baseCampStrategy: "FLEXIBLE", 
+        shareToken,
+        status: "PROPOSED",
+        days: {
+          create: draft.days.map((day, idx) => ({
+            dayNumber: day.dayNumber || idx + 1,
+            date: day.date ? new Date(day.date) : new Date(startDate.getTime() + idx * 24 * 60 * 60 * 1000),
+            sleepTown: day.endAnchor?.locationStr || 'Unknown',
+            dayTheme: day.guideNotes?.slice(0, 50) || 'Exploration', // Rough fallback
+            guideNotes: day.guideNotes || null,
+            startTime: day.startAnchor?.time || "08:00 AM",
+            meetingPoint: day.startAnchor?.locationStr || null,
+            eventsJson: JSON.stringify(day.events || []),
+            isAgencyLocked: true,
+            isCustomized: true,
+          }))
+        }
+      }
+    });
+
+    return {
+      success: true,
+      shareToken: trip.shareToken,
+      message: "Trip generated successfully"
+    }
+  } catch (error) {
+    console.error("Failed to generate pro trip:", error);
+    throw new Error("Failed to save trip to database");
   }
 }

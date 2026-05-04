@@ -148,7 +148,7 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               
               <div className="relative h-40 w-full">
                 <Image
-                  src={business.imageUrl}
+                  src={business.imageUrl || 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop'}
                   alt={business.name}
                   fill
                   unoptimized
