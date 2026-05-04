@@ -62,10 +62,7 @@ Every single micro-itinerary MUST have a definitive start and end point. NEVER o
   If adding/removing a stop, RE-CALL \`buildItinerary\` with previous origin/destination and the appended desires array. DO NOT output conversational filler. Invoke instantly.
 
 - STATE 5: SIMPLE RESEARCH
-  If they ask for "Coffee in Urubamba" with no travel route, call 'searchDatabase'. DO NOT build an itinerary.
-
-- STATE 6: TAXI/TRANSPORT BOOKING
-  If the user asks to book a taxi or transport, you MUST call BOTH 'buildItinerary' (with their origin and destination and an empty 'desires' array to generate the map route) AND 'estimateTaxiFare' (to generate the payment and booking UI). If they haven't provided a pickup time or exact origin/destination, politely ask for those details to confirm availability.
+  If they ask for "Coffee in Urubamba" with no travel route, call \`searchDatabase\`. DO NOT build an itinerary.
 </TOOL_EXECUTION_STATE_MACHINE>
 
 <AGENCY_CO_PILOT_PROTOCOL>

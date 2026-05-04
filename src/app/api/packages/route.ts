@@ -16,6 +16,7 @@ const lensTagMap: Record<string, string[]> = {
 
 export async function GET(req: NextRequest) {
   try {
+    const fetchAll = req.nextUrl.searchParams.get('all') === 'true'
     const exertion = req.nextUrl.searchParams.get('exertion') || 'EXPLORER'
     const lensParam = req.nextUrl.searchParams.get('lenses') || ''
     const lenses = lensParam ? lensParam.split(',').filter(Boolean) : []
@@ -24,11 +25,13 @@ export async function GET(req: NextRequest) {
 
     const WIZARD_SECTORS = ['EAST_VALLEY', 'URUBAMBA', 'CUSCO_CITY', 'OTHER']
 
+    const whereClause = fetchAll ? {} : {
+      pace: { in: allowedPaces },
+      sector: { in: WIZARD_SECTORS },
+    }
+
     const packages = await prisma.tourPackage.findMany({
-      where: {
-        pace: { in: allowedPaces },
-        sector: { in: WIZARD_SECTORS },
-      },
+      where: whereClause,
       select: { 
         id: true, 
         title: true, 

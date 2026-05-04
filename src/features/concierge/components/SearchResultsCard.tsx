@@ -2,7 +2,6 @@
 
 import { useItinerary } from "@/lib/store/itinerary-context";
 import { Plus, Star, MapPin } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
@@ -24,16 +23,12 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
   }
 
   const handleSelect = (business: any) => {
-    if (business.businessType === 'service' || business.category === 'Taxi' || business.category === 'Guide' || business.category === 'Agency' || business.category === 'Therapist') {
-      if (business.category === 'Taxi') {
-        router.push('/services/transport');
-      } else if (business.category === 'Agency') {
-        router.push('/services/agencies');
-      } else if (business.category === 'Therapist' || business.category === 'Guide') {
-        router.push('/services/healers');
-      } else {
-        router.push('/services');
-      }
+    if (business.category === 'Taxi') {
+      router.push('/services/transport');
+    } else if (business.category === 'Agency') {
+      router.push('/services/agencies');
+    } else if (business.category === 'Therapist' || business.category === 'Guide' || business.category === 'Therapy') {
+      router.push('/services/healers');
     } else {
       setSelectedId(business.id);
     }
@@ -68,7 +63,7 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
             >
               <div className="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden shrink-0 relative">
                 {displayImage ? (
-                  <Image src={displayImage} alt={business.name} fill className="object-cover" unoptimized />
+                  <img src={displayImage} alt={business.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-slate-100">
                     <MapPin className="w-4 h-4 text-slate-400" />
@@ -91,7 +86,7 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
                     {business.category} in {business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : 'Vallecito'}
                   </p>
                   
-                  {activeItinerary && business.businessType !== 'service' && (
+                  {activeItinerary && !['Taxi', 'Therapist', 'Therapy', 'Guide', 'Agency'].includes(business.category) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

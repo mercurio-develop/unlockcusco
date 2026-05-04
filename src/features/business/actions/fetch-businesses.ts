@@ -10,14 +10,6 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY 
 });
 
-export interface FetchBusinessesParams {
-  query?: string
-  category?: string
-  loc?: string
-  page: number
-  limit: number
-}
-
 // Helper to interleave categories while maintaining relative rating sort
 function interleaveCategories(sortedBusinesses: Business[]) {
   const byCategory: Record<string, Business[]> = {}
@@ -47,12 +39,11 @@ export interface FetchBusinessesParams {
   query?: string
   category?: string
   loc?: string
-  page: number
+  page?: number
   limit: number
-  businessType?: 'place' | 'service'
 }
 
-export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20, businessType }: FetchBusinessesParams) {
+export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20 }: FetchBusinessesParams) {
   const google = createGoogleGenerativeAI({ 
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY 
   });

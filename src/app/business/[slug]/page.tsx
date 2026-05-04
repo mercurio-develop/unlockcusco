@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   const categoryName = business.categorySlug ? business.categorySlug.charAt(0).toUpperCase() + business.categorySlug.slice(1) : business.category
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : "the Sacred Valley"
   const title = `${business.name} — ${categoryName} in ${locationName}`
-  const description = `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.scoreQuality ? (business.scoreQuality / 20).toFixed(1) : 'New'} stars.`
+  const description = `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`
 
   return {
     title,
@@ -71,7 +71,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       {/* Hero Image Header */}
       <div className="relative h-[40vh] md:h-[50vh] w-full border-b border-white/10">
         <Image
-          src={business.imageUrl || 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop'}
+          src={business.imageUrl}
           alt={business.name}
           fill
           priority

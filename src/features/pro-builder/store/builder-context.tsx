@@ -13,6 +13,7 @@ interface BuilderContextType {
   addEventToDay: (dayNumber: number, event: TimelineEvent) => void
   removeEventFromDay: (dayNumber: number, eventId: string) => void
   updateEventInDay: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void
+  moveEvent: (dayNumber: number, eventId: string, direction: -1 | 1) => void
 
   // View State
   viewState: 'wizard' | 'workspace' | 'checkout'
@@ -61,6 +62,37 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
         if (day.dayNumber !== dayNumber) return day
         // Sort events by startTime after adding
         const newEvents = [...day.events, event].sort((a, b) => a.startTime.localeCompare(b.startTime))
+        
+        // Auto-complete preceding transport's end location
+        if (event.type === 'MEAL' || event.type === 'EXPERIENCE') {
+          const addedIndex = newEvents.findIndex(e => e.id === event.id)
+          if (addedIndex > 0) {
+            const prevEvent = newEvents[addedIndex - 1]
+            if (prevEvent.type === 'TRANSPORT') {
+              const locationStr = event.type === 'MEAL' ? (event.experienceTitle || event.location || event.name) : event.title
+              newEvents[addedIndex - 1] = {
+                ...prevEvent,
+                to: locationStr || prevEvent.to
+              }
+            }
+          }
+        }
+        
+        // Auto-complete new transport's start location based on preceding event
+        if (event.type === 'TRANSPORT') {
+          const addedIndex = newEvents.findIndex(e => e.id === event.id)
+          if (addedIndex > 0) {
+            const prevEvent = newEvents[addedIndex - 1]
+            if (prevEvent.type === 'MEAL' || prevEvent.type === 'EXPERIENCE') {
+              const locationStr = prevEvent.type === 'MEAL' ? (prevEvent.experienceTitle || prevEvent.location || prevEvent.name) : prevEvent.title
+              newEvents[addedIndex] = {
+                ...event,
+                from: locationStr || event.from
+              }
+            }
+          }
+        }
+        
         return { ...day, events: newEvents }
       })
     }))
@@ -82,10 +114,77 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       ...prev,
       days: prev.days.map(day => {
         if (day.dayNumber !== dayNumber) return day
-        const updatedEvents = day.events.map(e => e.id === eventId ? { ...e, ...updates } as TimelineEvent : e)
+        
+        let events = day.events.map(e => e.id === eventId ? { ...e, ...updates } as TimelineEvent : e)
         // Re-sort in case time changed
-        updatedEvents.sort((a, b) => a.startTime.localeCompare(b.startTime))
+        events.sort((a, b) => a.startTime.localeCompare(b.startTime))
+
+        // Re-run transport auto-complete for the whole day
+        const updatedEvents = events.map((event, i) => {
+          if (event.type === 'TRANSPORT') {
+            const prevEvt = i > 0 ? events[i - 1] : null;
+            let newFrom = event.from;
+            if (prevEvt && (prevEvt.type === 'MEAL' || prevEvt.type === 'EXPERIENCE')) {
+              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.experienceTitle || prevEvt.location || prevEvt.name) : prevEvt.title;
+            }
+            
+            const nextEvt = i < events.length - 1 ? events[i + 1] : null;
+            let newTo = event.to;
+            if (nextEvt && (nextEvt.type === 'MEAL' || nextEvt.type === 'EXPERIENCE')) {
+              newTo = nextEvt.type === 'MEAL' ? (nextEvt.experienceTitle || nextEvt.location || nextEvt.name) : nextEvt.title;
+            }
+            
+            return { ...event, from: newFrom || event.from, to: newTo || event.to };
+          }
+          return event;
+        });
+
         return { ...day, events: updatedEvents }
+      })
+    }))
+  }
+
+  const moveEvent = (dayNumber: number, eventId: string, direction: -1 | 1) => {
+    setDraftTrip(prev => ({
+      ...prev,
+      days: prev.days.map(day => {
+        if (day.dayNumber !== dayNumber) return day
+        
+        const events = [...day.events];
+        const index = events.findIndex(e => e.id === eventId);
+        if (index < 0) return day;
+        
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= events.length) return day;
+
+        // Swap start times to naturally reorder them
+        const tempTime = events[index].startTime;
+        events[index].startTime = events[targetIndex].startTime;
+        events[targetIndex].startTime = tempTime;
+
+        events.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        // Re-run transport auto-complete for the whole day
+        const updatedEvents = events.map((event, i) => {
+          if (event.type === 'TRANSPORT') {
+            const prevEvt = i > 0 ? events[i - 1] : null;
+            let newFrom = event.from;
+            if (prevEvt && (prevEvt.type === 'MEAL' || prevEvt.type === 'EXPERIENCE')) {
+              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.experienceTitle || prevEvt.location || prevEvt.name) : prevEvt.title;
+            }
+            
+            const nextEvt = i < events.length - 1 ? events[i + 1] : null;
+            let newTo = event.to;
+            if (nextEvt && (nextEvt.type === 'MEAL' || nextEvt.type === 'EXPERIENCE')) {
+              newTo = nextEvt.type === 'MEAL' ? (nextEvt.experienceTitle || nextEvt.location || nextEvt.name) : nextEvt.title;
+            }
+            
+            return { ...event, from: newFrom || event.from, to: newTo || event.to };
+          }
+          return event;
+        });
+
+        return { ...day, events: updatedEvents };
       })
     }))
   }
@@ -105,6 +204,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       addEventToDay,
       removeEventFromDay,
       updateEventInDay,
+      moveEvent,
       viewState,
       setViewState,
       activeDayNumber,

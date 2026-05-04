@@ -1,106 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { useBuilder } from "@/features/pro-builder/store/builder-context"
-import { MapPin, Plus, Edit2, Calendar, Users, Moon, Plane, Car, Utensils, AlignLeft, Trash2, Check, X } from "lucide-react"
+import { MapPin, Plus, Edit2, Calendar, Users, Moon, Plane, Car, Utensils, AlignLeft, Trash2, Check, X, ArrowUp, ArrowDown } from "lucide-react"
 import { ExperiencePickerModal } from "./ExperiencePickerModal"
+import { PackagePreviewModal } from "./PackagePreviewModal"
 import { LocationAutocomplete } from "./LocationAutocomplete"
 import { motion, AnimatePresence } from "framer-motion"
 import { TimelineEvent, EventType } from "../types"
 import { v4 as uuidv4 } from "uuid"
-
-type MinimizedPackage = {
-  id: string
-  title: string
-  sector: string
-  pace: string
-  tags: string
-}
-
-let cachedExperiences: MinimizedPackage[] | null = null;
-
-function MealNameInput({ name, currentPackageId, onUpdate }: { name: string, currentPackageId?: string, onUpdate: (updates: any) => void }) {
-  const [experiences, setExperiences] = useState<MinimizedPackage[]>(cachedExperiences || [])
-  const [suggestion, setSuggestion] = useState<MinimizedPackage | null>(null)
-  const [showPopup, setShowPopup] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (!cachedExperiences) {
-      fetch('/api/experiences').then(res => res.json()).then(data => {
-        if (Array.isArray(data)) {
-          cachedExperiences = data;
-          setExperiences(data)
-        }
-      }).catch(console.error)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (name.length > 2 && !currentPackageId && experiences.length > 0) {
-      const match = experiences.find(exp => 
-        (exp.tags?.toLowerCase().includes('food') || exp.tags?.toLowerCase().includes('dining') || exp.tags?.toLowerCase().includes('restaurant')) &&
-        exp.title?.toLowerCase().includes(name.toLowerCase())
-      )
-      
-      if (match) {
-        setSuggestion(match)
-        setShowPopup(true)
-      } else {
-        setShowPopup(false)
-      }
-    } else {
-      setShowPopup(false)
-    }
-  }, [name, currentPackageId, experiences])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({ name: e.target.value })
-  }
-
-  const handleFocus = () => {
-    if (suggestion && !currentPackageId) setShowPopup(true)
-  }
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        setShowPopup(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  return (
-    <div className="relative" ref={inputRef}>
-      <input type="text" value={name} onChange={handleChange} onFocus={handleFocus} className="w-full font-bold text-slate-900 outline-none focus:text-amber-600" placeholder="Restaurant Name" />
-      {showPopup && suggestion && (
-        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-amber-200 shadow-xl rounded-xl p-3 w-72 animate-in fade-in slide-in-from-top-2">
-          <p className="text-xs text-slate-500 mb-2">Do you want to link this experience?</p>
-          <div className="flex items-start gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-              <MapPin className="w-4 h-4 text-amber-600" />
-            </div>
-            <h5 className="font-bold text-slate-900 text-sm leading-tight">{suggestion.title}</h5>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <button onClick={() => setShowPopup(false)} className="text-xs text-slate-500 hover:text-slate-700 px-2 py-1">Cancel</button>
-            <button 
-              onClick={() => {
-                onUpdate({ name: suggestion.title, packageId: suggestion.id, experienceTitle: suggestion.title })
-                setShowPopup(false)
-              }} 
-              className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-            >
-              Add Experience
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 function getEventIcon(type: EventType) {
   switch (type) {
@@ -112,9 +20,10 @@ function getEventIcon(type: EventType) {
 }
 
 export function BuilderWorkspace() {
-  const { draftTrip, updateDay, activeDayNumber, setActiveDayNumber, setViewState, removeEventFromDay, addEventToDay, updateEventInDay } = useBuilder()
+  const { draftTrip, updateDay, activeDayNumber, setActiveDayNumber, setViewState, removeEventFromDay, addEventToDay, updateEventInDay, moveEvent } = useBuilder()
   
-  const [activeDayPicker, setActiveDayPicker] = useState<number | null>(null)
+  const [activeDayPicker, setActiveDayPicker] = useState<{dayNumber: number, eventId?: string} | null>(null)
+  const [viewingPackage, setViewingPackage] = useState<string | null>(null)
   const [showAddMenu, setShowAddMenu] = useState(false)
 
   const activeDay = draftTrip.days.find(d => d.dayNumber === activeDayNumber)
@@ -140,7 +49,7 @@ export function BuilderWorkspace() {
       if (lastEvent.type === 'TRANSPORT') {
         defaultFrom = lastEvent.to || defaultFrom
       } else if (lastEvent.type === 'MEAL') {
-        defaultFrom = lastEvent.location || lastEvent.name || defaultFrom
+        defaultFrom = lastEvent.experienceTitle || lastEvent.location || lastEvent.name || defaultFrom
       } else if (lastEvent.type === 'EXPERIENCE') {
         defaultFrom = lastEvent.title || defaultFrom
       }
@@ -162,7 +71,7 @@ export function BuilderWorkspace() {
         newEvent = { id, type, startTime: defaultStartTime, content: "Client has requested extra time for photography." }
         break
       case 'EXPERIENCE':
-        setActiveDayPicker(activeDayNumber)
+        setActiveDayPicker({ dayNumber: activeDayNumber })
         setShowAddMenu(false)
         return
     }
@@ -292,13 +201,30 @@ export function BuilderWorkspace() {
                     
                     <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
                       
-                      {/* Delete Button (appears on hover) */}
-                      <button 
-                        onClick={() => removeEventFromDay(activeDay.dayNumber, evt.id)}
-                        className="absolute -top-3 -right-3 w-8 h-8 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm z-10"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {/* Action Buttons (appears on hover) */}
+                      <div className="absolute -top-3 -right-3 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all z-10">
+                        <button 
+                          onClick={() => moveEvent(activeDay.dayNumber, evt.id, -1)}
+                          className="w-8 h-8 bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 rounded-full flex items-center justify-center shadow-sm"
+                          title="Move up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => removeEventFromDay(activeDay.dayNumber, evt.id)}
+                          className="w-8 h-8 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 rounded-full flex items-center justify-center shadow-sm"
+                          title="Remove"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => moveEvent(activeDay.dayNumber, evt.id, 1)}
+                          className="w-8 h-8 bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 rounded-full flex items-center justify-center shadow-sm"
+                          title="Move down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
 
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-2">
@@ -316,7 +242,15 @@ export function BuilderWorkspace() {
                       {evt.type === 'EXPERIENCE' && (
                         <div>
                           <h4 className="font-bold text-slate-900 font-serif text-lg">{evt.title || "Selected Vallecito Experience"}</h4>
-                          <p className="text-xs text-slate-500 mt-1">ID: {evt.packageId}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-xs text-slate-500">ID: {evt.packageId}</p>
+                            <button 
+                              onClick={() => setViewingPackage(evt.packageId)} 
+                              className="text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              See Details
+                            </button>
+                          </div>
                         </div>
                       )}
                       
@@ -347,12 +281,9 @@ export function BuilderWorkspace() {
 
                       {evt.type === 'MEAL' && (
                         <div className="space-y-2">
-                          <MealNameInput 
-                            name={evt.name} 
-                            currentPackageId={(evt as any).packageId} 
-                            onUpdate={(updates) => updateEventInDay(activeDay.dayNumber, evt.id, updates)} 
-                          />                          <input type="text" value={evt.notes || ''} onChange={(e) => updateEventInDay(activeDay.dayNumber, evt.id, { notes: e.target.value })} className="w-full text-xs text-slate-500 outline-none" placeholder="Reservation notes..." />
-                          {(evt as any).packageId ? (
+                          <input type="text" value={evt.name} onChange={(e) => updateEventInDay(activeDay.dayNumber, evt.id, { name: e.target.value })} className="w-full font-bold text-slate-900 outline-none focus:text-amber-600" placeholder="Restaurant Name" />
+                          <input type="text" value={evt.notes || ''} onChange={(e) => updateEventInDay(activeDay.dayNumber, evt.id, { notes: e.target.value })} className="w-full text-xs text-slate-500 outline-none" placeholder="Reservation notes..." />
+                          {evt.packageId ? (
                             <div className="relative border border-amber-200 bg-amber-50/50 rounded-xl p-3 mt-3 shadow-sm group/nested">
                               <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2">
@@ -361,16 +292,24 @@ export function BuilderWorkspace() {
                                   </div>
                                   <div>
                                     <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Linked Experience</p>
-                                    <h5 className="font-serif font-bold text-slate-900 text-sm leading-tight">{(evt as any).experienceTitle}</h5>
+                                    <h5 className="font-bold text-slate-900 text-sm leading-tight">{evt.experienceTitle}</h5>
                                   </div>
                                 </div>
-                                <button onClick={() => updateEventInDay(activeDay.dayNumber, evt.id, { packageId: undefined, experienceTitle: undefined } as any)} className="text-slate-400 hover:text-rose-600 transition-colors opacity-0 group-hover/nested:opacity-100 p-1">
+                                <button onClick={() => updateEventInDay(activeDay.dayNumber, evt.id, { packageId: undefined, experienceTitle: undefined })} className="text-slate-400 hover:text-rose-600 transition-colors opacity-0 group-hover/nested:opacity-100 p-1">
                                   <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <div className="flex justify-end mt-2">
+                                <button 
+                                  onClick={() => setViewingPackage(evt.packageId!)} 
+                                  className="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                                >
+                                  See Details
                                 </button>
                               </div>
                             </div>
                           ) : (
-                            <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id } as any)} className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
+                            <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id })} className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
                               <Plus className="w-3.5 h-3.5" /> Add Experience
                             </button>
                           )}
@@ -429,7 +368,24 @@ export function BuilderWorkspace() {
                     <Moon className="w-3 h-3 text-slate-800" />
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-slate-400 transition-colors">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] block mb-2">End Anchor</span>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">End Anchor</span>
+                      {activeDay.events.length > 0 && (
+                        <button 
+                          onClick={() => {
+                            const lastEvent = activeDay.events[activeDay.events.length - 1];
+                            let lastLoc = "";
+                            if (lastEvent.type === 'TRANSPORT') lastLoc = lastEvent.to;
+                            else if (lastEvent.type === 'MEAL') lastLoc = lastEvent.location || lastEvent.name;
+                            else if (lastEvent.type === 'EXPERIENCE') lastLoc = lastEvent.title;
+                            if (lastLoc) updateDay(activeDay.dayNumber, { endAnchor: { ...activeDay.endAnchor, locationStr: lastLoc } });
+                          }}
+                          className="text-[10px] font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-md transition-colors border border-rose-100"
+                        >
+                          Use Last Location
+                        </button>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <input 
                         type="time" 
@@ -469,8 +425,13 @@ export function BuilderWorkspace() {
       <ExperiencePickerModal 
         isOpen={activeDayPicker !== null} 
         onClose={() => setActiveDayPicker(null)} 
-        dayNumber={typeof activeDayPicker === 'object' && activeDayPicker !== null ? (activeDayPicker as any).dayNumber : (activeDayPicker || 1)} 
-        eventId={typeof activeDayPicker === 'object' && activeDayPicker !== null ? (activeDayPicker as any).eventId : undefined}
+        dayNumber={activeDayPicker?.dayNumber || 1}
+        eventId={activeDayPicker?.eventId}
+      />
+
+      <PackagePreviewModal 
+        packageId={viewingPackage}
+        onClose={() => setViewingPackage(null)}
       />
 
     </div>

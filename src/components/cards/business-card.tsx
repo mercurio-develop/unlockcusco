@@ -12,7 +12,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Star, Zap, Plus } from "lucide-react"
-import Image from "next/image"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { trackWhatsappClick } from "@/features/business/actions/track-click"
 import { trackBusinessView } from "@/features/business/actions/track-view"
@@ -81,7 +80,7 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
   }
 
   const parsedHeroImages = business.heroImages && business.heroImages !== "[]" ? JSON.parse(business.heroImages) : []
-  const displayImage = (parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl) || 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop'
+  const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl
 
   return (
     <div
@@ -96,12 +95,11 @@ export function BusinessCard({ business, isHighlighted, onSelect, orientation = 
       } ${
         isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
       }`}>
-        <Image
+        <img
           src={displayImage}
           alt={business.name}
-          fill
-          unoptimized
-          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          referrerPolicy="no-referrer"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         />
         
         {/* Top Badges */}

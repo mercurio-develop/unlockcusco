@@ -15,15 +15,8 @@ model Business {
   lat                Float?
   lng                Float?
   rating             Float?
-  scoreQuality       Int      @default(0)
-  scoreVibe          Int      @default(0)
-  scoreService       Int      @default(0)
-  editorialSummary   String?  
-  zagatSummary       String?
-  editorialCategory  String?
-  operatingHours     String?
-  contactPhone       String?
-  priceEstimate      String?
+  googleRating       Float?
+  reviewSummary      String?
   priceTier          String   @default("$$")
   reviewsCount       Int      @default(0)
   imageUrl           String
@@ -42,76 +35,6 @@ model Business {
   whatsappClicksCount Int     @default(0)
   aiRecommendationsCount Int  @default(0)
   leads              Lead[]
-}
-
-model Restaurant {
-  id                     String  @id @default(uuid())
-  slug                   String  @unique
-  name                   String
-  cuisineType            String  @default("Peruvian")
-  mealService            String  @default("lunch,dinner") // CSV: breakfast,lunch,dinner,coffee
-  dietaryOptions         String  @default("[]")           // JSON: ["vegan","vegetarian","gluten-free"]
-  avgMealUsd             Float?
-  reservationRequired    Boolean @default(false)
-  lat                    Float?
-  lng                    Float?
-  rating                 Float?
-  scoreQuality           Int     @default(0)
-  scoreVibe              Int     @default(0)
-  scoreService           Int     @default(0)
-  editorialSummary       String?
-  zagatSummary           String?
-  editorialCategory      String?
-  operatingHours         String?
-  contactPhone           String?
-  priceTier              String  @default("$$")
-  reviewsCount           Int     @default(0)
-  imageUrl               String  @default("")
-  whatsapp               String?
-  isClaimed              Boolean @default(false)
-  locationSlug           String  @default("")
-  instagramHandle        String?
-  instagramFollowers     Int     @default(0)
-  heroImages             String  @default("[]")
-  avgDwellTimeMins       Int     @default(60)
-  marginTier             String  @default("STANDARD")
-  viewsCount             Int     @default(0)
-  whatsappClicksCount    Int     @default(0)
-  aiRecommendationsCount Int     @default(0)
-}
-
-model Lodging {
-  id                     String  @id @default(uuid())
-  slug                   String  @unique
-  name                   String
-  lodgingType            String  @default("hotel") // hotel,hostel,ecolodge,glamping,guesthouse
-  amenities              String  @default("[]")    // JSON: ["wifi","pool","breakfast-included"]
-  pricePerNightUsd       Float?
-  checkInTime            String  @default("14:00")
-  checkOutTime           String  @default("11:00")
-  lat                    Float?
-  lng                    Float?
-  rating                 Float?
-  scoreQuality           Int     @default(0)
-  scoreVibe              Int     @default(0)
-  scoreService           Int     @default(0)
-  editorialSummary       String?
-  zagatSummary           String?
-  editorialCategory      String?
-  contactPhone           String?
-  priceTier              String  @default("$$")
-  reviewsCount           Int     @default(0)
-  imageUrl               String  @default("")
-  whatsapp               String?
-  isClaimed              Boolean @default(false)
-  locationSlug           String  @default("")
-  instagramHandle        String?
-  instagramFollowers     Int     @default(0)
-  heroImages             String  @default("[]")
-  marginTier             String  @default("STANDARD")
-  viewsCount             Int     @default(0)
-  whatsappClicksCount    Int     @default(0)
-  aiRecommendationsCount Int     @default(0)
 }
 
 model Transport {

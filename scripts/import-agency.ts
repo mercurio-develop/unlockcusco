@@ -49,11 +49,6 @@ async function main() {
       contactPhone: data.contactPhone,
       contactEmail: data.contactEmail || "",
       themeConfig: JSON.stringify(themeConfig),
-      visionMission: data.visionMission || null,
-      featuresJson: featuresJson,
-      socialLinks: socialLinks,
-      seoMetaTitle: data.seoMetaTitle || null,
-      seoMetaDesc: data.seoMetaDesc || null,
     },
     create: {
       slug: data.slug,
@@ -67,11 +62,6 @@ async function main() {
       contactPhone: data.contactPhone,
       contactEmail: data.contactEmail || "",
       themeConfig: JSON.stringify(themeConfig),
-      visionMission: data.visionMission || null,
-      featuresJson: featuresJson,
-      socialLinks: socialLinks,
-      seoMetaTitle: data.seoMetaTitle || null,
-      seoMetaDesc: data.seoMetaDesc || null,
     }
   });
 

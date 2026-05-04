@@ -1,5 +1,0 @@
-{
-  details: string[127],
-  error: string,
-  stack: string[3294]
-}

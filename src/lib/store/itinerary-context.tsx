@@ -28,6 +28,7 @@ interface ItineraryContextType {
   selectBasecamp: (hotel: any) => void;
   setStartAnchorLocation: (lat: number, lng: number, name?: string) => void;
   setEndAnchorLocation: (lat: number, lng: number, name?: string) => void;
+  truncateAfterWaypoint: (idx: number) => void;
 }
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(undefined);
@@ -58,7 +59,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       };
       
       // Update total cost
-      (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
+      newItinerary.totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
       
       setActiveItinerary(newItinerary);
     }
@@ -82,7 +83,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       };
       
       // Update total cost
-      (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
+      newItinerary.totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
       
       setActiveItinerary(newItinerary);
     }
@@ -99,7 +100,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       newItinerary.transitEdges.pop();
     }
     
-    (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
+    newItinerary.totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
     setActiveItinerary(newItinerary);
   };
 
@@ -130,7 +131,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       locationSlug: business.locationSlug,
     };
     
-    const destination = newItinerary.endAnchor || (newItinerary as any).destination;
+    const destination = newItinerary.endAnchor || newItinerary.endAnchor;
 
     const newWaypoint = {
       id: business.id,
@@ -144,10 +145,36 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       alternatives: [newAlt]
     };
 
-    if (exchangeTargetIndex !== null && exchangeTargetIndex >= 0 && exchangeTargetIndex < newItinerary.waypoints.length) {
-      // Exchange logic: replace the target waypoint
-      newItinerary.waypoints = [...newItinerary.waypoints];
-      newItinerary.waypoints[exchangeTargetIndex] = newWaypoint;
+    if (exchangeTargetIndex !== null) {
+      if (exchangeTargetIndex === -1) {
+        // Exchange Start Anchor
+        if (newItinerary.startAnchor) {
+          newItinerary.startAnchor = {
+            ...newItinerary.startAnchor,
+            title: business.name,
+            lat: business.lat,
+            lng: business.lng,
+            locationStr: business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : newItinerary.startAnchor.locationStr,
+            type: business.category === 'Stays' ? 'HOTEL' : 'GENERIC_TOWN'
+          };
+        }
+      } else if (exchangeTargetIndex === -2) {
+        // Exchange End Anchor
+        if (newItinerary.endAnchor) {
+          newItinerary.endAnchor = {
+            ...newItinerary.endAnchor,
+            title: business.name,
+            lat: business.lat,
+            lng: business.lng,
+            locationStr: business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : newItinerary.endAnchor.locationStr,
+            type: business.category === 'Stays' ? 'HOTEL' : 'GENERIC_TOWN'
+          };
+        }
+      } else if (exchangeTargetIndex >= 0 && exchangeTargetIndex < newItinerary.waypoints.length) {
+        // Exchange logic: replace the target waypoint
+        newItinerary.waypoints = [...newItinerary.waypoints];
+        newItinerary.waypoints[exchangeTargetIndex] = newWaypoint;
+      }
       setExchangeTargetIndex(null); // Reset after exchange
     } else {
       // Insert logic: append to the end
@@ -159,7 +186,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
+    newItinerary.totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
     setActiveItinerary(newItinerary);
     setPanelMode("itinerary");
   };
@@ -175,7 +202,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     const newItinerary = { ...activeItinerary };
     
     const alt = accommodationAlts[0];
-    const destination = newItinerary.endAnchor || (newItinerary as any).destination;
+    const destination = newItinerary.endAnchor || newItinerary.endAnchor;
 
     newItinerary.waypoints = [...newItinerary.waypoints, {
       id: alt.id,
@@ -190,7 +217,7 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
     }];
     
     newItinerary.needsAccommodationUpsell = false;
-    (newItinerary as any).totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
+    newItinerary.totalCost = newItinerary.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newItinerary.transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0);
     
     setActiveItinerary(newItinerary);
   };
@@ -208,9 +235,9 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
         lng: hotel.lng,
         locationStr: hotel.locationSlug ? (hotel.locationSlug.charAt(0).toUpperCase() + hotel.locationSlug.slice(1)) : newItinerary.endAnchor.locationStr,
       };
-    } else if ((newItinerary as any).destination) {
-       (newItinerary as any).destination = {
-        ...(newItinerary as any).destination,
+    } else if (newItinerary.endAnchor) {
+       newItinerary.endAnchor = {
+        ...newItinerary.endAnchor,
         title: hotel.name,
         lat: hotel.lat,
         lng: hotel.lng,
@@ -232,9 +259,9 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
         title: name,
         locationStr: "Live GPS"
       };
-    } else if ((newItinerary as any).origin) {
-      (newItinerary as any).origin = {
-        ...(newItinerary as any).origin,
+    } else if (newItinerary.startAnchor) {
+      newItinerary.startAnchor = {
+        ...newItinerary.startAnchor,
         lat,
         lng,
         title: name,
@@ -254,15 +281,47 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
         title: name,
         locationStr: "Custom Location"
       };
-    } else if ((newItinerary as any).destination) {
-      (newItinerary as any).destination = {
-        ...(newItinerary as any).destination,
+    } else if (newItinerary.endAnchor) {
+      newItinerary.endAnchor = {
+        ...newItinerary.endAnchor,
         lat,
         lng,
         title: name,
       };
     }
     setActiveItinerary(newItinerary);
+  };
+
+  const truncateAfterWaypoint = (waypointIndex: number) => {
+    if (!activeItinerary) return;
+    const newItinerary = { ...activeItinerary };
+    
+    // Set end anchor to the waypoint
+    const targetWp = newItinerary.waypoints[waypointIndex];
+    if (targetWp) {
+      if (newItinerary.endAnchor) {
+        newItinerary.endAnchor = {
+          ...newItinerary.endAnchor,
+          title: targetWp.title,
+          lat: targetWp.lat,
+          lng: targetWp.lng,
+          type: 'GENERIC_TOWN', // Adjust as needed
+          locationStr: targetWp.locationStr || "Selected Location",
+        };
+      } else if (newItinerary.endAnchor) {
+        newItinerary.endAnchor = {
+          ...newItinerary.endAnchor,
+          title: targetWp.title,
+          lat: targetWp.lat,
+          lng: targetWp.lng,
+        };
+      }
+      
+      // Truncate waypoints and edges
+      newItinerary.waypoints = newItinerary.waypoints.slice(0, waypointIndex + 1);
+      newItinerary.transitEdges = newItinerary.transitEdges.slice(0, waypointIndex + 1);
+      setActiveItinerary(newItinerary);
+    }
   };
 
   return (
@@ -288,7 +347,8 @@ export function ItineraryProvider({ children }: { children: ReactNode }) {
       addAccommodation,
       selectBasecamp,
       setStartAnchorLocation,
-      setEndAnchorLocation
+      setEndAnchorLocation,
+      truncateAfterWaypoint
     }}>
       {children}
     </ItineraryContext.Provider>

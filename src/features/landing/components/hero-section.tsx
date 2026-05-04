@@ -4,7 +4,6 @@ import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {ArrowRight, ChevronDown, MapPin, Sparkles} from "lucide-react"
-import Image from "next/image"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
 export function HeroSection() {
@@ -44,13 +43,10 @@ export function HeroSection() {
     <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-white">
       {/* Sacred Valley background — visible but light-theme friendly */}
       <div className="absolute inset-0 z-0">
-        <Image
+        <img
           src="https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=3000&auto=format&fit=crop"
-          className="object-cover object-center"
+          className="object-cover object-center w-full h-full"
           alt="Sacred Valley, Andes Mountains"
-          fill
-          priority
-          unoptimized
         />
       </div>
       {/* Radial white vignette — keeps center text crisp, shows landscape at edges */}
@@ -137,23 +133,22 @@ export function HeroSection() {
         <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl">
           {[
             { emoji: "🚕", text: "I need a taxi from Urubamba to Pisac" },
-            { emoji: "🦙", text: "Authentic Alpaca textiles in Chinchero", href: "/explore?q=Alpaca%20textiles&loc=chinchero" },
+            { emoji: "🦙", text: "Plan a 2-day cultural tour in Chinchero" },
             { emoji: "🌿", text: "Recovery massage after the Inca Trail" },
-            { emoji: "🍽️", text: "Authentic local Picantería near me" },
-            { emoji: "🛵", text: "Hidden ATV routes in Maras", href: "/explore?q=ATV&loc=maras" },
-            { emoji: "⛰️", text: "Machu Picchu Live Availability", href: "/explore/machu-picchu" },
-          ].map(({ emoji, text, href }) => (
+            { emoji: "🍽️", text: "Find the best authentic local Picantería" },
+            { emoji: "🛵", text: "Plan a hidden ATV route in Maras" },
+            { emoji: "⛰️", text: "Show me availability for Machu Picchu" },
+            { emoji: "🎒", text: "Suggest an adventurous hike near Ollantaytambo" },
+            { emoji: "🧘", text: "I want a relaxing wellness weekend" },
+            { emoji: "🏺", text: "Where can I buy authentic ceramics?" },
+            { emoji: "☕", text: "Best coffee shops with Wi-Fi in Pisac" },
+            { emoji: "👨‍👩‍👧‍👦", text: "Build a 3-day family itinerary" },
+          ].map(({ emoji, text }) => (
             <button
               key={text}
               type="button"
               disabled={isSearching}
-              onClick={() => {
-                if (href) {
-                  router.push(href)
-                } else {
-                  handleSearch(undefined, text)
-                }
-              }}
+              onClick={() => handleSearch(undefined, text)}
               className="bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-4 py-2 rounded-full text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {emoji} {text}

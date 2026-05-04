@@ -23,8 +23,6 @@ export async function GET(req: NextRequest) {
         name: true,
         locationSlug: true,
         category: true,
-        lat: true,
-        lng: true,
       }
     })
 
@@ -34,9 +32,7 @@ export async function GET(req: NextRequest) {
       title: pkg.title,
       sector: pkg.sector,
       pace: pkg.pace,
-      tags: pkg.tags || '',
-      lat: null,
-      lng: null,
+      tags: pkg.tags || ''
     }))
 
     // Map Businesses
@@ -45,9 +41,7 @@ export async function GET(req: NextRequest) {
       title: b.name,
       sector: b.locationSlug || 'VALLE_SAGRADO',
       pace: 'FLEXIBLE', // Places usually don't have a rigid pace
-      tags: b.category, // Use category as tags
-      lat: b.lat,
-      lng: b.lng,
+      tags: b.category // Use category as tags
     }))
 
     // Combine both arrays

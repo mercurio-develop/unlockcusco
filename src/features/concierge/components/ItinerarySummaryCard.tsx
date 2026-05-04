@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useItinerary } from "@/lib/store/itinerary-context";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { MapPin, ArrowRight, Navigation } from "lucide-react";
@@ -7,12 +8,18 @@ import { MapPin, ArrowRight, Navigation } from "lucide-react";
 export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }) {
   const { setActiveItinerary, setPanelMode } = useItinerary();
 
+  // Auto-open planner when AI generates a new itinerary
+  useEffect(() => {
+    setActiveItinerary(itinerary);
+    setPanelMode("itinerary");
+  }, [itinerary, setActiveItinerary, setPanelMode]);
+
   const handleOpenPlanner = () => {
     setActiveItinerary(itinerary);
     setPanelMode("itinerary");
   };
 
-  const totalCost = (itinerary as any).totalCost ?? 0;
+  const totalCost = itinerary.totalCost ?? 0;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 w-full my-3">
@@ -23,7 +30,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
         </div>
         <div>
           <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">Your Plan</p>
-          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{(itinerary as any).title ?? `${itinerary.startAnchor.title} → ${itinerary.endAnchor.title}`}</h3>
+          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{itinerary.title ?? `${itinerary.startAnchor.title} → ${itinerary.endAnchor.title}`}</h3>
         </div>
       </div>
 
@@ -64,8 +71,8 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
         </button>
       </div>
 
-      {(itinerary as any).constraints && (
-        <p className="text-[10px] text-slate-400 mt-2 text-center">⚡ {(itinerary as any).constraints}</p>
+      {itinerary.constraints && (
+        <p className="text-[10px] text-slate-400 mt-2 text-center">⚡ {itinerary.constraints}</p>
       )}
     </div>
   );

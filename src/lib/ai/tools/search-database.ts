@@ -5,12 +5,10 @@ import { calculateDetourKm } from '@/lib/geo/math';
 import { kv } from '@vercel/kv';
 
 export const searchDatabase = tool({
-  description: `Search for experiences, activities, culture, and wellness businesses.
-Use for: hike, trek, ATV, ruins, market, textiles, art, massage, spa, yoga, boleto, museum, adventure.
-Do NOT use for restaurants/food (use searchRestaurants) or lodging/hotels (use searchLodging) or taxis (use estimateTaxiFare).`,
+  description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries.',
   inputSchema: z.object({
-    query: z.string().describe("Activity or experience type, e.g. textiles, ruins, ATV, massage"),
-    location: z.string().optional().describe("Town slug: pisac, urubamba, ollantaytambo, cusco, maras"),
+    query: z.string().describe("The type of business, e.g. coffee, textiles, taxi"),
+    location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
     routeStart: z.object({ lat: z.number(), lng: z.number() }).optional(),
     routeEnd: z.object({ lat: z.number(), lng: z.number() }).optional(),
   }),
@@ -29,7 +27,6 @@ Do NOT use for restaurants/food (use searchRestaurants) or lodging/hotels (use s
     }
 
     const whereClause: any = {
-      NOT: { category: { in: ['Dining', 'Stays', 'Descanso'] } },
       OR: [
         { name: { contains: query } },
         { category: { contains: query } },
@@ -43,7 +40,7 @@ Do NOT use for restaurants/food (use searchRestaurants) or lodging/hotels (use s
 
     let businesses = await prisma.business.findMany({
       where: whereClause,
-      orderBy: { rating: "desc" }
+      orderBy: { rating: 'desc' }
     });
 
     // Fallback if no exact location match
@@ -51,7 +48,7 @@ Do NOT use for restaurants/food (use searchRestaurants) or lodging/hotels (use s
       delete whereClause.locationSlug;
       const fallbackBusinesses = await prisma.business.findMany({
         where: whereClause,
-        orderBy: { rating: "desc" }
+        orderBy: { rating: 'desc' }
       });
       
       const result = {

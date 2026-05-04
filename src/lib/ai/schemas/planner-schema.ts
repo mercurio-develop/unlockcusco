@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 export const microDaySchema = z.object({
+  title: z.string().optional(),
+  totalCost: z.number().optional(),
+  constraints: z.string().optional(),
   startAnchor: z.object({
     title: z.string(),
     locationStr: z.string(),

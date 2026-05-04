@@ -11,6 +11,7 @@ const MOCK_SERVICES = [
     locationSlug: "urubamba",
     serviceZones: '["urubamba", "ollantaytambo", "yucay"]',
     imageUrl: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800",
+    rating: 4.8,
     reviewsCount: 15,
   },
   {
@@ -20,6 +21,7 @@ const MOCK_SERVICES = [
     locationSlug: "cusco",
     serviceZones: '["cusco", "pisac"]',
     imageUrl: "https://images.unsplash.com/photo-1590483736622-39818817daaa?q=80&w=800",
+    rating: 4.9,
     reviewsCount: 22,
   },
   {
@@ -29,6 +31,7 @@ const MOCK_SERVICES = [
     locationSlug: "pisac",
     serviceZones: '["pisac", "calca"]',
     imageUrl: "https://images.unsplash.com/photo-1602058474246-8805f8cc4ec2?q=80&w=800",
+    rating: 5.0,
     reviewsCount: 40,
   },
   {
@@ -38,6 +41,7 @@ const MOCK_SERVICES = [
     locationSlug: "ollantaytambo",
     serviceZones: '["ollantaytambo", "machupicchu"]',
     imageUrl: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800",
+    rating: 4.7,
     reviewsCount: 8,
   },
   {
@@ -47,6 +51,7 @@ const MOCK_SERVICES = [
     locationSlug: "maras",
     serviceZones: '["maras", "moray", "urubamba"]',
     imageUrl: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=800",
+    rating: 4.6,
     reviewsCount: 5,
   },
   
@@ -58,6 +63,7 @@ const MOCK_SERVICES = [
     locationSlug: "cusco",
     serviceZones: '["cusco", "sacred-valley", "machupicchu"]',
     imageUrl: "https://images.unsplash.com/photo-1517584144342-cb794ccb1979?q=80&w=800",
+    rating: 4.9,
     reviewsCount: 120,
   },
   {
@@ -67,6 +73,7 @@ const MOCK_SERVICES = [
     locationSlug: "urubamba",
     serviceZones: '["urubamba", "maras", "moray", "chinchero"]',
     imageUrl: "https://images.unsplash.com/photo-1533230635445-d8cf818f90dd?q=80&w=800",
+    rating: 4.8,
     reviewsCount: 45,
   },
   {
@@ -76,6 +83,7 @@ const MOCK_SERVICES = [
     locationSlug: "pisac",
     serviceZones: '["pisac", "lares", "ausangate"]',
     imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800",
+    rating: 4.5,
     reviewsCount: 30,
   },
   
@@ -87,6 +95,7 @@ const MOCK_SERVICES = [
     locationSlug: "ollantaytambo",
     serviceZones: '["ollantaytambo", "machupicchu"]',
     imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800",
+    rating: 5.0,
     reviewsCount: 88,
   },
   {
@@ -96,6 +105,7 @@ const MOCK_SERVICES = [
     locationSlug: "chinchero",
     serviceZones: '["chinchero", "maras", "moray"]',
     imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=800",
+    rating: 4.9,
     reviewsCount: 56,
   }
 ];

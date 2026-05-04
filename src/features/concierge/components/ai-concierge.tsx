@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -20,8 +20,7 @@ export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const [lastProcessedSearch, setLastProcessedSearch] = useState<string | null>(null)
+  const pathname = usePathname()
 
   const initialMessages: any[] = [
     {
@@ -86,42 +85,9 @@ Please generate my macro trip plan.`;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Sync searchDatabase tool calls to the Explore map/list UI
-  useEffect(() => {
-    // Find the latest searchDatabase tool call
-    const toolParts = messages
-      .flatMap((m: any) => m.parts || [])
-      .filter((p: any) => {
-        // AI SDK handles tool calls in different ways depending on version/config
-        const isSearch = p.type === 'tool-searchDatabase' || (p.type === 'tool-invocation' && p.toolInvocation?.toolName === 'searchDatabase');
-        const hasArgs = p.args || p.toolInvocation?.args;
-        // Wait until output is available to avoid partial streaming args
-        const isComplete = p.state === 'output-available' || p.toolInvocation?.state === 'result';
-        return isSearch && hasArgs && isComplete;
-      });
-    
-    if (toolParts.length > 0) {
-      const latest = toolParts[toolParts.length - 1];
-      const toolCallId = latest.toolCallId || latest.toolInvocation?.toolCallId || 'fallback';
-      
-      if (toolCallId !== lastProcessedSearch) {
-        setLastProcessedSearch(toolCallId);
-        
-        const args = latest.args || latest.toolInvocation?.args;
-        
-        // Push the query to the router so the main map filters
-        const params = new URLSearchParams(window.location.search);
-        if (args.query) {
-          params.set('q', args.query);
-        }
-        if (args.location) {
-          params.set('loc', args.location);
-        }
-        
-        router.push(`/explore?${params.toString()}`);
-      }
-    }
-  }, [messages, lastProcessedSearch, router]);
+  if (pathname?.startsWith("/trip/")) {
+    return null;
+  }
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -199,19 +165,19 @@ Please generate my macro trip plan.`;
                       const key = part.toolCallId || idx;
                       if (part.state === 'output-available') {
                         if (part.type === 'tool-buildItinerary') {
-                          return <ItinerarySummaryCard key={key} itinerary={part.output as any} />
+                          return <ItinerarySummaryCard key={key} itinerary={part.output} />
                         }
                         if (part.type === 'tool-buildMacroTrip') {
-                          return <MacroItineraryCard key={key} itinerary={part.output as any} />
+                          return <MacroItineraryCard key={key} itinerary={part.output} />
                         }
                         if (part.type === 'tool-searchDatabase') {
-                          return <SearchResultsCard key={key} businesses={part.output as any[]} />
+                          return <SearchResultsCard key={key} businesses={part.output} />
                         }
                         if (part.type === 'tool-askAvailability') {
-                          return <PendingAvailability key={key} message={(part.output as any).message} />
+                          return <PendingAvailability key={key} message={part.output.message} />
                         }
                         if (part.type === 'tool-showBoletoInfo') {
-                          return <BoletoInfoCard key={key} data={(part.output as any).data} message={(part.output as any).message} />
+                          return <BoletoInfoCard key={key} data={part.output.data} message={part.output.message} />
                         }
                       }
                       if (part.type === 'tool-askAvailability' && part.state !== 'output-available') {

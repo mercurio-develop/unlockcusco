@@ -18,36 +18,36 @@ export const buildChronoRelay = tool({
     // Find food at foodLocation
     let food = await prisma.business.findFirst({
       where: { category: { contains: 'TASTE' }, locationSlug: { contains: foodLower } },
-      orderBy: { rating: "desc" }
+      orderBy: { rating: 'desc' }
     });
     if (!food) {
         food = await prisma.business.findFirst({
             where: { category: { contains: 'TASTE' } },
-            orderBy: { rating: "desc" }
+            orderBy: { rating: 'desc' }
         });
     }
 
     // Find transit (taxi)
-    let taxi = await prisma.business.findFirst({
-      where: { category: { contains: 'TRANSIT' } },
-      orderBy: { rating: "desc" }
+    let taxi = await prisma.transport.findFirst({
+      where: { category: { contains: 'Taxi' } },
+      orderBy: { rating: 'desc' }
     });
     if (!taxi) {
-        taxi = await prisma.business.findFirst({
+        taxi = await prisma.transport.findFirst({
             where: { name: { contains: 'taxi' } },
-            orderBy: { rating: "desc" }
+            orderBy: { rating: 'desc' }
         });
     }
 
     // Find stay at destination
     let stay = await prisma.business.findFirst({
       where: { category: { contains: 'STAY' }, locationSlug: { contains: destLower } },
-      orderBy: { rating: "desc" }
+      orderBy: { rating: 'desc' }
     });
     if (!stay) {
         stay = await prisma.business.findFirst({
             where: { category: { contains: 'STAY' } },
-            orderBy: { rating: "desc" }
+            orderBy: { rating: 'desc' }
         });
     }
 

@@ -3,8 +3,6 @@ import { streamText, convertToModelMessages } from 'ai';
 import { buildItinerary } from '@/lib/ai/tools/build-itinerary';
 import { askAvailability } from '@/lib/ai/tools/ask-availability';
 import { searchDatabase } from '@/lib/ai/tools/search-database';
-import { searchRestaurants } from '@/lib/ai/tools/search-restaurants';
-import { searchLodging } from '@/lib/ai/tools/search-lodging';
 import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
@@ -48,8 +46,6 @@ export async function POST(req: Request) {
         buildItinerary,
         askAvailability,
         searchDatabase,
-        searchRestaurants,
-        searchLodging,
         buildMacroTrip,
         showBoletoInfo,
         estimateTaxiFare,

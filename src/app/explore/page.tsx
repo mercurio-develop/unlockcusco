@@ -3,11 +3,11 @@ import { ExploreView } from "@/features/explore/components/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; mode?: string }>
+  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string }>
 }
 
 export async function generateMetadata({ searchParams }: ExplorePageProps): Promise<Metadata> {
-  const { q, loc, cat, mode } = await searchParams
+  const { q, loc, cat } = await searchParams
   
   let title = "Explore"
   let description = "Find the best places and services in the Sacred Valley."
@@ -20,9 +20,6 @@ export async function generateMetadata({ searchParams }: ExplorePageProps): Prom
     const catName = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : "Places"
     title = `${catName} in ${locName}`
     description = `Explore the best ${catName.toLowerCase()} in ${locName}, curated by Vallecito.`
-  } else if (mode === 'service') {
-    title = "Local Services & Experts"
-    description = "Connect with top local guides, drivers, and service providers."
   }
 
   return {
@@ -41,17 +38,15 @@ export async function generateMetadata({ searchParams }: ExplorePageProps): Prom
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id, loc, cat, mode } = await searchParams
+  const { q, id, loc, cat } = await searchParams
   const query = q?.toLowerCase() || ""
-  const businessType = mode === 'service' ? 'service' : 'place'
 
   const { businesses, hasMore } = await fetchBusinesses({
     query,
     category: cat,
     loc,
     page: 0,
-    limit: 20,
-    businessType,
+    limit: 20
   })
 
   // Ensure selected business is exactly at the top
@@ -75,7 +70,6 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         initialHasMore={hasMore}
         initialQuery={q ?? ""}
         initialSelectedId={id ?? null}
-        initialMode={businessType}
       />
     </div>
   )

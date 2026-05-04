@@ -207,6 +207,7 @@ async function main() {
           const reviewsData = originalReviews.map((r, index) => ({
             text: finalReviews[index] || String(r.textTranslated || r.text),
             author: "Google Reviewer",
+            rating: Number(r.stars),
           }));
 
           const slug = finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7);
@@ -218,6 +219,7 @@ async function main() {
               category,
               lat: location.lat,
               lng: location.lng,
+              rating,
               reviewsCount: (item.reviewsCount as number) ?? 0,
               imageUrl,
               whatsapp,

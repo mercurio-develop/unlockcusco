@@ -163,6 +163,7 @@ async function main() {
         category: "Boleto", // Special Boleto category
         lat: place.lat,
         lng: place.lng,
+        rating: 4.8, // Arbitrary high rating for official sites
         reviewsCount: 500,
         imageUrl: imageUrl,
         heroImages: JSON.stringify([imageUrl]),
@@ -170,7 +171,7 @@ async function main() {
         isClaimed: true, // Official government sites
         reviews: {
           create: [
-             { author: "Vallecito", text: "Official site included in the Boleto Turístico." , rating: 5 }
+             { author: "Vallecito", rating: 5, text: "Official site included in the Boleto Turístico." }
           ]
         }
       }

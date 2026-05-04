@@ -8,6 +8,7 @@ const MOCK_AIRBNBS = [
     location: "Urubamba",
     lat: -13.3050,
     lng: -72.1160,
+    rating: 4.95,
     reviewsCount: 124,
     imageUrl: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1000&auto=format&fit=crop",
   },
@@ -16,6 +17,7 @@ const MOCK_AIRBNBS = [
     location: "Pisac",
     lat: -13.2990,
     lng: -71.8495,
+    rating: 4.98,
     reviewsCount: 89,
     imageUrl: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=1000&auto=format&fit=crop",
   },
@@ -24,6 +26,7 @@ const MOCK_AIRBNBS = [
     location: "Ollantaytambo",
     lat: -13.2580,
     lng: -72.2640,
+    rating: 4.85,
     reviewsCount: 210,
     imageUrl: "https://images.unsplash.com/photo-1542718610-a1d656d1884c?q=80&w=1000&auto=format&fit=crop",
   },
@@ -32,6 +35,7 @@ const MOCK_AIRBNBS = [
     location: "Chinchero",
     lat: -13.3935,
     lng: -72.0480,
+    rating: 4.92,
     reviewsCount: 56,
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
   }
@@ -59,6 +63,7 @@ async function main() {
         category: "Stays",
         lat: item.lat,
         lng: item.lng,
+        rating: item.rating,
         reviewsCount: item.reviewsCount,
         imageUrl: item.imageUrl,
         heroImages: JSON.stringify([item.imageUrl]),
@@ -66,7 +71,7 @@ async function main() {
         isClaimed: false, 
         reviews: {
           create: [
-            { author: "InkaPortal Concierge", text: "Beautiful curated Airbnb stay in the Sacred Valley." , rating: 5 }
+            { author: "InkaPortal Concierge", rating: 5, text: "Beautiful curated Airbnb stay in the Sacred Valley." }
           ]
         }
       },

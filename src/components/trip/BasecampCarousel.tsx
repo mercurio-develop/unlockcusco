@@ -19,7 +19,7 @@ interface Basecamp {
 }
 
 export function BasecampCarousel({ locationTown }: { locationTown: string }) {
-  const { selectBasecamp } = useItinerary()
+  const { selectBasecamp, setExchangeTargetIndex, setPanelMode } = useItinerary()
 
   // Placeholder mock data for hotels
   const mockHotels: Basecamp[] = [
@@ -58,49 +58,70 @@ export function BasecampCarousel({ locationTown }: { locationTown: string }) {
     }
   ]
 
+  const filteredHotels = mockHotels.filter(h => h.locationSlug.toLowerCase() === locationTown.toLowerCase())
+
+  if (filteredHotels.length === 0) {
+    return (
+      <div className="w-full text-center py-6">
+        <Moon className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+        <h4 className="text-sm font-bold text-slate-900 mb-1">No verified basecamps in {locationTown}</h4>
+        <p className="text-xs text-slate-500 mb-4">We are still onboarding partners in this area.</p>
+        <button 
+          onClick={() => {
+            setExchangeTargetIndex(-2)
+            setPanelMode("categories")
+          }}
+          className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition-colors"
+        >
+          Change Destination
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+        <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
           <Moon className="w-4 h-4 text-rose-500" />
           Verified Basecamps in {locationTown}
         </h4>
-        <span className="text-[10px] font-bold text-slate-500 uppercase">Swipe to explore</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Nearby options</span>
       </div>
       
-      <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
-        {mockHotels.map((hotel) => (
+      <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x -mx-1 px-1">
+        {filteredHotels.map((hotel) => (
           <div 
             key={hotel.id}
             className="flex-none w-[260px] snap-start group"
           >
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-rose-500/50 transition-all">
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-rose-400 hover:shadow-lg transition-all duration-300">
               {/* Image Placeholder */}
-              <div className="h-32 bg-slate-800 relative">
+              <div className="h-32 bg-slate-100 relative overflow-hidden">
                 <img 
                   src={hotel.image} 
                   alt={hotel.name} 
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
-                <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <ShieldCheck className="w-2.5 h-2.5" /> Vallecito Verified
+                <div className="absolute top-2 right-2 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                  <ShieldCheck className="w-2.5 h-2.5" /> Verified
                 </div>
               </div>
               
               <div className="p-4">
-                <h5 className="text-white font-serif font-bold text-sm mb-1 line-clamp-1">{hotel.name}</h5>
+                <h5 className="text-slate-900 font-serif font-bold text-sm mb-1 line-clamp-1">{hotel.name}</h5>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1 text-[10px] text-amber-400 font-bold">
+                  <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold">
                     <Star className="w-3 h-3 fill-current" /> {hotel.rating}
                   </div>
-                  <div className="text-slate-400 text-[11px]">
-                    from <span className="text-white font-bold">${hotel.price}</span>/night
+                  <div className="text-slate-500 text-[11px]">
+                    from <span className="text-slate-900 font-bold">${hotel.price}</span>/night
                   </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-1 mb-4">
                   {hotel.tags.map(tag => (
-                    <span key={tag} className="text-[8px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-tighter">
+                    <span key={tag} className="text-[8px] bg-slate-50 text-slate-500 border border-slate-100 px-1.5 py-0.5 rounded uppercase font-bold tracking-tighter">
                       {tag}
                     </span>
                   ))}
@@ -108,7 +129,7 @@ export function BasecampCarousel({ locationTown }: { locationTown: string }) {
                 
                 <button 
                   onClick={() => selectBasecamp(hotel)}
-                  className="w-full bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold uppercase tracking-wider py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
                 >
                   🛎️ Select Basecamp
                 </button>

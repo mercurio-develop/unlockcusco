@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useBuilder } from "@/features/pro-builder/store/builder-context"
 import { MapPin, Plus, Check, Search, Loader2, X, Star } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
-import { ExperienceEvent } from "../types"
+import { ExperienceEvent, MealEvent } from "../types"
 
 // Minimal type for display in picker
 type MinimizedPackage = {
@@ -13,9 +13,28 @@ type MinimizedPackage = {
   sector: string
   pace: string
   tags: string
-  lat?: number | null
-  lng?: number | null
 }
+
+const CATEGORIES = [
+  { id: 'all', label: 'All Experiences' },
+  { id: 'food', label: 'Food & Drink', tags: ['food', 'restaurant', 'cafe', 'tasting', 'gastronomy', 'dining', 'pachamanca', 'drink'] },
+  { id: 'culture', label: 'Culture & Ruins', tags: ['culture', 'ruins', 'history', 'archaeology', 'market', 'inca', 'museum'] },
+  { id: 'adventure', label: 'Adventure', tags: ['atv', 'trek', 'hike', 'bike', 'rafting', 'zip', 'horse'] },
+  { id: 'wellness', label: 'Wellness', tags: ['wellness', 'yoga', 'healing', 'ceremony', 'spa', 'thermal', 'sound'] },
+  { id: 'nature', label: 'Nature', tags: ['nature', 'lake', 'mountain', 'wildlife', 'birds'] }
+]
+
+const LOCATIONS = [
+  { label: "Urubamba", value: "urubamba" },
+  { label: "Pisac", value: "pisac" },
+  { label: "Maras", value: "maras" },
+  { label: "Ollantaytambo", value: "ollantaytambo" },
+  { label: "Chinchero", value: "chinchero" },
+  { label: "Calca", value: "calca" },
+  { label: "Yucay", value: "yucay" },
+  { label: "Cusco", value: "cusco" },
+  { label: "Machu Picchu", value: "machu_picchu" }
+]
 
 interface ExperiencePickerModalProps {
   isOpen: boolean
@@ -25,46 +44,92 @@ interface ExperiencePickerModalProps {
 }
 
 export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: ExperiencePickerModalProps) {
-  const { draftTrip, addEventToDay, removeEventFromDay } = useBuilder()
+  const { draftTrip, addEventToDay, removeEventFromDay, updateEventInDay } = useBuilder()
   const [packages, setPackages] = useState<MinimizedPackage[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
-  const [filterCategory, setFilterCategory] = useState("All")
+  const [activeCategory, setActiveCategory] = useState("all")
+  const [activeLocation, setActiveLocation] = useState("all")
 
   const day = draftTrip.days.find(d => d.dayNumber === dayNumber)
   
   // Find all existing EXPERIENCE events for this day
   const experienceEvents = (day?.events || []).filter(e => e.type === 'EXPERIENCE') as ExperienceEvent[]
-  const selectedPackageIds = experienceEvents.map(e => e.packageId)
+  
+  // If we are in "meal mode", the selected package is the one on the meal event
+  const mealEvent = eventId ? day?.events.find(e => e.id === eventId && e.type === 'MEAL') as MealEvent | undefined : undefined;
+  
+  const selectedPackageIds = mealEvent 
+    ? (mealEvent.packageId ? [mealEvent.packageId] : []) 
+    : experienceEvents.map(e => e.packageId)
 
   useEffect(() => {
-    if (isOpen && packages.length === 0) {
-      setLoading(true)
-      // Fetch packages (re-using existing endpoint)
-      fetch('/api/experiences')
-        .then(res => res.json())
-        .then(data => {
-          setPackages(data || [])
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false))
+    if (isOpen) {
+      setActiveCategory(mealEvent ? 'food' : 'all')
+      
+      if (packages.length === 0) {
+        setLoading(true)
+        // Fetch packages and businesses
+        fetch('/api/experiences')
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data)) {
+              setPackages(data)
+            } else {
+              setPackages([])
+            }
+          })
+          .catch(console.error)
+          .finally(() => setLoading(false))
+      }
     }
-  }, [isOpen, packages.length])
+  }, [isOpen, mealEvent, packages.length])
 
   if (!isOpen) return null
 
   const filtered = packages.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || 
-                          p.tags.toLowerCase().includes(search.toLowerCase())
+    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.toLowerCase().includes(search.toLowerCase())
     if (!matchesSearch) return false
 
-    if (filterCategory === "All") return true
-    if (filterCategory === "Experiences") return p.pace !== "FLEXIBLE"
-    return p.tags.includes(filterCategory)
+    if (activeLocation !== 'all') {
+      const sector = p.sector.toLowerCase();
+      const loc = activeLocation.toLowerCase();
+      
+      let matchesLoc = sector.includes(loc);
+      
+      if (!matchesLoc) {
+        if (loc === 'pisac' || loc === 'calca') {
+          matchesLoc = sector.includes('east_valley') || sector.includes('valle_sagrado');
+        } else if (loc === 'urubamba' || loc === 'yucay' || loc === 'ollantaytambo' || loc === 'maras' || loc === 'chinchero') {
+          matchesLoc = sector.includes('valle_sagrado');
+        }
+        if (sector === 'any') matchesLoc = true;
+      }
+      
+      if (!matchesLoc) return false;
+    }
+
+    if (activeCategory === 'all') return true
+
+    const categoryDef = CATEGORIES.find(c => c.id === activeCategory)
+    if (!categoryDef || !categoryDef.tags) return true
+
+    return categoryDef.tags.some(tag => p.tags.toLowerCase().includes(tag))
   })
 
   const togglePackage = (pkg: MinimizedPackage) => {
     const isSelected = selectedPackageIds.includes(pkg.id)
+    
+    if (mealEvent) {
+      if (isSelected) {
+        updateEventInDay(dayNumber, mealEvent.id, { packageId: undefined, experienceTitle: undefined })
+      } else {
+        updateEventInDay(dayNumber, mealEvent.id, { packageId: pkg.id, experienceTitle: pkg.title })
+        onClose() // Close immediately after selecting for a meal
+      }
+      return;
+    }
+
     if (isSelected) {
       // Find the event ID to remove
       const eventToRemove = experienceEvents.find(e => e.packageId === pkg.id)
@@ -72,15 +137,25 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
         removeEventFromDay(dayNumber, eventToRemove.id)
       }
     } else {
+      let defaultStartTime = "10:00"
+      if (day && day.events.length > 0) {
+        const lastEvent = day.events[day.events.length - 1]
+        if (lastEvent.startTime) {
+          const [hours, minutes] = lastEvent.startTime.split(':').map(Number)
+          defaultStartTime = `${String((hours + 2) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+        }
+      } else if (day && day.startAnchor.time) {
+        const [hours, minutes] = day.startAnchor.time.split(':').map(Number)
+        defaultStartTime = `${String((hours + 1) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+      }
+
       addEventToDay(dayNumber, {
         id: uuidv4(),
         type: 'EXPERIENCE',
-        startTime: "09:00", // Default time
+        startTime: defaultStartTime,
         packageId: pkg.id,
-        title: pkg.title,
-        locationLat: pkg.lat || undefined,
-        locationLng: pkg.lng || undefined,
-      } as any)
+        title: pkg.title
+      })
     }
   }
 
@@ -89,7 +164,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
       <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-3xl shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-8">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
           <div>
             <h2 className="text-2xl font-serif font-bold text-slate-900">Add Experience</h2>
             <p className="text-slate-500 text-sm mt-1">Select experiences for Day {dayNumber}</p>
@@ -100,7 +175,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
         </div>
 
         {/* Search */}
-        <div className="p-6 border-b border-slate-100 space-y-4">
+        <div className="p-6 border-b border-slate-100 shrink-0">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input 
@@ -111,16 +186,51 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
               className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-slate-900"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-             {["All", "Experiences", "Dining", "Stays", "Wellness", "Culture"].map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setFilterCategory(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${filterCategory === cat ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                >
-                  {cat}
-                </button>
-             ))}
+        </div>
+
+        {/* Categories / Filters */}
+        <div className="flex flex-col border-b border-slate-100 shrink-0">
+          <div className="px-6 py-3 border-b border-slate-50 flex overflow-x-auto scrollbar-hide gap-2 items-center">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-2 sticky left-0 bg-white pr-2 z-10 shadow-[8px_0_12px_-4px_rgba(255,255,255,1)]">Location</span>
+            <button
+              onClick={() => setActiveLocation('all')}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                activeLocation === 'all'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Anywhere
+            </button>
+            {LOCATIONS.map(loc => (
+              <button
+                key={loc.value}
+                onClick={() => setActiveLocation(loc.value)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  activeLocation === loc.value
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {loc.label}
+              </button>
+            ))}
+          </div>
+          <div className="px-6 py-3 flex overflow-x-auto scrollbar-hide gap-2 items-center">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-2 sticky left-0 bg-white pr-2 z-10 shadow-[8px_0_12px_-4px_rgba(255,255,255,1)]">Category</span>
+            {CATEGORIES.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setActiveCategory(c.id)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  activeCategory === c.id
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
           </div>
         </div>
 

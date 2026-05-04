@@ -56,7 +56,7 @@ export const findLocalExperiences = tool({
 
     let businesses = await prisma.business.findMany({
       where: whereClause,
-      orderBy: { rating: "desc" },
+      orderBy: { rating: 'desc' },
       take: 3,
     });
 
@@ -66,7 +66,7 @@ export const findLocalExperiences = tool({
       delete whereClause.locationSlug;
       businesses = await prisma.business.findMany({
         where: whereClause,
-        orderBy: { rating: "desc" },
+        orderBy: { rating: 'desc' },
         take: 3,
       });
     }

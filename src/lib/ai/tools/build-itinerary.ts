@@ -13,26 +13,30 @@ function getCoords(location: string) {
   return { ...COORDS_MAP.urubamba };
 }
 
-function score(rating: number, distKm: number) {
-  return (rating ? rating / 20 : 0) * 0.6 + Math.max(0, 10 - distKm) * 0.4;
+function score(rating: number, detourKm: number) {
+  // Higher rating is better. Lower detour is better.
+  return rating * 0.6 + Math.max(0, 20 - detourKm) * 0.4;
 }
 
 const DESIRE_MAP: Record<string, { category: string; icon: string; cost: number; keywords: string[] }> = {
-  coffee:     { category: 'Dining',   icon: '☕', cost: 12, keywords: ['coffee', 'cafe', 'cafeteria'] },
+  coffee:     { category: 'Dining',   icon: '☕', cost: 12, keywords: ['coffee', 'cafe', 'cafeteria', 'espresso'] },
   cafe:       { category: 'Dining',   icon: '☕', cost: 12, keywords: ['coffee', 'cafe', 'cafeteria'] },
   breakfast:  { category: 'Dining',   icon: '🥐', cost: 15, keywords: ['breakfast', 'desayuno', 'brunch'] },
   lunch:      { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['lunch', 'almuerzo', 'restaurant', 'food'] },
   dinner:     { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['dinner', 'cena', 'restaurant', 'food'] },
   food:       { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['food', 'comida', 'restaurant'] },
   restaurant: { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['restaurant', 'comida', 'food'] },
-  market:     { category: 'Culture',  icon: '🛍️', cost: 0,  keywords: ['market', 'mercado', 'artisan', 'textiles'] },
-  ruins:      { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['ruins', 'ruinas', 'archeological', 'site'] },
-  culture:    { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['culture', 'cultura', 'tradition', 'village'] },
-  hike:       { category: 'Adventure', icon: '🥾', cost: 15, keywords: ['hike', 'trek', 'walk', 'mountain'] },
+  market:     { category: 'Culture',  icon: '🛍️', cost: 0,  keywords: ['market', 'mercado', 'artisan', 'craft'] },
+  textiles:   { category: 'Culture',  icon: '🧶', cost: 0,  keywords: ['textiles', 'weaving', 'weaver', 'tejido', 'artisan'] },
+  ruins:      { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['ruins', 'ruinas', 'archeological', 'site', 'fortress'] },
+  culture:    { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['culture', 'cultura', 'tradition', 'village', 'native'] },
+  hike:       { category: 'Adventure', icon: '🥾', cost: 15, keywords: ['hike', 'trek', 'walk', 'mountain', 'trail'] },
   atv:        { category: 'Adventure', icon: '🏍️', cost: 40, keywords: ['atv', 'quad', 'motorcycle'] },
   adventure:  { category: 'Adventure', icon: '🥾', cost: 20, keywords: ['adventure', 'aventura', 'trek', 'climb'] },
-  massage:    { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['massage', 'masaje', 'spa', 'therapy'] },
+  massage:    { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['massage', 'masaje', 'spa', 'therapy', 'bodywork'] },
   spa:        { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['spa', 'wellness', 'relaxation', 'massage'] },
+  relax:      { category: 'Wellness',  icon: '🌿', cost: 20, keywords: ['relax', 'peaceful', 'wellness', 'sanctuary', 'view'] },
+  wellness:   { category: 'Wellness',  icon: '🧘', cost: 30, keywords: ['wellness', 'healing', 'ceremony', 'ritual'] },
 };
 
 function resolveDesire(desire: string) {
@@ -40,7 +44,14 @@ function resolveDesire(desire: string) {
   for (const [pattern, meta] of Object.entries(DESIRE_MAP)) {
     if (key.includes(pattern)) return meta;
   }
-  return { category: 'Dining', icon: '📍', cost: 15, keywords: [key] };
+  
+  // Smarter fallback: if the desire sounds like food, use Dining. Otherwise use Culture/Generic.
+  const foodKeywords = ['eat', 'drink', 'pizza', 'vegan', 'bar', 'beer', 'wine', 'snack', 'restaurant', 'food', 'cafeteria', 'coffee'];
+  if (foodKeywords.some(fk => key.includes(fk))) {
+    return { category: 'Dining', icon: '🍽️', cost: 20, keywords: [key] };
+  }
+  
+  return { category: 'Culture', icon: '📍', cost: 0, keywords: [key] };
 }
 
 export const buildItinerary = tool({
@@ -63,8 +74,9 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     // BOUNDED CORRIDOR ALGORITHM
     const VALLEY_ARRAY = ["cusco", "taray", "pisac", "calca", "urubamba", "ollantaytambo"];
     const PLATEAU_ARRAY = ["cusco", "poroy", "chinchero", "maras", "moray", "urubamba", "ollantaytambo"];
+    const ALL_TOWNS = Array.from(new Set([...VALLEY_ARRAY, ...PLATEAU_ARRAY]));
     
-    let corridor: string[] = [originLocation.toLowerCase(), destination.toLowerCase()];
+    let corridor: string[] = [];
     
     const getCorridor = (arr: string[]) => {
       const oIdx = arr.findIndex(t => originLocation.toLowerCase().includes(t));
@@ -80,55 +92,60 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     const valleyCorridor = getCorridor(VALLEY_ARRAY);
     const plateauCorridor = getCorridor(PLATEAU_ARRAY);
     
-    if (valleyCorridor && plateauCorridor) {
-      // Pick the shorter corridor if both match (e.g. Cusco to Urubamba)
-      corridor = valleyCorridor.length <= plateauCorridor.length ? valleyCorridor : plateauCorridor;
-    } else if (valleyCorridor) {
-      corridor = valleyCorridor;
-    } else if (plateauCorridor) {
-      corridor = plateauCorridor;
-    }
+    if (valleyCorridor) corridor.push(...valleyCorridor);
+    if (plateauCorridor) corridor.push(...plateauCorridor);
+
+    // Add any explicitly requested towns from desires
+    const requestedTowns = ALL_TOWNS.filter(town => desires.some(d => d.toLowerCase().includes(town)));
+    corridor.push(...requestedTowns);
+    corridor.push(originLocation.toLowerCase(), destination.toLowerCase());
+
+    // Deduplicate
+    corridor = Array.from(new Set(corridor));
 
     const waypoints = [];
     const recommendedIds = new Set<string>();
     const usedLocationSlugs = new Set<string>();
     const usedBusinessIds = new Set<string>();
+    
+    const baseTripDist = calculateDistance(originCoords.lat, originCoords.lng, destCoords.lat, destCoords.lng);
 
     // --- Activity steps (Nodes) ---
     for (const desire of desires) {
       const { category, cost, keywords } = resolveDesire(desire);
 
-      const sharedWhere = {
-        locationSlug: { in: corridor },
-        id: { notIn: Array.from(usedBusinessIds) },
-        OR: [
-          { name: { contains: desire } },
-          ...keywords.map(kw => ({ name: { contains: kw } })),
-        ],
-      };
+      // Extract town from desire if mentioned
+      const desireLower = desire.toLowerCase();
+      const specificTown = ALL_TOWNS.find(t => desireLower.includes(t));
+      const searchCorridor = specificTown ? [specificTown] : corridor;
 
-      // Route to the correct domain table
-      let candidates: { id: string; name: string; lat: number | null; lng: number | null; rating: number | null; locationSlug: string; whatsapp: string | null; category: string; categorySlug?: string; scoreQuality?: number }[];
+      const candidates = await prisma.business.findMany({
+        where: {
+          locationSlug: { in: searchCorridor },
+          id: { notIn: Array.from(usedBusinessIds) },
+          AND: [
+             { category: { equals: category } },
+             {
+               OR: [
+                 { categorySlug: { in: keywords } },
+                 { name: { contains: desire } },
+                 ...keywords.map(kw => ({ name: { contains: kw } })),
+                 ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
+               ]
+             }
+          ]
+        },
+        orderBy: { rating: 'desc' },
+        take: 50,
+      });
 
-      if (category === 'Dining') {
-        const rows = await prisma.restaurant.findMany({
-          where: { locationSlug: { in: corridor }, id: { notIn: Array.from(usedBusinessIds) }, OR: [{ name: { contains: desire } }, ...keywords.map(kw => ({ name: { contains: kw } }))] },
-          orderBy: { rating: 'desc' },
-          take: 50,
-        });
-        candidates = rows.map(r => ({ ...r, category: 'Dining', categorySlug: 'dining' }));
-      } else if (category === 'Stays') {
-        const rows = await prisma.lodging.findMany({
-          where: { locationSlug: { in: corridor }, id: { notIn: Array.from(usedBusinessIds) }, OR: [{ name: { contains: desire } }, ...keywords.map(kw => ({ name: { contains: kw } }))] },
-          orderBy: { rating: 'desc' },
-          take: 50,
-        });
-        candidates = rows.map(r => ({ ...r, category: 'Stays', categorySlug: 'stays' }));
-      } else {
-        candidates = await prisma.business.findMany({
+      // Fallback if strict AND category match failed
+      let finalCandidates = candidates;
+      if (candidates.length === 0) {
+        finalCandidates = await prisma.business.findMany({
           where: {
-            ...sharedWhere,
-            NOT: { category: { in: ['Dining', 'Stays', 'Descanso'] } },
+            locationSlug: { in: searchCorridor },
+            id: { notIn: Array.from(usedBusinessIds) },
             OR: [
               { category: { equals: category } },
               { categorySlug: { in: keywords } },
@@ -142,17 +159,26 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         });
       }
 
-      const alts = candidates
+      const alts = finalCandidates
         .filter(b => b.lat !== null && b.lng !== null && b.rating !== null)
         .map(b => {
           const lat = b.lat as number;
           const lng = b.lng as number;
-          const dist = calculateDistance(originCoords.lat, originCoords.lng, lat, lng);
+          
+          const distFromOrigin = calculateDistance(originCoords.lat, originCoords.lng, lat, lng);
+          const distToDest = calculateDistance(lat, lng, destCoords.lat, destCoords.lng);
+          
+          let detourKm = 0;
+          if (baseTripDist === 0) {
+             detourKm = distFromOrigin;
+          } else {
+             detourKm = (distFromOrigin + distToDest) - baseTripDist;
+          }
           
           // Boost score if the town hasn't been used yet to encourage distribution
           let locationBoost = usedLocationSlugs.has(b.locationSlug) ? 0 : 0.5;
           
-          return { b, dist, s: score(b.rating! + locationBoost, dist) };
+          return { b, dist: distFromOrigin, detourKm, s: score(b.rating! + locationBoost, detourKm) };
         })
         .sort((a, b) => b.s - a.s)
         .slice(0, 3)
@@ -191,7 +217,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         priceUsd: cost,
         lat: selected.lat,
         lng: selected.lng,
-        rating: (selected as any).scoreQuality ? (selected as any).scoreQuality / 20 : 0,
+        rating: selected.rating,
         alternatives: alts
       });
     }
@@ -220,9 +246,9 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const transitKm = calculateDistance(fromNode.coords.lat, fromNode.coords.lng, toNode.coords.lat, toNode.coords.lng);
       const transitCost = Math.max(15, Math.round(transitKm * 1.8));
 
-      const taxiRows = await prisma.business.findMany({
+      const taxiRows = await prisma.transport.findMany({
         where: {
-          categorySlug: 'taxi',
+          category: 'Taxi',
         }
       });
 
@@ -230,10 +256,10 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const dLower = toNode.locationStr.toLowerCase();
 
       const validTaxis = taxiRows.filter(t => {
-        const zones = JSON.parse((t as any).serviceZones || "[]") as string[];
+        const zones = JSON.parse(t.serviceZones || "[]") as string[];
         return zones.some(z => oLower.includes(z) || dLower.includes(z));
       }).map(t => {
-        const zones = JSON.parse((t as any).serviceZones || "[]") as string[];
+        const zones = JSON.parse(t.serviceZones || "[]") as string[];
         const coversBoth = zones.some(z => oLower.includes(z)) && zones.some(z => dLower.includes(z));
         return { ...t, coversBoth, zonesCount: zones.length, zones };
       }).sort((a, b) => {
@@ -242,8 +268,15 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         const ratingA = a.rating ?? 0;
         const ratingB = b.rating ?? 0;
         if (ratingA !== ratingB) return ratingB - ratingA;
-        return (b as any).zonesCount - (a as any).zonesCount;
+        return b.zonesCount - a.zonesCount;
       });
+
+      const walkOption = {
+        id: 'walk-' + fromNode.locationStr,
+        name: 'Walk',
+        priceUsd: 0,
+        whatsapp: undefined,
+      };
 
       if (validTaxis.length > 0) {
         validTaxis.slice(0, 3).forEach(t => recommendedIds.add(t.id));
@@ -254,6 +287,14 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
           whatsapp: t.whatsapp ?? undefined,
         }));
         
+        // Add Moto Taxi option
+        alternatives.push({
+          id: 'moto-' + fromNode.locationStr,
+          name: 'Moto Taxi (Torito)',
+          priceUsd: Math.max(2, Math.round(transitKm * 0.5)),
+          whatsapp: undefined,
+        });
+
         // Add public transport option
         alternatives.push({
           id: 'colectivo-' + fromNode.locationStr,
@@ -262,30 +303,56 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
           whatsapp: undefined,
         });
 
-        transitEdges.push({
-          fromLocation: fromNode.locationStr,
-          toLocation: toNode.locationStr,
-          defaultDriver: {
+        // Add Walk option
+        alternatives.push(walkOption);
+
+        const defaultDriver = transitKm < 1.5 ? walkOption : {
+          id: validTaxis[0].id,
+          name: validTaxis[0].name,
+          priceUsd: transitCost,
+          whatsapp: validTaxis[0].whatsapp ?? undefined,
+        };
+
+        const alternativeDrivers = transitKm < 1.5 ? [
+          {
             id: validTaxis[0].id,
             name: validTaxis[0].name,
             priceUsd: transitCost,
             whatsapp: validTaxis[0].whatsapp ?? undefined,
           },
-          alternativeDrivers: alternatives
-        });
-      } else {
+          ...alternatives.filter(a => a.id !== walkOption.id)
+        ] : alternatives;
+
         transitEdges.push({
           fromLocation: fromNode.locationStr,
           toLocation: toNode.locationStr,
-          defaultDriver: {
-            id: 'valle-safe-' + fromNode.locationStr,
-            name: 'Valle Safe SUV',
-            priceUsd: transitCost,
-          },
-          alternativeDrivers: [
-            { id: 'sv-transfers-' + fromNode.locationStr, name: 'Sacred Valley Transfers', priceUsd: Math.max(10, transitCost - 5), whatsapp: undefined },
-            { id: 'colectivo-' + fromNode.locationStr, name: 'Public Transport (Colectivo)', priceUsd: Math.max(1, Math.round(transitKm * 0.15)), whatsapp: undefined }
-          ]
+          defaultDriver,
+          alternativeDrivers
+        });
+      } else {
+        const fallbackAlternatives = [
+          { id: 'sv-transfers-' + fromNode.locationStr, name: 'Sacred Valley Transfers', priceUsd: Math.max(10, transitCost - 5), whatsapp: undefined },
+          { id: 'moto-' + fromNode.locationStr, name: 'Moto Taxi (Torito)', priceUsd: Math.max(2, Math.round(transitKm * 0.5)), whatsapp: undefined },
+          { id: 'colectivo-' + fromNode.locationStr, name: 'Public Transport (Colectivo)', priceUsd: Math.max(1, Math.round(transitKm * 0.15)), whatsapp: undefined },
+          walkOption
+        ];
+
+        const defaultDriver = transitKm < 1.5 ? walkOption : {
+          id: 'valle-safe-' + fromNode.locationStr,
+          name: 'Valle Safe SUV',
+          priceUsd: transitCost,
+        };
+
+        const alternativeDrivers = transitKm < 1.5 ? [
+          { id: 'valle-safe-' + fromNode.locationStr, name: 'Valle Safe SUV', priceUsd: transitCost, whatsapp: undefined },
+          ...fallbackAlternatives.filter(a => a.id !== walkOption.id)
+        ] : fallbackAlternatives;
+
+        transitEdges.push({
+          fromLocation: fromNode.locationStr,
+          toLocation: toNode.locationStr,
+          defaultDriver,
+          alternativeDrivers
         });
       }
     }
@@ -300,15 +367,17 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     }
 
     return {
-      origin: {
+      startAnchor: {
         title: originLocation,
         locationStr: originLocation,
+        type: 'GENERIC_TOWN',
         lat: originCoords.lat,
         lng: originCoords.lng,
       },
-      destination: {
+      endAnchor: {
         title: destination,
         locationStr: destination,
+        type: 'GENERIC_TOWN',
         lat: destCoords.lat,
         lng: destCoords.lng,
       },

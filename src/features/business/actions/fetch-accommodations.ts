@@ -6,6 +6,7 @@ export async function fetchAccommodations(destination: string) {
   try {
     const stayRows = await prisma.business.findMany({
       where: {
+        businessType: 'place',
         locationSlug: { contains: destination.toLowerCase() },
         OR: [
           { category: { contains: 'STAY' } },
@@ -14,7 +15,7 @@ export async function fetchAccommodations(destination: string) {
           { category: { contains: 'Hostel' } },
         ],
       },
-      orderBy: { rating: "desc" },
+      orderBy: { rating: 'desc' },
       take: 5,
     });
 

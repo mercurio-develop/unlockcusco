@@ -2,12 +2,12 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useItinerary } from "@/lib/store/itinerary-context";
-import { MapPin, ChevronRight, CheckCircle2, Edit2 } from "lucide-react";
+import { MapPin, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DayExplorer } from "@/components/trip/DayExplorer";
 
 export function ItineraryPanel() {
-  const { activeItinerary, setPanelMode, isEditMode, setIsEditMode, macroTrip } = useItinerary();
+  const { activeItinerary, setPanelMode, macroTrip } = useItinerary();
   const searchParams = useSearchParams();
 
   if (!activeItinerary) {
@@ -28,7 +28,7 @@ export function ItineraryPanel() {
     );
   }
 
-  const totalCost = (activeItinerary as any).totalCost ?? 0;
+  const totalCost = activeItinerary.totalCost ?? 0;
 
   return (
     <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
@@ -48,17 +48,6 @@ export function ItineraryPanel() {
               <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">Live Plan</span>
             </div>
           )}
-          <button 
-            onClick={() => setIsEditMode(!isEditMode)}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors border",
-              isEditMode 
-                ? "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100" 
-                : "bg-white border-gray-200 text-slate-600 hover:bg-gray-50"
-            )}
-          >
-            {isEditMode ? <><CheckCircle2 className="w-3.5 h-3.5" /> Done</> : <><Edit2 className="w-3.5 h-3.5" /> Edit</>}
-          </button>
         </div>
         
         {/* Day Indicator if applicable */}
@@ -69,7 +58,7 @@ export function ItineraryPanel() {
           </div>
         )}
 
-        <h2 className="text-xl font-serif font-semibold text-slate-900">{(activeItinerary as any).title ?? "Your Expedition"}</h2>
+        <h2 className="text-xl font-serif font-semibold text-slate-900">{activeItinerary.title ?? "Your Expedition"}</h2>
       </div>
 
       {/* The Golden Thread Timeline */}

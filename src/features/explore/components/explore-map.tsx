@@ -25,7 +25,7 @@ interface ExploreMapProps {
 
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
-  const [popupBusiness, setPopupBusiness] = useState<Business | null>(null)
+  const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, googleRating?: number, reviewSummary?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
   const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation } = useItinerary()
 
@@ -42,8 +42,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const waypoints = useMemo(() => {
     if (panelMode !== "itinerary" || !activeItinerary) return [];
     const pts: [number, number][] = [];
-    const start = (activeItinerary as any).startAnchor || (activeItinerary as any).origin;
-    const end = (activeItinerary as any).endAnchor || (activeItinerary as any).destination;
+    const start = activeItinerary.startAnchor;
+    const end = activeItinerary.endAnchor;
     
     if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
     for (const waypoint of activeItinerary.waypoints || []) {
@@ -56,8 +56,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const directWaypoints = useMemo(() => {
     if (panelMode !== "itinerary" || !activeItinerary) return [];
     const pts: [number, number][] = [];
-    const start = (activeItinerary as any).startAnchor || (activeItinerary as any).origin;
-    const end = (activeItinerary as any).endAnchor || (activeItinerary as any).destination;
+    const start = activeItinerary.startAnchor;
+    const end = activeItinerary.endAnchor;
     
     if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
     if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
@@ -133,14 +133,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     const isItineraryId = selectedId === 'itin-start' || selectedId === 'itin-arrival';
     const pitch = isItineraryId ? 0 : (mapMode === "satellite" ? 60 : 0);
     
-    const start = (activeItinerary as any)?.startAnchor || (activeItinerary as any)?.origin;
+    const start = activeItinerary?.startAnchor;
     if (selectedId === 'itin-start' && start?.lat && start?.lng) {
       mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
 
-    const end = (activeItinerary as any)?.endAnchor || (activeItinerary as any)?.destination;
+    const end = activeItinerary?.endAnchor;
     if (selectedId === 'itin-arrival' && end?.lat && end?.lng) {
       mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
@@ -183,38 +183,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     }
   }, [selectedId, businesses, activeItinerary, mapMode]);
 
-  // Fit bounds to route or businesses
+  // Fit bounds to route ONLY when itineraryRoute is newly generated
+  // Disabled as per MVP Crucible to preserve viewport unless explicitly routed
   useEffect(() => {
-    if (!mapRef.current) return;
-
-    if (itineraryRoute) {
-      const coords = itineraryRoute.geometry.coordinates;
-      let [minLng, minLat] = coords[0];
-      let [maxLng, maxLat] = coords[0];
-      for (const [lng, lat] of coords) {
-        if (lng < minLng) minLng = lng; if (lng > maxLng) maxLng = lng;
-        if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
-      }
-      if (minLng === maxLng) { minLng -= 0.01; maxLng += 0.01; }
-      if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01; }
-      mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 100, duration: 1500, pitch: 0 });
-      return;
-    }
-
-    const validBusinesses = businesses.filter(b => b.lat !== null && b.lng !== null) as (Business & { lat: number, lng: number })[];
-
-    if (validBusinesses.length > 0) {
-      let minLng = validBusinesses[0].lng, maxLng = validBusinesses[0].lng;
-      let minLat = validBusinesses[0].lat, maxLat = validBusinesses[0].lat;
-      for (const b of validBusinesses) {
-        if (b.lng < minLng) minLng = b.lng; if (b.lng > maxLng) maxLng = b.lng;
-        if (b.lat < minLat) minLat = b.lat; if (b.lat > maxLat) maxLat = b.lat;
-      }
-      if (minLng === maxLng) { minLng -= 0.01; maxLng += 0.01; }
-      if (minLat === maxLat) { minLat -= 0.01; maxLat += 0.01; }
-      mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1000, pitch: 0 });
-    }
-  }, [businesses, itineraryRoute]);
+    // We keep this empty so we don't automatically recenter the map on tab change or route generation.
+  }, []);
 
   if (!mapboxToken) {
     return (
@@ -266,7 +239,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         {/* Start Marker */}
         {(() => {
-          const start = (activeItinerary as any)?.startAnchor || (activeItinerary as any)?.origin;
+          const start = activeItinerary?.startAnchor;
           if (!start?.lat || !start?.lng) return null;
           return (
             <Marker 
@@ -301,7 +274,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         {/* Arrival Marker */}
         {(() => {
-          const end = (activeItinerary as any)?.endAnchor || (activeItinerary as any)?.destination;
+          const end = activeItinerary?.endAnchor;
           if (!end?.lat || !end?.lng) return null;
           return (
             <Marker 
@@ -342,7 +315,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
           return (
             <Marker key={`itin-${idx}`} longitude={pick.lng as number} latitude={pick.lat as number} anchor="bottom"
-              onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(pick as any); onSelectBusiness(pick.id); }}
+              onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(pick); onSelectBusiness(pick.id); }}
             >
               <div
                 className="cursor-pointer transition-all duration-300 relative flex flex-col items-center"
@@ -402,24 +375,52 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           );
         })}
 
-        {popupBusiness && popupBusiness.lng !== null && popupBusiness.lat !== null && (
+        {(popupBusiness as any).&& (popupBusiness as any).lng !== null && (popupBusiness as any).lat !== null && (
           <Popup
-            anchor="bottom" longitude={popupBusiness.lng} latitude={popupBusiness.lat}
-            onClose={() => setPopupBusiness(null)} maxWidth="260px"
+            anchor="bottom" longitude={(popupBusiness as any).lng as number} latitude={(popupBusiness as any).lat as number}
+            onClose={() => setPopupBusiness(null)} maxWidth="280px"
             closeButton={false} closeOnClick={false} className="z-50" offset={32}
           >
-            <div className="px-4 py-3 rounded-2xl bg-white/95 border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-bold text-[13px] tracking-tight truncate">{popupBusiness.name || (popupBusiness as any).title}</h3>
-                  {popupBusiness.isClaimed && <Zap className="w-3 h-3 text-emerald-500 fill-emerald-500" />}
+            <div className="w-64 rounded-2xl bg-white/95 overflow-hidden border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
+              {(popupBusiness as any).imageUrl && (
+                <div className="w-full h-24 bg-slate-100 relative">
+                  <img src={(popupBusiness as any).imageUrl} alt={(popupBusiness as any).name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                 </div>
-                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-semibold uppercase tracking-wider">
-                  <span>{popupBusiness.category}</span>
-                  {popupBusiness.rating !== null && popupBusiness.rating !== undefined && (
-                    <span className="flex items-center gap-0.5 text-slate-900">
-                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> {popupBusiness.rating}
-                    </span>
+              )}
+              <div className="p-3">
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || ((popupBusiness as any).as any).title}</h3>
+                  {(popupBusiness as any).isClaimed && <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-500 fill-emerald-500" />}
+                </div>
+                <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
+                  <span>{(popupBusiness as any).category}</span>
+                  <span className="text-slate-400 font-mono">{(popupBusiness as any).priceTier || '$$'}</span>
+                </div>
+                
+                {((popupBusiness as any).googleRating || (popupBusiness as any).rating) && (
+                  <div className="flex flex-col gap-1 mb-3">
+                    <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      {(popupBusiness as any).googleRating || (popupBusiness as any).rating}
+                    </div>
+                    {(popupBusiness as any).reviewSummary && (
+                      <p className="text-xs text-slate-600 italic leading-snug">"{(popupBusiness as any).reviewSummary}"</p>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mt-2">
+                  {((popupBusiness as any).as Record<string, any>).menuUrl ? (
+                    <a href={((popupBusiness as any).as Record<string, any>).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                      View Menu ↗
+                    </a>
+                  ) : (
+                    <button onClick={() => {
+                      // Stub action for now; the user might want to integrate it with the itinerary context
+                      alert('Added to Day!')
+                    }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                      + Add to Day
+                    </button>
                   )}
                 </div>
               </div>
