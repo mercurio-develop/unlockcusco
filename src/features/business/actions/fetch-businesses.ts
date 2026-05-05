@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { Business } from "@prisma/client"
+import { COORDS_MAP } from "@/lib/constants"
 
 // Helper to interleave categories while maintaining relative rating sort
 function interleaveCategories(sortedBusinesses: Business[]) {
@@ -32,11 +33,27 @@ export interface FetchBusinessesParams {
   query?: string
   category?: string
   loc?: string
+  radiusKm?: number
+  userLat?: number
+  userLng?: number
   page?: number
   limit: number
 }
 
-export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20 }: FetchBusinessesParams) {
+// Haversine formula
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  return R * c;
+}
+
+export async function fetchBusinesses({ query = "", category = "", loc = "", radiusKm, userLat, userLng, page = 0, limit = 20 }: FetchBusinessesParams) {
   let targetCategory = category
   const q = query.trim()
   let isHeuristicMatch = false
@@ -68,13 +85,19 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   const whereClause: Record<string, unknown> = {}
   if (targetCategory) {
     const categories = targetCategory.split(',').map(c => c.trim()).filter(Boolean)
-    if (categories.length > 1) {
-      whereClause.category = { in: categories }
-    } else {
-      whereClause.category = categories[0]
+    if (categories.length > 0) {
+      // Expand to cover different casings present in the DB (e.g. 'Dining', 'DINING', 'dining')
+      const expandedCategories = new Set<string>();
+      for (const cat of categories) {
+        expandedCategories.add(cat);
+        expandedCategories.add(cat.toUpperCase());
+        expandedCategories.add(cat.toLowerCase());
+        expandedCategories.add(cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase());
+      }
+      whereClause.category = { in: Array.from(expandedCategories) };
     }
   }
-  if (loc) {
+  if (loc && radiusKm === undefined) {
     whereClause.locationSlug = loc
   }
 
@@ -101,6 +124,27 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   let businesses = await prisma.business.findMany({
     where: whereClause,
   })
+
+  // Distance Filter
+  if (radiusKm !== undefined) {
+    let centerLat = userLat;
+    let centerLng = userLng;
+
+    if (centerLat === undefined || centerLng === undefined) {
+      if (loc && COORDS_MAP[loc]) {
+        centerLat = COORDS_MAP[loc].lat;
+        centerLng = COORDS_MAP[loc].lng;
+      }
+    }
+
+    if (centerLat !== undefined && centerLng !== undefined) {
+      businesses = businesses.filter(b => {
+        if (b.lat === null || b.lng === null) return false;
+        const dist = getDistanceKm(centerLat!, centerLng!, b.lat, b.lng);
+        return dist <= radiusKm;
+      });
+    }
+  }
 
   // Sort by a weighted score (rating * log10(reviewsCount + 10)) + (instagramFollowers * 0.001)
   businesses.sort((a, b) => {

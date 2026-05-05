@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useTrip } from "@/lib/store/trip-context"
 import { MapPin, Plus, Check, Search, Loader2, X, Star } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
-import { ExperienceEvent, MealEvent } from "../types"
+import { ExperienceEvent, MealEvent } from "@/lib/types/trip"
 
 // Minimal type for display in picker
 type MinimizedPackage = {
@@ -61,7 +61,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
   const mealEvent = eventId ? day?.events.find(e => e.id === eventId && e.type === 'MEAL') as MealEvent | undefined : undefined;
   
   const selectedPackageIds = mealEvent 
-    ? (mealEvent.name ? [mealEvent.name] : []) 
+    ? (mealEvent.title ? [mealEvent.title] : []) 
     : experienceEvents.map(e => e.packageId)
 
   useEffect(() => {
@@ -121,14 +121,14 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
 
   const togglePackage = (pkg: MinimizedPackage) => {
     const isSelected = mealEvent 
-      ? mealEvent.name === pkg.title
+      ? mealEvent.businessId === pkg.id || mealEvent.title === pkg.title
       : selectedPackageIds.includes(pkg.id)
     
     if (mealEvent) {
       if (isSelected) {
-        updateEvent(dayNumber, mealEvent.id, { name: "Lunch" } as any)
+        updateEvent(dayNumber, mealEvent.id, { title: "Lunch", businessId: undefined } as any)
       } else {
-        updateEvent(dayNumber, mealEvent.id, { name: pkg.title } as any)
+        updateEvent(dayNumber, mealEvent.id, { title: pkg.title, businessId: pkg.id } as any)
       }
       onClose()
       return;
@@ -252,11 +252,10 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map(pkg => {
-                const isSelected = mealEvent 
-                  ? mealEvent.name === pkg.title
+                const isSelected = mealEvent
+                  ? mealEvent.businessId === pkg.id || mealEvent.title === pkg.title
                   : selectedPackageIds.includes(pkg.id)
-                return (
-                  <div 
+                return (                  <div 
                     key={pkg.id} 
                     onClick={() => togglePackage(pkg)}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${

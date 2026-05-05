@@ -16,10 +16,11 @@ import { SearchResultsCard } from "@/features/concierge/components/SearchResults
 import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { BoletoInfoCard } from "./BoletoInfoCard"
 import { TaxiFareCard } from "./TaxiFareCard"
+import { useTrip } from "@/lib/store/trip-context"
 
 export function AiConcierge() {
-  const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -28,7 +29,7 @@ export function AiConcierge() {
     {
       id: "1",
       role: "assistant",
-      content: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?"
+      content: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?\n\nTip: You can set your travel style in the top menu to get better personalized recommendations!"
     }
   ];
 
@@ -57,7 +58,7 @@ export function AiConcierge() {
     const data = searchParams.get("data");
     
     if (aiPrompt) {
-      setIsOpen(true);
+      setIsChatOpen(true);
       
       let promptText = aiPrompt;
       if (aiPrompt === "macro_trip" && data) {
@@ -84,7 +85,9 @@ Please generate my macro trip plan.`;
         body: {
           userLat: DEFAULT_COORDS.lat,
           userLng: DEFAULT_COORDS.lng,
-          localTime: new Date().toLocaleTimeString()
+          localTime: new Date().toLocaleTimeString(),
+          archetype: travelVibe,
+          intensity: travelIntensity
         }
           }
         );
@@ -97,7 +100,7 @@ Please generate my macro trip plan.`;
       window.history.replaceState({}, '', newUrl.toString());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, travelVibe, travelIntensity]);
 
   if (pathname?.startsWith("/trip/")) {
     return null;
@@ -114,7 +117,9 @@ Please generate my macro trip plan.`;
         body: {
           userLat: DEFAULT_COORDS.lat,
           userLng: DEFAULT_COORDS.lng,
-          localTime: new Date().toLocaleTimeString()
+          localTime: new Date().toLocaleTimeString(),
+          archetype: travelVibe,
+          intensity: travelIntensity
         }
       }
     )
@@ -124,15 +129,15 @@ Please generate my macro trip plan.`;
   return (
     <>
       <AnimatePresence>
-        {isOpen && (
+        {isChatOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 w-[350px] sm:w-[450px]"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed top-[56px] right-0 z-40 w-full sm:w-[450px] h-[calc(100vh-56px)]"
           >
-            <Card className="flex flex-col h-[600px] shadow-2xl border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
+            <Card className="flex flex-col h-full rounded-none shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
               {/* Header */}
               <div className="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
@@ -148,7 +153,7 @@ Please generate my macro trip plan.`;
                   variant="ghost" 
                   size="icon" 
                   className="text-slate-400 hover:text-slate-900 hover:bg-gray-100 rounded-full transition-colors"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsChatOpen(false)}
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -239,43 +244,60 @@ Please generate my macro trip plan.`;
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Quick Suggestions / Multi-Chip Selection */}
+              <div className="px-4 pt-3 pb-2 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
+                {[
+                  "Plan my day",
+                  "I need a Taxi",
+                  "Find a great Restaurant",
+                  "Book Machu Picchu",
+                  "Spiritual retreats"
+                ].map(suggestion => (
+                  <button
+                    key={suggestion}
+                    onClick={() => { 
+                      sendMessage(
+                        { text: suggestion },
+                        {
+                          body: {
+                            userLat: DEFAULT_COORDS.lat,
+                            userLng: DEFAULT_COORDS.lng,
+                            localTime: new Date().toLocaleTimeString(),
+                            archetype: travelVibe,
+                            intensity: travelIntensity
+                          }
+                        }
+                      )
+                    }}
+                    className="whitespace-nowrap px-4 py-2 bg-slate-50 border border-slate-200 hover:border-slate-400 hover:bg-slate-100 text-slate-700 text-[13px] font-semibold rounded-full transition-all shadow-sm"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+
               {/* Input Area */}
-              <div className="p-4 bg-gray-50 border-t border-gray-200 shrink-0">
+              <div className="p-4 bg-white pb-6 shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input 
                     placeholder="Describe your ideal day..." 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    className="bg-white border-gray-300 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-12 px-5"
                   />
                   <Button 
                     type="submit" 
                     size="icon" 
-                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105"
+                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105 h-12 w-12"
                     disabled={!input.trim() || isLoading}
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-5 h-5 ml-0.5" />
                   </Button>
                 </form>
               </div>
             </Card>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            onClick={() => setIsOpen(true)}
-            data-testid="ai-chat-trigger"
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 group transition-all"
-          >
-            <Sparkles className="w-6 h-6 text-rose-600 group-hover:animate-pulse" />
-          </motion.button>
         )}
       </AnimatePresence>
     </>

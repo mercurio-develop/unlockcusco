@@ -5,17 +5,46 @@ import { useRouter } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useItinerary } from "@/lib/store/itinerary-context"
+import { cn } from "@/lib/utils"
 
-const CATEGORY_STYLE: Record<string, { bg: string; icon: any }> = {
-  Dining:    { bg: "#FF9500", icon: Utensils }, // Apple Orange
-  Wellness:  { bg: "#34C759", icon: Sprout },   // Apple Green
-  Adventure: { bg: "#5856D6", icon: MountainIcon }, // Apple Indigo
-  Stays:     { bg: "#007AFF", icon: Bed },      // Apple Blue
-  Culture:   { bg: "#AF52DE", icon: Landmark }, // Apple Purple
-  Boleto:    { bg: "#FF2D55", icon: Ticket },   // Apple Red
+const getCategoryStyle = (category: string | undefined | null) => {
+  if (!category) return { bg: "#8E8E93", icon: MapPin };
+  
+  const cat = category.toUpperCase();
+  switch (cat) {
+    case 'DINING':
+    case 'MEAL':
+      return { bg: "#FF9500", icon: Utensils }; // Apple Orange
+    case 'WELLNESS':
+    case 'BIENESTAR':
+      return { bg: "#34C759", icon: Sprout };   // Apple Green
+    case 'ADVENTURE':
+    case 'AVENTURA':
+      return { bg: "#5856D6", icon: MountainIcon }; // Apple Indigo
+    case 'STAYS':
+    case 'STAY':
+    case 'DESCANSO':
+    case 'LODGING':
+      return { bg: "#007AFF", icon: Bed };      // Apple Blue
+    case 'CULTURE':
+    case 'CULTURA':
+      return { bg: "#AF52DE", icon: Landmark }; // Apple Purple
+    case 'BOLETO':
+      return { bg: "#FF2D55", icon: Ticket };   // Apple Red
+    case 'TRANSPORT':
+    case 'TAXI':
+      return { bg: "#5AC8FA", icon: Car };      // Apple Light Blue
+    case 'AGENCY':
+    case 'EXPERIENCE':
+      return { bg: "#FFCC00", icon: Star };     // Apple Yellow
+    case 'NOTE':
+      return { bg: "#8E8E93", icon: Clipboard }; // Apple Gray
+    default:
+      return { bg: "#8E8E93", icon: MapPin };
+  }
 }
 
 interface ExploreMapProps {
@@ -40,6 +69,54 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   // Build route GeoJSON from itinerary waypoints
   const [itineraryRoute, setItineraryRoute] = useState<GeoJSON.Feature<GeoJSON.LineString> | null>(null);
   const [directRoute, setDirectRoute] = useState<GeoJSON.Feature<GeoJSON.LineString> | null>(null);
+
+  // Multi-day routes for Pro Builder
+  const [multiDayRoutes, setMultiDayRoutes] = useState<{[dayNumber: number]: GeoJSON.Feature<GeoJSON.LineString>}>({});
+
+  const completedDays = useMemo(() => {
+    if (panelMode !== "builder" || !currentTrip) return [];
+    const daysToRender = currentTrip.days.filter(d => d.isComplete || d.dayNumber === activeDayNumber);
+    return daysToRender.map(d => {
+      const pts: [number, number][] = [];
+      if (d.startAnchor?.lat && d.startAnchor?.lng) pts.push([d.startAnchor.lng, d.startAnchor.lat]);
+      for (const evt of d.events || []) {
+        if (evt.type === 'TRANSPORT') {
+          if ((evt as any).fromLat && (evt as any).fromLng) pts.push([(evt as any).fromLng, (evt as any).fromLat]);
+          if ((evt as any).toLat && (evt as any).toLng) pts.push([(evt as any).toLng, (evt as any).toLat]);
+        } else {
+           if (evt.lat && evt.lng) pts.push([evt.lng, evt.lat]);
+        }
+      }
+      if (d.endAnchor?.lat && d.endAnchor?.lng) pts.push([d.endAnchor.lng, d.endAnchor.lat]);
+      return { dayNumber: d.dayNumber, isComplete: !!d.isComplete, isActive: d.dayNumber === activeDayNumber, waypoints: pts };
+    });
+  }, [currentTrip, activeDayNumber, panelMode]);
+
+  useEffect(() => {
+    if (!mapboxToken || completedDays.length === 0) return;
+    
+    completedDays.forEach(day => {
+      if (day.waypoints.length < 2) return;
+      const coordsStr = day.waypoints.map(c => `${c[0]},${c[1]}`).join(';');
+      if (day.waypoints.length <= 25) {
+        fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${coordsStr}?geometries=geojson&overview=full&access_token=${mapboxToken}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.routes && data.routes.length > 0) {
+              setMultiDayRoutes(prev => ({
+                ...prev,
+                [day.dayNumber]: {
+                  type: 'Feature',
+                  properties: { dayNumber: day.dayNumber, isActive: day.isActive, isComplete: day.isComplete },
+                  geometry: data.routes[0].geometry,
+                }
+              }));
+            }
+          })
+          .catch(console.error);
+      }
+    });
+  }, [completedDays, mapboxToken]);
 
   const waypoints = useMemo(() => {
     if (panelMode !== "itinerary" && panelMode !== "builder") return [];
@@ -287,7 +364,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}
 
         {/* Direct baseline route line (Main Route) */}
-        {directRoute && (
+        {directRoute && panelMode === "itinerary" && (
           <Source id="direct-route" type="geojson" data={directRoute}>
             <Layer id="direct-route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.3, "line-blur": 6 }} />
@@ -297,13 +374,31 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         )}
 
         {/* Alternative Detour route line */}
-        {itineraryRoute && (
+        {itineraryRoute && panelMode === "itinerary" && (
           <Source id="itinerary-route" type="geojson" data={itineraryRoute}>
             <Layer id="route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ "line-color": "#34C759", "line-width": 4, "line-opacity": 0.8,
                 "line-dasharray": [2, 2] }} />
           </Source>
         )}
+
+        {/* Multi-day builder routes */}
+        {panelMode === "builder" && Object.values(multiDayRoutes).map(route => {
+          const isAct = route.properties?.isActive;
+          const isComp = route.properties?.isComplete;
+          const dayNum = route.properties?.dayNumber as number;
+          const colors = ["#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#f43f5e", "#ef4444"];
+          const color = isAct ? "#0f172a" : colors[dayNum % colors.length];
+          const opacity = isAct ? 0.8 : (isComp ? 0.5 : 0.2);
+          
+          return (
+            <Source key={`route-${dayNum}`} id={`route-${dayNum}`} type="geojson" data={route}>
+              <Layer id={`route-line-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
+                paint={{ "line-color": color, "line-width": isAct ? 4 : 3, "line-opacity": opacity, "line-dasharray": isAct ? [1, 2] : [1] }}
+              />
+            </Source>
+          );
+        })}
 
         {/* Start Marker */}
         {(() => {
@@ -393,7 +488,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         {/* Itinerary waypoint markers */}
         {itineraryMarkers.map(({ pick, idx }) => {
-          const style = CATEGORY_STYLE[pick.category] ?? { bg: "#8E8E93", icon: MapPin };
+          const style = getCategoryStyle(pick.category);
           const isSelected = selectedId === pick.id;
           const Icon = style.icon;
 
@@ -427,7 +522,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         })}
         {/* Regular business markers — hidden in itinerary mode */}
         {panelMode !== "itinerary" && validBusinesses.map((business, index) => {
-          const style = CATEGORY_STYLE[business.category] ?? { bg: "#8E8E93", icon: MapPin };
+          const style = getCategoryStyle(business.category);
           const isSelected = selectedId === business.id;
           const Icon = style.icon;
 
@@ -440,8 +535,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(business); onSelectBusiness(business.id); }}
             >
               <div
-                className="cursor-pointer transition-all duration-300 relative flex flex-col items-center"
-                style={{ transform: isSelected ? "scale(1.25)" : "scale(1)", zIndex: isSelected ? 50 : 1 }}
+                className={cn(
+                  "cursor-pointer transition-all duration-300 relative flex flex-col items-center animate-in zoom-in fade-in slide-in-from-bottom-4",
+                  isSelected ? "scale-125 z-50" : "scale-100 z-10"
+                )}
+                style={{ animationDuration: `${300 + (index % 10) * 50}ms` }}
               >
                 {/* Apple-style shadow blob */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
@@ -500,10 +598,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                     </a>
                   ) : (
                     <button onClick={() => {
-                      const isNewTrip = insertWaypoint(popupBusiness as any)
-                      if (isNewTrip) {
-                        router.push(`?ai_prompt=I just added ${encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title)} to my day. Can you help me set up an end destination and a basecamp based on this?`)
-                      }
+                      insertWaypoint(popupBusiness as any)
                       setPopupBusiness(null)
                     }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
                       + Add to Day

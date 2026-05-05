@@ -88,7 +88,9 @@ const LENS_OPTIONS = [
   { id: 'SANCTUARY', label: 'The Sanctuary', desc: 'Plant medicine, thermal baths, silence', icon: '🌿' },
 ]
 
-export function JourneyDesigner() {
+import { Archetype } from "@/components/wizard/ArchetypeSelector"
+
+export function JourneyDesigner({ archetype, intensity }: { archetype?: Archetype | null, intensity?: number | null }) {
   const router = useRouter()
   const { setMacroTrip, setPanelMode } = useItinerary()
 
@@ -236,7 +238,7 @@ export function JourneyDesigner() {
       const res = await fetch('/api/travel-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dates, pax, exertionProfile, lenses, autonomy, needsHotels, pinnedPackageIds }),
+        body: JSON.stringify({ dates, pax, exertionProfile, lenses, autonomy, needsHotels, pinnedPackageIds, archetype, intensity }),
       })
       if (!res.ok) throw new Error("Failed")
       const data = await res.json()
@@ -260,7 +262,7 @@ export function JourneyDesigner() {
       const res = await fetch('/api/trip/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trip: generatedTrip, dates, pax })
+        body: JSON.stringify({ trip: generatedTrip, dates, pax, archetype, intensity })
       })
       if (!res.ok) throw new Error("Failed to save trip")
       const data = await res.json()

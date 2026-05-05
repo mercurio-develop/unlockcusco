@@ -121,18 +121,28 @@ model TourPackage {
   tripDays      TripDay[]
 }
 
+enum TravelerArchetype {
+  LIVING_CULTURE
+  GASTRONOMIC
+  LUXURY_WELLNESS
+  SPIRITUAL
+  MOUNTAIN_EXPLORER
+}
+
 model Trip {
-  id                 String     @id @default(cuid())
+  id                 String             @id @default(cuid())
   userId             String?
   businessId         String?
   tripTitle          String
   startDate          DateTime
   endDate            DateTime
-  paxCount           Int        @default(1)
+  paxCount           Int                @default(1)
   baseCampStrategy   String
-  shareToken         String?    @unique
-  status             String     @default("DRAFT")
-  totalPriceUsd      Float      @default(0)
+  archetype          TravelerArchetype?
+  intensity          Int?
+  shareToken         String?            @unique
+  status             String             @default("DRAFT")
+  totalPriceUsd      Float              @default(0)
   createdAt          DateTime   @default(now())
   isVerifiedTemplate Boolean    @default(false)
   templateVibeTags   String?

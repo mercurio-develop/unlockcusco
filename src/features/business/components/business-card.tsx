@@ -28,20 +28,18 @@ interface BusinessCardProps {
   isHighlighted?: boolean
   onSelect?: () => void
   orientation?: "vertical" | "horizontal"
-  showAddButton?: boolean
 }
 
 export function BusinessCard({ 
   business, 
   isHighlighted, 
   onSelect, 
-  orientation = "vertical",
-  showAddButton = true
+  orientation = "vertical"
 }: BusinessCardProps) {
   const [touristName, setTouristName] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const { activeItinerary, insertWaypoint, panelMode } = useTrip()
+  const { activeItinerary, panelMode } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -84,11 +82,6 @@ export function BusinessCard({
       onSelect()
       trackBusinessView(business.id)
     }
-  }
-
-  const handleAddAction = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    insertWaypoint(business as any)
   }
 
   return (
@@ -254,19 +247,6 @@ export function BusinessCard({
                 </Button>
               </DialogContent>
             </Dialog>
-          )}
-
-          {showAddButton && (
-            <Button
-              onClick={handleAddAction}
-              className={cn(
-                "shrink-0 bg-slate-900 hover:bg-slate-800 text-white border-none rounded-xl transition-all shadow-md",
-                isHorizontal ? "w-9 h-9 p-0" : "w-10 h-10 p-0 flex items-center justify-center"
-              )}
-              title="Add to Itinerary"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
           )}
         </div>
       </div>

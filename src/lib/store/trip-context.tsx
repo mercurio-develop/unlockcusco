@@ -31,6 +31,12 @@ interface TripContextType {
   removeEvent: (dayNumber: number, eventId: string) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
   insertWaypoint: (service: Business) => boolean;
+  isChatOpen: boolean;
+  setIsChatOpen: (open: boolean) => void;
+  travelVibe: string | null;
+  setTravelVibe: (vibe: string | null) => void;
+  travelIntensity: number | null;
+  setTravelIntensity: (intensity: number | null) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -45,6 +51,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [activeDayNumber, setActiveDayNumber] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [leftWidth, setLeftWidth] = useState(40);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [travelVibe, setTravelVibe] = useState<string | null>(null);
+  const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
@@ -279,7 +288,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
       addEvent,
       removeEvent,
       updateEvent,
-      insertWaypoint
+      insertWaypoint,
+      isChatOpen,
+      setIsChatOpen,
+      travelVibe,
+      setTravelVibe,
+      travelIntensity,
+      setTravelIntensity
     }}>
       {children}
     </TripContext.Provider>

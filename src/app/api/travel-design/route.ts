@@ -3,12 +3,13 @@ import { generateText, Output } from 'ai';
 import { macroTripSchema } from '@/lib/ai/schemas/planner-schema';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
 import { prisma } from '@/lib/prisma';
+import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { dates, pax, exertionProfile, lenses, autonomy, needsHotels, pinnedPackageIds = [] } = await req.json();
+    const { dates, pax, exertionProfile, lenses, autonomy, needsHotels, pinnedPackageIds = [], archetype, intensity } = await req.json();
 
     // 1. Trip Recycling Check
     const vibeTags = [...lenses].sort().join(',');
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
     });
 
-    const prompt = `I have completed the Journey Architect. Here is my profile:
+    let prompt = `I have completed the Journey Architect. Here is my profile:
 Dates: ${dates.start} to ${dates.end}
 Travelers: ${pax}
 Exertion Profile: ${exertionProfile}
@@ -95,6 +96,10 @@ Please generate my macro trip plan according to the Nat Geo Narrative Arc. Make 
       }`
     : ''
 }`;
+
+    if (archetype && intensity && PSYCHOGRAPHIC_MATRIX[archetype]?.[intensity]) {
+      prompt += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;
+    }
 
     const { output } = await generateText({
       model: google('gemini-2.5-pro'),

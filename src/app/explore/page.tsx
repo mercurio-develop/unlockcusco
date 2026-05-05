@@ -4,7 +4,7 @@ import { ExploreView } from "@/features/explore/components/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string }>
+  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; rad?: string; lat?: string; lng?: string }>
 }
 
 export async function generateMetadata({ searchParams }: ExplorePageProps): Promise<Metadata> {
@@ -39,15 +39,18 @@ export async function generateMetadata({ searchParams }: ExplorePageProps): Prom
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id, loc, cat } = await searchParams
+  const { q, id, loc, cat, rad, lat, lng } = await searchParams
   const query = q?.toLowerCase() || ""
 
   const { businesses, hasMore } = await fetchBusinesses({
     query,
     category: cat,
     loc,
+    radiusKm: rad ? parseFloat(rad) : 0.5,
+    userLat: lat ? parseFloat(lat) : undefined,
+    userLng: lng ? parseFloat(lng) : undefined,
     page: 0,
-    limit: 20
+    limit: 200
   })
 
   // Ensure selected business is exactly at the top

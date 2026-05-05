@@ -62,6 +62,7 @@ export interface TripDay {
   dayNumber: number;
   date: Date;
   title?: string;
+  isComplete?: boolean;
   sleepTown?: string;
   startAnchor?: {
     title: string;

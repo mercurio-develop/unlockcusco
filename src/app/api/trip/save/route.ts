@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 export async function POST(req: Request) {
   try {
-    const { trip, dates, pax } = await req.json();
+    const { trip, dates, pax, archetype, intensity } = await req.json();
 
     const shareToken = `vll-${crypto.randomBytes(6).toString('hex')}`;
 
@@ -18,6 +18,8 @@ export async function POST(req: Request) {
         endDate,
         paxCount: pax || 1,
         baseCampStrategy: trip.baseCampStrategy || 'Multiple Basecamps',
+        archetype: archetype || null,
+        intensity: intensity || null,
         shareToken,
         status: 'CONFIRMED_UNPAID', // Unlocked via wizard paywall
         days: {

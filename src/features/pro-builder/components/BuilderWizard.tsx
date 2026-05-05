@@ -186,7 +186,7 @@ export function BuilderWizard() {
               <button
                 onClick={handleStartBuilding}
                 disabled={!isFormValid}
-                className="flex-1 flex items-center justify-center gap-2 bg-rose-600 text-white px-8 py-5 rounded-2xl font-bold text-lg disabled:opacity-50 hover:bg-rose-700 transition-all shadow-lg hover:shadow-xl hover:shadow-rose-600/20 active:scale-[0.98]"
+                className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-5 rounded-2xl font-bold text-lg disabled:opacity-50 hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:shadow-slate-900/20 active:scale-[0.98]"
               >
                 Start Building <ChevronRight className="w-5 h-5" />
               </button>

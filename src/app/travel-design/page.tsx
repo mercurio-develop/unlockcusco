@@ -2,12 +2,31 @@
 
 import { useState } from "react"
 import { JourneyDesigner } from "@/features/wizard/components/JourneyDesigner"
+import { ArchetypeSelector, Archetype } from "@/components/wizard/ArchetypeSelector"
 import { Sparkles, Map, Compass, ShieldCheck } from "lucide-react"
 
 export default function DesignPage() {
   const [isStarted, setIsStarted] = useState(false)
+  const [profileSet, setProfileSet] = useState(false)
+  const [archetype, setArchetype] = useState<Archetype | null>(null)
+  const [intensity, setIntensity] = useState<number | null>(null)
 
-  if (isStarted) {
+  const handleProfileComplete = (a: Archetype, i: number) => {
+    setArchetype(a)
+    setIntensity(i)
+    // We would normally save this to DB here. For now, we will pass it down or handle it in the wizard/chat.
+    setProfileSet(true)
+  }
+
+  if (isStarted && !profileSet) {
+    return (
+      <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center animate-in fade-in duration-500">
+        <ArchetypeSelector onComplete={handleProfileComplete} />
+      </div>
+    )
+  }
+
+  if (isStarted && profileSet) {
     return (
       <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center animate-in fade-in duration-500">
         <div className="w-full max-w-6xl">
@@ -22,7 +41,8 @@ export default function DesignPage() {
               Craft a once-in-a-lifetime expedition through the heart of the Andes.
             </p>
           </div>
-          <JourneyDesigner />
+          {/* Pass the archetype and intensity down if JourneyDesigner needs them, or store in a context/global store */}
+          <JourneyDesigner archetype={archetype} intensity={intensity} />
         </div>
       </div>
     )

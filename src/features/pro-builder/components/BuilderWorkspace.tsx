@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import { useTrip } from "@/lib/store/trip-context"
-import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search } from "lucide-react"
+import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LocationAutocomplete } from "./LocationAutocomplete"
+import { MealAutocomplete } from "./MealAutocomplete"
 import { ExperiencePickerModal } from "./ExperiencePickerModal"
 import { PackagePreviewModal } from "./PackagePreviewModal"
-import { EventType, TimelineEvent } from "@/lib/types/trip"
+import { EventType, TimelineEvent, MealEvent } from "@/lib/types/trip"
 import { v4 as uuidv4 } from "uuid"
 
 function getEventIcon(type: EventType) {
@@ -91,6 +92,35 @@ export function BuilderWorkspace() {
     setCurrentTrip({ ...currentTrip, days: newDays })
   }
 
+  const handleAutoCalculate = () => {
+    if (!currentTrip || !activeDay) return;
+    
+    const newEvents = [...activeDay.events].map(e => ({...e})); // deep copy to trigger render
+    let currentMins = 9 * 60; // Start at 09:00 AM by default
+    
+    if (activeDay.startAnchor?.time) {
+      const [h, m] = activeDay.startAnchor.time.split(':').map(Number);
+      currentMins = h * 60 + m;
+    }
+
+    newEvents.forEach((evt) => {
+      const h = Math.floor(currentMins / 60) % 24;
+      const m = currentMins % 60;
+      evt.startTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+      let duration = 60;
+      if (evt.type === 'EXPERIENCE') duration = 120;
+      else if (evt.type === 'MEAL') duration = 90;
+      else if (evt.type === 'TRANSPORT') duration = evt.durationMins || 30;
+      else if (evt.type === 'STAY') duration = 30;
+      else if (evt.type === 'NOTE') duration = 0;
+
+      currentMins += duration;
+    });
+
+    updateDay(activeDay.dayNumber, { events: newEvents });
+  };
+
   return (
     <div className="flex-1 bg-transparent relative flex flex-col h-full">
       <AnimatePresence mode="wait">
@@ -103,9 +133,17 @@ export function BuilderWorkspace() {
           className="flex-1 overflow-y-auto p-8"
         >
           
-          <div className="mb-10">
-            <h2 className="text-4xl font-serif font-bold text-slate-900 mb-1">Day {activeDay.dayNumber}</h2>
-            <p className="text-slate-500 text-lg">{activeDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <div className="mb-10 flex justify-between items-start">
+            <div>
+              <h2 className="text-4xl font-serif font-bold text-slate-900 mb-1">Day {activeDay.dayNumber}</h2>
+              <p className="text-slate-500 text-lg">{activeDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <button 
+              onClick={handleAutoCalculate}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-md hover:bg-slate-800 transition-colors"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" /> Auto-Arrange Time
+            </button>
           </div>
 
           <div className="max-w-2xl mx-auto relative border-l border-slate-200 ml-4 pl-8 space-y-8 pb-32">
@@ -219,17 +257,43 @@ export function BuilderWorkspace() {
                            />
                          </div>
                       </div>
-                      <input type="text" value={(evt as any).details || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { details: e.target.value })} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Driver notes or vehicle details..." />
+                      <div className="flex items-center gap-3">
+                        <input type="text" value={(evt as any).details || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { details: e.target.value })} className="flex-1 text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Driver notes or vehicle details..." />
+                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-transparent focus-within:border-slate-200">
+                          <input 
+                            type="number" 
+                            min="5" step="5"
+                            value={evt.durationMins || 30} 
+                            onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { durationMins: parseInt(e.target.value) || 30 })} 
+                            className="w-12 text-sm text-slate-900 font-bold outline-none bg-transparent text-center" 
+                          />
+                          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Mins</span>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {evt.type === 'MEAL' && (
                     <div className="space-y-3">
-                      <input type="text" value={evt.title || ""} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { title: e.target.value } as any)} className="w-full font-bold text-slate-900 font-serif text-xl outline-none focus:text-amber-600 transition-colors placeholder:text-slate-300" placeholder="Restaurant Name or 'Close to...'" />
+                      <MealAutocomplete 
+                        title={evt.title || ""}
+                        businessId={(evt as any).businessId}
+                        onChange={(title, businessId) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId } as any)}
+                      />
                       <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value } as any)} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
-                      <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="mt-1 flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
-                        <Search className="w-3.5 h-3.5" /> {evt.title && !evt.title.toLowerCase().includes('close to') && evt.title.trim() !== '' ? `Search for "${evt.title}"` : 'Find Restaurant Near Activity'}
-                      </button>
+                      <div className="flex items-center justify-between mt-1">
+                        <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
+                          <Search className="w-3.5 h-3.5" /> {(evt as any).businessId ? 'Change Restaurant' : 'Browse Vallecito Library'}
+                        </button>
+                        {(evt as MealEvent).businessId && (
+                          <button 
+                            onClick={() => setViewingPackage((evt as MealEvent).businessId!)}
+                            className="text-[10px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                          >
+                            <MapPin className="w-3.5 h-3.5" /> View Restaurant Details
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -288,6 +352,21 @@ export function BuilderWorkspace() {
               )}
             </div>
             
+            {/* DAY COMPLETE TOGGLE */}
+            <div className="pt-8 mb-8 border-t border-slate-200/60 flex flex-col items-center">
+              <button 
+                onClick={() => updateDay(activeDay.dayNumber, { isComplete: !activeDay.isComplete })}
+                className={`w-full max-w-sm py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${activeDay.isComplete ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : 'bg-slate-900 text-white border border-slate-900 hover:bg-slate-800'}`}
+              >
+                {activeDay.isComplete ? <><Check className="w-5 h-5" /> Day Completed</> : 'Mark Day Complete'}
+              </button>
+              {activeDay.isComplete && (
+                <p className="text-xs text-slate-500 text-center mt-3 max-w-sm">
+                  Route calculated. View the map to see the union of all completed days.
+                </p>
+              )}
+            </div>
+
           </div>
         </motion.div>
       </AnimatePresence>

@@ -7,6 +7,7 @@ import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
+import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
 
 export const maxDuration = 30;
 
@@ -22,9 +23,9 @@ export async function POST(req: Request) {
       } : undefined
     });
 
-    const { messages, userLat, userLng, localTime } = await req.json();
+    const { messages, userLat, userLng, localTime, archetype, intensity } = await req.json();
     console.log("=== INCOMING CHAT REQUEST ===");
-    console.log("Local Time:", localTime, "Coords:", userLat, userLng);
+    console.log("Local Time:", localTime, "Coords:", userLat, userLng, "Profile:", archetype, intensity);
     console.log("Messages Payload:", JSON.stringify(messages, null, 2));
 
     if (!messages || !Array.isArray(messages)) {
@@ -39,10 +40,14 @@ export async function POST(req: Request) {
       return msg;
     });
 
-    const systemPrompt = SYSTEM_PROMPT_CONCIERGE
+    let systemPrompt = SYSTEM_PROMPT_CONCIERGE
       .replace('{localTime}', localTime || 'unknown')
       .replace('{userLat}', userLat || 'unknown')
       .replace('{userLng}', userLng || 'unknown');
+
+    if (archetype && intensity && PSYCHOGRAPHIC_MATRIX[archetype]?.[intensity]) {
+      systemPrompt += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;
+    }
 
     const result = streamText({
       model: google('gemini-2.5-pro'),
