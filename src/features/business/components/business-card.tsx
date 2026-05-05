@@ -180,7 +180,18 @@ export function BusinessCard({
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
-          {isClaimed || business.category === 'TRANSPORT' ? (
+          {business.category === 'AGENCY' || business.category === 'WELLNESS' ? (
+            <Link 
+              href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)}
+              className={cn(
+                "flex-1 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl transition-all",
+                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              View Profile
+            </Link>
+          ) : isClaimed || business.category === 'TRANSPORT' ? (
             <Button
               onClick={handleBookNow}
               className={cn(
