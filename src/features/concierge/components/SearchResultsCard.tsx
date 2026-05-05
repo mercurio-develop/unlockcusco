@@ -5,11 +5,9 @@ import { Plus, Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
-  const { activeItinerary, insertWaypoint, setSelectedId } = useItinerary();
+  const { activeItinerary, insertWaypoint, setSelectedId, panelMode, currentTrip } = useItinerary();
   const router = useRouter();
 
-  // Normalize data (handle raw array vs fallback object)
-  // Tool returns an array on success, or { foundInRequestedLocation, requestedLocation, alternatives: [...] } on fallback
   const isFallback = !Array.isArray(businesses) && businesses?.alternatives;
   const list = Array.isArray(businesses) ? businesses : (businesses?.alternatives || []);
   const requestedLocation = !Array.isArray(businesses) ? businesses?.requestedLocation : null;
@@ -23,11 +21,11 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
   }
 
   const handleSelect = (business: any) => {
-    if (business.category === 'Taxi') {
+    if (business.category === 'Taxi' || business.type === 'TRANSPORT') {
       router.push('/services/transport');
-    } else if (business.category === 'Agency') {
+    } else if (business.category === 'Agency' || business.type === 'AGENCY') {
       router.push('/services/agencies');
-    } else if (business.category === 'Therapist' || business.category === 'Guide' || business.category === 'Therapy') {
+    } else if (['Therapist', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || business.type === 'THERAPIST') {
       router.push('/services/healers');
     } else {
       setSelectedId(business.id);
@@ -52,8 +50,8 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
       
       <div className="divide-y divide-gray-50 max-h-[300px] overflow-y-auto">
         {list.map((business: any, idx: number) => {
-          const parsedHeroImages = business.heroImages && business.heroImages !== "[]" ? JSON.parse(business.heroImages) : [];
-          const displayImage = parsedHeroImages.length > 0 ? parsedHeroImages[0] : business.imageUrl;
+          const displayImage = business.imageUrl;
+          const showAdd = activeItinerary || (panelMode === 'builder' && currentTrip);
           
           return (
             <div 
@@ -77,16 +75,16 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
                   {business.rating && (
                     <div className="flex items-center gap-0.5 shrink-0 bg-rose-50 px-1.5 py-0.5 rounded text-rose-700">
                       <Star className="w-2.5 h-2.5 fill-current" />
-                      <span className="text-[10px] font-bold">{business.rating.toFixed(1)}</span>
+                      <span className="text-[10px] font-bold">{(Number(business.rating)).toFixed(1)}</span>
                     </div>
                   )}
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-[10px] text-slate-500 font-medium truncate">
-                    {business.category} in {business.locationSlug ? (business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1)) : 'Vallecito'}
+                    {business.category} in {business.locationLabel || 'Vallecito'}
                   </p>
                   
-                  {activeItinerary && !['Taxi', 'Therapist', 'Therapy', 'Guide', 'Agency'].includes(business.category) && (
+                  {showAdd && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -94,7 +92,7 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
                       }}
                       className="opacity-0 group-hover:opacity-100 text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded transition-all"
                     >
-                      <Plus className="w-3 h-3 inline-block mr-0.5" /> Add
+                      <Plus className="w-3.5 h-3.5 inline-block mr-0.5" /> Add
                     </button>
                   )}
                 </div>
