@@ -16,11 +16,11 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // 2. Fetch Businesses (Experiences/Places)
+    // 2. Fetch Businesses (Experiences/Places/Stays)
     const businesses = await prisma.business.findMany({
       where: {
         category: {
-          notIn: ["TRANSPORT", "WELLNESS", "STAYS"]
+          notIn: ["TRANSPORT", "WELLNESS"]
         }
       },
       select: {

@@ -21,7 +21,8 @@ const CATEGORIES = [
   { id: 'culture', label: 'Culture & Ruins', tags: ['culture', 'ruins', 'history', 'archaeology', 'market', 'inca', 'museum'] },
   { id: 'adventure', label: 'Adventure', tags: ['atv', 'trek', 'hike', 'bike', 'rafting', 'zip', 'horse'] },
   { id: 'wellness', label: 'Wellness', tags: ['wellness', 'yoga', 'healing', 'ceremony', 'spa', 'thermal', 'sound'] },
-  { id: 'nature', label: 'Nature', tags: ['nature', 'lake', 'mountain', 'wildlife', 'birds'] }
+  { id: 'nature', label: 'Nature', tags: ['nature', 'lake', 'mountain', 'wildlife', 'birds'] },
+  { id: 'stays', label: 'Accommodation', tags: ['stays', 'hotel', 'lodge', 'hostal', 'resort', 'stay'] }
 ]
 
 const LOCATIONS = [

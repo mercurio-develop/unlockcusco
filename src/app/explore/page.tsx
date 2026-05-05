@@ -46,7 +46,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     query,
     category: cat,
     loc,
-    radiusKm: rad ? parseFloat(rad) : 0.5,
+    radiusKm: rad ? parseFloat(rad) : undefined,
     userLat: lat ? parseFloat(lat) : undefined,
     userLng: lng ? parseFloat(lng) : undefined,
     page: 0,

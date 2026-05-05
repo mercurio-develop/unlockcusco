@@ -29,6 +29,7 @@ interface TripContextType {
   setLeftWidth: (w: number) => void;
   addEvent: (dayNumber: number, event: TimelineEvent) => void;
   removeEvent: (dayNumber: number, eventId: string) => void;
+  removeWaypoint: (index: number) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
   insertWaypoint: (service: Business) => boolean;
   isChatOpen: boolean;
@@ -37,6 +38,8 @@ interface TripContextType {
   setTravelVibe: (vibe: string | null) => void;
   travelIntensity: number | null;
   setTravelIntensity: (intensity: number | null) => void;
+  isWorkspaceCollapsed: boolean;
+  setIsWorkspaceCollapsed: (collapsed: boolean) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -54,6 +57,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [travelVibe, setTravelVibe] = useState<string | null>(null);
   const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
+  const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
@@ -109,6 +113,34 @@ export function TripProvider({ children }: { children: ReactNode }) {
             events: day.events.filter(e => e.id !== eventId)
           };
         })
+      };
+    });
+  }, []);
+
+  const removeWaypoint = useCallback((index: number) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const newWaypoints = [...prev.waypoints];
+      newWaypoints.splice(index, 1);
+      
+      const newTransitEdges = [...prev.transitEdges];
+      // Remove the edge leading to this waypoint
+      newTransitEdges.splice(index, 1);
+      
+      // If there's a next edge, we should ideally update its fromLocation
+      // but for now let's just keep it simple and see if the UI handles it
+      if (newTransitEdges[index]) {
+          const prevLoc = index === 0 ? prev.startAnchor.locationStr : newWaypoints[index-1].locationStr;
+          newTransitEdges[index] = {
+              ...newTransitEdges[index],
+              fromLocation: prevLoc
+          };
+      }
+
+      return {
+        ...prev,
+        waypoints: newWaypoints,
+        transitEdges: newTransitEdges
       };
     });
   }, []);
@@ -287,6 +319,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setLeftWidth,
       addEvent,
       removeEvent,
+      removeWaypoint,
       updateEvent,
       insertWaypoint,
       isChatOpen,
@@ -294,7 +327,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
       travelVibe,
       setTravelVibe,
       travelIntensity,
-      setTravelIntensity
+      setTravelIntensity,
+      isWorkspaceCollapsed,
+      setIsWorkspaceCollapsed
     }}>
       {children}
     </TripContext.Provider>

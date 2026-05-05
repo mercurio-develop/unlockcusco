@@ -78,7 +78,7 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", rad
       targetCategory = "Culture"; isHeuristicMatch = true; 
     }
     else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport") || qLower.includes("driver")) { 
-      targetCategory = "Business"; isHeuristicMatch = true; 
+      targetCategory = "Transport"; isHeuristicMatch = true; 
     }
   }
 

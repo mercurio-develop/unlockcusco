@@ -13,7 +13,6 @@ export function useItinerary() {
   return {
     ...trip,
     // Add any legacy mapping here if names changed
-    removeWaypoint: (id: string | number) => trip.removeEvent(trip.activeDayNumber || 1, String(id)),
     // Placeholder for other missing methods to prevent immediate crashes
     setStartAnchorLocation: (...args: any[]) => {},
     setEndAnchorLocation: (...args: any[]) => {},

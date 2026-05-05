@@ -62,6 +62,8 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       <div className={panelMode === "categories" ? "block" : "hidden"}>
         <ExploreSearch 
           initialQuery={initialQuery} 
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
         />
       </div>    </div>  )
 

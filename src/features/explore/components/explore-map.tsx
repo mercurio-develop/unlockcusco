@@ -52,7 +52,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const router = useRouter()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, insertWaypoint } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
+
+  // Calculate dynamic right offset for map controls
+  // If chat is open, shift left by the chat width (450px)
+  const controlsRightOffset = isChatOpen ? "466px" : "16px"
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -601,7 +605,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                     </a>
                   ) : (
                     <button onClick={() => {
-                      insertWaypoint(popupBusiness as any)
+                      const isNewTrip = insertWaypoint(popupBusiness as any)
+                      if (isNewTrip) {
+                        router.push(`?ai_prompt=I just added ${encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title)} to my day. Can you help me set up an end destination and a basecamp based on this?`)
+                      }
                       setPopupBusiness(null)
                     }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
                       + Add to Day
@@ -613,17 +620,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           </Popup>
         )}
 
-        <NavigationControl position="bottom-right" showCompass={false} />
+        <NavigationControl 
+          position="bottom-right" 
+          showCompass={false} 
+          style={{ position: 'absolute', right: controlsRightOffset, bottom: '80px', transition: 'right 0.3s ease-in-out' }} 
+        />
         <GeolocateControl 
           position="bottom-right" 
           positionOptions={{ enableHighAccuracy: true }}
           trackUserLocation={true}
           showUserHeading={true}
+          style={{ position: 'absolute', right: controlsRightOffset, bottom: '20px', transition: 'right 0.3s ease-in-out' }}
         />
       </Map>
 
       {/* Floating Style Switcher - Apple Style */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+      <div 
+        className="absolute top-4 z-20 flex flex-col gap-2 transition-all duration-300"
+        style={{ right: controlsRightOffset }}
+      >
         <button
           onClick={() => setMapMode(mapMode === "satellite" ? "planning" : "satellite")}
           className="w-10 h-10 bg-white/90 backdrop-blur-md hover:bg-white text-slate-900 rounded-full shadow-lg border border-white/50 flex items-center justify-center transition-all active:scale-95"

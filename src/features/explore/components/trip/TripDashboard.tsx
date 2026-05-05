@@ -419,7 +419,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
         {/* Toggle Sidebar Button */}
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="absolute top-6 left-6 z-30 w-10 h-10 bg-white/90 backdrop-blur-md border border-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:text-slate-900 hover:scale-105 transition-all"
+          className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/90 backdrop-blur-md border border-white rounded-full shadow-lg flex items-center justify-center text-slate-700 hover:text-slate-900 hover:scale-105 transition-all"
         >
           {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
         </button>

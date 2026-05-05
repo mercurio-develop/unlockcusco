@@ -11,6 +11,7 @@ const CATEGORIES = [
   { label: "🍽️ Dining", value: "Dining" },
   { label: "🏺 Culture", value: "Culture" },
   { label: "🛌 Stays", value: "Stays" },
+  { label: "🚕 Transport", value: "Transport" },
 ]
 
 const LOCATIONS = [
@@ -24,14 +25,18 @@ const LOCATIONS = [
   { label: "Cusco", value: "cusco" },
 ]
 
-const RADIUS_MARKS: number[] = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 10, 15, 20];
+const RADIUS_MARKS: number[] = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 10, 15];
 
 interface ExploreSearchProps {
   initialQuery: string
+  showFilters?: boolean
+  setShowFilters?: (v: boolean) => void
 }
 
 export function ExploreSearch({ 
   initialQuery,
+  showFilters = true,
+  setShowFilters = () => {}
 }: ExploreSearchProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,7 +46,8 @@ export function ExploreSearch({
 
   const currentLoc = searchParams.get("loc") || ""
   const currentCatStr = searchParams.get("cat") || ""
-  const currentRad = searchParams.get("rad") ? parseFloat(searchParams.get("rad")!) : 0.5
+  const isRadEnabled = searchParams.has("rad")
+  const currentRad = searchParams.has("rad") ? parseFloat(searchParams.get("rad")!) : 2
   const currentLat = searchParams.get("lat") || ""
   const currentLng = searchParams.get("lng") || ""
   
@@ -64,7 +70,7 @@ export function ExploreSearch({
     if (q) params.set("q", q)
     if (loc) params.set("loc", loc)
     if (cats && cats.length > 0) params.set("cat", cats.join(','))
-    if (rad !== undefined && rad !== 0.5) params.set("rad", rad.toString())
+    if (rad !== undefined) params.set("rad", rad.toString())
     if (lat && lng) {
       params.set("lat", lat)
       params.set("lng", lng)
@@ -78,7 +84,7 @@ export function ExploreSearch({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     
     debounceRef.current = setTimeout(() => {
-      navigateFilters(currentLoc, currentCats, newVal.trim(), currentRad, currentLat, currentLng)
+      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)
     }, 500)
   }
 
@@ -89,7 +95,7 @@ export function ExploreSearch({
     } else {
       nextCats.push(catValue)
     }
-    navigateFilters(currentLoc, nextCats, value.trim(), currentRad, currentLat, currentLng)
+    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)
   }
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,16 +153,23 @@ export function ExploreSearch({
             </button>
           )}
         </div>
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={`shrink-0 text-xs font-semibold px-4 py-3.5 rounded-full transition-colors border shadow-sm ${showFilters ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-gray-200 hover:bg-gray-50'}`}
+        >
+          Filters
+        </button>
       </div>
 
-      <div className="flex flex-col gap-5 pt-2">
-        {/* Location */}
+      {showFilters && (
+        <div className="flex flex-col gap-5 pt-2">
+          {/* Location */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Location</span>
               {(currentLoc || currentCats.length > 0) && (
                 <button 
-                  onClick={() => navigateFilters("", [], value.trim())}
+                  onClick={() => navigateFilters("", [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)}
                   className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors"
                 >
                   Clear All
@@ -165,7 +178,7 @@ export function ExploreSearch({
             </div>
             <div className="flex flex-wrap gap-2.5">
               <button
-                onClick={() => navigateFilters("", currentCats, value.trim())}
+                onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap ${
                   currentLoc === "" 
                     ? "bg-slate-900 text-white shadow-md border-slate-900" 
@@ -177,7 +190,7 @@ export function ExploreSearch({
               {LOCATIONS.map((loc) => (
                 <button
                   key={loc.value}
-                  onClick={() => navigateFilters(loc.value, currentCats, value.trim())}
+                  onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap ${
                     currentLoc === loc.value 
                       ? "bg-slate-900 text-white shadow-md border-slate-900" 
@@ -193,24 +206,33 @@ export function ExploreSearch({
           {/* Radius */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Radius Search</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Radius Search</span>
+                <button
+                  onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? undefined : localRad, currentLat, currentLng)}
+                  className={`w-8 h-4 rounded-full transition-colors relative ${isRadEnabled ? 'bg-rose-500' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${isRadEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+              </div>
               <button 
                 onClick={handleUseMyLocation}
-                disabled={isGettingLocation}
-                className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors disabled:opacity-50"
+                disabled={isGettingLocation || !isRadEnabled}
+                className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors disabled:opacity-30"
               >
                 {isGettingLocation ? "Locating..." : (currentLat ? "Using Device GPS" : "Use My Location")}
               </button>
             </div>
-            <div className="flex items-center gap-4 bg-white px-4 py-3 rounded-2xl border border-gray-200">
+            <div className={`flex items-center gap-4 bg-white px-4 py-3 rounded-2xl border border-gray-200 transition-opacity ${!isRadEnabled && 'opacity-50 pointer-events-none'}`}>
               <input 
                 type="range" 
                 min="0" 
                 max={RADIUS_MARKS.length - 1} 
                 step="1"
-                value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(0.5)}
+                value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(2)}
                 onChange={handleRadiusChange}
-                className="flex-1 accent-rose-600"
+                disabled={!isRadEnabled}
+                className="flex-1 accent-rose-600 disabled:accent-slate-400"
               />
               <span className="text-sm font-bold text-slate-900 w-12 text-right">{localRad} km</span>
             </div>
@@ -221,7 +243,7 @@ export function ExploreSearch({
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Category (Multi-Select)</span>
             <div className="flex flex-wrap gap-2.5">
               <button
-                onClick={() => navigateFilters(currentLoc, [], value.trim())}
+                onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap ${
                   currentCats.length === 0 
                     ? "bg-slate-900 text-white shadow-md border-slate-900" 
@@ -250,6 +272,7 @@ export function ExploreSearch({
           </div>
 
         </div>
+      )}
     </div>
   )
 }

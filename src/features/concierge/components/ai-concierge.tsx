@@ -21,10 +21,14 @@ import { useTrip } from "@/lib/store/trip-context"
 
 export function AiConcierge() {
   const [input, setInput] = useState("")
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity } = useTrip()
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, isWorkspaceCollapsed, panelMode } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Determine the offset: if in builder mode and sidebar is open, push left by 500px
+  const isBuilder = panelMode === 'builder'
+  const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
 
   const initialMessages: any[] = [
     {
@@ -133,10 +137,10 @@ Please generate my macro trip plan.`;
         {isChatOpen && (
           <motion.div
             initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0, right: sidebarOffset }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-[56px] right-0 z-40 w-full sm:w-[450px] h-[calc(100vh-56px)]"
+            className="fixed top-[56px] z-40 w-full sm:w-[450px] h-[calc(100vh-56px)]"
           >
             <Card className="flex flex-col h-full rounded-none shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
               {/* Header */}

@@ -108,7 +108,7 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
                   <h4 className="font-bold text-slate-900 mb-2">Tags</h4>
                   <div className="flex flex-wrap gap-2">
                     {pkg.tags.split(',').map((tag: string) => (
-                      <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg">
+                      <span key={tag} className="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100/50 text-xs font-semibold rounded-lg shadow-sm">
                         {tag.trim()}
                       </span>
                     ))}
