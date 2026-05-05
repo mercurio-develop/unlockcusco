@@ -1,5 +1,5 @@
-import { Business, Transport, Therapist, Agency, TourPackage } from \"@prisma/client\"
-import type { UniversalService, EntityType } from \"@/lib/types/trip\"
+import { Business, Transport, Therapist, Agency, TourPackage } from "@prisma/client"
+import type { UniversalService, EntityType } from "@/lib/types/trip"
 
 export function mapBusinessToUniversal(b: Business): UniversalService {
   return {
