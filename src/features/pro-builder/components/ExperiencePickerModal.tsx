@@ -120,15 +120,17 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
   })
 
   const togglePackage = (pkg: MinimizedPackage) => {
-    const isSelected = mealEvent ? selectedPackageIds.includes(pkg.title) : selectedPackageIds.includes(pkg.id)
+    const isSelected = mealEvent 
+      ? mealEvent.name === pkg.title
+      : selectedPackageIds.includes(pkg.id)
     
     if (mealEvent) {
       if (isSelected) {
-        updateEvent(dayNumber, mealEvent.id, { title: "Lunch" })
+        updateEvent(dayNumber, mealEvent.id, { name: "Lunch" } as any)
       } else {
-        updateEvent(dayNumber, mealEvent.id, { title: pkg.title })
-        onClose() // Close immediately after selecting for a meal
+        updateEvent(dayNumber, mealEvent.id, { name: pkg.title } as any)
       }
+      onClose()
       return;
     }
 
@@ -250,7 +252,9 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map(pkg => {
-                const isSelected = mealEvent ? selectedPackageIds.includes(pkg.title) : selectedPackageIds.includes(pkg.id)
+                const isSelected = mealEvent 
+                  ? mealEvent.name === pkg.title
+                  : selectedPackageIds.includes(pkg.id)
                 return (
                   <div 
                     key={pkg.id} 

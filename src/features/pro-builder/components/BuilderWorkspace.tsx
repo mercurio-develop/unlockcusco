@@ -225,8 +225,8 @@ export function BuilderWorkspace() {
 
                   {evt.type === 'MEAL' && (
                     <div className="space-y-3">
-                      <input type="text" value={evt.title || ""} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { title: e.target.value })} className="w-full font-bold text-slate-900 font-serif text-xl outline-none focus:text-amber-600 transition-colors placeholder:text-slate-300" placeholder="Restaurant Name or 'Close to...'" />
-                      <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value })} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
+                      <input type="text" value={evt.title || ""} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { title: e.target.value } as any)} className="w-full font-bold text-slate-900 font-serif text-xl outline-none focus:text-amber-600 transition-colors placeholder:text-slate-300" placeholder="Restaurant Name or 'Close to...'" />
+                      <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value } as any)} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
                       <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="mt-1 flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
                         <Search className="w-3.5 h-3.5" /> {evt.title && !evt.title.toLowerCase().includes('close to') && evt.title.trim() !== '' ? `Search for "${evt.title}"` : 'Find Restaurant Near Activity'}
                       </button>

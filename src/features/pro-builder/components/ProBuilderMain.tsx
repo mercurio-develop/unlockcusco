@@ -133,10 +133,10 @@ export function ProBuilderMain() {
                         {day.events.length === 0 ? (
                           <p className="text-sm text-slate-500 font-medium bg-slate-50 p-5 rounded-2xl text-center border border-slate-200 border-dashed">No events scheduled.</p>
                         ) : (
-                          <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
+                          <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
                             {day.events.map((e, i) => (
-                              <div key={e.id} className="relative flex items-center justify-between group pl-10">
-                                <div className="absolute left-2.5 w-2 h-2 rounded-full bg-slate-300 z-10 group-hover:bg-slate-900 transition-colors ring-4 ring-white" />
+                              <div key={e.id} className="relative flex items-center justify-between group pl-8">
+                                <div className="absolute left-[9px] w-2 h-2 rounded-full bg-slate-300 z-10 group-hover:bg-slate-900 transition-colors ring-4 ring-white" />
                                 <span className="text-slate-700 text-[15px] font-medium truncate pr-4">{e.title}</span>
                                 <span className="text-slate-400 text-xs font-bold font-mono shrink-0">{e.startTime}</span>
                               </div>
