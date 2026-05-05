@@ -70,7 +70,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       {panelMode === "macro" && macroTrip ? (
         <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
       ) : panelMode === "categories" ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-6 pb-20">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6 pb-20">
            {businesses.map(e => (
              <BusinessCard key={e.id} business={e} isHighlighted={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
            ))}

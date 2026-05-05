@@ -16,7 +16,7 @@ export function Navbar() {
 
   const navItems = [
     { href: homePath(), label: "Home", icon: Home },
-    { href: explorePath(), label: "Places", icon: Compass },
+    { href: explorePath(), label: "Explore", icon: Compass },
     { href: travelDesignPath(), label: "Travel Design", icon: Route },
   ]
 
@@ -90,13 +90,19 @@ export function Navbar() {
                 <div className="flex flex-col gap-3">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Travel Vibe</span>
                   <div className="flex flex-wrap gap-2">
-                    {['LIVING_CULTURE', 'GASTRONOMIC', 'LUXURY_WELLNESS', 'SPIRITUAL', 'MOUNTAIN_EXPLORER'].map(a => (
+                    {[
+                      { id: 'LIVING_CULTURE', label: 'Living Culture', icon: '🏛️', theme: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', active: 'bg-orange-600 text-white border-orange-600 shadow-md' },
+                      { id: 'GASTRONOMIC', label: 'Gastronomic', icon: '🍷', theme: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100', active: 'bg-rose-600 text-white border-rose-600 shadow-md' },
+                      { id: 'LUXURY_WELLNESS', label: 'Luxury Wellness', icon: '🌿', theme: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100', active: 'bg-emerald-600 text-white border-emerald-600 shadow-md' },
+                      { id: 'SPIRITUAL', label: 'Spiritual', icon: '🧿', theme: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100', active: 'bg-purple-600 text-white border-purple-600 shadow-md' },
+                      { id: 'MOUNTAIN_EXPLORER', label: 'Mountain Explorer', icon: '⛰️', theme: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100', active: 'bg-blue-600 text-white border-blue-600 shadow-md' }
+                    ].map(a => (
                       <button
-                        key={a}
-                        onClick={() => setTravelVibe(travelVibe === a ? null : a)}
-                        className={`px-4 py-2 text-xs font-bold rounded-full transition-all ${travelVibe === a ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 hover:border-slate-300'}`}
+                        key={a.id}
+                        onClick={() => setTravelVibe(travelVibe === a.id ? null : a.id)}
+                        className={`px-4 py-2 text-[13px] font-bold rounded-full transition-all border flex items-center gap-1.5 hover:scale-105 active:scale-95 ${travelVibe === a.id ? a.active : a.theme}`}
                       >
-                        {a.replace('_', ' ')}
+                        <span>{a.icon}</span> {a.label}
                       </button>
                     ))}
                   </div>
@@ -105,13 +111,18 @@ export function Navbar() {
                 <div className="flex flex-col gap-3">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Intensity Level</span>
                   <div className="flex gap-2 w-full">
-                    {[1, 2, 3].map(i => (
+                    {[
+                      { id: 1, label: 'Level 1', desc: 'Accessible', theme: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100', active: 'bg-green-600 text-white border-green-600 shadow-md' },
+                      { id: 2, label: 'Level 2', desc: 'Immersive', theme: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', active: 'bg-amber-600 text-white border-amber-600 shadow-md' },
+                      { id: 3, label: 'Level 3', desc: 'The Edge', theme: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100', active: 'bg-red-600 text-white border-red-600 shadow-md' }
+                    ].map(i => (
                       <button
-                        key={i}
-                        onClick={() => setTravelIntensity(travelIntensity === i ? null : i)}
-                        className={`flex-1 py-3 text-xs font-bold rounded-xl transition-all ${travelIntensity === i ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 hover:border-slate-300'}`}
+                        key={i.id}
+                        onClick={() => setTravelIntensity(travelIntensity === i.id ? null : i.id)}
+                        className={`flex-1 py-3 px-2 flex flex-col items-center justify-center text-center rounded-xl transition-all border hover:scale-[1.02] active:scale-95 ${travelIntensity === i.id ? i.active : i.theme}`}
                       >
-                        Level {i}
+                        <span className="font-bold text-sm">{i.label}</span>
+                        <span className={`text-[10px] mt-0.5 ${travelIntensity === i.id ? 'text-white/80' : 'opacity-70'}`}>{i.desc}</span>
                       </button>
                     ))}
                   </div>

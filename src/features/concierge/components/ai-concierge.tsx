@@ -245,19 +245,19 @@ Please generate my macro trip plan.`;
               </div>
 
               {/* Quick Suggestions / Multi-Chip Selection */}
-              <div className="px-4 pt-3 pb-2 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
+              <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
                 {[
-                  "Plan my day",
-                  "I need a Taxi",
-                  "Find a great Restaurant",
-                  "Book Machu Picchu",
-                  "Spiritual retreats"
+                  { label: "Plan my day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                  { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                  { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+                  { label: "Book Machu Picchu", icon: "⛰️", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                  { label: "Spiritual retreats", icon: "🧿", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
                 ].map(suggestion => (
                   <button
-                    key={suggestion}
+                    key={suggestion.label}
                     onClick={() => { 
                       sendMessage(
-                        { text: suggestion },
+                        { text: suggestion.label },
                         {
                           body: {
                             userLat: DEFAULT_COORDS.lat,
@@ -269,30 +269,30 @@ Please generate my macro trip plan.`;
                         }
                       )
                     }}
-                    className="whitespace-nowrap px-4 py-2 bg-slate-50 border border-slate-200 hover:border-slate-400 hover:bg-slate-100 text-slate-700 text-[13px] font-semibold rounded-full transition-all shadow-sm"
+                    className={`whitespace-nowrap px-4 py-2 border text-[13px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 ${suggestion.theme}`}
                   >
-                    {suggestion}
+                    <span>{suggestion.icon}</span> {suggestion.label}
                   </button>
                 ))}
               </div>
 
               {/* Input Area */}
-              <div className="p-4 bg-white pb-6 shrink-0">
+              <div className="px-4 pb-6 pt-2 bg-white shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input 
                     placeholder="Describe your ideal day..." 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
-                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-12 px-5"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-12 px-5 shadow-inner"
                   />
                   <Button 
                     type="submit" 
                     size="icon" 
-                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105 h-12 w-12"
+                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105 h-12 w-12 flex items-center justify-center"
                     disabled={!input.trim() || isLoading}
                   >
-                    <Send className="w-5 h-5 ml-0.5" />
+                    <Send className="w-4 h-4 ml-0.5" />
                   </Button>
                 </form>
               </div>

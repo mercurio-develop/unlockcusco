@@ -24,13 +24,7 @@ const LOCATIONS = [
   { label: "Cusco", value: "cusco" },
 ]
 
-const RADIUS_MARKS: number[] = [];
-for (let i = 0.1; i <= 5.0; i += 0.1) {
-  RADIUS_MARKS.push(Math.round(i * 10) / 10);
-}
-for (let i = 6.0; i <= 15.0; i += 1.0) {
-  RADIUS_MARKS.push(Math.round(i * 10) / 10);
-}
+const RADIUS_MARKS: number[] = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 10, 15, 20];
 
 interface ExploreSearchProps {
   initialQuery: string
@@ -99,7 +93,8 @@ export function ExploreSearch({
   }
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newRad = parseFloat(e.target.value)
+    const index = parseInt(e.target.value)
+    const newRad = RADIUS_MARKS[index]
     setLocalRad(newRad)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     
@@ -210,14 +205,15 @@ export function ExploreSearch({
             <div className="flex items-center gap-4 bg-white px-4 py-3 rounded-2xl border border-gray-200">
               <input 
                 type="range" 
-                min="0.5" 
-                max="20" 
-                step="0.5"
-                value={localRad}
+                min="0" 
+                max={RADIUS_MARKS.length - 1} 
+                step="1"
+                value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(0.5)}
                 onChange={handleRadiusChange}
                 className="flex-1 accent-rose-600"
               />
-              <span className="text-sm font-bold text-slate-900 w-12 text-right">{localRad} km</span>            </div>
+              <span className="text-sm font-bold text-slate-900 w-12 text-right">{localRad} km</span>
+            </div>
           </div>
 
           {/* Categories */}

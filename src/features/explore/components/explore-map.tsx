@@ -308,14 +308,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
   const validBusinesses = businesses.filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng)) as (Business & { lat: number, lng: number })[];
 
-  const [firstBusinessId, setFirstBusinessId] = useState<string | null>(null);
+  const businessSignature = validBusinesses.map(b => b.id).join(',');
+  const [prevSignature, setPrevSignature] = useState<string | null>(null);
 
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
     
-    const currentFirstId = validBusinesses[0].id;
-    if (currentFirstId !== firstBusinessId) {
-      setFirstBusinessId(currentFirstId);
+    if (businessSignature !== prevSignature) {
+      setPrevSignature(businessSignature);
       
       let minLng = validBusinesses[0].lng;
       let maxLng = validBusinesses[0].lng;
@@ -343,7 +343,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         });
       }
     }
-  }, [validBusinesses, firstBusinessId]);
+  }, [validBusinesses, businessSignature, prevSignature]);
 
   const center = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
