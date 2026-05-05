@@ -92,44 +92,32 @@ export function DayExplorer() {
           </div>
         </div>
 
-        {/* Macro Experience */}
-        {currentMacroDay?.tourPackageTitle || (waypoints.length === 0) ? (
+        {/* Empty State / Add Experience */}
+        {waypoints.length === 0 && (
           <div className="relative group flex gap-4">
             <div className="flex flex-col items-center pt-2">
-              <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] z-20 flex items-center justify-center shrink-0">
-                <Star className="w-4 h-4 text-rose-500" />
+              <div className="w-8 h-8 rounded-full bg-white border-2 border-dashed border-slate-300 z-20 flex items-center justify-center shrink-0">
+                <Plus className="w-4 h-4 text-slate-400" />
               </div>
-              {(waypoints.length > 0 || transitEdges.length > 0) && <div className="w-0.5 h-full bg-rose-200 mt-2 min-h-6" />}
+              <div className="w-0.5 h-full bg-gray-200 mt-2 min-h-6" />
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-md hover:border-rose-300 transition-all flex-1">
-              {currentMacroDay?.tourPackageTitle ? (
-                <div>
-                  <span className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] block mb-2">Macro Experience</span>
-                  <h3 className="text-slate-900 font-serif font-bold text-xl mb-2">{currentMacroDay.tourPackageTitle}</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed">This anchor experience defines your day's narrative arc.</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-start gap-4">
-                  <div>
-                    <span className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] block mb-2">Macro Experience</span>
-                    <h3 className="text-slate-900 font-serif font-bold text-xl mb-1">No Primary Experience Selected</h3>
-                    <p className="text-slate-500 text-xs leading-relaxed">Enhance this day by adding a curated Vallecito expedition.</p>
-                  </div>
-                  <button 
-                    onClick={() => setPanelMode("categories")}
-                    className="flex items-center gap-2 text-xs font-bold bg-rose-600 text-white px-5 py-2.5 rounded-full hover:bg-rose-700 transition-colors shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" /> Add Experience
-                  </button>
-                </div>
-              )}
+            <div 
+              onClick={() => setPanelMode("categories")}
+              className="bg-white border border-dashed border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow hover:border-rose-300 hover:bg-rose-50/30 transition-all flex-1 cursor-pointer flex flex-col items-center justify-center text-center gap-3"
+            >
+              <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+                <Plus className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-slate-900 font-bold text-sm">Add an Experience</h3>
+                <p className="text-slate-500 text-xs mt-1">Discover activities, dining, or wellness in Vallecito to build your day.</p>
+              </div>
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* WAYPOINTS & TRANSIT */}
-        {waypoints.map((wp: any, idx: number) => {
+        {/* WAYPOINTS & TRANSIT */}        {waypoints.map((wp: any, idx: number) => {
           const edge = transitEdges[idx]
           const prevWp = idx === 0 ? startAnchor : waypoints[idx - 1]
           const estimate = calculateTravelEstimate(prevWp?.lat, prevWp?.lng, wp?.lat, wp?.lng);

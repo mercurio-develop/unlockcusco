@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User } from "lucide-react"
@@ -22,6 +22,7 @@ export function AiConcierge() {
   const [input, setInput] = useState("")
   const searchParams = useSearchParams()
   const pathname = usePathname()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const initialMessages: any[] = [
     {
@@ -37,6 +38,18 @@ export function AiConcierge() {
     }),
     messages: initialMessages
   });
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" })
+      }
+    }, 100);
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, status])
 
   // Seamless Handoff: auto-submit ai_prompt if present
   useEffect(() => {
@@ -223,6 +236,7 @@ Please generate my macro trip plan.`;
                     )}
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input Area */}

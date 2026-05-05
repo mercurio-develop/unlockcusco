@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { ExploreView } from "@/features/explore/components/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
@@ -65,12 +66,14 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
 
   return (
     <div className="relative">
-      <ExploreView
-        initialBusinesses={businesses}
-        initialHasMore={hasMore}
-        initialQuery={q ?? ""}
-        initialSelectedId={id ?? null}
-      />
+      <Suspense fallback={<div className="h-screen w-full bg-slate-50 animate-pulse flex items-center justify-center">Loading Explore...</div>}>
+        <ExploreView
+          initialBusinesses={businesses}
+          initialHasMore={hasMore}
+          initialQuery={q ?? ""}
+          initialSelectedId={id ?? null}
+        />
+      </Suspense>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useTrip } from "@/lib/store/trip-context"
-import { Calendar, Users, ChevronRight, Sparkles } from "lucide-react"
+import { Calendar, Users, ChevronRight, Sparkles, MapPin, Minus, Plus } from "lucide-react"
 import type { UniversalTrip, TripDay } from "@/lib/types/trip"
 import { v4 as uuidv4 } from "uuid"
 
@@ -12,7 +12,7 @@ export function BuilderWizard() {
   const [title, setTitle] = useState(currentTrip?.title || "")
   const [startDate, setStartDate] = useState(currentTrip?.startDate.toISOString().split('T')[0] || "")
   const [endDate, setEndDate] = useState(currentTrip?.endDate.toISOString().split('T')[0] || "")
-  const [paxCount, setPaxCount] = useState(currentTrip?.paxCount || 1)
+  const [paxCount, setPaxCount] = useState(currentTrip?.paxCount || 2) // Default to 2
 
   const minStartDate = useMemo(() => {
     const d = new Date()
@@ -96,68 +96,113 @@ export function BuilderWizard() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-8 bg-white min-h-[600px] flex flex-col justify-center">
-      <div className="mb-16">
-        <h1 className="text-5xl font-serif text-slate-900 mb-4 tracking-tight">Trip Foundations</h1>
-        <p className="text-xl text-slate-500 font-light">Set the core parameters before designing the itinerary.</p>
-      </div>
+    <div className="w-full min-h-[calc(100vh-56px)] flex items-center justify-center p-6 bg-[#FAF9F6] relative overflow-hidden">
+      
+      {/* Decorative blurred shapes in background */}
+      <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-rose-100/60 rounded-full blur-[120px] pointer-events-none mix-blend-multiply -translate-x-1/2 -translate-y-1/4" />
+      <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-amber-50/60 rounded-full blur-[120px] pointer-events-none mix-blend-multiply translate-x-1/4 translate-y-1/4" />
 
-      <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl w-full">
-        <div className="group relative">
-          <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1 transition-colors group-focus-within:text-rose-600">Itinerary Title</label>
-          <input 
-            type="text" 
-            placeholder="e.g. The Jenkins Family Adventure"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="w-full py-3 bg-transparent border-b-2 border-slate-200 text-3xl font-serif text-slate-900 focus:border-rose-600 outline-none transition-colors placeholder:text-slate-200"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-          <div className="group relative">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1 flex items-center gap-2 transition-colors group-focus-within:text-rose-600">
-              <Calendar className="w-3.5 h-3.5" /> Start Date
-            </label>
-            <input
-              type="date"
-              min={minStartDate}
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-              className="w-full py-3 bg-transparent border-b-2 border-slate-200 text-xl font-medium text-slate-900 focus:border-rose-600 outline-none transition-colors"
-            />
+      {/* Main Elevated Card */}
+      <div className="w-full max-w-4xl bg-white/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white overflow-hidden animate-in fade-in zoom-in-95 duration-500 z-10">
+        <div className="p-12 md:p-16">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl md:text-6xl font-serif text-slate-900 mb-4 tracking-tight">Design a Journey</h1>
+            <p className="text-xl text-slate-500 font-light">Set the core parameters before entering the workspace.</p>
           </div>
-          <div className="group relative">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1 flex items-center gap-2 transition-colors group-focus-within:text-rose-600">
-              <Calendar className="w-3.5 h-3.5" /> End Date
-            </label>
-            <input
-              type="date"
-              min={minEndDate}
-              value={endDate}
-              onChange={e => setEndDate(e.target.value)}
-              className="w-full py-3 bg-transparent border-b-2 border-slate-200 text-xl font-medium text-slate-900 focus:border-rose-600 outline-none transition-colors"
-            />
-          </div>
-        </div>
 
-        <div className="pt-10 flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={handleStartBuilding}
-            disabled={!isFormValid}
-            className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-5 rounded-2xl font-bold text-lg disabled:opacity-50 hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-          >
-            Start Building <ChevronRight className="w-5 h-5" />
-          </button>
-          
-          <button
-            onClick={handleMagicAutoFill}
-            className="flex-1 flex items-center justify-center gap-2 bg-rose-50 text-rose-600 border border-rose-100 px-8 py-5 rounded-2xl font-bold text-lg hover:bg-rose-100 transition-all"
-          >
-            <Sparkles className="w-5 h-5" /> Magic Auto-Fill
-          </button>
+          <div className="space-y-10 max-w-3xl mx-auto">
+            
+            {/* Trip Title */}
+            <div className="group relative bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-rose-200 transition-colors focus-within:border-rose-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-rose-500/10">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2 transition-colors group-focus-within:text-rose-600">
+                <MapPin className="w-4 h-4" /> Itinerary Title
+              </label>
+              <input 
+                type="text" 
+                placeholder="e.g. The Jenkins Family Adventure"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className="w-full bg-transparent text-3xl font-serif text-slate-900 outline-none transition-colors placeholder:text-slate-300"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Dates */}
+              <div className="md:col-span-2 grid grid-cols-2 gap-4 bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-rose-200 transition-colors focus-within:border-rose-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-rose-500/10">
+                <div className="relative border-r border-slate-200 pr-4">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2 transition-colors group-focus-within:text-rose-600">
+                    <Calendar className="w-4 h-4" /> Start
+                  </label>
+                  <input
+                    type="date"
+                    min={minStartDate}
+                    value={startDate}
+                    onChange={e => setStartDate(e.target.value)}
+                    className="w-full bg-transparent text-xl font-medium text-slate-900 outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                  />
+                </div>
+                <div className="relative pl-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2 transition-colors group-focus-within:text-rose-600">
+                    <Calendar className="w-4 h-4" /> End
+                  </label>
+                  <input
+                    type="date"
+                    min={minEndDate}
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                    className="w-full bg-transparent text-xl font-medium text-slate-900 outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                  />
+                </div>
+              </div>
+
+              {/* Travelers (Pax) */}
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-rose-200 transition-colors focus-within:border-rose-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-rose-500/10 flex flex-col justify-between">
+                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2 transition-colors group-focus-within:text-rose-600">
+                    <Users className="w-4 h-4" /> Travelers
+                  </label>
+                  <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 p-1">
+                     <button 
+                       onClick={() => setPaxCount(Math.max(1, paxCount - 1))}
+                       className="w-10 h-10 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors disabled:opacity-30"
+                       disabled={paxCount <= 1}
+                     >
+                       <Minus className="w-5 h-5" />
+                     </button>
+                     <span className="text-xl font-semibold text-slate-900 w-8 text-center">{paxCount}</span>
+                     <button 
+                       onClick={() => setPaxCount(paxCount + 1)}
+                       className="w-10 h-10 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                     >
+                       <Plus className="w-5 h-5" />
+                     </button>
+                  </div>
+              </div>
+
+            </div>
+
+            {/* Actions */}
+            <div className="pt-8 flex flex-col sm:flex-row gap-4 border-t border-slate-100">
+              <button
+                onClick={handleStartBuilding}
+                disabled={!isFormValid}
+                className="flex-1 flex items-center justify-center gap-2 bg-rose-600 text-white px-8 py-5 rounded-2xl font-bold text-lg disabled:opacity-50 hover:bg-rose-700 transition-all shadow-lg hover:shadow-xl hover:shadow-rose-600/20 active:scale-[0.98]"
+              >
+                Start Building <ChevronRight className="w-5 h-5" />
+              </button>
+              
+              <button
+                onClick={handleMagicAutoFill}
+                className="flex-1 flex items-center justify-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 px-8 py-5 rounded-2xl font-bold text-lg hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-[0.98]"
+              >
+                <Sparkles className="w-5 h-5 text-amber-500" /> Magic Auto-Fill
+              </button>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
   )
 }
+

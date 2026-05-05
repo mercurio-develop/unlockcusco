@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useBuilder } from "@/features/pro-builder/store/builder-context"
+import { useTrip } from "@/lib/store/trip-context"
 import { MapPin, Plus, Check, Search, Loader2, X, Star } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
 import { ExperienceEvent, MealEvent } from "../types"
@@ -41,17 +41,18 @@ interface ExperiencePickerModalProps {
   onClose: () => void
   dayNumber: number
   eventId?: string
+  initialSearch?: string
 }
 
-export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: ExperiencePickerModalProps) {
-  const { draftTrip, addEventToDay, removeEventFromDay, updateEventInDay } = useBuilder()
+export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, initialSearch }: ExperiencePickerModalProps) {
+  const { currentTrip, addEvent, removeEvent, updateEvent } = useTrip()
   const [packages, setPackages] = useState<MinimizedPackage[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState("all")
   const [activeLocation, setActiveLocation] = useState("all")
 
-  const day = draftTrip.days.find(d => d.dayNumber === dayNumber)
+  const day = currentTrip?.days.find(d => d.dayNumber === dayNumber)
   
   // Find all existing EXPERIENCE events for this day
   const experienceEvents = (day?.events || []).filter(e => e.type === 'EXPERIENCE') as ExperienceEvent[]
@@ -66,6 +67,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
   useEffect(() => {
     if (isOpen) {
       setActiveCategory(mealEvent ? 'food' : 'all')
+      setSearch(initialSearch || "")
       
       if (packages.length === 0) {
         setLoading(true)
@@ -83,7 +85,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
           .finally(() => setLoading(false))
       }
     }
-  }, [isOpen, mealEvent, packages.length])
+  }, [isOpen, mealEvent, packages.length, initialSearch])
 
   if (!isOpen) return null
 
@@ -122,9 +124,9 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
     
     if (mealEvent) {
       if (isSelected) {
-        updateEventInDay(dayNumber, mealEvent.id, { name: "Lunch" })
+        updateEvent(dayNumber, mealEvent.id, { title: "Lunch" })
       } else {
-        updateEventInDay(dayNumber, mealEvent.id, { name: pkg.title })
+        updateEvent(dayNumber, mealEvent.id, { title: pkg.title })
         onClose() // Close immediately after selecting for a meal
       }
       return;
@@ -134,7 +136,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
       // Find the event ID to remove
       const eventToRemove = experienceEvents.find(e => e.packageId === pkg.id)
       if (eventToRemove) {
-        removeEventFromDay(dayNumber, eventToRemove.id)
+        removeEvent(dayNumber, eventToRemove.id)
       }
     } else {
       let defaultStartTime = "10:00"
@@ -144,12 +146,12 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
           const [hours, minutes] = lastEvent.startTime.split(':').map(Number)
           defaultStartTime = `${String((hours + 2) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
         }
-      } else if (day && day.startAnchor.time) {
+      } else if (day && day.startAnchor?.time) {
         const [hours, minutes] = day.startAnchor.time.split(':').map(Number)
         defaultStartTime = `${String((hours + 1) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
       }
 
-      addEventToDay(dayNumber, {
+      addEvent(dayNumber, {
         id: uuidv4(),
         type: 'EXPERIENCE',
         startTime: defaultStartTime,
@@ -176,61 +178,65 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
 
         {/* Search */}
         <div className="p-6 border-b border-slate-100 shrink-0">
-          <div className="relative">
+          <div className="relative max-w-xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search Vallecito library..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-slate-900"
+              className="w-full pl-12 pr-4 py-3.5 rounded-full border border-gray-200 bg-white text-slate-900 focus:ring-2 focus:ring-slate-900 text-[15px] font-medium shadow-sm hover:shadow transition-all outline-none"
             />
           </div>
         </div>
 
         {/* Categories / Filters */}
-        <div className="flex flex-col border-b border-slate-100 shrink-0">
-          <div className="px-6 py-3 border-b border-slate-50 flex overflow-x-auto scrollbar-hide gap-2 items-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-2 sticky left-0 bg-white pr-2 z-10 shadow-[8px_0_12px_-4px_rgba(255,255,255,1)]">Location</span>
-            <button
-              onClick={() => setActiveLocation('all')}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                activeLocation === 'all'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              Anywhere
-            </button>
-            {LOCATIONS.map(loc => (
+        <div className="flex flex-col bg-slate-50 border-b border-slate-100 shrink-0 px-6 py-4 gap-4">
+          <div className="flex items-start gap-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2 w-16 shrink-0">Location</span>
+            <div className="flex flex-wrap gap-2">
               <button
-                key={loc.value}
-                onClick={() => setActiveLocation(loc.value)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                  activeLocation === loc.value
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                onClick={() => setActiveLocation('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border duration-200 shrink-0 ${
+                  activeLocation === 'all'
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                    : 'bg-white text-slate-600 border-gray-200 hover:border-slate-900 hover:text-slate-900 hover:bg-gray-50'
                 }`}
               >
-                {loc.label}
+                Anywhere
               </button>
-            ))}
+              {LOCATIONS.map(loc => (
+                <button
+                  key={loc.value}
+                  onClick={() => setActiveLocation(loc.value)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border duration-200 shrink-0 ${
+                    activeLocation === loc.value
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      : 'bg-white text-slate-600 border-gray-200 hover:border-slate-900 hover:text-slate-900 hover:bg-gray-50'
+                  }`}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="px-6 py-3 flex overflow-x-auto scrollbar-hide gap-2 items-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-2 sticky left-0 bg-white pr-2 z-10 shadow-[8px_0_12px_-4px_rgba(255,255,255,1)]">Category</span>
-            {CATEGORIES.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setActiveCategory(c.id)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                  activeCategory === c.id
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
+          <div className="flex items-start gap-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2 w-16 shrink-0">Category</span>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setActiveCategory(c.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border duration-200 shrink-0 ${
+                    activeCategory === c.id
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                      : 'bg-white text-slate-600 border-gray-200 hover:border-slate-900 hover:text-slate-900 hover:bg-gray-50'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -244,7 +250,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map(pkg => {
-                const isSelected = selectedPackageIds.includes(pkg.id)
+                const isSelected = mealEvent ? selectedPackageIds.includes(pkg.title) : selectedPackageIds.includes(pkg.id)
                 return (
                   <div 
                     key={pkg.id} 

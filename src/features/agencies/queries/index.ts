@@ -11,7 +11,7 @@ export async function getAgencyBySlug(slug: string) {
 
 export async function getAllAgencies() {
   return await prisma.business.findMany({
-    where: { category: "AGENCY" },
+    where: { category: { in: ["AGENCY", "Adventure", "ADVENTURE", "AVENTURA"] } },
     include: {
       tourPackages: true
     }

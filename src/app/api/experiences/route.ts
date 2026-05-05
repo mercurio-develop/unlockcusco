@@ -18,6 +18,11 @@ export async function GET(req: NextRequest) {
 
     // 2. Fetch Businesses (Experiences/Places)
     const businesses = await prisma.business.findMany({
+      where: {
+        category: {
+          notIn: ["TRANSPORT", "Transport", "Transporte", "Taxi", "WELLNESS", "Wellness", "Therapy", "THERAPY", "THERAPIST", "BIENESTAR"]
+        }
+      },
       select: {
         id: true,
         name: true,
@@ -26,8 +31,11 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // 3. Fetch Business
+    // 3. Fetch Transport
     const transport = await prisma.business.findMany({
+      where: {
+        category: { in: ["TRANSPORT", "Transport", "Transporte", "Taxi"] }
+      },
       select: {
         id: true,
         name: true,
@@ -38,6 +46,9 @@ export async function GET(req: NextRequest) {
 
     // 4. Fetch Therapists
     const therapists = await prisma.business.findMany({
+      where: {
+        category: { in: ["WELLNESS", "Wellness", "Therapy", "THERAPY", "THERAPIST", "BIENESTAR"] }
+      },
       select: {
         id: true,
         name: true,

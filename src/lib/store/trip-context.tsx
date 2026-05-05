@@ -30,7 +30,7 @@ interface TripContextType {
   addEvent: (dayNumber: number, event: TimelineEvent) => void;
   removeEvent: (dayNumber: number, eventId: string) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
-  insertWaypoint: (service: Business) => void;
+  insertWaypoint: (service: Business) => boolean;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -81,7 +81,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           if (day.dayNumber !== dayNumber) return day;
           return {
             ...day,
-            events: [...day.events, event].sort((a, b) => a.startTime.localeCompare(b.startTime))
+            events: [...day.events, event].sort((a, b) => (a.startTime || "00:00").localeCompare(b.startTime || "00:00"))
           };
         })
       };
@@ -114,14 +114,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
           return {
             ...day,
             events: day.events.map(e => e.id === eventId ? { ...e, ...updates } as TimelineEvent : e)
-              .sort((a, b) => a.startTime.localeCompare(b.startTime))
+              .sort((a, b) => (a.startTime || "00:00").localeCompare(b.startTime || "00:00"))
           };
         })
       };
     });
   }, []);
 
-  const insertWaypoint = useCallback((service: Business) => {
+  const insertWaypoint = useCallback((service: Business): boolean => {
     const dayNum = activeDayNumber || 1;
     const isTransport = service.category === 'TRANSPORT';
     const isStay = service.category === 'LODGING' || service.category === 'STAYS';
@@ -162,11 +162,74 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    if (panelMode === 'builder' || currentTrip) {
-        addEvent(dayNum, newEvent);
+    let isNewTrip = false;
+
+    if (panelMode === 'itinerary' || panelMode === 'builder' || activeItinerary || currentTrip) {
+        if (activeItinerary) {
+            const newWp = {
+                id: newEvent.id,
+                category: service.category,
+                title: service.name,
+                locationStr: service.name,
+                durationMins: 120,
+                priceUsd: 0,
+                lat: service.lat || undefined,
+                lng: service.lng || undefined,
+                rating: service.rating || undefined
+            };
+            setActiveItinerary({
+                ...activeItinerary,
+                waypoints: [...activeItinerary.waypoints, newWp],
+                totalCost: (activeItinerary.totalCost || 0) + 0
+            });
+        }
+        if (currentTrip) {
+            addEvent(dayNum, newEvent);
+        }
+        setPanelMode('itinerary');
     } else {
+        isNewTrip = true;
+        
+        const startLocName = service.locationSlug 
+            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+            : service.name;
+
+        const newPlan: OptimizedPlan = {
+            title: `Trip to ${service.name}`,
+            totalCost: 0,
+            startAnchor: {
+                title: startLocName,
+                locationStr: startLocName,
+                time: "09:00",
+                type: 'GENERIC_TOWN',
+                lat: service.lat || undefined,
+                lng: service.lng || undefined
+            },
+            endAnchor: {
+                title: "To Be Decided",
+                locationStr: "To Be Decided",
+                time: "18:00",
+                type: 'GENERIC_TOWN',
+            },
+            waypoints: [
+                {
+                    id: newEvent.id,
+                    category: service.category,
+                    title: service.name,
+                    locationStr: service.name,
+                    durationMins: 120,
+                    priceUsd: 0,
+                    lat: service.lat || undefined,
+                    lng: service.lng || undefined,
+                    rating: service.rating || undefined
+                }
+            ],
+            transitEdges: [],
+            needsAccommodationUpsell: false
+        };
+
         const newTrip: UniversalTrip = {
-            title: "My Trip",
+            title: `Trip to ${service.name}`,
             startDate: new Date(),
             endDate: new Date(),
             paxCount: 1,
@@ -174,13 +237,24 @@ export function TripProvider({ children }: { children: ReactNode }) {
             days: [{
                 dayNumber: 1,
                 date: new Date(),
+                startAnchor: {
+                  title: startLocName,
+                  time: "09:00",
+                  lat: service.lat || undefined,
+                  lng: service.lng || undefined
+                },
                 events: [newEvent]
             }]
         };
+
+        setActiveItinerary(newPlan);
         setCurrentTrip(newTrip);
-        setPanelMode('builder');
+        setActiveDayNumber(1);
+        setPanelMode('itinerary');
     }
-  }, [activeDayNumber, addEvent, currentTrip, panelMode]);
+
+    return isNewTrip;
+  }, [activeDayNumber, addEvent, activeItinerary, currentTrip, panelMode]);
 
   return (
     <TripContext.Provider value={{

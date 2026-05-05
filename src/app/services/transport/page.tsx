@@ -14,7 +14,9 @@ export default async function TransportPage({
   const { loc, type, q } = await searchParams
   const query = q?.trim() ?? ""
 
-  const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = {
+    category: { in: ["TRANSPORT", "Transport", "Transporte", "Taxi"] }
+  }
   
   if (loc) {
     where.serviceZones = { contains: loc.toLowerCase() }

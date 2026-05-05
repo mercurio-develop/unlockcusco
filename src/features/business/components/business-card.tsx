@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { agencyPath, therapistPath } from "@/paths"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,6 +42,7 @@ export function BusinessCard({
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const { activeItinerary, insertWaypoint, panelMode } = useTrip()
+  const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
@@ -101,16 +103,21 @@ export function BusinessCard({
       {/* Image Container */}
       <div className={cn(
         "relative overflow-hidden rounded-2xl transition-all duration-300 bg-slate-100",
-        isHorizontal ? "w-32 sm:w-48 aspect-square shrink-0" : "w-full aspect-[4/3] sm:aspect-square",
+        isHorizontal ? "w-32 sm:w-48 aspect-square shrink-0" : "w-full aspect-[4/3] sm:aspect-[4/3]",
         isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
       )}>
         {business.imageUrl ? (
-          <img
-            src={business.imageUrl}
-            alt={business.name}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          />
+          <>
+            <img
+              src={business.imageUrl}
+              alt={business.name}
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+            {/* Magazine-style overlays to normalize image appearance */}
+            <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:bg-black/0" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
              {business.category === 'TRANSPORT' ? <Users className="w-10 h-10" /> : <Briefcase className="w-10 h-10" />}
@@ -186,7 +193,7 @@ export function BusinessCard({
               href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)}
               className={cn(
                 "flex-1 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl transition-all",
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
+                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
               )}
               onClick={(e) => e.stopPropagation()}
             >
@@ -196,8 +203,8 @@ export function BusinessCard({
             <Button
               onClick={handleBookNow}
               className={cn(
-                "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
+                "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold rounded-xl transition-all",
+                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
               )}
             >
               {business.category === 'TRANSPORT' ? 'Contact' : 'Book Now'}
@@ -210,7 +217,7 @@ export function BusinessCard({
                   variant="outline" 
                   className={cn(
                     "flex-1 bg-white text-slate-900 border-gray-200 hover:bg-gray-50 hover:text-slate-900 font-semibold rounded-xl transition-all",
-                    isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-5 text-sm"
+                    isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
                   )}
                 >
                   Check Availability
@@ -253,8 +260,8 @@ export function BusinessCard({
             <Button
               onClick={handleAddAction}
               className={cn(
-                "shrink-0 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-none rounded-xl transition-all",
-                isHorizontal ? "w-9 h-9 p-0" : "w-10 py-5"
+                "shrink-0 bg-slate-900 hover:bg-slate-800 text-white border-none rounded-xl transition-all shadow-md",
+                isHorizontal ? "w-9 h-9 p-0" : "w-10 h-10 p-0 flex items-center justify-center"
               )}
               title="Add to Itinerary"
             >
@@ -266,3 +273,4 @@ export function BusinessCard({
     </div>
   )
 }
+

@@ -82,6 +82,10 @@ export const estimateTaxiFare = tool({
      return {
        destinationName: finalDestinationName,
        originGuessed: originMatched ? origin : "Urubamba (Default)",
+       originLat: oLat,
+       originLng: oLng,
+       destLat: dLat,
+       destLng: dLng,
        distanceKm: dist.toFixed(1),
        estimatedCostUSD: cost,
        estimatedTimeMinutes: timeMins,
@@ -93,3 +97,4 @@ export const estimateTaxiFare = tool({
      };
   }
 });
+

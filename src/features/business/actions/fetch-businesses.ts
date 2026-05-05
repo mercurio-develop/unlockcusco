@@ -2,13 +2,6 @@
 
 import { prisma } from "@/lib/prisma"
 import { Business } from "@prisma/client"
-import { generateObject } from "ai"
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import { z } from "zod"
-
-const google = createGoogleGenerativeAI({ 
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY 
-});
 
 // Helper to interleave categories while maintaining relative rating sort
 function interleaveCategories(sortedBusinesses: Business[]) {
@@ -44,50 +37,31 @@ export interface FetchBusinessesParams {
 }
 
 export async function fetchBusinesses({ query = "", category = "", loc = "", page = 0, limit = 20 }: FetchBusinessesParams) {
-  const google = createGoogleGenerativeAI({ 
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY 
-  });
-
   let targetCategory = category
-  let searchTerms: string[] = []
   const q = query.trim()
   let isHeuristicMatch = false
 
   // If there's a complex query and no strict category filter applied yet
   if (q && !targetCategory) {
-    if (q.split(" ").length > 2) {
-      try {
-        const { object } = await generateObject({
-          model: google("gemini-2.5-flash"),
-          system: "You are a travel concierge AI. Extract search constraints from the user query.",
-          schema: z.object({
-            categories: z.array(z.enum(["Adventure", "Wellness", "Dining", "Culture", "Stays", "Business"])).describe("Categories that match the user's intent. Only include if explicitly implied."),
-            searchTerms: z.array(z.string()).describe("1-3 essential keywords to search for in the business name or description (e.g., 'vegan', 'massage', 'coffee'). If none, return empty array.")
-          }),
-          prompt: `User query: "${q}"`
-        });
-
-        if (object.categories && object.categories.length > 0) {
-          targetCategory = object.categories[0]; // For MVP, just use the first match
-          isHeuristicMatch = true;
-        }
-        if (object.searchTerms && object.searchTerms.length > 0) {
-          searchTerms = object.searchTerms;
-        }
-      } catch (e) {
-        console.error("LLM Query Translation failed, falling back to heuristics:", e);
-      }
+    // Fallback heuristics to extract a category from the text query
+    const qLower = q.toLowerCase();
+    if (qLower.includes("massage") || qLower.includes("spa") || qLower.includes("wellness") || qLower.includes("recovery") || qLower.includes("retreat") || qLower.includes("yoga")) { 
+      targetCategory = "Wellness"; isHeuristicMatch = true; 
     }
-
-    // Fallback heuristics if LLM failed, skipped, or didn't find a category
-    if (!targetCategory) {
-       const qLower = q.toLowerCase();
-       if (qLower.includes("massage") || qLower.includes("spa") || qLower.includes("wellness") || qLower.includes("recovery") || qLower.includes("retreat") || qLower.includes("yoga")) { targetCategory = "Wellness"; isHeuristicMatch = true; }
-       else if (qLower.includes("atv") || qLower.includes("hiking") || qLower.includes("adventure") || qLower.includes("tour") || qLower.includes("trail") || qLower.includes("trekking") || qLower.includes("llama")) { targetCategory = "Adventure"; isHeuristicMatch = true; }
-       else if (qLower.includes("picantería") || qLower.includes("restaurant") || qLower.includes("food") || qLower.includes("dining") || qLower.includes("eat") || qLower.includes("coffee") || qLower.includes("vegan") || qLower.includes("cafe")) { targetCategory = "Dining"; isHeuristicMatch = true; }
-       else if (qLower.includes("hotel") || qLower.includes("stays") || qLower.includes("sleep") || qLower.includes("boutique")) { targetCategory = "Stays"; isHeuristicMatch = true; }
-       else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile")) { targetCategory = "Culture"; isHeuristicMatch = true; }
-       else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport")) { targetCategory = "Business"; isHeuristicMatch = true; }
+    else if (qLower.includes("atv") || qLower.includes("hiking") || qLower.includes("adventure") || qLower.includes("tour") || qLower.includes("trail") || qLower.includes("trekking") || qLower.includes("llama")) { 
+      targetCategory = "Adventure"; isHeuristicMatch = true; 
+    }
+    else if (qLower.includes("picantería") || qLower.includes("restaurant") || qLower.includes("food") || qLower.includes("dining") || qLower.includes("eat") || qLower.includes("coffee") || qLower.includes("vegan") || qLower.includes("cafe")) { 
+      targetCategory = "Dining"; isHeuristicMatch = true; 
+    }
+    else if (qLower.includes("hotel") || qLower.includes("stays") || qLower.includes("sleep") || qLower.includes("boutique") || qLower.includes("lodging") || qLower.includes("hostel")) { 
+      targetCategory = "Stays"; isHeuristicMatch = true; 
+    }
+    else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile") || qLower.includes("ruins")) { 
+      targetCategory = "Culture"; isHeuristicMatch = true; 
+    }
+    else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport") || qLower.includes("driver")) { 
+      targetCategory = "Business"; isHeuristicMatch = true; 
     }
   }
 
@@ -108,7 +82,7 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orConditions: any[] = []
 
-  if (q && !isHeuristicMatch && searchTerms.length === 0) {
+  if (q && !isHeuristicMatch) {
      const titleCase = q.charAt(0).toUpperCase() + q.slice(1).toLowerCase();
      orConditions.push({ name: { contains: q } })
      orConditions.push({ name: { contains: q.toLowerCase() } })
@@ -118,18 +92,6 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
      orConditions.push({ description: { contains: q } })
      orConditions.push({ description: { contains: q.toLowerCase() } })
      orConditions.push({ description: { contains: titleCase } })
-  }
-
-  if (searchTerms.length > 0) {
-    searchTerms.forEach(term => {
-      const titleCase = term.charAt(0).toUpperCase() + term.slice(1).toLowerCase();
-      orConditions.push({ name: { contains: term } })
-      orConditions.push({ name: { contains: term.toLowerCase() } })
-      orConditions.push({ name: { contains: titleCase } })
-      orConditions.push({ name: { contains: term.toUpperCase() } })
-      orConditions.push({ description: { contains: term } })
-      orConditions.push({ description: { contains: term.toLowerCase() } })
-    })
   }
 
   if (orConditions.length > 0) {

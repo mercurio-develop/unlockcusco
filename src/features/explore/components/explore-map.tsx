@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -25,9 +26,10 @@ interface ExploreMapProps {
 
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
+  const router = useRouter()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, insertWaypoint } = useItinerary()
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -40,29 +42,58 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const [directRoute, setDirectRoute] = useState<GeoJSON.Feature<GeoJSON.LineString> | null>(null);
 
   const waypoints = useMemo(() => {
-    if (panelMode !== "itinerary" || !activeItinerary) return [];
-    const pts: [number, number][] = [];
-    const start = activeItinerary.startAnchor;
-    const end = activeItinerary.endAnchor;
+    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
     
-    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
-    for (const waypoint of activeItinerary.waypoints || []) {
-      if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
+    const pts: [number, number][] = [];
+    
+    if (panelMode === "itinerary" && activeItinerary) {
+      const start = activeItinerary.startAnchor;
+      const end = activeItinerary.endAnchor;
+      if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+      for (const waypoint of activeItinerary.waypoints || []) {
+        if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
+      }
+      if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      if (activeDay) {
+        const start = activeDay.startAnchor;
+        const end = activeDay.endAnchor;
+        if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+        for (const evt of activeDay.events || []) {
+          if (evt.type === 'TRANSPORT') {
+            if ((evt as any).fromLat && (evt as any).fromLng) pts.push([(evt as any).fromLng, (evt as any).fromLat]);
+            if ((evt as any).toLat && (evt as any).toLng) pts.push([(evt as any).toLng, (evt as any).toLat]);
+          } else {
+             if (evt.lat && evt.lng) pts.push([evt.lng, evt.lat]);
+          }
+        }
+        if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+      }
     }
-    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
     return pts;
-  }, [activeItinerary, panelMode]);
+  }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
 
   const directWaypoints = useMemo(() => {
-    if (panelMode !== "itinerary" || !activeItinerary) return [];
+    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
     const pts: [number, number][] = [];
-    const start = activeItinerary.startAnchor;
-    const end = activeItinerary.endAnchor;
     
-    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
-    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+    if (panelMode === "itinerary" && activeItinerary) {
+      const start = activeItinerary.startAnchor;
+      const end = activeItinerary.endAnchor;
+      if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+      if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      if (activeDay) {
+        const start = activeDay.startAnchor;
+        const end = activeDay.endAnchor;
+        if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+        if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+      }
+    }
     return pts;
-  }, [activeItinerary, panelMode]);
+  }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
 
   useEffect(() => {
     if (waypoints.length < 2 || !mapboxToken) {
@@ -200,6 +231,43 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
   const validBusinesses = businesses.filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng)) as (Business & { lat: number, lng: number })[];
 
+  const [firstBusinessId, setFirstBusinessId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (validBusinesses.length === 0 || !mapRef.current) return;
+    
+    const currentFirstId = validBusinesses[0].id;
+    if (currentFirstId !== firstBusinessId) {
+      setFirstBusinessId(currentFirstId);
+      
+      let minLng = validBusinesses[0].lng;
+      let maxLng = validBusinesses[0].lng;
+      let minLat = validBusinesses[0].lat;
+      let maxLat = validBusinesses[0].lat;
+
+      const boundsItems = validBusinesses.slice(0, 20);
+      for (const b of boundsItems) {
+        if (b.lng < minLng) minLng = b.lng;
+        if (b.lng > maxLng) maxLng = b.lng;
+        if (b.lat < minLat) minLat = b.lat;
+        if (b.lat > maxLat) maxLat = b.lat;
+      }
+
+      if (minLng !== maxLng || minLat !== maxLat) {
+        mapRef.current.fitBounds(
+          [[minLng, minLat], [maxLng, maxLat]],
+          { padding: 80, duration: 1200, maxZoom: 15 }
+        );
+      } else {
+        mapRef.current.flyTo({
+          center: [minLng, minLat],
+          zoom: 14,
+          duration: 1200
+        });
+      }
+    }
+  }, [validBusinesses, firstBusinessId]);
+
   const center = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
     : [-72.1167, -13.3047];
@@ -239,7 +307,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         {/* Start Marker */}
         {(() => {
-          const start = activeItinerary?.startAnchor;
+          let start;
+          if (panelMode === "itinerary" && activeItinerary) {
+            start = activeItinerary.startAnchor;
+          } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+            const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+            start = activeDay?.startAnchor;
+          }
           if (!start?.lat || !start?.lng) return null;
           return (
             <Marker 
@@ -248,12 +322,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               anchor="bottom"
               draggable={true}
               onDragEnd={(e) => {
-                setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                if (panelMode === "itinerary") {
+                  setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                }
               }}
             >
               <div 
-                className="cursor-grab active:cursor-grabbing group/start flex flex-col items-center" 
-                title="Drag to change start location"
+                className={`cursor-grab active:cursor-grabbing group/start flex flex-col items-center ${panelMode === "builder" ? "pointer-events-none" : ""}`} 
+                title="Start location"
                 onClick={e => {
                   e.stopPropagation();
                   mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
@@ -262,8 +338,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />
                 <div className="relative flex flex-col items-center z-10 transition-transform group-hover/start:-translate-y-1">
                   <div className="bg-slate-900 text-white px-3 py-1.5 rounded-full shadow-xl border-[2.5px] border-white flex items-center gap-1.5">
-                    {start.type === 'AIRPORT' ? <Plane className="w-3.5 h-3.5" /> : <Navigation className="w-3.5 h-3.5" />}
-                    <span className="text-[11px] font-bold tracking-wide">{start.type === 'AIRPORT' ? 'CUZ' : 'START'}</span>
+                    {(start as any).type === 'AIRPORT' ? <Plane className="w-3.5 h-3.5" /> : <Navigation className="w-3.5 h-3.5" />}
+                    <span className="text-[11px] font-bold tracking-wide">{(start as any).type === 'AIRPORT' ? 'CUZ' : 'START'}</span>
                   </div>
                   <div className="w-2.5 h-2.5 bg-slate-900 rotate-45 -mt-1.5 border-r-[2.5px] border-b-[2.5px] border-white" />
                 </div>
@@ -274,7 +350,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
         {/* Arrival Marker */}
         {(() => {
-          const end = activeItinerary?.endAnchor;
+          let end;
+          if (panelMode === "itinerary" && activeItinerary) {
+            end = activeItinerary.endAnchor;
+          } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+            const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+            end = activeDay?.endAnchor;
+          }
           if (!end?.lat || !end?.lng) return null;
           return (
             <Marker 
@@ -283,12 +365,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               anchor="bottom"
               draggable={true}
               onDragEnd={(e) => {
-                setEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                if (panelMode === "itinerary") {
+                  setEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                }
               }}
             >
               <div 
-                className="cursor-grab active:cursor-grabbing group/start flex flex-col items-center" 
-                title="Drag to change end location"
+                className={`cursor-grab active:cursor-grabbing group/start flex flex-col items-center ${panelMode === "builder" ? "pointer-events-none" : ""}`} 
+                title="End location"
                 onClick={e => {
                   e.stopPropagation();
                   mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
@@ -297,8 +381,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />
                 <div className="relative flex flex-col items-center z-10 transition-transform group-hover/start:-translate-y-1">
                   <div className="bg-rose-600 text-white px-3 py-1.5 rounded-full shadow-xl border-[2.5px] border-white flex items-center gap-1.5">
-                    {end.type === 'HOTEL' ? <Bed className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
-                    <span className="text-[11px] font-bold tracking-wide">{end.type === 'HOTEL' ? 'BED' : 'END'}</span>
+                    {(end as any).type === 'HOTEL' ? <Bed className="w-3.5 h-3.5" /> : <MapPin className="w-3.5 h-3.5" />}
+                    <span className="text-[11px] font-bold tracking-wide">{(end as any).type === 'HOTEL' ? 'BED' : 'END'}</span>
                   </div>
                   <div className="w-2.5 h-2.5 bg-rose-600 rotate-45 -mt-1.5 border-r-[2.5px] border-b-[2.5px] border-white" />
                 </div>
@@ -416,9 +500,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                     </a>
                   ) : (
                     <button onClick={() => {
-                      // Stub action for now; the user might want to integrate it with the itinerary context
-                      alert('Added to Day!')
-                    }} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                      const isNewTrip = insertWaypoint(popupBusiness as any)
+                      if (isNewTrip) {
+                        router.push(`?ai_prompt=I just added ${encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title)} to my day. Can you help me set up an end destination and a basecamp based on this?`)
+                      }
+                      setPopupBusiness(null)
+                    }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
                       + Add to Day
                     </button>
                   )}

@@ -36,6 +36,8 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   const searchParams = useSearchParams()
   const { ref, inView } = useInView()
   const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
+  
+  const [showFilters, setShowFilters] = useState(true)
 
   // Sync when server re-renders
   const [prevInitialBusinesses, setPrevInitialBusinesses] = useState(initialBusinesses)
@@ -45,11 +47,20 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
     setBusinesses(initialBusinesses)
     setHasMore(initialHasMore)
     setPage(0)
+    setShowFilters(true)
   }
 
   useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
-  }, [initialSelectedId, setSelectedId])
+    setPanelMode("categories")
+  }, [initialSelectedId, setSelectedId, setPanelMode])
+
+  useEffect(() => {
+    // Automatically hide filters when fetching more experiences to save space
+    if (page > 0) {
+      setShowFilters(false)
+    }
+  }, [page])
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return
@@ -74,8 +85,18 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   useEffect(() => { if (inView) loadMore() }, [inView, loadMore])
 
   const sidebar = (
-    <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm">
-      <h1 className="text-2xl font-serif tracking-tight text-slate-900">Explore Vallecito</h1>
+    <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-serif tracking-tight text-slate-900">Explore Vallecito</h1>
+        {panelMode === "categories" && (
+          <button 
+            onClick={() => setShowFilters(!showFilters)} 
+            className="text-xs font-semibold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full hover:bg-rose-100 transition-colors"
+          >
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </button>
+        )}
+      </div>
       
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
         <button onClick={() => setPanelMode("categories")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
@@ -83,11 +104,11 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} disabled={!activeItinerary}><CalendarDays className="w-4 h-4" /> Day View</button>
       </div>
 
-      {panelMode === "categories" && (
+      <div className={showFilters && panelMode === "categories" ? "block" : "hidden"}>
         <ExploreSearch 
           initialQuery={initialQuery} 
         />
-      )}
+      </div>
     </div>
   )
 
@@ -96,7 +117,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       {panelMode === "macro" && macroTrip ? (
         <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
       ) : panelMode === "categories" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
+        <div className="grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-6 pb-20">
            {businesses.map(e => (
              <BusinessCard key={e.id} business={e} isHighlighted={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
            ))}

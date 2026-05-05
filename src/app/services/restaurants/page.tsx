@@ -13,7 +13,7 @@ export default async function RestaurantsPage({
   const { loc, cat, q } = await searchParams
   const query = q?.trim() ?? ""
 
-  const where: any = { category: { in: ["Comida", "Cafe", "Dining"] } }
+  const where: any = { category: { in: ["Comida", "Cafe", "Dining", "DINING"] } }
   if (loc) where.locationSlug = loc
   if (cat) where.category = cat
   if (query) {
