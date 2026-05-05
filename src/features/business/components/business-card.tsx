@@ -44,6 +44,7 @@ export function BusinessCard({
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
+  const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
 
   const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -144,7 +145,7 @@ export function BusinessCard({
             isHorizontal ? "flex-col sm:flex-row sm:items-start" : "items-start"
           )}>
             <div className={cn("flex-1", isHorizontal ? "line-clamp-2 sm:line-clamp-1" : "line-clamp-1")}>
-              {business.category === 'AGENCY' || business.category === 'WELLNESS' ? (
+              {hasProfile ? (
                 <Link 
                   href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)} 
                   className={cn(
@@ -180,7 +181,7 @@ export function BusinessCard({
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
-          {business.category === 'AGENCY' || business.category === 'WELLNESS' ? (
+          {hasProfile ? (
             <Link 
               href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)}
               className={cn(
