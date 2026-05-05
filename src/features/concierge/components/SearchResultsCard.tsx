@@ -1,16 +1,18 @@
 "use client";
 
+import { Business } from "@prisma/client";
+
 import { useItinerary } from "@/lib/store/itinerary-context";
 import { Plus, Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
+export function SearchResultsCard({ businesses }: { businesses: Business[] }) {
   const { activeItinerary, insertWaypoint, setSelectedId, panelMode, currentTrip } = useItinerary();
   const router = useRouter();
 
-  const isFallback = !Array.isArray(businesses) && businesses?.alternatives;
-  const list = Array.isArray(businesses) ? businesses : (businesses?.alternatives || []);
-  const requestedLocation = !Array.isArray(businesses) ? businesses?.requestedLocation : null;
+  const isFallback = !Array.isArray(businesses) && (businesses as any)?.alternatives;
+  const list = Array.isArray(businesses) ? businesses : ((businesses as any)?.alternatives || []);
+  const requestedLocation = !Array.isArray(businesses) ? (businesses as any)?.requestedLocation : null;
 
   if (!list || !Array.isArray(list) || list.length === 0) {
     return (
@@ -20,12 +22,12 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
     );
   }
 
-  const handleSelect = (business: any) => {
-    if (business.category === 'Taxi' || business.type === 'TRANSPORT') {
+  const handleSelect = (business: Business) => {
+    if (business.category === 'Taxi' || (business as any).type === 'TRANSPORT') {
       router.push('/services/transport');
-    } else if (business.category === 'Business' || business.type === 'AGENCY') {
+    } else if (business.category === 'Business' || (business as any).type === 'AGENCY') {
       router.push('/services/agencies');
-    } else if (['Business', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || business.type === 'THERAPIST') {
+    } else if (['Business', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || (business as any).type === 'THERAPIST') {
       router.push('/services/healers');
     } else {
       setSelectedId(business.id);
@@ -49,7 +51,7 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
       </div>
       
       <div className="divide-y divide-gray-50 max-h-[300px] overflow-y-auto">
-        {list.map((business: any, idx: number) => {
+        {list.map((business: Business, idx: number) => {
           const displayImage = business.imageUrl;
           const showAdd = activeItinerary || (panelMode === 'builder' && currentTrip);
           
@@ -61,7 +63,16 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
             >
               <div className="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden shrink-0 relative">
                 {displayImage ? (
-                  <img src={displayImage} alt={business.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                  <img 
+                    src={displayImage} 
+                    alt={business.name} 
+                    referrerPolicy="no-referrer" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-slate-100">
                     <MapPin className="w-4 h-4 text-slate-400" />
@@ -81,7 +92,7 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-[10px] text-slate-500 font-medium truncate">
-                    {business.category} in {business.locationLabel || 'Vallecito'}
+                    {business.category} in {(business as any).locationLabel || 'Vallecito'}
                   </p>
                   
                   {showAdd && (

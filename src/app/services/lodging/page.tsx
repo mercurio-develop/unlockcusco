@@ -13,7 +13,7 @@ export default async function LodgingPage({
   const { loc, type, q } = await searchParams
   const query = q?.trim() ?? ""
 
-  const where: any = { category: { in: ["Stays", "Descanso", "LODGING", "Lodging", "STAYS", "DESCANSO"] } }
+  const where: any = { category: "STAYS" }
   if (loc) where.locationSlug = loc
   if (type) where.name = { contains: type }
   if (query) {

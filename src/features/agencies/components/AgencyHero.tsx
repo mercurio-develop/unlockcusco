@@ -1,10 +1,11 @@
+import { Business, TourPackage } from "@prisma/client";
 "use client"
 
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { agenciesPath } from "@/paths"
 
-export function AgencyHero({ business }: { business: any }) {
+export function AgencyHero({ business }: { business: Business & { tourPackages?: TourPackage[] } }) {
   const router = useRouter()
 
   return (
@@ -15,6 +16,10 @@ export function AgencyHero({ business }: { business: any }) {
           src={business.imageUrl} 
           alt={business.name} 
           className="w-full h-full object-cover opacity-60" 
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1200&auto=format&fit=crop";
+            e.currentTarget.onerror = null;
+          }}
         />
         <div className="absolute inset-0 bg-linear-to-b from-[var(--primary)]/60 via-transparent to-[var(--primary)]" />
       </div>

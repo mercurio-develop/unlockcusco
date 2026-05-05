@@ -10,7 +10,7 @@ export default async function TherapistsPage({
   const { specialty, q } = await searchParams
   const query = q?.trim() ?? ""
 
-  const where: any = { category: { in: ["WELLNESS", "Wellness", "Therapy", "THERAPY", "THERAPIST", "BIENESTAR"] } }
+  const where: any = { category: "WELLNESS" }
   if (query) {
     where.OR = [
       { name: { contains: query } },

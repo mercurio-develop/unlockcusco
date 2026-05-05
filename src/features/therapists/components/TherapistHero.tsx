@@ -1,10 +1,11 @@
+import { Business, BusinessService } from "@prisma/client";
 "use client"
 
 import { ArrowLeft, Star, MapPin } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { therapistsPath } from "@/paths"
 
-export function TherapistHero({ therapist }: { therapist: any }) {
+export function TherapistHero({ therapist }: { therapist: Business }) {
   const router = useRouter()
 
   return (
@@ -12,9 +13,13 @@ export function TherapistHero({ therapist }: { therapist: any }) {
       {/* Cinematic Image */}
       <div className="absolute inset-0">
         <img 
-          src={therapist.heroImage} 
+          src={therapist.imageUrl} 
           alt={therapist.name} 
           className="w-full h-full object-cover opacity-70 scale-105" 
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1200&auto=format&fit=crop";
+            e.currentTarget.onerror = null;
+          }}
         />
         <div className="absolute inset-0 bg-linear-to-b from-slate-900/40 via-transparent to-white" />
       </div>
@@ -38,7 +43,12 @@ export function TherapistHero({ therapist }: { therapist: any }) {
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-20 h-20 rounded-full border-4 border-white shadow-2xl overflow-hidden">
-                <img src={therapist.imageUrl} className="w-full h-full object-cover" />
+                <img src={therapist.imageUrl} className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=200&auto=format&fit=crop";
+                    e.currentTarget.onerror = null;
+                  }}
+                />
               </div>
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1 flex items-center gap-2">
                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -60,10 +70,10 @@ export function TherapistHero({ therapist }: { therapist: any }) {
           <div className="flex flex-col gap-2 items-start md:items-end pb-4">
              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                 <MapPin className="w-4 h-4 text-rose-500" />
-                {therapist.location}
+                {therapist.locationSlug}
              </div>
              <div className="flex gap-2">
-               {therapist.specialties.map((s: string) => (
+               {(JSON.parse(therapist.specialties || '[]')).map((s: string) => (
                  <span key={s} className="bg-slate-900 text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
                    {s}
                  </span>

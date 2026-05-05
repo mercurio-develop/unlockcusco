@@ -9,6 +9,7 @@ async function fetchTripByToken(token: string) {
     where: { shareToken: token },
     include: {
       business: true,
+      travelers: true,
       days: {
         orderBy: { dayNumber: 'asc' },
         include: { tourPackage: true }
@@ -59,5 +60,5 @@ export default async function MagicLinkPage({ params }: { params: Promise<{ shar
 
   if (!trip) return notFound()
 
-  return <TripDashboard trip={trip} />
+  return <TripDashboard trip={trip as any} />
 }

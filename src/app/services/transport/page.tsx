@@ -15,7 +15,7 @@ export default async function TransportPage({
   const query = q?.trim() ?? ""
 
   const where: Record<string, unknown> = {
-    category: { in: ["TRANSPORT", "Transport", "Transporte", "Taxi"] }
+    category: "TRANSPORT"
   }
   
   if (loc) {

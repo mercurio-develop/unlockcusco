@@ -1,4 +1,5 @@
 "use client"
+import { Business } from "@prisma/client";
 
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams, usePathname } from "next/navigation"

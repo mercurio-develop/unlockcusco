@@ -1,3 +1,6 @@
+"use client"
+import { Business } from "@prisma/client";
+import { FullTrip } from "@/lib/types/trip";
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Calendar, MapPin, Sparkles, User, Sun, Moon, ArrowRight, Download, ChevronRight, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -5,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useItinerary } from "@/lib/store/itinerary-context"
 import { cn } from "@/lib/utils"
 
-export function MacroItineraryCard({ itinerary, isExploreView = false }: { itinerary: any, isExploreView?: boolean }) {
+export function MacroItineraryCard({ itinerary, isExploreView = false }: { itinerary: FullTrip, isExploreView?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setPanelMode } = useItinerary()
@@ -37,7 +40,7 @@ export function MacroItineraryCard({ itinerary, isExploreView = false }: { itine
             {itinerary.tripTitle}
           </h3>
           <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-md">
-            {itinerary.narrativeArc}
+            {(itinerary as any).narrativeArc}
           </p>
         </div>
       </div>

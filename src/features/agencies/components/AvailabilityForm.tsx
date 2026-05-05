@@ -1,4 +1,5 @@
 "use client"
+import { Business, TourPackage } from "@prisma/client";
 
 import { useState, useEffect } from "react"
 import { Send, CheckCircle2, MessageCircle } from "lucide-react"
@@ -16,7 +17,7 @@ export function AvailabilityForm({
   agencyName: string;
   agencyEmail?: string;
   whatsapp: string;
-  packages: any[];
+  packages: TourPackage[];
   selectedExperienceId?: string;
 }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')

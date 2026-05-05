@@ -1,10 +1,11 @@
+import { Business, TourPackage } from "@prisma/client";
 "use client"
 
 import { useState } from "react"
 import { ShieldCheck, Mountain, Clock, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function PackageGrid({ packages }: { packages: any[] }) {
+export function PackageGrid({ packages }: { packages: TourPackage[] }) {
   return (
     <section className="bg-slate-50 py-24 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
@@ -27,7 +28,7 @@ export function PackageGrid({ packages }: { packages: any[] }) {
   )
 }
 
-function PackageCard({ pkg }: { pkg: any }) {
+function PackageCard({ pkg }: { pkg: TourPackage }) {
   const [expanded, setExpanded] = useState(false)
   const included = JSON.parse(pkg.included || "[]")
   const gallery = JSON.parse(pkg.galleryJson || "[]")
@@ -41,6 +42,10 @@ function PackageCard({ pkg }: { pkg: any }) {
           src={mainImage} 
           alt={pkg.title} 
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+          onError={(e) => {
+            e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+            e.currentTarget.onerror = null;
+          }}
         />
         <div className="absolute top-4 right-4 bg-[var(--primary)]/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
           ${pkg.basePriceUsd}

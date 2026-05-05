@@ -1,8 +1,9 @@
+import { Business, BusinessService } from "@prisma/client";
 "use client"
 
 import { Clock, Tag } from "lucide-react"
 
-export function SessionGrid({ services, therapistName }: { services: any[], therapistName: string }) {
+export function SessionGrid({ services, therapistName }: { services: BusinessService[], therapistName: string }) {
   return (
     <section className="bg-slate-50 py-24 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">

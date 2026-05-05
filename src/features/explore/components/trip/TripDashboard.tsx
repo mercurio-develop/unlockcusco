@@ -1,4 +1,6 @@
 "use client"
+import { TripDay, Traveler } from "@prisma/client";
+import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -10,7 +12,7 @@ import ReactMarkdown from 'react-markdown'
 const TouristMap = dynamic(() => import("./TouristMap"), { ssr: false })
 
 interface TripDashboardProps {
-  trip: any
+  trip: FullTrip
 }
 
 const ALTITUDES: Record<string, string> = {
@@ -47,13 +49,13 @@ export function TripDashboard({ trip }: TripDashboardProps) {
       "METHOD:PUBLISH"
     ];
 
-    trip.days.forEach((day: any) => {
+    trip.days.forEach((day: TripDay) => {
       let events = [];
       try {
         events = JSON.parse(day.eventsJson || "[]");
       } catch(e) {}
       
-      events.forEach((evt: any) => {
+      events.forEach((evt: TimelineEvent) => {
         if (evt.type === 'NOTE') return;
         
         // Format YYYYMMDDTHHMMSSZ
@@ -71,9 +73,9 @@ export function TripDashboard({ trip }: TripDashboardProps) {
           `DTSTAMP:${formatICSDate(new Date())}`,
           `DTSTART:${formatICSDate(d)}`,
           `DTEND:${formatICSDate(end)}`,
-          `SUMMARY:${evt.title || evt.name || (evt.type === 'TRANSPORT' ? evt.from + " to " + evt.to : evt.type)}`,
-          `LOCATION:${evt.location || evt.from || ''}`,
-          `DESCRIPTION:${evt.description || evt.notes || evt.details || ''}`,
+          `SUMMARY:${evt.title || (evt.type === 'TRANSPORT' ? evt.from + " to " + evt.to : evt.type)}`,
+          `LOCATION:${(evt as any).location || (evt as any).from || ''}`,
+          `DESCRIPTION:${(evt as any).description || (evt as any).notes || (evt as any).details || ''}`,
           "END:VEVENT"
         );
       });
@@ -117,18 +119,18 @@ export function TripDashboard({ trip }: TripDashboardProps) {
       }
     }
     if (selectedEventId === 'end') {
-      const acc = activeEvents.find((e: any) => e.type === 'ACCOMMODATION')
+      const acc = activeEvents.find((e: TimelineEvent) => e.type === 'STAY')
       return {
         id: 'end',
         type: 'REST',
-        title: acc?.name || acc?.title || `Overnight in ${activeDay.sleepTown}`,
+        title: acc?.title || `Overnight in ${activeDay.sleepTown}`,
         startTime: acc?.startTime || "Evening",
-        location: acc?.location || activeDay.sleepTown,
-        notes: acc?.description || acc?.notes || "Rest and recharge for tomorrow.",
-        imageUrl: acc?.imageUrl
+        location: (acc as any)?.location || activeDay.sleepTown,
+        notes: (acc as any)?.description || (acc as any)?.notes || "Rest and recharge for tomorrow.",
+        imageUrl: (acc as any)?.imageUrl
       }
     }
-    return activeEvents.find((e: any) => e.id === selectedEventId) || null
+    return activeEvents.find((e: TimelineEvent) => e.id === selectedEventId) || null
   }, [selectedEventId, activeEvents, activeDay])
 
   if (isBookingMode) {
@@ -199,7 +201,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                 </div>
 
                 <p className="text-rose-400 text-[10px] uppercase tracking-[0.2em] font-bold mb-2 print:text-rose-600">
-                  Curated by {trip.agency?.name || "Vallecito"}
+                  Curated by {(trip as any).agency?.name || "Vallecito"}
                 </p>
                 <h2 className="text-2xl font-serif font-bold text-white mb-2 leading-tight pr-16 print:text-slate-900 print:text-3xl">
                   {trip.tripTitle}
@@ -236,7 +238,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
               {/* Sidebar Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide print:hidden">
                 {sidebarTab === "itinerary" && (
-                  trip.days.map((day: any) => {
+                  trip.days.map((day: TripDay) => {
                     const isActive = day.dayNumber === activeDayNum
                     let dayEvents = []
                     try { dayEvents = JSON.parse(day.eventsJson || "[]") } catch(e) {}
@@ -256,7 +258,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                           </div>
                           {!isActive && dayEvents.length > 0 && (
                             <div className="flex -space-x-1.5">
-                              {dayEvents.slice(0, 3).map((e: any) => (
+                              {dayEvents.slice(0, 3).map((e: TimelineEvent) => (
                                 <div key={e.id} className="w-6 h-6 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[8px] text-slate-300">
                                   {e.type ? e.type.charAt(0) : 'E'}
                                 </div>
@@ -275,7 +277,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                               <p className="text-sm text-slate-500 font-medium bg-slate-900/50 p-4 rounded-xl text-center border border-slate-700 border-dashed">Open day</p>
                             ) : (
                               <div className="flex flex-col gap-3 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
-                                {dayEvents.map((e: any) => (
+                                {dayEvents.map((e: TimelineEvent) => (
                                   <button key={e.id} onClick={() => setSelectedEventId(e.id)} className="relative flex items-center justify-between group pl-8 w-full text-left">
                                     <div className={`absolute left-1.5 w-2 h-2 rounded-full z-10 transition-colors ${selectedEventId === e.id ? 'bg-rose-500' : 'bg-slate-400 group-hover:bg-rose-400'}`} />
                                     <span className={`text-sm font-medium truncate pr-4 transition-colors ${selectedEventId === e.id ? 'text-white' : 'text-slate-300 group-hover:text-slate-100'}`}>{e.title || e.type}</span>
@@ -293,7 +295,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                 
                 {sidebarTab === "travelers" && (
                   <div className="space-y-4">
-                    {trip.travelers?.length > 0 ? trip.travelers.map((traveler: any) => (
+                    {trip.travelers?.length > 0 ? trip.travelers.map((traveler: Traveler) => (
                       <div key={traveler.id} className="bg-slate-800/50 border border-slate-700 rounded-2xl p-4">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-white font-bold">{traveler.firstName} {traveler.lastName}</h4>
@@ -457,7 +459,15 @@ export function TripDashboard({ trip }: TripDashboardProps) {
               <div className="p-6 flex-1 overflow-y-auto">
                 {selectedEvent.imageUrl && (
                   <div className="-mx-6 -mt-6 mb-6 h-48 relative">
-                    <img src={selectedEvent.imageUrl} alt={selectedEvent.title || selectedEvent.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={selectedEvent.imageUrl} 
+                      alt={selectedEvent.title || selectedEvent.name} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                        e.currentTarget.onerror = null;
+                      }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent" />
                   </div>
                 )}
@@ -538,12 +548,12 @@ export function TripDashboard({ trip }: TripDashboardProps) {
               </div>
 
               <h3 className="text-2xl font-serif font-bold text-slate-900 mb-2 leading-tight">
-                {activeDay.tourPackage?.title || activeDay.dayTheme || "Free Exploration"}
+                {(activeDay as any).tourPackage?.title || (activeDay as any).dayTheme || "Free Exploration"}
               </h3>
               
-              {activeDay.tourPackage?.description && (
+              {(activeDay as any).tourPackage?.description && (
                 <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                  {activeDay.tourPackage.description}
+                  {(activeDay as any).tourPackage.description}
                 </p>
               )}
 
@@ -584,7 +594,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                 {/* Events Timeline */}
                 {activeEvents.length > 0 && (
                   <div className="relative border-l-2 border-slate-200 ml-4 pl-6 py-2 space-y-6">
-                    {activeEvents.map((evt: any, idx: number) => {
+                    {activeEvents.map((evt: TimelineEvent, idx: number) => {
                       const isSelected = selectedEventId === evt.id;
                       return (
                         <div 
@@ -619,7 +629,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
 
                             {evt.type === 'MEAL' && (
                               <div className="mt-1">
-                                <h4 className="font-bold text-amber-700 text-sm">{evt.name}</h4>
+                                <h4 className="font-bold text-amber-700 text-sm">{evt.title}</h4>
                                 {evt.notes && <p className="text-xs text-slate-500 mt-0.5">{evt.notes}</p>}
                               </div>
                             )}
@@ -638,7 +648,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
 
                 {/* Sleep Town */}
                 {(() => {
-                  const acc = activeEvents.find((e: any) => e.type === 'ACCOMMODATION');
+                  const acc = activeEvents.find((e: TimelineEvent) => e.type === 'STAY');
                   return (
                     <div 
                       className={`flex items-start gap-4 group cursor-pointer p-3 rounded-2xl transition-all border ${selectedEventId === 'end' ? 'bg-rose-50 border-rose-200 shadow-sm' : 'border-transparent hover:bg-slate-50'}`}
@@ -651,11 +661,11 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Rest</span>
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                            {acc ? `Overnight at ${acc.name || acc.title}` : `Overnight in ${activeDay.sleepTown}`}
+                            {acc ? `Overnight at ${acc.title}` : `Overnight in ${activeDay.sleepTown}`}
                           </p>
-                          {getAltitude(acc?.location || activeDay.sleepTown) && (
+                          {getAltitude((acc as any)?.location || activeDay.sleepTown) && (
                             <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded flex items-center gap-1">
-                              🏔️ {getAltitude(acc?.location || activeDay.sleepTown)}
+                              🏔️ {getAltitude((acc as any)?.location || activeDay.sleepTown)}
                             </span>
                           )}
                         </div>

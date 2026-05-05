@@ -29,7 +29,7 @@ export const buildChronoRelay = tool({
 
     // Find transit (taxi)
     let taxi = await prisma.business.findFirst({
-      where: { category: { contains: 'Taxi' } },
+      where: { category: 'TRANSPORT' },
       orderBy: { rating: 'desc' }
     });
     if (!taxi) {

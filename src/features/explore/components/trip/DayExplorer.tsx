@@ -1,4 +1,6 @@
 "use client"
+import { TripDay, Traveler } from "@prisma/client";
+import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 
 import { useState } from "react"
 import { useItinerary } from "@/lib/store/itinerary-context"
@@ -117,7 +119,7 @@ export function DayExplorer() {
           </div>
         )}
 
-        {/* WAYPOINTS & TRANSIT */}        {waypoints.map((wp: any, idx: number) => {
+        {/* WAYPOINTS & TRANSIT */}        {waypoints.map((wp: any /* TODO: Waypoint */, idx: number) => {
           const edge = transitEdges[idx]
           const prevWp = idx === 0 ? startAnchor : waypoints[idx - 1]
           const estimate = calculateTravelEstimate(prevWp?.lat, prevWp?.lng, wp?.lat, wp?.lng);
@@ -188,7 +190,7 @@ export function DayExplorer() {
                       <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] px-1">Available Drivers</div>
                         <div className="grid gap-1.5">
-                          {edge.alternativeDrivers.map((alt: any, altIdx: number) => (
+                          {edge.alternativeDrivers.map((alt: any /* TODO: AlternativeDriver */, altIdx: number) => (
                             <button
                               key={alt.id}
                               onClick={(e) => { e.stopPropagation(); swapDriverAlternative(idx === -1 ? transitEdges.length - 1 : idx, altIdx); setOpenTransportId(null); }}
@@ -304,17 +306,6 @@ export function DayExplorer() {
           )
         })}
 
-        {/* Add Stop Button */}
-        <div className="flex justify-center -mt-2">
-          <button 
-            onClick={() => { setExchangeTargetIndex(null); setPanelMode("categories"); }}
-            className="group flex items-center gap-2 px-4 py-2 bg-white border border-dashed border-gray-300 rounded-full text-xs font-bold text-slate-500 hover:border-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add Stop
-          </button>
-        </div>
-
         {/* Return Transit */}
         {transitEdges.length > waypoints.length && (
           <div className="relative group flex gap-4">
@@ -402,7 +393,7 @@ export function DayExplorer() {
                       <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] px-1">Available Drivers</div>
                         <div className="grid gap-1.5">
-                          {edge.alternativeDrivers.map((alt: any, altIdx: number) => (
+                          {edge.alternativeDrivers.map((alt: any /* TODO: AlternativeDriver */, altIdx: number) => (
                             <button
                               key={alt.id}
                               onClick={(e) => { e.stopPropagation(); swapDriverAlternative(idx === -1 ? transitEdges.length - 1 : idx, altIdx); setOpenTransportId(null); }}

@@ -19,23 +19,17 @@ const getCategoryStyle = (category: string | undefined | null) => {
     case 'MEAL':
       return { bg: "#FF9500", icon: Utensils }; // Apple Orange
     case 'WELLNESS':
-    case 'BIENESTAR':
       return { bg: "#34C759", icon: Sprout };   // Apple Green
     case 'ADVENTURE':
-    case 'AVENTURA':
       return { bg: "#5856D6", icon: MountainIcon }; // Apple Indigo
     case 'STAYS':
     case 'STAY':
-    case 'DESCANSO':
-    case 'LODGING':
       return { bg: "#007AFF", icon: Bed };      // Apple Blue
     case 'CULTURE':
-    case 'CULTURA':
       return { bg: "#AF52DE", icon: Landmark }; // Apple Purple
     case 'BOLETO':
       return { bg: "#FF2D55", icon: Ticket };   // Apple Red
     case 'TRANSPORT':
-    case 'TAXI':
       return { bg: "#5AC8FA", icon: Car };      // Apple Light Blue
     case 'AGENCY':
     case 'EXPERIENCE':
@@ -566,7 +560,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
             <div className="w-64 rounded-2xl bg-white/95 overflow-hidden border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
               {(popupBusiness as any).imageUrl && (
                 <div className="w-full h-24 bg-slate-100 relative">
-                  <img src={(popupBusiness as any).imageUrl} alt={(popupBusiness as any).name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                  <img 
+                    src={(popupBusiness as any).imageUrl} 
+                    alt={(popupBusiness as any).name} 
+                    referrerPolicy="no-referrer" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
                 </div>
               )}
               <div className="p-3">

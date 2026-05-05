@@ -1,4 +1,5 @@
 "use client"
+import { Business, TourPackage } from "@prisma/client";
 import { useEffect, useState } from "react"
 import { Phone, Mail, ChevronDown, ChevronUp, Compass, Heart, Target, Mountain, Clock, Map as MapIcon, ArrowRight, Star, Leaf, Users, MapPin, Zap } from "lucide-react"
 import { AvailabilityForm } from "@/features/agencies/components/AvailabilityForm"
@@ -7,7 +8,7 @@ const IconMap: Record<string, React.ElementType> = {
   Compass, Heart, Target, Mountain, Clock, MapIcon, Star, Leaf, Users, MapPin, Zap
 }
 
-function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: any, agencyPhone: string, agencyName: string, onSelectPackage: (id: string) => void }) {
+function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: TourPackage, agencyPhone: string, agencyName: string, onSelectPackage: (id: string) => void }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const gallery = JSON.parse(pkg.galleryJson || "[]")
   const mainImage = pkg.heroImage || gallery[0]?.url || "/images/og-default.jpg"
@@ -57,7 +58,7 @@ function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: a
   )
 }
 
-export function ExpeditionOnePage({ business }: { business: any }) {
+export function ExpeditionOnePage({ business }: { business: Business & { tourPackages?: TourPackage[] } }) {
   const [filter, setFilter] = useState<'ALL' | 'MULTI_DAY' | 'SINGLE_DAY'>('ALL')
   const [selectedExperienceId, setSelectedExperienceId] = useState<string>("")
 
@@ -78,7 +79,7 @@ export function ExpeditionOnePage({ business }: { business: any }) {
     ]
   }
 
-  const visionMission = business.visionMission || "We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people."
+  const visionMission = business.tagline || "We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people."
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth"
@@ -118,6 +119,10 @@ export function ExpeditionOnePage({ business }: { business: any }) {
               src={business.imageUrl || "/images/og-default.jpg"} 
               alt={business.name} 
               className="w-full h-full object-cover object-[center_20%]" 
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1200&auto=format&fit=crop";
+                e.currentTarget.onerror = null;
+              }}
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-b from-[var(--primary)]/20 via-[var(--primary)]/75 to-[var(--primary)]" />
@@ -218,9 +223,8 @@ export function ExpeditionOnePage({ business }: { business: any }) {
                           {feature.desc}
                         </p>
                       </div>
-                    </div>
-                  )
-                })}
+                      </div>
+                      )})}
               </div>
             </div>
           </div>
@@ -258,11 +262,11 @@ export function ExpeditionOnePage({ business }: { business: any }) {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayedPackages.map((pkg: any) => (
+              {displayedPackages.map((pkg: TourPackage) => (
                 <PackageCard 
                   key={pkg.id} 
                   pkg={pkg} 
-                  agencyPhone={business.contactPhone || ""} 
+                  agencyPhone={business.whatsapp || ""} 
                   agencyName={business.name} 
                   onSelectPackage={(id) => setSelectedExperienceId(id)}
                 />
@@ -276,8 +280,8 @@ export function ExpeditionOnePage({ business }: { business: any }) {
       <AvailabilityForm 
         businessId={business.id}
         agencyName={business.name} 
-        whatsapp={business.contactPhone}
-        packages={business.tourPackages}
+        whatsapp={business.whatsapp || ''}
+        packages={business.tourPackages || []}
         selectedExperienceId={selectedExperienceId}
       />
 

@@ -1,8 +1,9 @@
+import { Business, TourPackage } from "@prisma/client";
 import { MapPin } from "lucide-react"
 
-export function AgencyAbout({ business }: { business: any }) {
+export function AgencyAbout({ business }: { business: Business & { tourPackages?: TourPackage[] } }) {
   const specialties = JSON.parse(business.specialties || "[]")
-  const initials = business.guideName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)
+  const initials = (business.guideName || '').split(' ').map((n: string) => n[0]).join('').substring(0, 2)
 
   return (
     <section className="bg-white py-24 px-6 md:px-12">
@@ -36,7 +37,7 @@ export function AgencyAbout({ business }: { business: any }) {
                 <h4 className="font-[var(--font-display)] font-bold text-[var(--primary)]">{business.guideName}</h4>
                 <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
                   <MapPin className="w-3 h-3" />
-                  {business.location}
+                  {business.locationSlug || 'Valle Sagrado'}
                 </div>
               </div>
             </div>

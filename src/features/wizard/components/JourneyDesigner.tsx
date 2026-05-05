@@ -616,6 +616,10 @@ export function JourneyDesigner({ archetype, intensity }: { archetype?: Archetyp
                         src={mainImage} 
                         alt={pkg.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                          e.currentTarget.onerror = null;
+                        }}
                       />
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md text-slate-900 px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
                         ${pkg.basePriceUsd}

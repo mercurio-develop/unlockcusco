@@ -61,7 +61,15 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
             <div className="space-y-6">
               {pkg.heroImage && (
                 <div className="w-full h-48 rounded-2xl overflow-hidden relative bg-slate-100">
-                  <img src={pkg.heroImage} alt={pkg.title} className="w-full h-full object-cover" />
+                  <img 
+                    src={pkg.heroImage} 
+                    alt={pkg.title} 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                      e.currentTarget.onerror = null;
+                    }}
+                  />
                 </div>
               )}
               

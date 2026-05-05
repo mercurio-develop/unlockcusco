@@ -1,9 +1,10 @@
+import { Business, TourPackage } from "@prisma/client";
 "use client"
 
 import { useState, useRef, MouseEvent } from "react"
 import { ArrowRight, Clock } from "lucide-react"
 
-export function ExperienceRow({ packages }: { packages: any[] }) {
+export function ExperienceRow({ packages }: { packages: TourPackage[] }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
@@ -68,6 +69,10 @@ export function ExperienceRow({ packages }: { packages: any[] }) {
                     src={mainImage} 
                     alt={exp.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                      e.currentTarget.onerror = null;
+                    }}
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-[var(--primary)] via-[var(--primary)]/20 to-transparent" />
                   

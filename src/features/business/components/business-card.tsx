@@ -106,6 +106,10 @@ export function BusinessCard({
               alt={business.name}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                e.currentTarget.onerror = null;
+              }}
             />
             {/* Magazine-style overlays to normalize image appearance */}
             <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:bg-black/0" />

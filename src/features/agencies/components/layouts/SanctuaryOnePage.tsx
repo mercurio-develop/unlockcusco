@@ -1,4 +1,5 @@
 "use client"
+import { Business, TourPackage } from "@prisma/client";
 import { useEffect } from "react"
 import { Phone, Mail, Compass, Heart, Target, Star, Leaf, Users, MapPin, Zap } from "lucide-react"
 
@@ -6,7 +7,7 @@ const IconMap: Record<string, React.ElementType> = {
   Compass, Heart, Target, Star, Leaf, Users, MapPin, Zap
 }
 
-export function SanctuaryOnePage({ business }: { business: any }) {
+export function SanctuaryOnePage({ business }: { business: Business & { tourPackages?: TourPackage[] } }) {
   // Parse Dynamic Features
   let features = []
   try {
@@ -15,7 +16,7 @@ export function SanctuaryOnePage({ business }: { business: any }) {
     features = []
   }
 
-  const visionMission = business.visionMission || business.description || ""
+  const visionMission = business.tagline || business.description || ""
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth"
     return () => {
@@ -48,11 +49,15 @@ export function SanctuaryOnePage({ business }: { business: any }) {
             src={business.imageUrl || "/images/og-default.jpg"} 
             alt={business.name} 
             className="w-full h-full object-cover opacity-80 mix-blend-multiply" 
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1200&auto=format&fit=crop";
+              e.currentTarget.onerror = null;
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAF9] via-transparent to-transparent" />
         </div>
         <div className="relative z-10 text-center px-6 max-w-3xl">
-          {business.logoUrl && <img src={business.logoUrl} alt="Logo" className="w-20 h-20 mx-auto mb-8 rounded-full shadow-sm" />}
+          {business.imageUrl && <img src={business.imageUrl} alt="Logo" className="w-20 h-20 mx-auto mb-8 rounded-full shadow-sm" />}
           <h1 className="text-5xl md:text-7xl font-light mb-6 text-slate-800 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>{business.name}</h1>
           <p className="text-lg md:text-xl font-light text-slate-600 max-w-2xl mx-auto">{business.tagline}</p>
         </div>
@@ -62,10 +67,15 @@ export function SanctuaryOnePage({ business }: { business: any }) {
       <section id="lineage" className="py-24 px-6 max-w-4xl mx-auto">
         <div className="flex flex-col items-center text-center">
           <div className="w-32 h-32 rounded-full overflow-hidden mb-8 shadow-md border-4 border-white">
-            <img src={business.imageUrl || "/images/og-default.jpg"} alt="Guide" className="w-full h-full object-cover" />
+            <img src={business.imageUrl || "/images/og-default.jpg"} alt="Guide" className="w-full h-full object-cover" 
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=300&auto=format&fit=crop";
+                e.currentTarget.onerror = null;
+              }}
+            />
           </div>
           <h2 className="text-xs font-bold text-amber-700 uppercase tracking-[0.3em] mb-4">The Lineage</h2>
-          <div className="prose prose-lg text-slate-600 font-light leading-relaxed text-center" dangerouslySetInnerHTML={{ __html: business.aboutHtml || business.description }} />
+          <div className="prose prose-lg text-slate-600 font-light leading-relaxed text-center" dangerouslySetInnerHTML={{ __html: business.description || business.description }} />
         </div>
       </section>
 
@@ -73,7 +83,7 @@ export function SanctuaryOnePage({ business }: { business: any }) {
       <section id="menu" className="py-24 px-6 max-w-3xl mx-auto border-t border-slate-200/50">
         <h2 className="text-3xl text-center mb-16 text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>Therapies & Ceremonies</h2>
         <div className="space-y-8">
-          {treatments.map((pkg: any) => (
+          {treatments.map((pkg: TourPackage) => (
             <div key={pkg.id} className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 group">
               <div className="flex-1">
                 <h3 className="text-xl text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>{pkg.title}</h3>
@@ -95,7 +105,7 @@ export function SanctuaryOnePage({ business }: { business: any }) {
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl text-center mb-16 text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>Immersive Retreats</h2>
             <div className="grid md:grid-cols-2 gap-8">
-              {retreats.map((pkg: any) => (
+              {retreats.map((pkg: TourPackage) => (
                 <div key={pkg.id} className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="text-2xl text-slate-800 mb-4" style={{ fontFamily: 'var(--font-display)' }}>{pkg.title}</h3>
                   <p className="text-slate-600 mb-6 font-light">{pkg.description}</p>
@@ -118,7 +128,7 @@ export function SanctuaryOnePage({ business }: { business: any }) {
           Reach out to coordinate logistics.
         </p>
         <a 
-          href={`https://wa.me/${(business.contactPhone || "").replace(/\D/g, '')}`} 
+          href={`https://wa.me/${(business.whatsapp || "").replace(/\D/g, '')}`} 
           target="_blank" rel="noreferrer" 
           className="inline-flex items-center gap-3 bg-amber-700 hover:bg-amber-800 text-white px-10 py-4 rounded-full font-medium transition-colors"
         >
@@ -129,7 +139,7 @@ export function SanctuaryOnePage({ business }: { business: any }) {
       {/* Mobile Sticky Bar */}
       <div className="fixed bottom-0 left-0 w-full z-50 p-4 bg-white/95 backdrop-blur border-t border-slate-100 md:hidden">
         <a 
-          href={`https://wa.me/${(business.contactPhone || "").replace(/\D/g, '')}`}
+          href={`https://wa.me/${(business.whatsapp || "").replace(/\D/g, '')}`}
           target="_blank" rel="noreferrer"
           className="block w-full text-center bg-amber-700 hover:bg-amber-800 text-white font-medium py-4 rounded-full shadow-lg"
         >

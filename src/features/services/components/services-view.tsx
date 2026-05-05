@@ -39,7 +39,7 @@ export function ServicesView({
     <div className="flex-1 overflow-y-auto bg-gray-50/50 relative">
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-gray-200 transition-all duration-300">
         <div className="px-6 md:px-10 lg:px-14 pt-8 pb-4 max-w-screen-3xl mx-auto w-full">
-          <Link href="/services" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors mb-6">
+          <Link href="/services" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 px-4 py-2 rounded-full transition-colors mb-6 shadow-sm border border-slate-200/50">
             <ArrowLeft className="w-4 h-4" /> Back to Services
           </Link>
           

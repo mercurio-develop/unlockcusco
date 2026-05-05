@@ -1,4 +1,6 @@
 "use client"
+import { TripDay, Traveler } from "@prisma/client";
+import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 
 import { useRef, useEffect, useMemo, useState } from "react"
 import Map, { Marker, NavigationControl, Source, Layer } from "react-map-gl/mapbox"
@@ -26,7 +28,7 @@ function getCoordsForLocation(locationStr: string | null | undefined): [number, 
 }
 
 interface TouristMapProps {
-  trip: any
+  trip: FullTrip
   activeDayNum: number
   selectedEventId?: string | null
   onEventSelect?: (id: string | null) => void
@@ -57,34 +59,34 @@ export default function TouristMap({ trip, activeDayNum, selectedEventId, onEven
     let coords: [number, number][] = []
     let ms: Array<{ coords: [number, number], type: string, id: string }> = []
     
-    events.forEach((evt: any) => {
+    events.forEach((evt: TimelineEvent) => {
       if (evt.type === 'TRANSPORT') {
         const fCoords = (evt.fromLng && evt.fromLat) ? [evt.fromLng, evt.fromLat] as [number, number] : getCoordsForLocation(evt.from);
         const tCoords = (evt.toLng && evt.toLat) ? [evt.toLng, evt.toLat] as [number, number] : getCoordsForLocation(evt.to);
         coords.push(fCoords);
         coords.push(tCoords);
       } else if (evt.type === 'EXPERIENCE') {
-        const pt = (evt.locationLng && evt.locationLat) ? [evt.locationLng, evt.locationLat] as [number, number] : getCoordsForLocation(evt.location || evt.title);
+        const pt = (evt.lng && evt.lat) ? [evt.lng, evt.lat] as [number, number] : getCoordsForLocation(evt.title);
         coords.push(pt)
         
         const isOverlapping = ms.some(m => Math.abs(m.coords[0] - pt[0]) < 0.0001 && Math.abs(m.coords[1] - pt[1]) < 0.0001);
         const markerPt: [number, number] = isOverlapping ? [pt[0] + 0.001, pt[1] - 0.001] : pt;
         ms.push({ coords: markerPt, type: 'EXPERIENCE', id: evt.id })
       } else if (evt.type === 'MEAL') {
-        const pt = (evt.locationLng && evt.locationLat) ? [evt.locationLng, evt.locationLat] as [number, number] : getCoordsForLocation(evt.location || evt.name);
+        const pt = (evt.lng && evt.lat) ? [evt.lng, evt.lat] as [number, number] : getCoordsForLocation(evt.title);
         coords.push(pt)
         
         const isOverlapping = ms.some(m => Math.abs(m.coords[0] - pt[0]) < 0.0001 && Math.abs(m.coords[1] - pt[1]) < 0.0001);
         const markerPt: [number, number] = isOverlapping ? [pt[0] - 0.001, pt[1] + 0.001] : pt;
         ms.push({ coords: markerPt, type: 'MEAL', id: evt.id })
-      } else if (evt.type === 'ACCOMMODATION') {
-        const pt = (evt.locationLng && evt.locationLat) ? [evt.locationLng, evt.locationLat] as [number, number] : getCoordsForLocation(evt.location || evt.name);
+      } else if (evt.type === 'STAY') {
+        const pt = (evt.lng && evt.lat) ? [evt.lng, evt.lat] as [number, number] : getCoordsForLocation(evt.title);
         coords.push(pt)
       }
     })
     
     if (coords.length === 0) {
-      const start = getCoordsForLocation(activeDay?.meetingPoint || activeDay?.tourPackage?.title)
+      const start = getCoordsForLocation(activeDay?.meetingPoint || activeDay?.dayTheme)
       const sleep = getCoordsForLocation(activeDay?.sleepTown)
       coords = [start, sleep]
     }

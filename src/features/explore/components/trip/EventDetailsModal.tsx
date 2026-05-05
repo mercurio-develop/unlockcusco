@@ -1,9 +1,11 @@
+import { TripDay, Traveler } from "@prisma/client";
+import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Loader2, X } from "lucide-react"
 import { EditorialModal } from "@/components/ui/EditorialModal"
 
-export function EventDetailsModal({ event, onClose }: { event: any, onClose: () => void }) {
+export function EventDetailsModal({ event, onClose }: { event: TimelineEvent, onClose: () => void }) {
   const [details, setDetails] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
@@ -24,9 +26,9 @@ export function EventDetailsModal({ event, onClose }: { event: any, onClose: () 
     } else {
       // For other events (Business, Meal, Note), just use the event data as generic details
       setDetails({
-        name: event.title || event.name || event.experienceTitle || "Activity Details",
+        name: event.title || (event as any).name || (event as any).experienceTitle || "Activity Details",
         editorialCategory: event.type,
-        editorialSummary: event.details || event.notes || event.content || "No additional details provided.",
+        editorialSummary: (event as any).details || (event as any).notes || (event as any).content || "No additional details provided.",
       })
     }
   }, [event])
