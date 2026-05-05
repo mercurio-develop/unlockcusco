@@ -1,7 +1,6 @@
 import { getAllAgencies } from "@/features/agencies/queries"
-import { AgencyCard, ComingSoonCard } from "@/features/agencies/components/AgencyCard"
-import { Navbar } from "@/components/layout/navbar"
-import { FilterBar } from "@/components/filters/filter-bar"
+import { ServicesView } from "@/features/services/components/services-view"
+import { UniversalService } from "@/lib/types/trip"
 
 const SPECIALTIES = ["Trekking", "Culture", "Wellness", "Spiritual", "Photography"]
 
@@ -13,7 +12,6 @@ export default async function AgenciesPage({
   const { specialty, q } = await searchParams
   const query = q?.trim() ?? ""
   
-  // This fetches all agencies, then we filter them in memory for now
   const allAgencies = await getAllAgencies()
   
   let agencies = allAgencies
@@ -37,44 +35,40 @@ export default async function AgenciesPage({
     )
   }
 
+  const universalEntities: UniversalService[] = agencies.map(a => ({
+    id: a.id,
+    slug: a.slug,
+    type: 'AGENCY',
+    name: a.name,
+    description: a.description,
+    tagline: a.tagline,
+    imageUrl: a.imageUrl,
+    rating: a.rating || undefined,
+    reviewsCount: a.reviewsCount,
+    whatsapp: a.whatsapp,
+    locationLabel: a.location,
+    category: a.category,
+    metadata: {
+      specialties: JSON.parse(a.specialties || "[]"),
+    },
+    _raw: { business: a as any } // Agencies are currently mapped loosely
+  }))
+
   return (
     <div className="bg-white min-h-screen">
-      <Navbar />
-      
-      <main className="max-w-7xl mx-auto px-6 py-24 sm:py-32">
-        {/* Header */}
-        <div className="max-w-2xl mb-12">
-          <p className="text-rose-600 text-xs uppercase tracking-[0.3em] mb-4 font-bold">
-            The Native Network
-          </p>
-          <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight mb-6 leading-tight">
-            Exclusive audiences with the <br/>
-            <span className="text-slate-400 italic">local experts of the Andes.</span>
-          </h1>
-          <p className="text-lg text-slate-500 leading-relaxed font-light">
-            We partner exclusively with native-owned agencies and unlisted local sanctuaries. No middlemen, no tourist traps—just authentic Andean heritage.
-          </p>
-        </div>
-
-        <FilterBar 
-          basePath="/services/agencies"
-          activeFilters={{ specialty, q: query || undefined }}
-          filterGroups={[
-            { key: "specialty", allLabel: "All specialties", options: SPECIALTIES.map(s => ({ label: s, value: s })) },
-          ]}
-          searchPlaceholder="Search agencies..."
-          defaultSearchValue={query}
-          resultCount={agencies.length}
-        />
-
-        {/* Agency Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {agencies.map((agency) => (
-            <AgencyCard key={agency.slug} agency={agency as any} />
-          ))}
-          <ComingSoonCard />
-        </div>
-      </main>
+      <ServicesView
+        title="Exclusive audiences with the local experts of the Andes."
+        subtitle="The Native Network"
+        description="We partner exclusively with native-owned agencies and unlisted local sanctuaries. No middlemen, no tourist traps—just authentic Andean heritage."
+        entities={universalEntities}
+        basePath="/services/agencies"
+        activeFilters={{ specialty, q: query || undefined }}
+        filterGroups={[
+          { key: "specialty", allLabel: "All specialties", options: SPECIALTIES.map(s => ({ label: s, value: s })) },
+        ]}
+        searchPlaceholder="Search agencies..."
+        defaultSearchValue={query}
+      />
     </div>
   )
 }
