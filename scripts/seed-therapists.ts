@@ -5,17 +5,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding Healers (Therapists)...");
 
-  const alma = await prisma.therapist.upsert({
+  const alma = await prisma.business.upsert({
     where: { slug: 'alma-sanadora' },
     update: {},
     create: {
       slug: 'alma-sanadora',
       name: 'Alma Sanadora',
+      category: 'Wellness',
       tagline: 'Sacred Healing through Sound & Touch',
-      bio: 'With over 15 years of experience in the ancestral healing arts of the Andes, Alma combines modern massage therapy with ancient vibration techniques.',
-      location: 'Urubamba, Sacred Valley',
+      description: 'With over 15 years of experience in the ancestral healing arts of the Andes, Alma combines modern massage therapy with ancient vibration techniques.',
+      locationSlug: 'urubamba',
       imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800',
-      heroImage: 'https://images.unsplash.com/photo-1590483736622-39818817daaa?q=80&w=1200',
+      heroImages: JSON.stringify(['https://images.unsplash.com/photo-1590483736622-39818817daaa?q=80&w=1200']),
       specialties: JSON.stringify(["Deep Tissue", "Sound Healing", "Registros Akáshicos", "Aromatherapy"]),
       whatsapp: '+51999888777',
       rating: 4.9,
@@ -25,14 +26,14 @@ async function main() {
 
   const services = [
     {
-      therapistId: alma.id,
+      businessId: alma.id,
       title: "Andean Deep Tissue Ritual",
       description: "A transformative physical session using local essential oils and deep pressure.",
       priceUsd: 85,
       durationMins: 90,
     },
     {
-      therapistId: alma.id,
+      businessId: alma.id,
       title: "Registros Akáshicos",
       description: "A deep spiritual inquiry into your soul's journey.",
       priceUsd: 120,
@@ -41,7 +42,7 @@ async function main() {
   ];
 
   for (const s of services) {
-    await prisma.therapistService.create({
+    await prisma.businessService.create({
       data: s
     });
   }

@@ -54,16 +54,16 @@ async function seedAncestral() {
   console.log('Seeding Alternative & Ancestral Tourism Packages...');
   
   for (const pkg of ANCESTRAL_PACKAGES) {
-    let agency = await prisma.agency.findFirst({
+    let agency = await prisma.business.findFirst({
       where: { name: pkg.agencyName }
     });
     
     if (!agency) {
-      agency = await prisma.agency.create({
+      agency = await prisma.business.create({
         data: {
           slug: pkg.agencyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
           name: pkg.agencyName,
-          contactPhone: "+51 999 999 999",
+          whatsapp: "+51 999 999 999",
           commissionRate: 0.05
         }
       });

@@ -1,48 +1,34 @@
-"use client"
-
-import { useState, useMemo } from "react"
-import { THERAPISTS } from "@/features/therapists/data"
+import { prisma } from "@/lib/prisma"
 import { ServicesView } from "@/features/services/components/services-view"
-import { UniversalService } from "@/lib/types/trip"
+import type { Business } from "@prisma/client"
 
-const ALL_SPECIALTIES = Array.from(
-  new Set(THERAPISTS.flatMap(t => t.specialties))
-).sort()
+export default async function TherapistsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ specialty?: string; q?: string }>
+}) {
+  const { specialty, q } = await searchParams
+  const query = q?.trim() ?? ""
 
-export default function TherapistsPage() {
-  const [query, setQuery] = useState("")
-  const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null)
+  const where: any = { category: "WELLNESS" }
+  if (query) {
+    where.OR = [
+      { name: { contains: query } },
+      { tagline: { contains: query } }
+    ]
+  }
+  if (specialty) {
+    where.specialties = { contains: specialty }
+  }
 
-  const filtered = useMemo(() => {
-    return THERAPISTS.filter(t => {
-      const matchesSearch = query === "" || 
-        t.name.toLowerCase().includes(query.toLowerCase()) || 
-        t.tagline.toLowerCase().includes(query.toLowerCase())
-      
-      const matchesSpecialty = activeSpecialty === null || 
-        t.specialties.includes(activeSpecialty)
-        
-      return matchesSearch && matchesSpecialty
-    })
-  }, [query, activeSpecialty])
+  const universalEntities = await prisma.business.findMany({
+    where,
+    orderBy: { rating: 'desc' }
+  })
 
-  const universalEntities: UniversalService[] = filtered.map(t => ({
-    id: t.id || t.slug,
-    slug: t.slug,
-    type: 'THERAPIST',
-    name: t.name,
-    description: t.bio || "",
-    tagline: t.tagline,
-    imageUrl: t.imageUrl,
-    rating: t.rating || undefined,
-    reviewsCount: t.reviewsCount,
-    whatsapp: t.whatsapp,
-    locationLabel: t.location,
-    category: 'Wellness',
-    metadata: {
-      specialties: t.specialties,
-    }
-  }))
+  // To keep it simple, we could query distinct specialties from the DB if needed, 
+  // or just hardcode some common ones. 
+  const ALL_SPECIALTIES = ["Sound Healing", "Massage", "Yoga", "Ceremony"]
 
   return (
     <div className="bg-white min-h-screen">
@@ -52,12 +38,10 @@ export default function TherapistsPage() {
         description="Tap into a private circle of verified therapists, healers, and sanctuaries. From deep tissue bodywork to ancestral sound rituals, we curate the valley's finest restorative experts."
         entities={universalEntities}
         basePath="/services/healers"
-        activeFilters={{ specialty: activeSpecialty ?? undefined }}
+        activeFilters={{ specialty, q: query || undefined }}
         filterGroups={[
             { key: "specialty", allLabel: "All specialties", options: ALL_SPECIALTIES.map(s => ({ label: s, value: s })) },
         ]}
-        onFilterChange={(key, value) => { if (key === "specialty") setActiveSpecialty(value) }}
-        onSearchChange={setQuery}
         searchPlaceholder="Search healers, specialties..."
         defaultSearchValue={query}
       />

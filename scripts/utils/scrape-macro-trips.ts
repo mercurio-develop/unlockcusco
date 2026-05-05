@@ -109,16 +109,16 @@ async function processItinerary(text: string, sourceName: string) {
       return;
     }
     
-    let agency = await prisma.agency.findFirst({
+    let agency = await prisma.business.findFirst({
       where: { name: tripData.agencyName }
     });
     
     if (!agency) {
-      agency = await prisma.agency.create({
+      agency = await prisma.business.create({
         data: {
           slug: tripData.agencyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
           name: tripData.agencyName,
-          contactPhone: "+51 999 999 999",
+          whatsapp: "+51 999 999 999",
           commissionRate: 0.05
         }
       });
@@ -130,7 +130,7 @@ async function processItinerary(text: string, sourceName: string) {
 
     const trip = await prisma.trip.create({
       data: {
-        agencyId: agency.id,
+        businessId: agency.id,
         tripTitle: tripData.tripTitle,
         startDate: startDate,
         endDate: endDate,
@@ -161,7 +161,7 @@ async function processItinerary(text: string, sourceName: string) {
 
       const tourPackage = await prisma.tourPackage.create({
         data: {
-          agencyId: agency.id,
+          businessId: agency.id,
           title: `${day.packageTitle} (${tripData.agencyName})`,
           tagline: day.packageTagline,
           sector: day.packageSector,

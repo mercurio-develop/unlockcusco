@@ -34,19 +34,18 @@ async function main() {
   // 3. Prepare Social Links
   const socialLinks = JSON.stringify(data.socialLinks || {});
 
-  // 4. Upsert Agency
-  console.log(`🚀 Upserting agency: ${data.name}...`);
-  const agency = await prisma.agency.upsert({
+  // 4. Upsert Business
+  console.log(`🚀 Upserting business: ${data.name}...`);
+  const agency = await prisma.business.upsert({
     where: { slug: data.slug },
     update: {
       name: data.name,
       category: data.category || "agency",
       tagline: data.tagline || "",
       description: data.description || "",
-      location: data.location || "Sacred Valley",
+      locationSlug: data.location || "Sacred Valley",
       imageUrl: data.imageUrl || "",
-      logoUrl: data.logoUrl || null,
-      contactPhone: data.contactPhone,
+      whatsapp: data.contactPhone,
       contactEmail: data.contactEmail || "",
       themeConfig: JSON.stringify(themeConfig),
     },
@@ -56,16 +55,15 @@ async function main() {
       category: data.category || "agency",
       tagline: data.tagline || "",
       description: data.description || "",
-      location: data.location || "Sacred Valley",
+      locationSlug: data.location || "Sacred Valley",
       imageUrl: data.imageUrl || "",
-      logoUrl: data.logoUrl || null,
-      contactPhone: data.contactPhone,
+      whatsapp: data.contactPhone,
       contactEmail: data.contactEmail || "",
       themeConfig: JSON.stringify(themeConfig),
     }
   });
 
-  console.log(`✅ Agency ${agency.name} created/updated with ID: ${agency.id}`);
+  console.log(`✅ Business ${agency.name} created/updated with ID: ${agency.id}`);
 
   // 5. Upsert Packages
   if (data.packages && Array.isArray(data.packages)) {
@@ -78,7 +76,7 @@ async function main() {
         // Assuming package slug/id is provided in JSON, otherwise fallback to title-based pseudo-slug
         where: { id: pkg.id || `${data.slug}-${pkg.title.toLowerCase().replace(/\s+/g, '-')}` },
         update: {
-          agencyId: agency.id,
+          businessId: agency.id,
           title: pkg.title,
           tagline: pkg.tagline || "",
           sector: pkg.sector || "SACRED_VALLEY",
@@ -99,7 +97,7 @@ async function main() {
         },
         create: {
           id: pkg.id || `${data.slug}-${pkg.title.toLowerCase().replace(/\s+/g, '-')}`,
-          agencyId: agency.id,
+          businessId: agency.id,
           title: pkg.title,
           tagline: pkg.tagline || "",
           sector: pkg.sector || "SACRED_VALLEY",

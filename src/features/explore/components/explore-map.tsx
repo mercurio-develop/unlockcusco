@@ -25,7 +25,7 @@ interface ExploreMapProps {
 
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
-  const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, googleRating?: number, reviewSummary?: string, menuUrl?: string }) | null>(null)
+  const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
   const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation } = useItinerary()
 
@@ -198,7 +198,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     );
   }
 
-  const validBusinesses = businesses.filter(b => b.lat !== null && b.lng !== null) as (Business & { lat: number, lng: number })[];
+  const validBusinesses = businesses.filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng)) as (Business & { lat: number, lng: number })[];
 
   const center = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
@@ -375,7 +375,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           );
         })}
 
-        {popupBusiness && (popupBusiness as any).lng !== null && (popupBusiness as any).lat !== null && (
+        {popupBusiness && (popupBusiness as any).lng != null && (popupBusiness as any).lat != null && !isNaN((popupBusiness as any).lng) && !isNaN((popupBusiness as any).lat) && (
           <Popup
             anchor="bottom" longitude={(popupBusiness as any).lng as number} latitude={(popupBusiness as any).lat as number}
             onClose={() => setPopupBusiness(null)} maxWidth="280px"
@@ -397,14 +397,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                   <span className="text-slate-400 font-mono">{(popupBusiness as any).priceTier || '$$'}</span>
                 </div>
                 
-                {((popupBusiness as any).googleRating || (popupBusiness as any).rating) && (
+                {((popupBusiness as any).rating || (popupBusiness as any).rating) && (
                   <div className="flex flex-col gap-1 mb-3">
                     <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      {(popupBusiness as any).googleRating || (popupBusiness as any).rating}
+                      {(popupBusiness as any).rating || (popupBusiness as any).rating}
                     </div>
-                    {(popupBusiness as any).reviewSummary && (
-                      <p className="text-xs text-slate-600 italic leading-snug">"{(popupBusiness as any).reviewSummary}"</p>
+                    {(popupBusiness as any).description && (
+                      <p className="text-xs text-slate-600 italic leading-snug">"{(popupBusiness as any).description}"</p>
                     )}
                   </div>
                 )}

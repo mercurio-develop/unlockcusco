@@ -6,13 +6,13 @@ import { useSearchParams } from "next/navigation"
 import { LayoutGrid, Map as RouteMap, CalendarDays, Loader2 } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { ExploreSearch } from "./explore-search"
-import { EntityCard } from "@/components/cards/entity-card"
+import { EntityCard } from "@/features/business/components/entity-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
 import { ItineraryPanel } from "./itinerary-panel"
 import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
-import { mapBusinessToUniversal } from "@/lib/utils/entity-mappers"
+
 import type { Business } from "@prisma/client"
 
 interface ExploreViewProps {
@@ -66,16 +66,15 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
     }
   }, [page, hasMore, isLoading, searchParams])
 
-  useEffect(() => { if (inView) loadMore() }, [inView, loadMore])
+  useEffect(() => { if (inView && !localSearch) loadMore() }, [inView, loadMore, localSearch])
 
-  const universalEntities = useMemo(() => 
+  const filteredEntities = useMemo(() => 
     businesses
       .filter(b => {
         if (!localSearch) return true
         const s = localSearch.toLowerCase()
         return b.name.toLowerCase().includes(s) || b.category.toLowerCase().includes(s)
       })
-      .map(mapBusinessToUniversal)
   , [businesses, localSearch])
 
   const sidebar = (
@@ -104,10 +103,12 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
       ) : panelMode === "categories" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
-           {universalEntities.map(e => (
+           {filteredEntities.map(e => (
              <EntityCard key={e.id} entity={e} isHighlighted={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
            ))}
-           <div ref={ref} className="col-span-full h-10 flex justify-center">{isLoading && <Loader2 className="animate-spin text-rose-600" />}</div>
+           {!localSearch && (
+             <div ref={ref} className="col-span-full h-10 flex justify-center">{isLoading && <Loader2 className="animate-spin text-rose-600" />}</div>
+           )}
         </div>
       ) : (
         <ItineraryPanel />

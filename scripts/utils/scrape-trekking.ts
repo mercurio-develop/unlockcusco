@@ -85,24 +85,24 @@ async function scrapeAndSeed() {
       
       console.log(`Extracted: ${packageData.title} by ${packageData.agencyName} - $${packageData.basePriceUsd}`);
       
-      // Ensure the Agency exists
-      let agency = await prisma.agency.findFirst({
+      // Ensure the Business exists
+      let agency = await prisma.business.findFirst({
         where: { name: packageData.agencyName }
       });
       
       if (!agency) {
-        agency = await prisma.agency.create({
+        agency = await prisma.business.create({
           data: {
             slug: packageData.agencyName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
             name: packageData.agencyName,
-            contactPhone: "+51 999 999 999", // Placeholder
+            whatsapp: "+51 999 999 999", // Placeholder
             commissionRate: 0.05
           }
         });
       }
       
       const updateData = {
-        agencyId: agency.id,
+        businessId: agency.id,
         tagline: packageData.tagline,
         sector: packageData.sector,
         pace: packageData.pace,
@@ -125,7 +125,7 @@ async function scrapeAndSeed() {
       const existingPackage = await prisma.tourPackage.findFirst({
         where: { 
           title: packageData.title,
-          agencyId: agency.id
+          businessId: agency.id
         }
       });
       

@@ -6,15 +6,15 @@ async function main() {
   console.log("Seeding Vallecito Originals...");
 
   // 1. Create the Vallecito Originals internal agency
-  const vallecitoAgency = await prisma.agency.upsert({
+  const vallecitoAgency = await prisma.business.upsert({
     where: { slug: 'vallecito-originals' },
     update: {},
     create: {
       slug: 'vallecito-originals',
       name: 'Vallecito Originals',
       description: 'Curated directly by the Vallecito team. Our signature routes optimize your biological descent and guarantee deep cultural immersion without the tourist traps.',
-      location: 'Sacred Valley',
-      contactPhone: '+51 987 654 321',
+      locationSlug: 'urubamba',
+      whatsapp: '+51 987 654 321',
       commissionRate: 0.10,
     }
   });
@@ -27,7 +27,7 @@ async function main() {
       description: "A gentle entry into the Sacred Valley focusing on safe altitude acclimation. Visit the indigenous alpaca farms, explore the vibrant Pisac market, and enjoy easy, scenic walks to begin your Andean journey peacefully.",
       basePriceUsd: 150,
       tags: "alpacas, market, acclimation, pisac",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "The Adrenaline Plateau",
@@ -36,7 +36,7 @@ async function main() {
       description: "High-octane day featuring ATV rides across the Maras plateau and extreme sightseeing of the ancient salt mines.",
       basePriceUsd: 185,
       tags: "atv, maras, moray, extreme",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "The Deep Sanctuary",
@@ -45,7 +45,7 @@ async function main() {
       description: "A fully restorative day of organic farm-to-table dining, massage therapy, and wellness.",
       basePriceUsd: 220,
       tags: "wellness, massage, organic, restorative",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "The Citadel Escrow",
@@ -54,7 +54,7 @@ async function main() {
       description: "A VIP, perfectly timed expedition to the crown jewel of the Andes with panoramic train views.",
       basePriceUsd: 350,
       tags: "train, ruins, bucket-list, vip",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "Cusco Artisanal Walk",
@@ -63,7 +63,7 @@ async function main() {
       description: "A guided architectural stroll through the cobblestone streets of San Blas, ending with a private coffee tasting at a local roastery.",
       basePriceUsd: 45,
       tags: "cusco, walking, san-blas, coffee",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "The Imperial Evening",
@@ -72,7 +72,7 @@ async function main() {
       description: "As the sun sets over the Plaza de Armas, embark on an exclusive culinary tasting menu featuring elevated Andean cuisine.",
       basePriceUsd: 120,
       tags: "cusco, culinary, dining, evening",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "Weavers of Chinchero",
@@ -81,7 +81,7 @@ async function main() {
       description: "A deeply immersive, half-day experience with the female weavers of Chinchero. Learn natural dyeing techniques and share a traditional meal.",
       basePriceUsd: 65,
       tags: "culture, textiles, chinchero, women",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     },
     {
       title: "Sacsayhuamán Deep Dive",
@@ -90,13 +90,13 @@ async function main() {
       description: "An intensive archaeological tour of the Sacsayhuamán fortress and Qorikancha, exploring the astronomical alignments of the Inca.",
       basePriceUsd: 75,
       tags: "ruins, history, cusco, archaeology",
-      agencyId: vallecitoAgency.id
+      businessId: vallecitoAgency.id
     }
   ];
 
   for (const pkg of packages) {
     const existing = await prisma.tourPackage.findFirst({
-      where: { title: pkg.title, agencyId: vallecitoAgency.id }
+      where: { title: pkg.title, businessId: vallecitoAgency.id }
     });
 
     if (existing) {

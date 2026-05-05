@@ -17,15 +17,15 @@ const JAGUAR_THEME = {
 };
 
 async function main() {
-  console.log("🐆 Seeding Jaguar Llaqta Agency...");
+  console.log("🐆 Seeding Jaguar Llaqta Business...");
 
-  const agency = await prisma.agency.upsert({
+  const agency = await prisma.business.upsert({
     where: { slug: "jaguar-llaqta" },
     update: {
       tagline: "INNER TRAVEL",
       description: "Founded by Álvaro Mauricio Ugarte Forno, Jaguar Llaqta specialises in off-the-beaten-path trekking, Andean spiritual experiences, and deep community encounters. Every route is chosen for its raw authenticity — the kind that disappears when the masses arrive.",
       guideName: "Álvaro Mauricio Ugarte Forno",
-      contactPhone: "51984004507",
+      whatsapp: "51984004507",
       contactEmail: "reservas@jaguarllaqta.com",
       imageUrl: "/agencies/jaguarllaqta/hero.jpg",
       themeConfig: JSON.stringify(JAGUAR_THEME),
@@ -37,8 +37,8 @@ async function main() {
       tagline: "INNER TRAVEL",
       description: "Founded by Álvaro Mauricio Ugarte Forno, Jaguar Llaqta specialises in off-the-beaten-path trekking, Andean spiritual experiences, and deep community encounters. Every route is chosen for its raw authenticity — the kind that disappears when the masses arrive.",
       guideName: "Álvaro Mauricio Ugarte Forno",
-      location: "Sacred Valley, Cusco Region",
-      contactPhone: "51984004507",
+      locationSlug: "urubamba",
+      whatsapp: "51984004507",
       contactEmail: "reservas@jaguarllaqta.com",
       imageUrl: "/images/jaguar-llaqta-cover.jpg",
       themeConfig: JSON.stringify(JAGUAR_THEME),
@@ -46,7 +46,7 @@ async function main() {
     }
   });
 
-  console.log(`✅ Agency ${agency.name} created/updated.`);
+  console.log(`✅ Business ${agency.name} created/updated.`);
 
   console.log(`📦 Seeding ${packages.length} packages...`);
 
@@ -57,7 +57,7 @@ async function main() {
     await prisma.tourPackage.upsert({
       where: { id: pkg.id },
       update: {
-        agencyId: agency.id,
+        businessId: agency.id,
         title: pkg.nameEn,
         tagline: pkg.taglineEn,
         sector: pkg.categories.includes("rutas") ? "URUBAMBA" : "VALLE_SAGRADO",
@@ -85,7 +85,7 @@ async function main() {
       },
       create: {
         id: pkg.id,
-        agencyId: agency.id,
+        businessId: agency.id,
         title: pkg.nameEn,
         tagline: pkg.taglineEn,
         sector: pkg.categories.includes("rutas") ? "URUBAMBA" : "VALLE_SAGRADO",

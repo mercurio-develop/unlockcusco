@@ -5,23 +5,23 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding Agencies and Tour Packages...");
 
-  const jaguar = await prisma.agency.upsert({
+  const jaguar = await prisma.business.upsert({
     where: { slug: 'jaguar-llaqta' },
     update: {},
     create: {
       slug: 'jaguar-llaqta',
       name: 'Jaguar Llaqta',
       description: 'Deeply rooted in the ancestral traditions of the Sacred Valley, Jaguar Llaqta offers more than just tours—we provide transformations. Led by native experts who carry the wisdom of the Quechua people.',
-      location: 'Pisac, Sacred Valley',
+      locationSlug: 'pisac',
       imageUrl: '/images/boleto/pisac-ruins.jpg',
-      contactPhone: '+51987654321',
+      whatsapp: '+51987654321',
       specialties: JSON.stringify(["Ancestral Wisdom", "High-Altitude Treks", "Local Textiles"]),
     }
   });
 
   const packages = [
     {
-      agencyId: jaguar.id,
+      businessId: jaguar.id,
       title: "Ausangate Spiritual Trek",
       description: "A 5-day journey around the sacred Apu Ausangate, visiting turquoise lagoons and high-alpine passes.",
       basePriceUsd: 650,
@@ -34,7 +34,7 @@ async function main() {
       included: JSON.stringify(["Private Guide", "Equipped Camping", "Horses", "Organic Meals", "Oxygen Support"]),
     },
     {
-      agencyId: jaguar.id,
+      businessId: jaguar.id,
       title: "Pisac Living Culture",
       description: "Spend a full day with the weavers of the Amaru community and explore the hidden trails of the ruins.",
       basePriceUsd: 120,
