@@ -32,7 +32,7 @@ export default function TransportDirectory() {
     <div className="min-h-screen bg-slate-50 py-12 px-6">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">Transport Directory</h1>
+          <h1 className="text-4xl font-serif font-bold text-slate-900 mb-4">Business Directory</h1>
           <p className="text-lg text-slate-600">
             Trusted drivers and public transit routes across the Sacred Valley.
           </p>

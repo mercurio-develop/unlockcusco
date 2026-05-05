@@ -8,7 +8,7 @@ const BOLETO_DIR = path.join(process.cwd(), 'public/images/boleto');
 const boletoImages = fs.readdirSync(BOLETO_DIR).filter(f => f.endsWith('.jpg'));
 
 async function main() {
-  const packages = await prisma.tourPackage.findMany({ where: { agency: { slug: 'jaguar-llaqta' } }});
+  const packages = await prisma.tourPackage.findMany({ where: { business: { slug: 'jaguar-llaqta' } }});
   
   let copied = 0;
   for (let i = 0; i < packages.length; i++) {

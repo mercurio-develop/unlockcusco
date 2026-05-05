@@ -61,7 +61,7 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
           model: google("gemini-2.5-flash"),
           system: "You are a travel concierge AI. Extract search constraints from the user query.",
           schema: z.object({
-            categories: z.array(z.enum(["Adventure", "Wellness", "Dining", "Culture", "Stays", "Transport"])).describe("Categories that match the user's intent. Only include if explicitly implied."),
+            categories: z.array(z.enum(["Adventure", "Wellness", "Dining", "Culture", "Stays", "Business"])).describe("Categories that match the user's intent. Only include if explicitly implied."),
             searchTerms: z.array(z.string()).describe("1-3 essential keywords to search for in the business name or description (e.g., 'vegan', 'massage', 'coffee'). If none, return empty array.")
           }),
           prompt: `User query: "${q}"`
@@ -87,7 +87,7 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
        else if (qLower.includes("picantería") || qLower.includes("restaurant") || qLower.includes("food") || qLower.includes("dining") || qLower.includes("eat") || qLower.includes("coffee") || qLower.includes("vegan") || qLower.includes("cafe")) { targetCategory = "Dining"; isHeuristicMatch = true; }
        else if (qLower.includes("hotel") || qLower.includes("stays") || qLower.includes("sleep") || qLower.includes("boutique")) { targetCategory = "Stays"; isHeuristicMatch = true; }
        else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile")) { targetCategory = "Culture"; isHeuristicMatch = true; }
-       else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport")) { targetCategory = "Transport"; isHeuristicMatch = true; }
+       else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport")) { targetCategory = "Business"; isHeuristicMatch = true; }
     }
   }
 
@@ -109,13 +109,26 @@ export async function fetchBusinesses({ query = "", category = "", loc = "", pag
   const orConditions: any[] = []
 
   if (q && !isHeuristicMatch && searchTerms.length === 0) {
+     const titleCase = q.charAt(0).toUpperCase() + q.slice(1).toLowerCase();
      orConditions.push({ name: { contains: q } })
+     orConditions.push({ name: { contains: q.toLowerCase() } })
+     orConditions.push({ name: { contains: titleCase } })
+     orConditions.push({ name: { contains: q.toUpperCase() } })
      orConditions.push({ category: { contains: q } })
+     orConditions.push({ description: { contains: q } })
+     orConditions.push({ description: { contains: q.toLowerCase() } })
+     orConditions.push({ description: { contains: titleCase } })
   }
 
   if (searchTerms.length > 0) {
     searchTerms.forEach(term => {
+      const titleCase = term.charAt(0).toUpperCase() + term.slice(1).toLowerCase();
       orConditions.push({ name: { contains: term } })
+      orConditions.push({ name: { contains: term.toLowerCase() } })
+      orConditions.push({ name: { contains: titleCase } })
+      orConditions.push({ name: { contains: term.toUpperCase() } })
+      orConditions.push({ description: { contains: term } })
+      orConditions.push({ description: { contains: term.toLowerCase() } })
     })
   }
 

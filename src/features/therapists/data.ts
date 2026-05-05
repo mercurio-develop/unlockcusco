@@ -7,7 +7,7 @@ export interface TherapistService {
   imageUrl?: string;
 }
 
-export interface Therapist {
+export interface Business {
   slug: string;
   name: string;
   tagline: string;
@@ -22,7 +22,7 @@ export interface Therapist {
   services: TherapistService[];
 }
 
-export const THERAPISTS: Therapist[] = [
+export const THERAPISTS: Business[] = [
   {
     slug: "alma-sanadora",
     name: "Alma Sanadora",

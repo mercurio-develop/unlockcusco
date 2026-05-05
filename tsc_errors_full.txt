@@ -1,0 +1,108 @@
+scripts/import-agency.ts(46,7): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type '(Without<BusinessUpdateInput, BusinessUncheckedUpdateInput> & BusinessUncheckedUpdateInput) | (Without<...> & BusinessUpdateInput)'.
+scripts/import-agency.ts(59,7): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/restore-from-bak.ts(47,9): error TS2353: Object literal may only specify known properties, and 'contactPhone' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/restore-from-bak.ts(80,9): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/restore-from-bak.ts(84,9): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed-agencies.ts(15,7): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/seed-therapists.ts(15,7): error TS2353: Object literal may only specify known properties, and 'bio' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/seed-therapists.ts(45,7): error TS2322: Type '{ therapistId: string; title: string; description: string; priceUsd: number; durationMins: number; }' is not assignable to type '(Without<BusinessServiceCreateInput, BusinessServiceUncheckedCreateInput> & BusinessServiceUncheckedCreateInput) | (Without<...> & BusinessServiceCreateInput)'.
+  Type '{ therapistId: string; title: string; description: string; priceUsd: number; durationMins: number; }' is not assignable to type 'Without<BusinessServiceUncheckedCreateInput, BusinessServiceCreateInput> & BusinessServiceCreateInput'.
+    Property 'business' is missing in type '{ therapistId: string; title: string; description: string; priceUsd: number; durationMins: number; }' but required in type 'BusinessServiceCreateInput'.
+scripts/seed/seed-ancestral.ts(66,11): error TS2353: Object literal may only specify known properties, and 'contactPhone' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/seed/seed-jaguar.ts(28,7): error TS2353: Object literal may only specify known properties, and 'contactPhone' does not exist in type '(Without<BusinessUpdateInput, BusinessUncheckedUpdateInput> & BusinessUncheckedUpdateInput) | (Without<...> & BusinessUpdateInput)'.
+scripts/seed/seed-jaguar.ts(40,7): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/seed/seed-mock-data.ts(48,11): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-mock-data.ts(55,11): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-mock-services.ts(126,9): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(9,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(13,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(23,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(27,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(37,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(41,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(51,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(55,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(65,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(69,5): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(103,9): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(111,9): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/seed/seed-services.ts(114,9): error TS2353: Object literal may only specify known properties, and 'avgDwellTimeMins' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/seed/seed-vallecito-originals.ts(16,7): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/test-agency.ts(11,42): error TS2339: Property 'contactPhone' does not exist on type '{ tourPackages: { id: string; title: string; description: string; tagline: string; businessId: string | null; sector: string; pace: string; basePriceUsd: number; difficulty: string; maxAltitude: string; ... 12 more ...; heroImage: string | null; }[]; } & { ...; }'.
+scripts/utils/classify-services.ts(50,11): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/utils/classify-services.ts(51,11): error TS1117: An object literal cannot have multiple properties with the same name.
+scripts/utils/scrape-macro-trips.ts(121,11): error TS2353: Object literal may only specify known properties, and 'contactPhone' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+scripts/utils/scrape-trekking.ts(98,13): error TS2353: Object literal may only specify known properties, and 'contactPhone' does not exist in type '(Without<BusinessCreateInput, BusinessUncheckedCreateInput> & BusinessUncheckedCreateInput) | (Without<...> & BusinessCreateInput)'.
+src/app/api/experiences/route.ts(44,9): error TS2353: Object literal may only specify known properties, and 'location' does not exist in type 'BusinessSelect<DefaultArgs>'.
+src/app/api/experiences/route.ts(87,20): error TS2339: Property 'location' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/app/services/agencies/[slug]/page.tsx(55,29): error TS2322: Type '{ agency: { tourPackages: { id: string; title: string; description: string; tagline: string; businessId: string | null; sector: string; pace: string; basePriceUsd: number; difficulty: string; maxAltitude: string; ... 12 more ...; heroImage: string | null; }[]; } & { ...; }; }' is not assignable to type 'IntrinsicAttributes & { business: any; }'.
+  Property 'agency' does not exist on type 'IntrinsicAttributes & { business: any; }'.
+src/app/services/agencies/[slug]/page.tsx(57,30): error TS2322: Type '{ agency: { tourPackages: { id: string; title: string; description: string; tagline: string; businessId: string | null; sector: string; pace: string; basePriceUsd: number; difficulty: string; maxAltitude: string; ... 12 more ...; heroImage: string | null; }[]; } & { ...; }; }' is not assignable to type 'IntrinsicAttributes & { business: any; }'.
+  Property 'agency' does not exist on type 'IntrinsicAttributes & { business: any; }'.
+src/app/services/agencies/page.tsx(38,9): error TS2322: Type '{ id: string; slug: string; type: "AGENCY"; name: string; description: string; tagline: string; imageUrl: string; rating: number | undefined; reviewsCount: number; whatsapp: string | null; locationLabel: any; category: string; metadata: { ...; }; _raw: { ...; }; }[]' is not assignable to type 'UniversalService[]'.
+  Type '{ id: string; slug: string; type: "AGENCY"; name: string; description: string; tagline: string; imageUrl: string; rating: number | undefined; reviewsCount: number; whatsapp: string | null; locationLabel: any; category: string; metadata: { ...; }; _raw: { ...; }; }' is not assignable to type 'UniversalService'.
+    Types of property 'whatsapp' are incompatible.
+      Type 'string | null' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.
+src/app/services/agencies/page.tsx(49,22): error TS2339: Property 'location' does not exist on type '{ tourPackages: { id: string; title: string; description: string; tagline: string; businessId: string | null; sector: string; pace: string; basePriceUsd: number; difficulty: string; maxAltitude: string; ... 12 more ...; heroImage: string | null; }[]; } & { ...; }'.
+src/app/services/healers/page.tsx(30,11): error TS2339: Property 'id' does not exist on type 'Business'.
+src/app/services/healers/page.tsx(59,9): error TS2322: Type '{ title: string; subtitle: string; description: string; entities: UniversalService[]; basePath: string; activeFilters: { specialty: string | undefined; }; filterGroups: { ...; }[]; onFilterChange: (key: any, value: any) => void; onSearchChange: Dispatch<...>; searchPlaceholder: string; defaultSearchValue: string; }' is not assignable to type 'IntrinsicAttributes & ServicesViewProps'.
+  Property 'onFilterChange' does not exist on type 'IntrinsicAttributes & ServicesViewProps'.
+src/app/services/healers/page.tsx(59,26): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/app/services/healers/page.tsx(59,31): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/features/agencies/components/AgencyAbout.tsx(3,31): error TS2339: Property 'agency' does not exist on type '{ business: any; }'.
+src/features/agencies/components/AgencyCard.tsx(5,30): error TS2339: Property 'agency' does not exist on type '{ business: any; }'.
+src/features/agencies/components/AgencyHero.tsx(7,30): error TS2339: Property 'agency' does not exist on type '{ business: any; }'.
+src/features/agencies/components/AvailabilityForm.tsx(8,3): error TS2339: Property 'agencyId' does not exist on type '{ businessId: string; agencyName: string; agencyEmail?: string | undefined; whatsapp: string; packages: any[]; selectedExperienceId?: string | undefined; }'.
+src/features/agencies/components/AvailabilityForm.tsx(44,7): error TS2353: Object literal may only specify known properties, and 'agencyId' does not exist in type 'RequestData'.
+src/features/agencies/components/layouts/ExpeditionOnePage.tsx(60,37): error TS2339: Property 'agency' does not exist on type '{ business: any; }'.
+src/features/agencies/components/layouts/ExpeditionOnePage.tsx(277,9): error TS2322: Type '{ agencyId: any; agencyName: any; whatsapp: any; packages: any; selectedExperienceId: string; }' is not assignable to type 'IntrinsicAttributes & { businessId: string; agencyName: string; agencyEmail?: string | undefined; whatsapp: string; packages: any[]; selectedExperienceId?: string | undefined; }'.
+  Property 'agencyId' does not exist on type 'IntrinsicAttributes & { businessId: string; agencyName: string; agencyEmail?: string | undefined; whatsapp: string; packages: any[]; selectedExperienceId?: string | undefined; }'.
+src/features/agencies/components/layouts/SanctuaryOnePage.tsx(9,36): error TS2339: Property 'agency' does not exist on type '{ business: any; }'.
+src/features/business/components/business-card.tsx(79,20): error TS2345: Argument of type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }' is not assignable to parameter of type 'UniversalService'.
+  Type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }' is missing the following properties from type 'UniversalService': type, locationLabel
+src/features/business/queries/universal-search.ts(66,24): error TS2322: Type '{ location: { contains: string; }; } | {}' is not assignable to type 'BusinessWhereInput'.
+  Object literal may only specify known properties, and 'location' does not exist in type 'BusinessWhereInput'.
+src/features/pro-builder/components/BuilderWizard.tsx(78,7): error TS2322: Type '{ id: string; type: "TRANSPORT"; startTime: string; title: string; from: string; to: string; }' is not assignable to type 'TimelineEvent'.
+  Property 'method' is missing in type '{ id: string; type: "TRANSPORT"; startTime: string; title: string; from: string; to: string; }' but required in type 'TransportEvent'.
+src/features/pro-builder/components/BuilderWorkspace.tsx(43,9): error TS2322: Type '{ id: string; type: EventType; startTime: string; title: string; }' is not assignable to type 'TimelineEvent'.
+  Property 'content' is missing in type '{ id: string; type: EventType; startTime: string; title: string; }' but required in type 'NoteEvent'.
+src/features/pro-builder/components/ExperiencePickerModal.tsx(63,18): error TS2339: Property 'packageId' does not exist on type 'MealEvent'.
+src/features/pro-builder/components/ExperiencePickerModal.tsx(63,41): error TS2339: Property 'packageId' does not exist on type 'MealEvent'.
+src/features/pro-builder/components/ExperiencePickerModal.tsx(125,75): error TS2353: Object literal may only specify known properties, and 'experienceTitle' does not exist in type 'Partial<TimelineEvent>'.
+src/features/pro-builder/components/ExperiencePickerModal.tsx(127,72): error TS2353: Object literal may only specify known properties, and 'experienceTitle' does not exist in type 'Partial<TimelineEvent>'.
+src/features/pro-builder/components/ProBuilderMain.tsx(79,13): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: ExploreMapProps, context?: any): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
+    Property 'onSelectBusiness' is missing in type '{ businesses: any; selectedId: null; }' but required in type 'ExploreMapProps'.
+  Overload 2 of 2, '(props: ExploreMapProps): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
+    Property 'onSelectBusiness' is missing in type '{ businesses: any; selectedId: null; }' but required in type 'ExploreMapProps'.
+src/features/services/components/service-card.tsx(11,3): error TS1117: An object literal cannot have multiple properties with the same name.
+src/features/transport/components/TransportCard.tsx(83,20): error TS2339: Property 'basePriceUsd' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/features/transport/components/TransportCard.tsx(86,88): error TS2339: Property 'basePriceUsd' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/ai/tools/get-business-details.ts(20,11): error TS2353: Object literal may only specify known properties, and 'operatingHours' does not exist in type 'BusinessSelect<DefaultArgs>'.
+src/lib/ai/tools/get-business-details.ts(34,34): error TS2339: Property 'operatingHours' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/ai/tools/get-business-details.ts(35,32): error TS2339: Property 'contactPhone' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/ai/tools/get-business-details.ts(36,36): error TS2339: Property 'editorialSummary' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/ai/tools/get-business-details.ts(37,33): error TS2339: Property 'priceEstimate' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/store/trip-context.tsx(125,11): error TS2322: Type '{ id: string; type: "TRANSPORT" | "EXPERIENCE" | "STAY"; startTime: string; title: string; lat: number | undefined; lng: number | undefined; priceUsd: number; service: UniversalService; }' is not assignable to type 'TimelineEvent'.
+  Type '{ id: string; type: "TRANSPORT" | "EXPERIENCE" | "STAY"; startTime: string; title: string; lat: number | undefined; lng: number | undefined; priceUsd: number; service: UniversalService; }' is not assignable to type 'ExperienceEvent | TransportEvent | StayEvent'.
+    Type '{ id: string; type: "TRANSPORT" | "EXPERIENCE" | "STAY"; startTime: string; title: string; lat: number | undefined; lng: number | undefined; priceUsd: number; service: UniversalService; }' is not assignable to type 'StayEvent'.
+      Types of property 'type' are incompatible.
+        Type '"TRANSPORT" | "EXPERIENCE" | "STAY"' is not assignable to type '"STAY"'.
+          Type '"TRANSPORT"' is not assignable to type '"STAY"'.
+src/lib/types/trip.ts(1,10): error TS2300: Duplicate identifier 'Business'.
+src/lib/types/trip.ts(1,20): error TS2300: Duplicate identifier 'Business'.
+src/lib/types/trip.ts(1,43): error TS2300: Duplicate identifier 'Business'.
+src/lib/utils/entity-mappers.ts(1,10): error TS2300: Duplicate identifier 'Business'.
+src/lib/utils/entity-mappers.ts(1,20): error TS2300: Duplicate identifier 'Business'.
+src/lib/utils/entity-mappers.ts(1,30): error TS2300: Duplicate identifier 'Business'.
+src/lib/utils/entity-mappers.ts(1,40): error TS2300: Duplicate identifier 'Business'.
+src/lib/utils/entity-mappers.ts(40,21): error TS2339: Property 'basePriceUsd' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/utils/entity-mappers.ts(42,7): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+src/lib/utils/entity-mappers.ts(43,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/lib/utils/entity-mappers.ts(55,22): error TS2339: Property 'bio' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.
+src/lib/utils/entity-mappers.ts(60,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/lib/utils/entity-mappers.ts(61,24): error TS2339: Property 'location' does not exist on type '{ id: string; description: string; name: string; slug: string; category: string; lat: number | null; lng: number | null; rating: number | null; reviewsCount: number; imageUrl: string; heroImages: string; ... 22 more ...; featuresJson: string; }'.

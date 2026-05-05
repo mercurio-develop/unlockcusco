@@ -1,46 +1,6 @@
-import { Business, Transport, TourPackage, Therapist } from "@prisma/client"
+import { Business, TourPackage } from "@prisma/client"
 
 export type EntityType = 'BUSINESS' | 'TRANSPORT' | 'PACKAGE' | 'THERAPIST' | 'AGENCY';
-
-/**
- * UniversalService: The polymorphic bridge between Prisma models.
- * Allows UI components and AI tools to handle any entity with the same interface.
- */
-export interface UniversalService {
-  id: string;
-  slug: string;
-  type: EntityType;
-  name: string;
-  description: string;
-  tagline?: string;
-  imageUrl: string;
-  rating?: number;
-  reviewsCount?: number;
-  whatsapp?: string;
-  lat?: number;
-  lng?: number;
-  locationLabel: string;
-  category: string; // e.g., 'Wellness', 'Taxi', 'Dining'
-  priceTier?: string; // '$', '$$', '$$$'
-  basePriceUsd?: number;
-  
-  // Specific data for cards/logic without breaking polymorphism
-  metadata?: {
-    capacity?: number; // for Transport
-    vehicleType?: string; // for Transport
-    duration?: string; // for Packages
-    specialties?: string[]; // for Therapists/Agencies
-    isClaimed?: boolean; // for Businesses
-  };
-
-  // Original records for deep access
-  _raw?: {
-    business?: Business;
-    transport?: Transport;
-    package?: TourPackage;
-    therapist?: Therapist;
-  };
-}
 
 export type EventType = 'EXPERIENCE' | 'TRANSPORT' | 'MEAL' | 'NOTE' | 'STAY';
 
@@ -59,7 +19,7 @@ export interface ExperienceEvent extends BaseEvent {
   type: 'EXPERIENCE';
   packageId?: string;
   businessId?: string;
-  service?: UniversalService;
+  service?: Business;
 }
 
 export interface TransportEvent extends BaseEvent {
@@ -73,20 +33,20 @@ export interface TransportEvent extends BaseEvent {
   toLng?: number;
   details?: string;
   transportId?: string;
-  service?: UniversalService;
+  service?: Business;
 }
 
 export interface MealEvent extends BaseEvent {
   type: 'MEAL';
   businessId?: string;
-  service?: UniversalService;
+  service?: Business;
   notes?: string;
 }
 
 export interface StayEvent extends BaseEvent {
   type: 'STAY';
   businessId?: string;
-  service?: UniversalService;
+  service?: Business;
   checkIn?: string;
   checkOut?: string;
 }

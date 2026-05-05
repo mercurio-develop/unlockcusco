@@ -1,6 +1,6 @@
 import { getAllAgencies } from "@/features/agencies/queries"
 import { ServicesView } from "@/features/services/components/services-view"
-import { UniversalService } from "@/lib/types/trip"
+import type { Business } from "@prisma/client"
 
 const SPECIALTIES = ["Trekking", "Culture", "Wellness", "Spiritual", "Photography"]
 
@@ -35,32 +35,13 @@ export default async function AgenciesPage({
     )
   }
 
-  const universalEntities: UniversalService[] = agencies.map(a => ({
-    id: a.id,
-    slug: a.slug,
-    type: 'AGENCY',
-    name: a.name,
-    description: a.description,
-    tagline: a.tagline,
-    imageUrl: a.imageUrl,
-    rating: a.rating || undefined,
-    reviewsCount: a.reviewsCount,
-    whatsapp: a.whatsapp,
-    locationLabel: a.location,
-    category: a.category,
-    metadata: {
-      specialties: JSON.parse(a.specialties || "[]"),
-    },
-    _raw: { business: a as any } // Agencies are currently mapped loosely
-  }))
-
   return (
     <div className="bg-white min-h-screen">
       <ServicesView
         title="Exclusive audiences with the local experts of the Andes."
         subtitle="The Native Network"
         description="We partner exclusively with native-owned agencies and unlisted local sanctuaries. No middlemen, no tourist traps—just authentic Andean heritage."
-        entities={universalEntities}
+        entities={agencies}
         basePath="/services/agencies"
         activeFilters={{ specialty, q: query || undefined }}
         filterGroups={[

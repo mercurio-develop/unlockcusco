@@ -40,11 +40,25 @@ export function BuilderWorkspace() {
 
   const handleAddMockEvent = (type: EventType) => {
     const id = uuidv4()
-    let newEvent: TimelineEvent = {
-        id,
-        type,
-        startTime: "10:00",
-        title: type === 'MEAL' ? 'Lunch Reservation' : (type === 'TRANSPORT' ? 'Private Transfer' : 'New Block')
+    let newEvent: TimelineEvent;
+
+    switch (type) {
+      case 'TRANSPORT':
+        newEvent = { id, type, startTime: "10:00", title: 'Private Transfer', method: 'CAR', from: '', to: '' };
+        break;
+      case 'MEAL':
+        newEvent = { id, type, startTime: "10:00", title: 'Lunch Reservation' };
+        break;
+      case 'STAY':
+        newEvent = { id, type, startTime: "10:00", title: 'Hotel Check-in' };
+        break;
+      case 'NOTE':
+        newEvent = { id, type, startTime: "10:00", title: 'Note', content: '' };
+        break;
+      case 'EXPERIENCE':
+      default:
+        newEvent = { id, type: 'EXPERIENCE', startTime: "10:00", title: 'New Block' };
+        break;
     }
     
     if (type === 'EXPERIENCE') {
@@ -58,36 +72,26 @@ export function BuilderWorkspace() {
   }
 
   return (
-    <div className="flex-1 bg-white flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-2xl mx-auto mb-10">
-          <div className="flex items-center justify-between">
-             <div>
-                <h2 className="text-3xl font-serif font-bold text-slate-900">Day {activeDay.dayNumber}</h2>
-                <p className="text-slate-500">{activeDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-             </div>
-             <button 
-                onClick={() => setViewState('checkout')}
-                className="bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-700 transition-colors"
-              >
-                Checkout &rarr;
-              </button>
+    <div className="flex-1 bg-[#FAFAFA] flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-10 lg:p-16">
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-5xl font-serif text-slate-900 tracking-tight">Day {activeDay.dayNumber}</h2>
+            <p className="text-xl text-slate-500 font-light">{activeDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto relative border-l-2 border-slate-100 ml-4 pl-8 space-y-8 pb-32">
+        <div className="max-w-2xl mx-auto relative border-l border-slate-200 ml-4 pl-10 space-y-10 pb-32">
           {/* Start Anchor */}
           <div className="relative group">
-             <div className="absolute -left-[43px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white border-2 border-rose-500 z-20 flex items-center justify-center">
-                <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-             </div>
-             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest block mb-2">Start Anchor</span>
+             <div className="absolute -left-[45px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-900 ring-4 ring-slate-100 z-20 flex items-center justify-center" />
+             <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Day Start</span>
                 <LocationAutocomplete 
                   value={activeDay.startAnchor?.title || ""}
                   onChange={(val) => {}} // TODO: Impl updateDay
-                  className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
-                  placeholder="Starting location..."
+                  className="w-full bg-transparent text-xl font-serif placeholder:text-slate-300 outline-none focus:text-slate-900"
+                  placeholder="Where does the day begin?"
                 />
              </div>
           </div>
@@ -102,24 +106,22 @@ export function BuilderWorkspace() {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative group"
               >
-                <div className="absolute -left-[41px] top-6 w-4 h-4 rounded-full bg-white border-2 border-slate-300 z-20 flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-slate-300" />
-                </div>
+                <div className="absolute -left-[45px] top-8 w-2 h-2 rounded-full bg-slate-200 z-20 flex items-center justify-center transition-colors group-hover:bg-rose-500" />
                 
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative">
+                <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 relative group-hover:-translate-y-0.5">
                   <div className="absolute -top-3 -right-3 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all z-10">
-                    <button onClick={() => removeEvent(activeDay.dayNumber, evt.id)} className="w-8 h-8 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 rounded-full flex items-center justify-center shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => removeEvent(activeDay.dayNumber, evt.id)} className="w-10 h-10 bg-white border border-slate-100 text-slate-400 hover:text-rose-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-all"><Trash2 className="w-4 h-4" /></button>
                   </div>
 
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-2">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-2.5">
                       {getEventIcon(evt.type)}
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{evt.type}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{evt.type}</span>
                     </div>
-                    <input type="time" value={evt.startTime} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { startTime: e.target.value })} className="text-xs font-mono font-bold bg-slate-50 px-2 py-1 rounded" />
+                    <input type="time" value={evt.startTime} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { startTime: e.target.value })} className="text-sm font-mono font-medium text-slate-500 hover:text-slate-900 bg-transparent outline-none cursor-pointer" />
                   </div>
                   
-                  <h4 className="font-bold text-slate-900">{evt.title}</h4>
+                  <h4 className="text-2xl font-serif text-slate-900">{evt.title}</h4>
                 </div>
               </motion.div>
             ))}

@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
-import { TripDashboard } from "@/components/trip/TripDashboard"
+import { TripDashboard } from "@/features/explore/components/trip/TripDashboard"
 
 async function fetchTripByToken(token: string) {
   if (!token) return null
   return await prisma.trip.findUnique({
     where: { shareToken: token },
     include: {
-      agency: true,
+      business: true,
       days: {
         orderBy: { dayNumber: 'asc' },
         include: { tourPackage: true }

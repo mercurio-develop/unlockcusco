@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
         description: true,
         heroImage: true,
         galleryJson: true,
-        agency: {
+        business: {
           select: {
             id: true,
             name: true,

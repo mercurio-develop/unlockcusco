@@ -11,10 +11,10 @@ export async function generateMetadata({ params }: AgencyLayoutProps): Promise<M
   const agency = await getAgencyBySlug(slug)
 
   if (!agency) {
-    return { title: 'Agency Not Found | Vallecito' }
+    return { title: 'Business Not Found | Vallecito' }
   }
 
-  const title = `${agency.name} | Partner Agency`
+  const title = `${agency.name} | Partner Business`
   const description = agency.tagline || agency.description
 
   return {

@@ -2,15 +2,15 @@
 
 import { useState } from "react"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
-import { FilterBar, FilterGroup } from "@/components/filters/filter-bar"
-import { EntityCard } from "@/components/cards/entity-card"
-import type { UniversalService } from "@/lib/types/trip"
+import { FilterBar, FilterGroup } from "@/features/explore/components/filters/filter-bar"
+import { BusinessCard } from "@/features/business/components/business-card"
+import type { Business } from "@prisma/client"
 
 interface ServicesViewProps {
   title: string
   subtitle?: string
   description?: string
-  entities: UniversalService[]
+  entities: Business[]
   filterGroups: FilterGroup[]
   activeFilters: Record<string, string | undefined>
   basePath: string
@@ -65,8 +65,8 @@ export function ServicesView({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
         {entities.map((entity) => (
           <div key={entity.id}>
-            <EntityCard 
-              entity={entity} 
+            <BusinessCard 
+              business={entity} 
               isHighlighted={selectedId === entity.id}
               onSelect={() => setSelectedId(entity.id)}
             />

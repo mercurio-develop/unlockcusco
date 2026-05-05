@@ -29,11 +29,11 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
 
 export async function generateStaticParams() {
   const combinations = await prisma.business.groupBy({
-    by: ['locationSlug', 'categorySlug'],
+    by: ['locationSlug', 'category'],
   })
   return combinations
-    .filter(c => c.locationSlug && c.categorySlug)
-    .map(c => ({ location: c.locationSlug, category: c.categorySlug }))
+    .filter(c => c.locationSlug && c.category)
+    .map(c => ({ location: c.locationSlug, category: c.category }))
 }
 
 export async function generateMetadata({
@@ -89,7 +89,7 @@ export default async function CategoryPage({
   const { location, category } = await params
 
   const localBusinesses = await prisma.business.findMany({
-    where: { locationSlug: location, categorySlug: category },
+    where: { locationSlug: location, category: category },
     orderBy: { rating: 'desc' },
   })
 

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useItinerary } from "@/lib/store/itinerary-context";
 import { MapPin, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DayExplorer } from "@/components/trip/DayExplorer";
+import { DayExplorer } from "@/features/explore/components/trip/DayExplorer";
 
 export function ItineraryPanel() {
   const { activeItinerary, setPanelMode, macroTrip } = useItinerary();

@@ -15,6 +15,7 @@ import { PendingAvailability } from "@/features/concierge/components/PendingAvai
 import { SearchResultsCard } from "@/features/concierge/components/SearchResultsCard"
 import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { BoletoInfoCard } from "./BoletoInfoCard"
+import { TaxiFareCard } from "./TaxiFareCard"
 
 export function AiConcierge() {
   const [isOpen, setIsOpen] = useState(false)
@@ -178,6 +179,9 @@ Please generate my macro trip plan.`;
                         }
                         if (part.type === 'tool-showBoletoInfo') {
                           return <BoletoInfoCard key={key} data={part.output.data} message={part.output.message} />
+                        }
+                        if (part.type === 'tool-estimateTaxiFare') {
+                          return <TaxiFareCard key={key} data={part.output} />
                         }
                       }
                       if (part.type === 'tool-askAvailability' && part.state !== 'output-available') {

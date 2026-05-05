@@ -15,7 +15,7 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 })
 
 export function ProBuilderMain() {
-  const { viewState, currentTrip, setPanelMode, activeDayNumber, setActiveDayNumber } = useTrip()
+  const { viewState, currentTrip, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState } = useTrip()
 
   useEffect(() => {
     setPanelMode('builder')
@@ -27,38 +27,70 @@ export function ProBuilderMain() {
   // workspace mode uses the 3-pane layout
   const sidebar = currentTrip ? (
     <div className="bg-slate-900 h-full flex flex-col">
-      <div className="p-6 border-b border-slate-800">
-        <h2 className="text-xl font-serif font-bold text-white mb-1">{currentTrip.title}</h2>
-        <div className="flex gap-3 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-          <span>{currentTrip.startDate.toLocaleDateString()}</span>
-          <span>•</span>
+      <div className="p-8 border-b border-slate-800 shrink-0">
+        <h2 className="text-2xl font-serif font-bold text-white mb-2 leading-tight">{currentTrip.title}</h2>
+        <div className="flex items-center gap-3 text-slate-400 text-xs font-semibold uppercase tracking-widest">
+          <span>{currentTrip.startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
           <span>{currentTrip.paxCount} Pax</span>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {currentTrip.days.map((day) => (
-          <button
-            key={day.dayNumber}
-            onClick={() => setActiveDayNumber(day.dayNumber)}
-            className={`w-full text-left p-4 rounded-2xl transition-all border ${
-              day.dayNumber === activeDayNumber 
-                ? 'bg-slate-800 border-slate-700 shadow-md' 
-                : 'bg-transparent border-transparent hover:bg-slate-800/50'
-            }`}
-          >
-            <div className="flex justify-between items-center">
-              <h3 className={`font-bold ${day.dayNumber === activeDayNumber ? 'text-white' : 'text-slate-400'}`}>Day {day.dayNumber}</h3>
-              <span className="text-[9px] text-slate-500 font-bold">{day.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+        {currentTrip.days.map((day) => {
+          const isActive = day.dayNumber === activeDayNumber
+          return (
+            <div key={day.dayNumber} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${isActive ? 'bg-slate-800 border-slate-700 shadow-lg' : 'bg-transparent border-transparent hover:bg-slate-800/30'}`}>
+              <button
+                onClick={() => setActiveDayNumber(day.dayNumber)}
+                className="w-full text-left p-5 flex justify-between items-center"
+              >
+                <div>
+                  <h3 className={`font-bold text-lg mb-1 ${isActive ? 'text-white' : 'text-slate-300'}`}>Day {day.dayNumber}</h3>
+                  <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{day.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                </div>
+                {!isActive && day.events.length > 0 && (
+                  <div className="flex -space-x-1.5">
+                    {day.events.slice(0, 3).map(e => (
+                      <div key={e.id} className="w-6 h-6 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[8px] text-slate-300">
+                        {e.type.charAt(0)}
+                      </div>
+                    ))}
+                    {day.events.length > 3 && (
+                      <div className="w-6 h-6 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[9px] font-bold text-slate-300">
+                        +{day.events.length - 3}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </button>
+              {isActive && (
+                <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 fade-in duration-300">
+                  {day.events.length === 0 ? (
+                    <p className="text-sm text-slate-500 font-medium bg-slate-900/50 p-4 rounded-xl text-center border border-slate-700 border-dashed">No events scheduled.</p>
+                  ) : (
+                    <div className="flex flex-col gap-3 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
+                      {day.events.map((e, i) => (
+                        <div key={e.id} className="relative flex items-center justify-between group pl-8">
+                          <div className="absolute left-1.5 w-2 h-2 rounded-full bg-slate-400 z-10 group-hover:bg-rose-500 transition-colors" />
+                          <span className="text-slate-300 text-sm font-medium truncate pr-4">{e.title}</span>
+                          <span className="text-slate-500 text-[10px] font-bold font-mono shrink-0">{e.startTime}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            {day.events.length > 0 && (
-               <div className="flex gap-1 mt-2">
-                 {day.events.slice(0, 5).map(e => (
-                   <div key={e.id} className="w-1.5 h-1.5 rounded-full bg-rose-500/50" />
-                 ))}
-               </div>
-            )}
-          </button>
-        ))}
+          )
+        })}
+      </div>
+      <div className="p-6 bg-slate-900 border-t border-slate-800 shrink-0">
+        <button
+          onClick={() => setViewState('checkout')}
+          className="w-full bg-rose-600 hover:bg-rose-500 text-white px-6 py-4 rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-rose-600/20"
+        >
+          Proceed to Checkout
+        </button>
       </div>
     </div>
   ) : null
@@ -76,7 +108,7 @@ export function ProBuilderMain() {
     <ThreePaneLayout
       sidebar={sidebar}
       content={<BuilderWorkspace />}
-      map={<ExploreMap businesses={mapEntities as any} selectedId={null} />}
+      map={<ExploreMap businesses={mapEntities as any} selectedId={null} onSelectBusiness={() => {}} />}
       showMap={true}
     />
   )

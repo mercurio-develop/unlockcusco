@@ -40,7 +40,7 @@ const categories = [
     accent: "group-hover:text-emerald-600",
   },
   {
-    title: "Transport & Taxis",
+    title: "Business & Taxis",
     description: "Reliable drivers and local combis across the Sacred Valley.",
     icon: Car,
     href: transportPath(),

@@ -46,9 +46,7 @@ async function main() {
       await prisma.business.update({
         where: { id: b.id },
         data: {
-          businessType: 'service',
           category: 'Taxi',
-          categorySlug: 'taxi',
           serviceZones: JSON.stringify(zones),
         },
       });

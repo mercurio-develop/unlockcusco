@@ -24,7 +24,7 @@ function locationSlug(lat: number, lng: number): string {
   return closest.slug
 }
 
-function categorySlug(category: string): string {
+function category(category: string): string {
   return category
     .toLowerCase()
     .normalize('NFD')
@@ -40,10 +40,10 @@ async function main() {
   let updated = 0
   for (const b of businesses) {
     const locSlug = locationSlug(b.lat ?? 0, b.lng ?? 0)
-    const catSlug = categorySlug(b.category)
+    const catSlug = category(b.category)
     await prisma.business.update({
       where: { id: b.id },
-      data: { locationSlug: locSlug, categorySlug: catSlug }
+      data: { locationSlug: locSlug, category: catSlug }
     })
     updated++
   }
@@ -52,12 +52,12 @@ async function main() {
 
   // Print the unique combinations for reference
   const combos = await prisma.business.groupBy({
-    by: ['locationSlug', 'categorySlug'],
+    by: ['locationSlug', 'category'],
     _count: true,
-    orderBy: [{ locationSlug: 'asc' }, { categorySlug: 'asc' }]
+    orderBy: [{ locationSlug: 'asc' }, { category: 'asc' }]
   })
   console.log(`\n${combos.length} unique pSEO routes:`)
-  combos.forEach(c => console.log(`  /explore/${c.locationSlug}/${c.categorySlug} (${c._count})`))
+  combos.forEach(c => console.log(`  /explore/${c.locationSlug}/${c.category} (${c._count})`))
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())

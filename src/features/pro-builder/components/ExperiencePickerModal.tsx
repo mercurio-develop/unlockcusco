@@ -60,7 +60,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
   const mealEvent = eventId ? day?.events.find(e => e.id === eventId && e.type === 'MEAL') as MealEvent | undefined : undefined;
   
   const selectedPackageIds = mealEvent 
-    ? (mealEvent.packageId ? [mealEvent.packageId] : []) 
+    ? (mealEvent.name ? [mealEvent.name] : []) 
     : experienceEvents.map(e => e.packageId)
 
   useEffect(() => {
@@ -118,13 +118,13 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId }: E
   })
 
   const togglePackage = (pkg: MinimizedPackage) => {
-    const isSelected = selectedPackageIds.includes(pkg.id)
+    const isSelected = mealEvent ? selectedPackageIds.includes(pkg.title) : selectedPackageIds.includes(pkg.id)
     
     if (mealEvent) {
       if (isSelected) {
-        updateEventInDay(dayNumber, mealEvent.id, { packageId: undefined, experienceTitle: undefined })
+        updateEventInDay(dayNumber, mealEvent.id, { name: "Lunch" })
       } else {
-        updateEventInDay(dayNumber, mealEvent.id, { packageId: pkg.id, experienceTitle: pkg.title })
+        updateEventInDay(dayNumber, mealEvent.id, { name: pkg.title })
         onClose() // Close immediately after selecting for a meal
       }
       return;

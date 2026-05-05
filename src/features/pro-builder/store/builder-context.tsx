@@ -69,7 +69,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
           if (addedIndex > 0) {
             const prevEvent = newEvents[addedIndex - 1]
             if (prevEvent.type === 'TRANSPORT') {
-              const locationStr = event.type === 'MEAL' ? (event.experienceTitle || event.location || event.name) : event.title
+              const locationStr = event.type === 'MEAL' ? (event.location || event.name) : event.title
               newEvents[addedIndex - 1] = {
                 ...prevEvent,
                 to: locationStr || prevEvent.to
@@ -84,7 +84,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
           if (addedIndex > 0) {
             const prevEvent = newEvents[addedIndex - 1]
             if (prevEvent.type === 'MEAL' || prevEvent.type === 'EXPERIENCE') {
-              const locationStr = prevEvent.type === 'MEAL' ? (prevEvent.experienceTitle || prevEvent.location || prevEvent.name) : prevEvent.title
+              const locationStr = prevEvent.type === 'MEAL' ? (prevEvent.location || prevEvent.name) : prevEvent.title
               newEvents[addedIndex] = {
                 ...event,
                 from: locationStr || event.from
@@ -125,13 +125,13 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
             const prevEvt = i > 0 ? events[i - 1] : null;
             let newFrom = event.from;
             if (prevEvt && (prevEvt.type === 'MEAL' || prevEvt.type === 'EXPERIENCE')) {
-              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.experienceTitle || prevEvt.location || prevEvt.name) : prevEvt.title;
+              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.location || prevEvt.name) : prevEvt.title;
             }
             
             const nextEvt = i < events.length - 1 ? events[i + 1] : null;
             let newTo = event.to;
             if (nextEvt && (nextEvt.type === 'MEAL' || nextEvt.type === 'EXPERIENCE')) {
-              newTo = nextEvt.type === 'MEAL' ? (nextEvt.experienceTitle || nextEvt.location || nextEvt.name) : nextEvt.title;
+              newTo = nextEvt.type === 'MEAL' ? (nextEvt.location || nextEvt.name) : nextEvt.title;
             }
             
             return { ...event, from: newFrom || event.from, to: newTo || event.to };
@@ -170,13 +170,13 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
             const prevEvt = i > 0 ? events[i - 1] : null;
             let newFrom = event.from;
             if (prevEvt && (prevEvt.type === 'MEAL' || prevEvt.type === 'EXPERIENCE')) {
-              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.experienceTitle || prevEvt.location || prevEvt.name) : prevEvt.title;
+              newFrom = prevEvt.type === 'MEAL' ? (prevEvt.location || prevEvt.name) : prevEvt.title;
             }
             
             const nextEvt = i < events.length - 1 ? events[i + 1] : null;
             let newTo = event.to;
             if (nextEvt && (nextEvt.type === 'MEAL' || nextEvt.type === 'EXPERIENCE')) {
-              newTo = nextEvt.type === 'MEAL' ? (nextEvt.experienceTitle || nextEvt.location || nextEvt.name) : nextEvt.title;
+              newTo = nextEvt.type === 'MEAL' ? (nextEvt.location || nextEvt.name) : nextEvt.title;
             }
             
             return { ...event, from: newFrom || event.from, to: newTo || event.to };

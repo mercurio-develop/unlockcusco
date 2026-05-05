@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { ServicesView } from "@/features/services/components/services-view"
-import { mapBusinessToUniversal } from "@/lib/utils/entity-mappers"
+
 
 const LOCATIONS = ["pisac", "urubamba", "ollantaytambo", "cusco", "chinchero", "maras"]
 const CATEGORIES = ["comida", "cafe", "bar", "vegan", "bakery"]
@@ -15,7 +15,7 @@ export default async function RestaurantsPage({
 
   const where: any = { category: { in: ["Comida", "Cafe", "Dining"] } }
   if (loc) where.locationSlug = loc
-  if (cat) where.categorySlug = cat
+  if (cat) where.category = cat
   if (query) {
     where.OR = [
       { name: { contains: query } },
@@ -27,7 +27,7 @@ export default async function RestaurantsPage({
     orderBy: [{ isClaimed: "desc" }, { rating: "desc" }],
   })
 
-  const universalEntities = restaurants.map(mapBusinessToUniversal)
+  const universalEntities = restaurants
 
   return (
     <div className="bg-white min-h-screen">

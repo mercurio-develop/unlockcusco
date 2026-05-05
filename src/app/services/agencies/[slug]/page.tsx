@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 import { getAgencyBySlug } from "@/features/agencies/queries"
 import { Navbar } from "@/components/layout/navbar"
-import { ExpeditionOnePage } from "@/components/agencies/layouts/ExpeditionOnePage"
-import { SanctuaryOnePage } from "@/components/agencies/layouts/SanctuaryOnePage"
+import { ExpeditionOnePage } from "@/features/agencies/components/layouts/ExpeditionOnePage"
+import { SanctuaryOnePage } from "@/features/agencies/components/layouts/SanctuaryOnePage"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -52,9 +52,9 @@ export default async function AgencyPage({ params }: { params: Promise<{ slug: s
       
       <main>
         {isSanctuary ? (
-          <SanctuaryOnePage agency={agency} />
+          <SanctuaryOnePage business={ agency } />
         ) : (
-          <ExpeditionOnePage agency={agency} />
+          <ExpeditionOnePage business={ agency } />
         )}
       </main>
     </div>

@@ -45,14 +45,12 @@ async function main() {
           name: bName,
           slug: bSlug,
           category: cat.category,
-          categorySlug: cat.slug,
           locationSlug: town.slug,
           lat: lat,
           lng: lng,
           rating: 4.0 + Math.random(), // 4.0 to 5.0
           reviewsCount: Math.floor(Math.random() * 100) + 10,
           imageUrl: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
-          businessType: cat.type,
           serviceZones: cat.type === 'service' ? JSON.stringify([town.slug]) : "[]"
         }
       })

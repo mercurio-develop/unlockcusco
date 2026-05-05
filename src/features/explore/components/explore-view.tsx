@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { LayoutGrid, Map as RouteMap, CalendarDays, Loader2 } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { ExploreSearch } from "./explore-search"
-import { EntityCard } from "@/features/business/components/entity-card"
+import { BusinessCard } from "@/features/business/components/business-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
 import { ItineraryPanel } from "./itinerary-panel"
@@ -32,19 +32,24 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [page, setPage] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [localSearch, setLocalSearch] = useState("")
   
   const searchParams = useSearchParams()
   const { ref, inView } = useInView()
   const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
 
   // Sync when server re-renders
-  useEffect(() => {
+  const [prevInitialBusinesses, setPrevInitialBusinesses] = useState(initialBusinesses)
+
+  if (initialBusinesses !== prevInitialBusinesses) {
+    setPrevInitialBusinesses(initialBusinesses)
     setBusinesses(initialBusinesses)
     setHasMore(initialHasMore)
     setPage(0)
+  }
+
+  useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
-  }, [initialBusinesses, initialHasMore, initialSelectedId, setSelectedId])
+  }, [initialSelectedId, setSelectedId])
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return
@@ -66,16 +71,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
     }
   }, [page, hasMore, isLoading, searchParams])
 
-  useEffect(() => { if (inView && !localSearch) loadMore() }, [inView, loadMore, localSearch])
-
-  const filteredEntities = useMemo(() => 
-    businesses
-      .filter(b => {
-        if (!localSearch) return true
-        const s = localSearch.toLowerCase()
-        return b.name.toLowerCase().includes(s) || b.category.toLowerCase().includes(s)
-      })
-  , [businesses, localSearch])
+  useEffect(() => { if (inView) loadMore() }, [inView, loadMore])
 
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm">
@@ -90,8 +86,6 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
       {panelMode === "categories" && (
         <ExploreSearch 
           initialQuery={initialQuery} 
-          localSearch={localSearch}
-          onLocalSearchChange={setLocalSearch}
         />
       )}
     </div>
@@ -103,12 +97,10 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
         <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />
       ) : panelMode === "categories" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20">
-           {filteredEntities.map(e => (
-             <EntityCard key={e.id} entity={e} isHighlighted={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
+           {businesses.map(e => (
+             <BusinessCard key={e.id} business={e} isHighlighted={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
            ))}
-           {!localSearch && (
-             <div ref={ref} className="col-span-full h-10 flex justify-center">{isLoading && <Loader2 className="animate-spin text-rose-600" />}</div>
-           )}
+           <div ref={ref} className="col-span-full h-10 flex justify-center">{isLoading && <Loader2 className="animate-spin text-rose-600" />}</div>
         </div>
       ) : (
         <ItineraryPanel />

@@ -635,7 +635,7 @@ export const packages: Package[] = [
         title: "Quishuarani – Cuncani – Lares",
         titleEn: "Quishuarani – Cuncani – Lares",
         description: "06:00 AM – Desayuno. 07:30 AM – Caminata de 4 horas hacia la comunidad de Cuncani. 11:00 AM – Refrigerio. 12:00 PM – Traslado en transporte privado a las aguas termales de Lares (45 minutos). Tiempo libre para relajarse (2 horas). 03:00 PM – Transporte hacia el Valle Sagrado (aprox. 2.5 horas). 05:30 PM – Llegada a Calca.",
-        descriptionEn: "06:00 AM – Breakfast. 07:30 AM – 4-hour hike to the community of Cuncani. 11:00 AM – Box Lunch. 12:00 PM – Transfer to the Lares Hot Springs (45 minutes). Relaxation time: 2 hours. 03:00 PM – Transport to the Sacred Valley (approx. 2.5 hours). 05:30 PM – Arrival to Calca.",
+        descriptionEn: "06:00 AM – Breakfast. 07:30 AM – 4-hour hike to the community of Cuncani. 11:00 AM – Box Lunch. 12:00 PM – Transfer to the Lares Hot Springs (45 minutes). Relaxation time: 2 hours. 03:00 PM – Business to the Sacred Valley (approx. 2.5 hours). 05:30 PM – Arrival to Calca.",
         highlights: ["Aguas termales de Lares"],
         highlightsEn: ["Lares Hot Springs"],
         meals: "Desayuno, Almuerzo",

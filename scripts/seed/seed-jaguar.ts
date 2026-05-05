@@ -22,6 +22,7 @@ async function main() {
   const agency = await prisma.business.upsert({
     where: { slug: "jaguar-llaqta" },
     update: {
+      category: "AGENCY",
       tagline: "INNER TRAVEL",
       description: "Founded by Álvaro Mauricio Ugarte Forno, Jaguar Llaqta specialises in off-the-beaten-path trekking, Andean spiritual experiences, and deep community encounters. Every route is chosen for its raw authenticity — the kind that disappears when the masses arrive.",
       guideName: "Álvaro Mauricio Ugarte Forno",
@@ -34,6 +35,7 @@ async function main() {
     create: {
       slug: "jaguar-llaqta",
       name: "Jaguar Llaqta",
+      category: "AGENCY",
       tagline: "INNER TRAVEL",
       description: "Founded by Álvaro Mauricio Ugarte Forno, Jaguar Llaqta specialises in off-the-beaten-path trekking, Andean spiritual experiences, and deep community encounters. Every route is chosen for its raw authenticity — the kind that disappears when the masses arrive.",
       guideName: "Álvaro Mauricio Ugarte Forno",

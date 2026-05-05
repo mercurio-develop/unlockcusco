@@ -2,7 +2,7 @@ import { prisma } from "../src/lib/prisma";
 
 async function check() {
   try {
-    const agencies = await prisma.agency.findMany();
+    const agencies = await prisma.business.findMany();
     console.log("Agencies found:", agencies.length);
     if (agencies.length > 0) {
       console.log("First agency keys:", Object.keys(agencies[0]));

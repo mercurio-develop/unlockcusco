@@ -11,7 +11,7 @@ export async function GET(
     // 1. Try to find in TourPackage
     const tourPackage = await prisma.tourPackage.findUnique({
       where: { id },
-      include: { agency: true }
+      include: { business: true }
     })
 
     if (tourPackage) {
@@ -20,7 +20,7 @@ export async function GET(
         title: tourPackage.title,
         tagline: tourPackage.tagline,
         description: tourPackage.description,
-        heroImage: tourPackage.heroImage || tourPackage.agency?.imageUrl,
+        heroImage: tourPackage.heroImage || tourPackage.business?.imageUrl,
         sector: tourPackage.sector,
         pace: tourPackage.pace,
         difficulty: tourPackage.difficulty,
@@ -39,8 +39,8 @@ export async function GET(
       return Response.json({
         id: business.id,
         title: business.name,
-        tagline: business.reviewSummary,
-        description: business.reviewSummary || `A ${business.category} in ${business.locationSlug}.`,
+        tagline: business.tagline || business.category,
+        description: business.description || `A ${business.category} in ${business.locationSlug}.`,
         heroImage: business.imageUrl,
         sector: business.locationSlug || 'VALLE_SAGRADO',
         pace: 'FLEXIBLE',
@@ -51,9 +51,9 @@ export async function GET(
       })
     }
 
-    // 3. Try to find in Transport
-    const transport = await prisma.transport.findUnique({
-      where: { id }
+    // 3. Try to find in Business
+    const transport = await prisma.business.findFirst({
+      where: { id, category: 'TRANSPORT' }
     })
 
     if (transport) {
@@ -72,9 +72,9 @@ export async function GET(
       })
     }
 
-    // 4. Try to find in Therapist
-    const therapist = await prisma.therapist.findUnique({
-      where: { id }
+    // 4. Try to find in Business
+    const therapist = await prisma.business.findFirst({
+      where: { id, category: 'WELLNESS' }
     })
 
     if (therapist) {
@@ -85,9 +85,9 @@ export async function GET(
         id: therapist.id,
         title: therapist.name,
         tagline: therapist.tagline,
-        description: therapist.bio || `Verified healer and sanctuary in ${therapist.location}.`,
-        heroImage: therapist.imageUrl || therapist.heroImage,
-        sector: therapist.location || 'VALLE_SAGRADO',
+        description: therapist.description || `Verified healer and sanctuary in ${therapist.locationSlug}.`,
+        heroImage: therapist.imageUrl || therapist.heroImages?.[0],
+        sector: therapist.locationSlug || 'VALLE_SAGRADO',
         pace: 'RELAXED',
         difficulty: 'EASY',
         durationStr: '60-90 min',

@@ -12,8 +12,14 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
+    // Helicone External Observability Integration
     const google = createGoogleGenerativeAI({
-      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+      baseURL: process.env.HELICONE_API_KEY ? 'https://gateway.helicone.ai/v1beta' : undefined,
+      headers: process.env.HELICONE_API_KEY ? {
+        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+        'Helicone-Property-Session': 'concierge-chat'
+      } : undefined
     });
 
     const { messages, userLat, userLng, localTime } = await req.json();

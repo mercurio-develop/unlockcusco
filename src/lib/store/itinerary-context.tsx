@@ -13,15 +13,15 @@ export function useItinerary() {
   return {
     ...trip,
     // Add any legacy mapping here if names changed
-    removeWaypoint: (id: string) => trip.removeEvent(trip.activeDayNumber || 1, id),
+    removeWaypoint: (id: string | number) => trip.removeEvent(trip.activeDayNumber || 1, String(id)),
     // Placeholder for other missing methods to prevent immediate crashes
-    setStartAnchorLocation: () => {},
-    setEndAnchorLocation: () => {},
-    selectBasecamp: () => {},
-    setExchangeTargetIndex: () => {},
-    swapDriverAlternative: () => {},
-    moveWaypoint: () => {},
-    truncateAfterWaypoint: () => {}
+    setStartAnchorLocation: (...args: any[]) => {},
+    setEndAnchorLocation: (...args: any[]) => {},
+    selectBasecamp: (...args: any[]) => {},
+    setExchangeTargetIndex: (...args: any[]) => {},
+    swapDriverAlternative: (...args: any[]) => {},
+    moveWaypoint: (...args: any[]) => {},
+    truncateAfterWaypoint: (...args: any[]) => {}
   };
 }
 

@@ -127,10 +127,10 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
              { category: { equals: category } },
              {
                OR: [
-                 { categorySlug: { in: keywords } },
+                 { category: { in: keywords } },
                  { name: { contains: desire } },
                  ...keywords.map(kw => ({ name: { contains: kw } })),
-                 ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
+                 ...keywords.map(kw => ({ category: { contains: kw } })),
                ]
              }
           ]
@@ -148,10 +148,10 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
             id: { notIn: Array.from(usedBusinessIds) },
             OR: [
               { category: { equals: category } },
-              { categorySlug: { in: keywords } },
+              { category: { in: keywords } },
               { name: { contains: desire } },
               ...keywords.map(kw => ({ name: { contains: kw } })),
-              ...keywords.map(kw => ({ categorySlug: { contains: kw } })),
+              ...keywords.map(kw => ({ category: { contains: kw } })),
             ],
           },
           orderBy: { rating: 'desc' },
@@ -246,9 +246,9 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const transitKm = calculateDistance(fromNode.coords.lat, fromNode.coords.lng, toNode.coords.lat, toNode.coords.lng);
       const transitCost = Math.max(15, Math.round(transitKm * 1.8));
 
-      const taxiRows = await prisma.transport.findMany({
+      const taxiRows = await prisma.business.findMany({
         where: {
-          category: 'Taxi',
+          category: 'TRANSPORT',
         }
       });
 
@@ -298,7 +298,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         // Add public transport option
         alternatives.push({
           id: 'colectivo-' + fromNode.locationStr,
-          name: 'Public Transport (Colectivo)',
+          name: 'Public Business (Colectivo)',
           priceUsd: Math.max(1, Math.round(transitKm * 0.15)),
           whatsapp: undefined,
         });
@@ -333,7 +333,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         const fallbackAlternatives = [
           { id: 'sv-transfers-' + fromNode.locationStr, name: 'Sacred Valley Transfers', priceUsd: Math.max(10, transitCost - 5), whatsapp: undefined },
           { id: 'moto-' + fromNode.locationStr, name: 'Moto Taxi (Torito)', priceUsd: Math.max(2, Math.round(transitKm * 0.5)), whatsapp: undefined },
-          { id: 'colectivo-' + fromNode.locationStr, name: 'Public Transport (Colectivo)', priceUsd: Math.max(1, Math.round(transitKm * 0.15)), whatsapp: undefined },
+          { id: 'colectivo-' + fromNode.locationStr, name: 'Public Business (Colectivo)', priceUsd: Math.max(1, Math.round(transitKm * 0.15)), whatsapp: undefined },
           walkOption
         ];
 

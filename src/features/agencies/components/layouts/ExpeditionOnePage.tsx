@@ -57,14 +57,14 @@ function PackageCard({ pkg, agencyPhone, agencyName, onSelectPackage }: { pkg: a
   )
 }
 
-export function ExpeditionOnePage({ agency }: { agency: any }) {
+export function ExpeditionOnePage({ business }: { business: any }) {
   const [filter, setFilter] = useState<'ALL' | 'MULTI_DAY' | 'SINGLE_DAY'>('ALL')
   const [selectedExperienceId, setSelectedExperienceId] = useState<string>("")
 
   // Parse Dynamic Features
   let features = []
   try {
-    features = JSON.parse(agency.featuresJson || "[]")
+    features = JSON.parse(business.featuresJson || "[]")
   } catch (e) {
     features = []
   }
@@ -78,7 +78,7 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
     ]
   }
 
-  const visionMission = agency.visionMission || "We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people."
+  const visionMission = business.visionMission || "We create transcendental experiences between the traveler and the living culture of Peru. We hold deep respect for ancestral culture and its sacred sites. We seek to generate experiences that change people."
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth"
@@ -87,7 +87,7 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
     }
   }, [])
 
-  const packages = agency.tourPackages || []
+  const packages = business.tourPackages || []
   
   const displayedPackages = packages.filter((p: any) => {
     if (filter === 'ALL') return true
@@ -101,7 +101,7 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
       {/* Sticky Nav - Hidden as per user request */}
       <nav className="hidden fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="font-bold text-xl text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{agency.name}</span>
+          <span className="font-bold text-xl text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{business.name}</span>
           <ul className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600 uppercase tracking-widest">
             <li><a href="#about" className="hover:text-[var(--accent)] transition-colors">Why Us</a></li>
             <li><a href="#expeditions" className="hover:text-[var(--accent)] transition-colors">Expeditions</a></li>
@@ -115,8 +115,8 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
         <div className="absolute inset-0">
           <div className="absolute inset-0 overflow-hidden blur-[2px]">
             <img 
-              src={agency.imageUrl || "/images/og-default.jpg"} 
-              alt={agency.name} 
+              src={business.imageUrl || "/images/og-default.jpg"} 
+              alt={business.name} 
               className="w-full h-full object-cover object-[center_20%]" 
             />
           </div>
@@ -134,21 +134,21 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
             className="text-6xl md:text-7xl lg:text-8xl text-white uppercase tracking-widest"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            {agency.name}
+            {business.name}
           </h2>
 
-          {agency.tagline && (
+          {business.tagline && (
             <h1 
               className="text-2xl md:text-3xl text-[var(--accent)] uppercase tracking-wide"
               style={{ fontFamily: 'var(--font-display)' }}
             >
-              {agency.tagline}
+              {business.tagline}
             </h1>
           )}
 
-          {agency.description && (
+          {business.description && (
             <p className="text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto leading-relaxed">
-              {agency.description.substring(0, 150)}{agency.description.length > 150 ? "..." : ""}
+              {business.description.substring(0, 150)}{business.description.length > 150 ? "..." : ""}
             </p>
           )}
 
@@ -262,8 +262,8 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
                 <PackageCard 
                   key={pkg.id} 
                   pkg={pkg} 
-                  agencyPhone={agency.contactPhone || ""} 
-                  agencyName={agency.name} 
+                  agencyPhone={business.contactPhone || ""} 
+                  agencyName={business.name} 
                   onSelectPackage={(id) => setSelectedExperienceId(id)}
                 />
               ))}
@@ -274,10 +274,10 @@ export function ExpeditionOnePage({ agency }: { agency: any }) {
 
       {/* Form */}
       <AvailabilityForm 
-        agencyId={agency.id}
-        agencyName={agency.name} 
-        whatsapp={agency.contactPhone}
-        packages={agency.tourPackages}
+        businessId={business.id}
+        agencyName={business.name} 
+        whatsapp={business.contactPhone}
+        packages={business.tourPackages}
         selectedExperienceId={selectedExperienceId}
       />
 

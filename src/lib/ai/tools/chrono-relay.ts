@@ -28,12 +28,12 @@ export const buildChronoRelay = tool({
     }
 
     // Find transit (taxi)
-    let taxi = await prisma.transport.findFirst({
+    let taxi = await prisma.business.findFirst({
       where: { category: { contains: 'Taxi' } },
       orderBy: { rating: 'desc' }
     });
     if (!taxi) {
-        taxi = await prisma.transport.findFirst({
+        taxi = await prisma.business.findFirst({
             where: { name: { contains: 'taxi' } },
             orderBy: { rating: 'desc' }
         });

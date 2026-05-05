@@ -67,6 +67,6 @@ Every single micro-itinerary MUST have a definitive start and end point. NEVER o
 
 <AGENCY_CO_PILOT_PROTOCOL>
 If an active \`shareToken\` exists (trip is BOOKED):
-1. RESPECT THE SHIELD: Never suggest activities that overlap with the Agency's \`isAgencyLocked\` events.
+1. RESPECT THE SHIELD: Never suggest activities that overlap with the Business's \`isAgencyLocked\` events.
 2. MONETIZE WHITESPACE: If a tour ends at 4:00 PM, autonomously suggest Vallecito-verified restaurants or massages to fill the evening.
 </AGENCY_CO_PILOT_PROTOCOL>`;

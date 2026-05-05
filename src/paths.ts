@@ -7,8 +7,8 @@ export const servicesPath = () => "/services";
 
 export const travelDesignPath = () => "/travel-design";
 
-export const exploreCategoryPath = (locationSlug: string, categorySlug: string) => 
-  `/explore/${locationSlug}/${categorySlug}`;
+export const exploreCategoryPath = (locationSlug: string, category: string) => 
+  `/explore/${locationSlug}/${category}`;
 
 export const businessPath = (businessId: string) => 
   `/business/${businessId}`;

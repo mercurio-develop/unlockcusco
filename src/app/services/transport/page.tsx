@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { ServicesView } from "@/features/services/components/services-view"
-import { mapTransportToUniversal } from "@/lib/utils/entity-mappers"
+
 import { Navbar } from "@/components/layout/navbar"
 
 const LOCATIONS = ["pisac", "urubamba", "ollantaytambo", "cusco", "airport", "calca", "maras"]
@@ -31,18 +31,18 @@ export default async function TransportPage({
     ]
   }
 
-  const transport = await prisma.transport.findMany({
+  const transport = await prisma.business.findMany({
     where,
     orderBy: { rating: "desc" },
   })
 
-  const universalEntities = transport.map(mapTransportToUniversal)
+  const universalEntities = transport
 
   return (
     <div className="bg-white min-h-screen">
       <ServicesView
         title="Reliable journeys through the heart of the valley."
-        subtitle="The Transport Network"
+        subtitle="The Business Network"
         description="We partner with the most trusted local drivers and transfer services. From private airport pickups to rugged 4x4 mountain exploration, we ensure your journey is as smooth as the destination."
         entities={universalEntities}
         basePath="/services/transport"

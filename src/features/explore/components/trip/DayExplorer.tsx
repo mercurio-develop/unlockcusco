@@ -208,7 +208,7 @@ export function DayExplorer() {
                             >
                               <div className="flex flex-col">
                                 <span className="font-bold group-hover/btn:text-rose-700">{alt.name}</span>
-                                {alt.id?.includes('colectivo') && <span className="text-[9px] text-slate-400">Public Transport</span>}
+                                {alt.id?.includes('colectivo') && <span className="text-[9px] text-slate-400">Public Business</span>}
                               </div>
                               <span className="font-mono text-slate-500 bg-slate-50 px-2 py-0.5 rounded group-hover/btn:bg-rose-100 group-hover/btn:text-rose-700 transition-colors">${alt.priceUsd}</span>
                             </button>
@@ -422,7 +422,7 @@ export function DayExplorer() {
                             >
                               <div className="flex flex-col">
                                 <span className="font-bold group-hover/btn:text-rose-700">{alt.name}</span>
-                                {alt.id?.includes('colectivo') && <span className="text-[9px] text-slate-400">Public Transport</span>}
+                                {alt.id?.includes('colectivo') && <span className="text-[9px] text-slate-400">Public Business</span>}
                               </div>
                               <span className="font-mono text-slate-500 bg-slate-50 px-2 py-0.5 rounded group-hover/btn:bg-rose-100 group-hover/btn:text-rose-700 transition-colors">${alt.priceUsd}</span>
                             </button>

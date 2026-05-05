@@ -5,7 +5,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface RequestData {
-  agencyId: string;
+  businessId: string;
   agencyName: string;
   agencyEmail: string;
   userName: string;
@@ -25,7 +25,7 @@ export async function sendAvailabilityRequest(data: RequestData) {
   try {
     const { agencyName, agencyEmail, userName, userWhatsapp, date, experienceTitle, notes } = data;
 
-    // Send to Agency
+    // Send to Business
     await resend.emails.send({
       from: "Vallecito <concierge@vallecito.pe>",
       to: agencyEmail || "reservas@jaguarllaqta.com", // Fallback for now

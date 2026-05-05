@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { agenciesPath } from "@/paths"
 
-export function AgencyHero({ agency }: { agency: any }) {
+export function AgencyHero({ business }: { business: any }) {
   const router = useRouter()
 
   return (
@@ -12,8 +12,8 @@ export function AgencyHero({ agency }: { agency: any }) {
       {/* Hero Image with Gradient */}
       <div className="absolute inset-0">
         <img 
-          src={agency.imageUrl} 
-          alt={agency.name} 
+          src={business.imageUrl} 
+          alt={business.name} 
           className="w-full h-full object-cover opacity-60" 
         />
         <div className="absolute inset-0 bg-linear-to-b from-[var(--primary)]/60 via-transparent to-[var(--primary)]" />
@@ -35,13 +35,13 @@ export function AgencyHero({ agency }: { agency: any }) {
       {/* Content */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-6">
         <span className="text-[var(--accent)] font-bold tracking-[0.4em] uppercase text-xs mb-6">
-          Authorized Agency Partner
+          Authorized Business Partner
         </span>
         <h1 className="text-6xl md:text-8xl font-[var(--font-display)] text-white tracking-tighter mb-4 leading-tight">
-          {agency.name}
+          {business.name}
         </h1>
         <p className="text-xl md:text-2xl text-white/90 font-light italic tracking-wide max-w-2xl">
-          {agency.tagline}
+          {business.tagline}
         </p>
       </div>
     </div>

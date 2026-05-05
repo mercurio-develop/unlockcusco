@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
     return { title: 'Not Found | Vallecito' }
   }
 
-  const categoryName = business.categorySlug ? business.categorySlug.charAt(0).toUpperCase() + business.categorySlug.slice(1) : business.category
+  const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1) : business.category
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : "the Sacred Valley"
   const title = `${business.name} — ${categoryName} in ${locationName}`
   const description = `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`

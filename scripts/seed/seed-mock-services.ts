@@ -6,7 +6,7 @@ const MOCK_SERVICES = [
   // Therapists
   {
     name: "_MOCK_DATA_ Alma Spa & Masajes",
-    category: "Therapist",
+    category: "Business",
     lat: -13.3050, lng: -72.1150, // Urubamba
     locationSlug: "urubamba",
     serviceZones: '["urubamba", "ollantaytambo", "yucay"]',
@@ -16,7 +16,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Registros Akáshicos Cusco",
-    category: "Therapist",
+    category: "Business",
     lat: -13.5186, lng: -71.9790, // Cusco
     locationSlug: "cusco",
     serviceZones: '["cusco", "pisac"]',
@@ -26,7 +26,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Sonido Sanador Pisac",
-    category: "Therapist",
+    category: "Business",
     lat: -13.4228, lng: -71.8480, // Pisac
     locationSlug: "pisac",
     serviceZones: '["pisac", "calca"]',
@@ -36,7 +36,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Terapias Alternativas Kawsay",
-    category: "Therapist",
+    category: "Business",
     lat: -13.2583, lng: -72.2635, // Ollantaytambo
     locationSlug: "ollantaytambo",
     serviceZones: '["ollantaytambo", "machupicchu"]',
@@ -46,7 +46,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Bio-Magnetismo Valle Sagrado",
-    category: "Therapist",
+    category: "Business",
     lat: -13.3320, lng: -72.0520, // Maras (approx)
     locationSlug: "maras",
     serviceZones: '["maras", "moray", "urubamba"]',
@@ -58,7 +58,7 @@ const MOCK_SERVICES = [
   // Agencies
   {
     name: "_MOCK_DATA_ Andean Expeditions",
-    category: "Agency",
+    category: "Business",
     lat: -13.5200, lng: -71.9800, // Cusco
     locationSlug: "cusco",
     serviceZones: '["cusco", "sacred-valley", "machupicchu"]',
@@ -68,7 +68,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Urubamba Adventure Co.",
-    category: "Agency",
+    category: "Business",
     lat: -13.3030, lng: -72.1120, // Urubamba
     locationSlug: "urubamba",
     serviceZones: '["urubamba", "maras", "moray", "chinchero"]',
@@ -78,7 +78,7 @@ const MOCK_SERVICES = [
   },
   {
     name: "_MOCK_DATA_ Pacha Trekking",
-    category: "Agency",
+    category: "Business",
     lat: -13.4210, lng: -71.8490, // Pisac
     locationSlug: "pisac",
     serviceZones: '["pisac", "lares", "ausangate"]',
@@ -122,8 +122,7 @@ async function main() {
       create: {
         ...service,
         slug,
-        categorySlug: service.category.toLowerCase(),
-        businessType: 'service',
+        category: service.category.toLowerCase(),
         whatsapp: "999888777",
       }
     });

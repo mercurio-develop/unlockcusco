@@ -22,7 +22,7 @@ export function EventDetailsModal({ event, onClose }: { event: any, onClose: () 
         .catch(console.error)
         .finally(() => setLoading(false))
     } else {
-      // For other events (Transport, Meal, Note), just use the event data as generic details
+      // For other events (Business, Meal, Note), just use the event data as generic details
       setDetails({
         name: event.title || event.name || event.experienceTitle || "Activity Details",
         editorialCategory: event.type,

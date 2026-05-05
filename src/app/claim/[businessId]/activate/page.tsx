@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { ActivationFlow } from "@/components/claim/activation-flow"
+import { ActivationFlow } from "@/features/business/components/claim/activation-flow"
 
 interface ActivatePageProps {
   params: Promise<{ businessId: string }>

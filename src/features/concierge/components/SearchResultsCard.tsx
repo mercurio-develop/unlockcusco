@@ -23,9 +23,9 @@ export function SearchResultsCard({ businesses }: { businesses: any[] | any }) {
   const handleSelect = (business: any) => {
     if (business.category === 'Taxi' || business.type === 'TRANSPORT') {
       router.push('/services/transport');
-    } else if (business.category === 'Agency' || business.type === 'AGENCY') {
+    } else if (business.category === 'Business' || business.type === 'AGENCY') {
       router.push('/services/agencies');
-    } else if (['Therapist', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || business.type === 'THERAPIST') {
+    } else if (['Business', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || business.type === 'THERAPIST') {
       router.push('/services/healers');
     } else {
       setSelectedId(business.id);

@@ -17,10 +17,10 @@ export const getBusinessDetails = tool({
         },
         select: {
           name: true,
-          operatingHours: true,
-          contactPhone: true,
-          editorialSummary: true,
-          priceEstimate: true,
+          description: true,
+          whatsapp: true,
+          tagline: true,
+          priceTier: true,
           category: true,
         }
       });
@@ -31,10 +31,10 @@ export const getBusinessDetails = tool({
 
       return {
         name: business.name,
-        operatingHours: business.operatingHours || 'Not available',
-        contactPhone: business.contactPhone || 'Not available',
-        editorialSummary: business.editorialSummary || 'Not available',
-        priceEstimate: business.priceEstimate || 'Not available',
+        operatingHours: 'Not available',
+        contactPhone: business.whatsapp || 'Not available',
+        editorialSummary: business.description || business.tagline || 'Not available',
+        priceEstimate: business.priceTier || 'Not available',
         category: business.category || 'Not available',
       };
     } catch (e) {

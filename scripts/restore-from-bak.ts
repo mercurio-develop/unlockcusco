@@ -26,7 +26,7 @@ async function main() {
   await prisma.tourPackage.deleteMany();
   await prisma.lead.deleteMany();
   await prisma.business.deleteMany();
-  await prisma.agency.deleteMany();
+  await prisma.business.deleteMany();
 
   // 2. Restore Agencies
   const backupAgencies = loadJson('backup_agency.json');
@@ -34,26 +34,22 @@ async function main() {
     let slug = a.slug || a.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
     // Ensure unique slug
-    const existing = await prisma.agency.findUnique({ where: { slug } });
+    const existing = await prisma.business.findUnique({ where: { slug } });
     if (existing) {
       slug = `${slug}-${Math.floor(Math.random() * 1000)}`;
     }
 
-    await prisma.agency.create({
+    await prisma.business.create({
       data: {
         id: a.id,
         name: a.name,
         slug: slug,
-        contactPhone: a.contactPhone,
-        commissionRate: a.commissionRate,
+        whatsapp: a.contactPhone,
         tagline: a.tagline || "",
         description: a.description || "",
-        location: a.location || "Sacred Valley",
         imageUrl: a.imageUrl || "",
-        guideName: a.guideName || "",
-        specialties: a.specialties || "[]",
+        category: 'agency',
         contactEmail: a.contactEmail || "",
-        themeConfig: a.themeConfig || "{}"
       }
     });
   }
@@ -68,7 +64,7 @@ async function main() {
         id: b.id,
         slug: b.slug,
         name: b.name,
-        category: b.category,
+        category: b.category || "place",
         lat: b.lat,
         lng: b.lng,
         rating: b.rating,
@@ -77,13 +73,11 @@ async function main() {
         whatsapp: b.whatsapp,
         isClaimed: b.isClaimed === 1 || b.isClaimed === true,
         locationSlug: b.locationSlug || "",
-        categorySlug: b.categorySlug || "",
         instagramHandle: b.instagramHandle,
         instagramFollowers: b.instagramFollowers || 0,
         heroImages: b.heroImages || "[]",
-        businessType: b.businessType || "place",
         serviceZones: b.serviceZones || "[]",
-        elevationMeters: b.elevationMeters,
+        capacity: b.capacity,
         avgDwellTimeMins: b.avgDwellTimeMins || 60,
         marginTier: b.marginTier || "STANDARD",
         viewsCount: b.viewsCount || 0,
@@ -110,7 +104,7 @@ async function main() {
     await prisma.tourPackage.create({
       data: {
         id: p.id,
-        agencyId: p.agencyId,
+        businessId: p.agencyId,
         title: p.title,
         tagline: p.tagline || "",
         sector: p.sector,

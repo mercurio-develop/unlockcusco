@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const combinations = await prisma.business.groupBy({
-    by: ['locationSlug', 'categorySlug'],
+    by: ['locationSlug', 'category'],
   })
 
   const businesses = await prisma.business.findMany({
@@ -26,9 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   for (const combo of combinations) {
-    if (!combo.locationSlug || !combo.categorySlug) continue
+    if (!combo.locationSlug || !combo.category) continue
     urls.push({
-      url: `https://vallecito.app/explore/${combo.locationSlug}/${combo.categorySlug}`,
+      url: `https://vallecito.app/explore/${combo.locationSlug}/${combo.category}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,

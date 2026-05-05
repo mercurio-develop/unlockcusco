@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
-import type { UniversalTrip, TimelineEvent, TripDay, UniversalService } from '@/lib/types/trip';
+import type { Business } from "@prisma/client";
+import type { UniversalTrip, TimelineEvent, TripDay } from '@/lib/types/trip';
 
 type PanelMode = "categories" | "itinerary" | "macro" | "builder";
 type ViewState = "wizard" | "workspace" | "checkout";
@@ -29,7 +30,7 @@ interface TripContextType {
   addEvent: (dayNumber: number, event: TimelineEvent) => void;
   removeEvent: (dayNumber: number, eventId: string) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
-  insertWaypoint: (service: UniversalService) => void;
+  insertWaypoint: (service: Business) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -120,21 +121,64 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const insertWaypoint = useCallback((service: UniversalService) => {
+  const insertWaypoint = useCallback((service: Business) => {
     const dayNum = activeDayNumber || 1;
-    const newEvent: TimelineEvent = {
+    const isTransport = service.category === 'TRANSPORT';
+    const isStay = service.category === 'LODGING' || service.category === 'STAYS';
+    
+    // We build the object incrementally to satisfy the discriminated union
+    let newEvent: TimelineEvent;
+    
+    if (isTransport) {
+      newEvent = {
         id: crypto.randomUUID(),
-        type: service.type === 'TRANSPORT' ? 'TRANSPORT' : (service.category === 'Stays' ? 'STAY' : 'EXPERIENCE'),
+        type: 'TRANSPORT',
+        method: 'CAR', // Default
+        from: 'Cusco', // Default placeholder
+        to: service.name,
         startTime: '10:00',
         title: service.name,
-        lat: service.lat,
-        lng: service.lng,
-        priceUsd: service.basePriceUsd || 15,
         service: service
-    };
+      };
+    } else if (isStay) {
+      newEvent = {
+        id: crypto.randomUUID(),
+        type: 'STAY',
+        startTime: '10:00',
+        title: service.name,
+        lat: service.lat || undefined,
+        lng: service.lng || undefined,
+        service: service
+      };
+    } else {
+      newEvent = {
+        id: crypto.randomUUID(),
+        type: 'EXPERIENCE',
+        startTime: '10:00',
+        title: service.name,
+        lat: service.lat || undefined,
+        lng: service.lng || undefined,
+        service: service
+      };
+    }
 
     if (panelMode === 'builder' || currentTrip) {
         addEvent(dayNum, newEvent);
+    } else {
+        const newTrip: UniversalTrip = {
+            title: "My Trip",
+            startDate: new Date(),
+            endDate: new Date(),
+            paxCount: 1,
+            status: 'DRAFT',
+            days: [{
+                dayNumber: 1,
+                date: new Date(),
+                events: [newEvent]
+            }]
+        };
+        setCurrentTrip(newTrip);
+        setPanelMode('builder');
     }
   }, [activeDayNumber, addEvent, currentTrip, panelMode]);
 

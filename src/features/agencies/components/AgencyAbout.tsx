@@ -1,8 +1,8 @@
 import { MapPin } from "lucide-react"
 
-export function AgencyAbout({ agency }: { agency: any }) {
-  const specialties = JSON.parse(agency.specialties || "[]")
-  const initials = agency.guideName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)
+export function AgencyAbout({ business }: { business: any }) {
+  const specialties = JSON.parse(business.specialties || "[]")
+  const initials = business.guideName.split(' ').map((n: string) => n[0]).join('').substring(0, 2)
 
   return (
     <section className="bg-white py-24 px-6 md:px-12">
@@ -14,7 +14,7 @@ export function AgencyAbout({ agency }: { agency: any }) {
             Our Ancestral Mandate
           </h2>
           <div className="space-y-6 text-lg text-slate-500 font-light leading-relaxed">
-            <p>{agency.description}</p>
+            <p>{business.description}</p>
             <p>
               Every trek and ritual we lead is designed to honor the Apu (mountain spirits) and the Pachamama (Mother Earth). We don&apos;t just guide you through physical landscapes; we facilitate an inner descent into the wisdom of the high Andes.
             </p>
@@ -33,10 +33,10 @@ export function AgencyAbout({ agency }: { agency: any }) {
                 {initials}
               </div>
               <div>
-                <h4 className="font-[var(--font-display)] font-bold text-[var(--primary)]">{agency.guideName}</h4>
+                <h4 className="font-[var(--font-display)] font-bold text-[var(--primary)]">{business.guideName}</h4>
                 <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
                   <MapPin className="w-3 h-3" />
-                  {agency.location}
+                  {business.location}
                 </div>
               </div>
             </div>

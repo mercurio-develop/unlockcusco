@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { SecureManifestForm } from "@/components/checkout/SecureManifestForm"
+import { SecureManifestForm } from "@/features/checkout/components/SecureManifestForm"
 import { ChevronLeft, ChevronRight, MapPin, Clock, Navigation, Bed, ChevronDown, X, Download, Share, CheckCircle2 } from "lucide-react"
 import dynamic from "next/dynamic"
 import ReactMarkdown from 'react-markdown'
@@ -234,33 +234,59 @@ export function TripDashboard({ trip }: TripDashboardProps) {
               </div>
 
               {/* Sidebar Content */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide print:hidden">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide print:hidden">
                 {sidebarTab === "itinerary" && (
                   trip.days.map((day: any) => {
                     const isActive = day.dayNumber === activeDayNum
+                    let dayEvents = []
+                    try { dayEvents = JSON.parse(day.eventsJson || "[]") } catch(e) {}
+                    
                     return (
-                      <button
-                        key={day.dayNumber}
-                        onClick={() => {
-                          setActiveDayNum(day.dayNumber)
-                          setSelectedEventId(null)
-                        }}
-                        className={`w-full text-left p-4 rounded-2xl transition-all border ${
-                          isActive 
-                            ? 'bg-slate-800 border-slate-700 shadow-md' 
-                            : 'bg-transparent border-transparent hover:bg-slate-800/50'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <h3 className={`font-bold font-serif ${isActive ? 'text-white' : 'text-slate-300'}`}>
-                            Day {day.dayNumber}
-                          </h3>
-                          {isActive && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />}
-                        </div>
-                        <div className="text-xs text-slate-400 truncate font-medium">
-                          {day.tourPackage?.title || day.dayTheme || "Free Day"}
-                        </div>
-                      </button>
+                      <div key={day.dayNumber} className={`rounded-2xl transition-all duration-300 overflow-hidden border ${isActive ? 'bg-slate-800 border-slate-700 shadow-lg' : 'bg-transparent border-transparent hover:bg-slate-800/30'}`}>
+                        <button
+                          onClick={() => {
+                            setActiveDayNum(day.dayNumber)
+                            setSelectedEventId(null)
+                          }}
+                          className="w-full text-left p-5 flex justify-between items-center"
+                        >
+                          <div>
+                            <h3 className={`font-bold text-lg mb-1 ${isActive ? 'text-white' : 'text-slate-300'}`}>Day {day.dayNumber}</h3>
+                            <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{new Date(day.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                          </div>
+                          {!isActive && dayEvents.length > 0 && (
+                            <div className="flex -space-x-1.5">
+                              {dayEvents.slice(0, 3).map((e: any) => (
+                                <div key={e.id} className="w-6 h-6 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[8px] text-slate-300">
+                                  {e.type ? e.type.charAt(0) : 'E'}
+                                </div>
+                              ))}
+                              {dayEvents.length > 3 && (
+                                <div className="w-6 h-6 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[9px] font-bold text-slate-300">
+                                  +{dayEvents.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </button>
+                        {isActive && (
+                          <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 fade-in duration-300">
+                            {dayEvents.length === 0 ? (
+                              <p className="text-sm text-slate-500 font-medium bg-slate-900/50 p-4 rounded-xl text-center border border-slate-700 border-dashed">Open day</p>
+                            ) : (
+                              <div className="flex flex-col gap-3 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
+                                {dayEvents.map((e: any) => (
+                                  <button key={e.id} onClick={() => setSelectedEventId(e.id)} className="relative flex items-center justify-between group pl-8 w-full text-left">
+                                    <div className={`absolute left-1.5 w-2 h-2 rounded-full z-10 transition-colors ${selectedEventId === e.id ? 'bg-rose-500' : 'bg-slate-400 group-hover:bg-rose-400'}`} />
+                                    <span className={`text-sm font-medium truncate pr-4 transition-colors ${selectedEventId === e.id ? 'text-white' : 'text-slate-300 group-hover:text-slate-100'}`}>{e.title || e.type}</span>
+                                    <span className="text-slate-500 text-[10px] font-bold font-mono shrink-0">{e.startTime || ''}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     )
                   })
                 )}

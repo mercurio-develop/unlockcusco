@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { ServicesView } from "@/features/services/components/services-view"
-import { mapBusinessToUniversal } from "@/lib/utils/entity-mappers"
+
 
 const LOCATIONS = ["pisac", "urubamba", "ollantaytambo", "cusco", "chinchero", "maras"]
 const TYPES = ["hotel", "hostel", "ecolodge", "glamping", "guesthouse"]
@@ -27,7 +27,7 @@ export default async function LodgingPage({
     orderBy: [{ isClaimed: "desc" }, { rating: "desc" }],
   })
 
-  const universalEntities = lodging.map(mapBusinessToUniversal)
+  const universalEntities = lodging
 
   return (
     <div className="bg-white min-h-screen">

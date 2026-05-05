@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getAgencyBySlug(slug: string) {
-  return await prisma.agency.findUnique({
+  return await prisma.business.findUnique({
     where: { slug },
     include: {
       tourPackages: true
@@ -10,7 +10,8 @@ export async function getAgencyBySlug(slug: string) {
 }
 
 export async function getAllAgencies() {
-  return await prisma.agency.findMany({
+  return await prisma.business.findMany({
+    where: { category: "AGENCY" },
     include: {
       tourPackages: true
     }

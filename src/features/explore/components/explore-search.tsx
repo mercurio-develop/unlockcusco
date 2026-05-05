@@ -1,11 +1,9 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useRef, useMemo } from "react"
-import { SlidersHorizontal, Sparkles, MapPin, Search, ChevronDown, ChevronUp, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useMemo, useEffect, useRef } from "react"
+import { SlidersHorizontal, Search, ChevronDown, ChevronUp, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
 const CATEGORIES = [
   { label: "🎟️ Boleto", value: "Boleto" },
@@ -29,25 +27,17 @@ const LOCATIONS = [
 
 interface ExploreSearchProps {
   initialQuery: string
-  isItineraryMode?: boolean
-  localSearch?: string
-  onLocalSearchChange?: (val: string) => void
 }
 
 export function ExploreSearch({ 
   initialQuery, 
-  isItineraryMode = false,
-  localSearch = "",
-  onLocalSearchChange
 }: ExploreSearchProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [value, setValue] = useState("")
+  const [value, setValue] = useState(initialQuery)
   const [showFilters, setShowFilters] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Local state for the filters
   const currentLoc = searchParams.get("loc") || ""
   const currentCatStr = searchParams.get("cat") || ""
   
@@ -55,9 +45,12 @@ export function ExploreSearch({
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
   }, [currentCatStr])
 
-  const navigateFilters = (loc?: string, cats?: string[]) => {
+  useEffect(() => {
+    setValue(searchParams.get("q") || "")
+  }, [searchParams])
+
+  const navigateFilters = (loc?: string, cats?: string[], q?: string) => {
     const params = new URLSearchParams()
-    const q = searchParams.get("q")
     if (q) params.set("q", q)
     if (loc) params.set("loc", loc)
     if (cats && cats.length > 0) params.set("cat", cats.join(','))
@@ -65,45 +58,13 @@ export function ExploreSearch({
     router.push(`/explore?${params.toString()}`)
   }
 
-  const handleSearch = () => {
-    if (!value.trim()) return
-
-    const rawValue = value.trim()
-    const wordCount = rawValue.split(" ").length
-
-    // If we're explicitly in itinerary mode, or the user typed a conversational sentence (e.g., > 3 words)
-    if (isItineraryMode || wordCount > 3) {
-      triggerAi(rawValue)
-      return
-    }
-
-    let finalQ = rawValue
-    let finalLoc = currentLoc
-
-    // Smart extract location from query
-    for (const loc of SACRED_VALLEY_LOCATIONS) {
-      const locLower = loc.toLowerCase()
-      if (finalQ.toLowerCase().includes(locLower)) {
-        finalLoc = locLower
-        const regex = new RegExp(`\\s*(?:in|near|at|to)?\\s*\\b${locLower}\\b`, 'i')
-        finalQ = finalQ.replace(regex, '').trim()
-        break
-      }
-    }
-
-    const params = new URLSearchParams()
-    if (finalQ) params.set("q", finalQ)
-    if (finalLoc) params.set("loc", finalLoc)
-    if (currentCatStr) params.set("cat", currentCatStr)
+  const handleSearchChange = (newVal: string) => {
+    setValue(newVal)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
     
-    router.push(`/explore?${params.toString()}`)
-  }
-
-  const triggerAi = (prompt: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("ai_prompt", prompt)
-    router.push(`/explore?${params.toString()}`)
-    setValue("")
+    debounceRef.current = setTimeout(() => {
+      navigateFilters(currentLoc, currentCats, newVal.trim())
+    }, 500)
   }
 
   const handleCategoryToggle = (catValue: string) => {
@@ -113,111 +74,26 @@ export function ExploreSearch({
     } else {
       nextCats.push(catValue)
     }
-    navigateFilters(currentLoc, nextCats)
+    navigateFilters(currentLoc, nextCats, value.trim())
   }
-
-  const lastWord = value.split(' ').pop() || "";
-  const suggestions = (isFocused && lastWord.length >= 2) 
-    ? SACRED_VALLEY_LOCATIONS.filter(l => l.toLowerCase().startsWith(lastWord.toLowerCase()) && l.toLowerCase() !== lastWord.toLowerCase())
-    : [];
-
-  const handleSuggestionClick = (suggestion: string) => {
-    const words = value.split(' ');
-    words.pop();
-    words.push(suggestion);
-    setValue(words.join(' ') + ' ');
-    inputRef.current?.focus();
-  };
-
-  const handleDevAutofill = () => {
-    const queries = [
-      "I'm in Pisac heading to Ollantaytambo. I want coffee, a local market, and a nice lunch with a view.",
-      "I am in Urubamba. Train at 4 PM in Ollanta. Quick hike and vegan food before I leave.",
-      "Staying in Pisac, heading to Maras today. I want to try a good picantería for lunch while still in Pisac.",
-      "Starting in Chinchero ending in Cusco. I just want a relaxing day, wellness stuff, no adventure.",
-      "I really want to go ATV riding and get a huge dinner afterwards!"
-    ];
-    const currentIndex = queries.findIndex(q => q === value);
-    const nextIndex = (currentIndex + 1) % queries.length;
-    const nextQuery = queries[nextIndex];
-    triggerAi(nextQuery);
-  };
 
   return (
     <>
       <div className="flex flex-col gap-4">
-        {/* Main Search Bar */}
-        <div className="relative z-0">
-          {process.env.NODE_ENV === 'development' && (
-            <div className="absolute -top-7 right-2 z-20">
-              <button
-                onClick={handleDevAutofill}
-                className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-colors shadow-sm"
-                title="Autofill & Execute AI Concierge"
-              >
-                Test AI
-              </button>
-            </div>
-          )}
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
-            <Sparkles className="h-5 w-5 text-rose-500" />
-          </div>
-          <input
-            ref={inputRef}
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleSearch()
-              }
-            }}
-            placeholder="Plan an itinerary or search..."
-            className="w-full py-4 pl-12 pr-6 rounded-2xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-300 transition-all text-slate-900 shadow-sm text-base placeholder:text-gray-400 font-medium"
-          />
-          
-          <AnimatePresence>
-            {suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-20 p-2 text-left"
-              >
-                {suggestions.map(suggestion => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-rose-50 hover:text-rose-700 text-slate-700 rounded-xl transition-colors flex items-center gap-2"
-                  >
-                    <MapPin className="w-4 h-4 text-rose-400" />
-                    <span className="font-medium">{suggestion}</span>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Unified Filtering Row */}
         <div className="flex items-center gap-3 w-full">
-          {/* Quick Filter (Local) */}
+          {/* Global Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Filter results quickly..." 
-              value={localSearch}
-              onChange={(e) => onLocalSearchChange?.(e.target.value)}
+              placeholder="Search experiences..." 
+              value={value}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full bg-slate-50 border border-gray-200 text-slate-800 text-sm pl-9 pr-8 py-2 rounded-xl focus:outline-none focus:border-rose-300 focus:bg-white transition-colors placeholder:text-slate-400"
             />
-            {localSearch && (
+            {value && (
               <button 
-                onClick={() => onLocalSearchChange?.("")}
+                onClick={() => handleSearchChange("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
@@ -254,7 +130,7 @@ export function ExploreSearch({
                     <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Location</span>
                     {(currentLoc || currentCats.length > 0) && (
                       <button 
-                        onClick={() => navigateFilters("", [])}
+                        onClick={() => navigateFilters("", [], value.trim())}
                         className="text-xs text-rose-500 hover:text-rose-700 font-semibold"
                       >
                         Clear All
@@ -263,7 +139,7 @@ export function ExploreSearch({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => navigateFilters("", currentCats)}
+                      onClick={() => navigateFilters("", currentCats, value.trim())}
                       className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                         currentLoc === "" 
                           ? "bg-slate-900 text-white shadow-md" 
@@ -275,7 +151,7 @@ export function ExploreSearch({
                     {LOCATIONS.map((loc) => (
                       <button
                         key={loc.value}
-                        onClick={() => navigateFilters(loc.value, currentCats)}
+                        onClick={() => navigateFilters(loc.value, currentCats, value.trim())}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                           currentLoc === loc.value 
                             ? "bg-slate-900 text-white shadow-md" 
@@ -292,7 +168,7 @@ export function ExploreSearch({
                   <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Category (Multi-Select)</span>
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => navigateFilters(currentLoc, [])}
+                      onClick={() => navigateFilters(currentLoc, [], value.trim())}
                       className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                         currentCats.length === 0 
                           ? "bg-slate-900 text-white shadow-md" 
@@ -327,4 +203,3 @@ export function ExploreSearch({
     </>
   )
 }
-

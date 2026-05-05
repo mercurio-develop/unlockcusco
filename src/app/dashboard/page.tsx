@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Building2, Settings, MessageSquare, PieChart } from "lucide-react"
-import { LeadCTA } from "@/components/dashboard/lead-cta"
+import { LeadCTA } from "@/features/business/components/dashboard/lead-cta"
 
 interface DashboardPageProps {
   searchParams: Promise<{ businessId?: string }>

@@ -5,14 +5,14 @@ import { Send, CheckCircle2, MessageCircle } from "lucide-react"
 import { sendAvailabilityRequest } from "../actions/send-availability-request"
 
 export function AvailabilityForm({ 
-  agencyId, 
+  businessId, 
   agencyName, 
   agencyEmail, 
   whatsapp, 
   packages,
   selectedExperienceId = ""
 }: { 
-  agencyId: string;
+  businessId: string;
   agencyName: string;
   agencyEmail?: string;
   whatsapp: string;
@@ -41,7 +41,7 @@ export function AvailabilityForm({
     const selectedPkg = packages.find(p => p.id === formData.experienceId)
     
     const result = await sendAvailabilityRequest({
-      agencyId,
+      businessId,
       agencyName,
       agencyEmail: agencyEmail || "reservas@jaguarllaqta.com",
       experienceTitle: selectedPkg?.title || "General Inquiry",
