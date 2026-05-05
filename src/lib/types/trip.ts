@@ -21,7 +21,7 @@ export interface UniversalService {
   lng?: number;
   locationLabel: string;
   category: string; // e.g., 'Wellness', 'Taxi', 'Dining'
-  priceTier?: string; // '$', '874156', '874156$'
+  priceTier?: string; // '$', '$$', '$$$'
   basePriceUsd?: number;
   
   // Specific data for cards/logic without breaking polymorphism

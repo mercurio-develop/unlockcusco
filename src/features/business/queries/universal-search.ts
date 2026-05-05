@@ -1,6 +1,6 @@
-import { prisma } from \"@/lib/prisma\";
-import { mapBusinessToUniversal, mapTransportToUniversal, mapTherapistToUniversal } from \"@/lib/utils/entity-mappers\";
-import type { UniversalService } from \"@/lib/types/trip\";
+import { prisma } from "@/lib/prisma";
+import { mapBusinessToUniversal, mapTransportToUniversal, mapTherapistToUniversal } from "@/lib/utils/entity-mappers";
+import type { UniversalService } from "@/lib/types/trip";
 
 interface UniversalSearchParams {
   query?: string;
@@ -19,8 +19,8 @@ export async function universalSearch({
   location,
   limit = 20
 }: UniversalSearchParams): Promise<UniversalService[]> {
-  const queryLower = query?.toLowerCase().trim() || \"\";
-  const locLower = location?.toLowerCase().trim() || \"\";
+  const queryLower = query?.toLowerCase().trim() || "";
+  const locLower = location?.toLowerCase().trim() || "";
 
   // 1. Parallel DB queries (simplified for MVP, optimization can follow)
   const [businesses, transport, therapists] = await Promise.all([

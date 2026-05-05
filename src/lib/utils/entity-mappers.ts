@@ -7,14 +7,14 @@ export function mapBusinessToUniversal(b: Business): UniversalService {
     slug: b.slug,
     type: 'BUSINESS',
     name: b.name,
-    description: b.reviewSummary || \"\",
+    description: b.reviewSummary || "",
     imageUrl: b.imageUrl,
     rating: b.rating || undefined,
     reviewsCount: b.reviewsCount,
     whatsapp: b.whatsapp || undefined,
     lat: b.lat || undefined,
     lng: b.lng || undefined,
-    locationLabel: b.locationSlug || \"Sacred Valley\",
+    locationLabel: b.locationSlug || "Sacred Valley",
     category: b.category,
     priceTier: b.priceTier,
     metadata: {
@@ -30,12 +30,12 @@ export function mapTransportToUniversal(t: Transport): UniversalService {
     slug: t.slug,
     type: 'TRANSPORT',
     name: t.name,
-    description: \`\${t.vehicleType} transport. Capacity: \${t.capacity} pax.\`,
-    imageUrl: t.imageUrl || \"\",
+    description: `${t.vehicleType} transport. Capacity: ${t.capacity} pax.`,
+    imageUrl: t.imageUrl || "",
     rating: t.rating || undefined,
     reviewsCount: t.reviewsCount,
     whatsapp: t.whatsapp || undefined,
-    locationLabel: \"Sacred Valley\",
+    locationLabel: "Sacred Valley",
     category: t.category || 'Taxi',
     basePriceUsd: t.basePriceUsd || undefined,
     metadata: {
@@ -61,7 +61,7 @@ export function mapTherapistToUniversal(t: Therapist): UniversalService {
       locationLabel: t.location,
       category: 'Wellness',
       metadata: {
-        specialties: JSON.parse(t.specialties || \"[]\"),
+        specialties: JSON.parse(t.specialties || "[]"),
       },
       _raw: { therapist: t }
     }
