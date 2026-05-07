@@ -12,15 +12,7 @@ export function useItinerary() {
   
   return {
     ...trip,
-    // Add any legacy mapping here if names changed
-    // Placeholder for other missing methods to prevent immediate crashes
-    setStartAnchorLocation: (...args: any[]) => {},
-    setEndAnchorLocation: (...args: any[]) => {},
-    selectBasecamp: (...args: any[]) => {},
-    setExchangeTargetIndex: (...args: any[]) => {},
-    swapDriverAlternative: (...args: any[]) => {},
-    moveWaypoint: (...args: any[]) => {},
-    truncateAfterWaypoint: (...args: any[]) => {}
+    // Methods already present in trip-context are automatically proxied by ...trip
   };
 }
 

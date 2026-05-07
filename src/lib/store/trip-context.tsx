@@ -5,6 +5,8 @@ import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import type { UniversalTrip, TimelineEvent, TripDay } from '@/lib/types/trip';
 
+import { COORDS_MAP, DEFAULT_COORDS } from "@/lib/constants";
+
 type PanelMode = "categories" | "itinerary" | "macro" | "builder";
 type ViewState = "wizard" | "workspace" | "checkout";
 
@@ -32,6 +34,13 @@ interface TripContextType {
   removeWaypoint: (index: number) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
   insertWaypoint: (service: Business) => boolean;
+  removeWaypoint: (index: number) => void;
+  moveWaypoint: (fromIndex: number, toIndex: number) => void;
+  swapDriverAlternative: (edgeIndex: number, altIndex: number) => void;
+  truncateAfterWaypoint: (index: number) => void;
+  setStartAnchorLocation: (lat: number, lng: number) => void;
+  aiPromptToTrigger: string | null;
+  setAiPromptToTrigger: (prompt: string | null) => void;
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
   travelVibe: string | null;
@@ -40,6 +49,8 @@ interface TripContextType {
   setTravelIntensity: (intensity: number | null) => void;
   isWorkspaceCollapsed: boolean;
   setIsWorkspaceCollapsed: (collapsed: boolean) => void;
+  exchangeTargetIndex: number | null;
+  setExchangeTargetIndex: (index: number | null) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -58,6 +69,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [travelVibe, setTravelVibe] = useState<string | null>(null);
   const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
   const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
+  const [exchangeTargetIndex, setExchangeTargetIndex] = useState<number | null>(null);
+  const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
@@ -127,8 +140,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       // Remove the edge leading to this waypoint
       newTransitEdges.splice(index, 1);
       
-      // If there's a next edge, we should ideally update its fromLocation
-      // but for now let's just keep it simple and see if the UI handles it
+      // Update the edge that now points to the successor
       if (newTransitEdges[index]) {
           const prevLoc = index === 0 ? prev.startAnchor.locationStr : newWaypoints[index-1].locationStr;
           newTransitEdges[index] = {
@@ -140,7 +152,111 @@ export function TripProvider({ children }: { children: ReactNode }) {
       return {
         ...prev,
         waypoints: newWaypoints,
-        transitEdges: newTransitEdges
+        transitEdges: newTransitEdges,
+        totalCost: newWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+      };
+    });
+  }, []);
+
+  const moveWaypoint = useCallback((fromIndex: number, toIndex: number) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const newWaypoints = [...prev.waypoints];
+      const [moved] = newWaypoints.splice(fromIndex, 1);
+      newWaypoints.splice(toIndex, 0, moved);
+
+      // Rebuild transit edges for simplicity and consistency
+      const nodes = [
+        { locationStr: prev.startAnchor.locationStr },
+        ...newWaypoints.map(w => ({ locationStr: w.locationStr })),
+        { locationStr: prev.endAnchor.locationStr }
+      ];
+
+      const newTransitEdges = nodes.slice(0, -1).map((node, i) => {
+        const existing = prev.transitEdges.find(e => e.fromLocation === node.locationStr && e.toLocation === nodes[i+1].locationStr);
+        if (existing) return existing;
+        
+        // Fallback edge
+        return {
+          fromLocation: node.locationStr,
+          toLocation: nodes[i+1].locationStr,
+          defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
+          alternativeDrivers: []
+        };
+      });
+
+      return {
+        ...prev,
+        waypoints: newWaypoints,
+        transitEdges: newTransitEdges,
+        totalCost: newWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+      };
+    });
+  }, []);
+
+  const swapDriverAlternative = useCallback((edgeIndex: number, altIndex: number) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const newTransitEdges = [...prev.transitEdges];
+      const edge = newTransitEdges[edgeIndex];
+      if (!edge || !edge.alternativeDrivers) return prev;
+
+      const newAlt = edge.alternativeDrivers[altIndex];
+      const oldDefault = edge.defaultDriver;
+
+      const newAlts = [...edge.alternativeDrivers];
+      newAlts.splice(altIndex, 1);
+      newAlts.push(oldDefault);
+
+      newTransitEdges[edgeIndex] = {
+        ...edge,
+        defaultDriver: newAlt,
+        alternativeDrivers: newAlts
+      };
+
+      return {
+        ...prev,
+        transitEdges: newTransitEdges,
+        totalCost: prev.waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+      };
+    });
+  }, []);
+
+  const truncateAfterWaypoint = useCallback((index: number) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const newWaypoints = prev.waypoints.slice(0, index + 1);
+      const newTransitEdges = prev.transitEdges.slice(0, index + 1);
+      
+      const lastWp = newWaypoints[newWaypoints.length - 1];
+      
+      return {
+        ...prev,
+        waypoints: newWaypoints,
+        transitEdges: newTransitEdges,
+        endAnchor: {
+          ...prev.endAnchor,
+          title: lastWp.title,
+          locationStr: lastWp.locationStr,
+          lat: lastWp.lat,
+          lng: lastWp.lng
+        },
+        totalCost: newWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + newTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+      };
+    });
+  }, []);
+
+  const setStartAnchorLocation = useCallback((lat: number, lng: number) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        startAnchor: {
+          ...prev.startAnchor,
+          lat,
+          lng,
+          locationStr: "My Location"
+        }
       };
     });
   }, []);
@@ -167,6 +283,46 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const isTransport = service.category === 'TRANSPORT';
     const isStay = service.category === 'LODGING' || service.category === 'STAYS';
     
+    if (exchangeTargetIndex !== null) {
+      if (exchangeTargetIndex === -1 && activeItinerary) {
+        const startLocName = service.locationSlug 
+            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+            : service.name;
+        setActiveItinerary({
+          ...activeItinerary,
+          startAnchor: {
+            ...activeItinerary.startAnchor,
+            title: service.name,
+            locationStr: startLocName,
+            lat: service.lat || undefined,
+            lng: service.lng || undefined,
+          }
+        });
+        setExchangeTargetIndex(null);
+        setPanelMode("itinerary");
+        return false;
+      }
+      if (exchangeTargetIndex === -2 && activeItinerary) {
+        const endLocName = service.locationSlug 
+            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+            : service.name;
+        setActiveItinerary({
+          ...activeItinerary,
+          endAnchor: {
+            ...activeItinerary.endAnchor,
+            title: service.name,
+            locationStr: endLocName,
+            lat: service.lat || undefined,
+            lng: service.lng || undefined,
+          }
+        });
+        setExchangeTargetIndex(null);
+        setPanelMode("itinerary");
+        return false;
+      }
+      setExchangeTargetIndex(null);
+    }
+
     // We build the object incrementally to satisfy the discriminated union
     let newEvent: TimelineEvent;
     
@@ -175,7 +331,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         id: crypto.randomUUID(),
         type: 'TRANSPORT',
         method: 'CAR', // Default
-        from: 'Cusco', // Default placeholder
+        from: 'Current Location', 
         to: service.name,
         startTime: '10:00',
         title: service.name,
@@ -218,43 +374,63 @@ export function TripProvider({ children }: { children: ReactNode }) {
                 lng: service.lng || undefined,
                 rating: service.rating || undefined
             };
+
+            const updatedWaypoints = [...activeItinerary.waypoints, newWp];
+            const prevLoc = activeItinerary.waypoints.length > 0 
+                ? activeItinerary.waypoints[activeItinerary.waypoints.length - 1].locationStr 
+                : activeItinerary.startAnchor.locationStr;
+            
+            const newEdge = {
+                fromLocation: prevLoc,
+                toLocation: service.name,
+                defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
+                alternativeDrivers: []
+            };
+
+            const updatedTransitEdges = [...activeItinerary.transitEdges];
+            // If we had a return edge, it was at the end. We need to insert before it or replace it.
+            if (updatedTransitEdges.length > activeItinerary.waypoints.length) {
+                const returnEdge = updatedTransitEdges.pop()!;
+                updatedTransitEdges.push(newEdge);
+                updatedTransitEdges.push({
+                    ...returnEdge,
+                    fromLocation: service.name
+                });
+            } else {
+                updatedTransitEdges.push(newEdge);
+            }
+
             setActiveItinerary({
                 ...activeItinerary,
-                waypoints: [...activeItinerary.waypoints, newWp],
-                totalCost: (activeItinerary.totalCost || 0) + 0
+                waypoints: updatedWaypoints,
+                transitEdges: updatedTransitEdges,
+                totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
             });
-        }
-        if (currentTrip) {
-            addEvent(dayNum, newEvent);
-        }
-        setPanelMode('itinerary');
-    } else {
-        isNewTrip = true;
-        
-        const startLocName = service.locationSlug 
-            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
-            : service.name;
-
-        const newPlan: OptimizedPlan = {
-            title: `Trip to ${service.name}`,
-            totalCost: 0,
-            startAnchor: {
-                title: startLocName,
-                locationStr: startLocName,
-                time: "09:00",
-                type: 'GENERIC_TOWN',
-                lat: service.lat || undefined,
-                lng: service.lng || undefined
-            },
-            endAnchor: {
-                title: "To Be Decided",
-                locationStr: "To Be Decided",
-                time: "18:00",
-                type: 'GENERIC_TOWN',
-            },
-            waypoints: [
-                {
-                    id: newEvent.id,
+            
+            setAiPromptToTrigger(`I just added ${service.name} to my itinerary.`);
+            setIsChatOpen(true);
+        } else {
+            // Initialize a new itinerary if none exists
+            const newItin: OptimizedPlan = {
+                title: "New Expedition",
+                startAnchor: {
+                    title: "Urubamba",
+                    locationStr: "Urubamba",
+                    type: 'GENERIC_TOWN',
+                    lat: COORDS_MAP.urubamba.lat,
+                    lng: COORDS_MAP.urubamba.lng,
+                    time: "09:00"
+                },
+                endAnchor: {
+                    title: "Urubamba",
+                    locationStr: "Urubamba",
+                    type: 'GENERIC_TOWN',
+                    lat: COORDS_MAP.urubamba.lat,
+                    lng: COORDS_MAP.urubamba.lng,
+                    time: "18:00"
+                },
+                waypoints: [{
+                    id: crypto.randomUUID(),
                     category: service.category,
                     title: service.name,
                     locationStr: service.name,
@@ -263,39 +439,39 @@ export function TripProvider({ children }: { children: ReactNode }) {
                     lat: service.lat || undefined,
                     lng: service.lng || undefined,
                     rating: service.rating || undefined
-                }
-            ],
-            transitEdges: [],
-            needsAccommodationUpsell: false
-        };
+                }],
+                transitEdges: [
+                    {
+                        fromLocation: "Urubamba",
+                        toLocation: service.name,
+                        defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
+                        alternativeDrivers: []
+                    },
+                    {
+                        fromLocation: service.name,
+                        toLocation: "Urubamba",
+                        defaultDriver: { name: 'Return Transfer', priceUsd: 15 },
+                        alternativeDrivers: []
+                    }
+                ],
+                needsAccommodationUpsell: true,
+                totalCost: 30
+            };
+            setActiveItinerary(newItin);
+            setAiPromptToTrigger(`I just added ${service.name} to my itinerary.`);
+            setIsChatOpen(true);
+        }
 
-        const newTrip: UniversalTrip = {
-            title: `Trip to ${service.name}`,
-            startDate: new Date(),
-            endDate: new Date(),
-            paxCount: 1,
-            status: 'DRAFT',
-            days: [{
-                dayNumber: 1,
-                date: new Date(),
-                startAnchor: {
-                  title: startLocName,
-                  time: "09:00",
-                  lat: service.lat || undefined,
-                  lng: service.lng || undefined
-                },
-                events: [newEvent]
-            }]
-        };
-
-        setActiveItinerary(newPlan);
-        setCurrentTrip(newTrip);
-        setActiveDayNumber(1);
+        if (currentTrip) {
+            addEvent(dayNum, newEvent);
+        }
         setPanelMode('itinerary');
+    } else {
+        isNewTrip = true;
     }
 
     return isNewTrip;
-  }, [activeDayNumber, addEvent, activeItinerary, currentTrip, panelMode]);
+  }, [activeDayNumber, addEvent, activeItinerary, currentTrip, panelMode, setIsChatOpen, setActiveItinerary, setPanelMode]);
 
   return (
     <TripContext.Provider value={{
@@ -329,7 +505,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
       travelIntensity,
       setTravelIntensity,
       isWorkspaceCollapsed,
-      setIsWorkspaceCollapsed
+      setIsWorkspaceCollapsed,
+      exchangeTargetIndex,
+      setExchangeTargetIndex
     }}>
       {children}
     </TripContext.Provider>

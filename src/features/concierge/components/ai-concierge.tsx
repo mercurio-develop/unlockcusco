@@ -2,7 +2,7 @@
 import { Business } from "@prisma/client";
 
 import { useState, useEffect, useRef } from "react"
-import { useSearchParams, usePathname } from "next/navigation"
+import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -21,9 +21,10 @@ import { useTrip } from "@/lib/store/trip-context"
 
 export function AiConcierge() {
   const [input, setInput] = useState("")
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, isWorkspaceCollapsed, panelMode } = useTrip()
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, isWorkspaceCollapsed, panelMode, aiPromptToTrigger, setAiPromptToTrigger } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+  const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Determine the offset: if in builder mode and sidebar is open, push left by 500px
@@ -44,6 +45,26 @@ export function AiConcierge() {
     }),
     messages: initialMessages
   });
+
+  // Listen for manual trigger from TripContext
+  useEffect(() => {
+    if (aiPromptToTrigger) {
+      setIsChatOpen(true);
+      sendMessage(
+        { text: aiPromptToTrigger },
+        {
+          body: {
+            userLat: DEFAULT_COORDS.lat,
+            userLng: DEFAULT_COORDS.lng,
+            localTime: new Date().toLocaleTimeString(),
+            archetype: travelVibe,
+            intensity: travelIntensity
+          }
+        }
+      );
+      setAiPromptToTrigger(null);
+    }
+  }, [aiPromptToTrigger, travelVibe, travelIntensity, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -99,13 +120,15 @@ Please generate my macro trip plan.`;
       }, 300);
       
       // Clean up the URL
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("ai_prompt");
-      newUrl.searchParams.delete("data");
-      window.history.replaceState({}, '', newUrl.toString());
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("ai_prompt");
+      params.delete("data");
+      const newSearch = params.toString();
+      const newUrl = newSearch ? `${pathname}?${newSearch}` : pathname;
+      router.replace(newUrl, { scroll: false });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, travelVibe, travelIntensity]);
+  }, [searchParams, travelVibe, travelIntensity, pathname, router]);
 
   if (pathname?.startsWith("/trip/")) {
     return null;
