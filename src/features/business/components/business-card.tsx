@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase } from "lucide-react"
+import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar } from "lucide-react"
 import { trackWhatsappClick } from "@/features/business/actions/track-click"
 import { trackBusinessView } from "@/features/business/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
@@ -22,6 +22,12 @@ import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { useTrip } from "@/lib/store/trip-context"
 import { cn } from "@/lib/utils"
 import type { Business } from "@prisma/client"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 
 interface BusinessCardProps {
   business: Business
@@ -39,7 +45,7 @@ export function BusinessCard({
   const [touristName, setTouristName] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const { activeItinerary, panelMode } = useTrip()
+  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -88,11 +94,53 @@ export function BusinessCard({
     <div
       onClick={handleCardClick}
       className={cn(
-        "group cursor-pointer transition-all duration-300",
+        "group cursor-pointer transition-all duration-300 relative",
         isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100",
         isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"
       )}
     >
+      {/* Top Right Action Menu - Absolute positioned to avoid event bubbling issues */}
+      {exchangeTargetIndex === null && (
+        <div 
+          className="absolute top-3 right-3 z-30" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={
+              <Button 
+                variant="outline" 
+                size="icon-xs" 
+                className="rounded-full bg-white/90 border-white shadow-sm text-slate-600 hover:text-rose-600 hover:bg-white backdrop-blur-md transition-all"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            } />
+            <DropdownMenuContent>
+              {hasProfile && (
+                <DropdownMenuItem onClick={() => router.push(business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug))}>
+                  <ExternalLink className="w-4 h-4 mr-2" /> View Profile
+                </DropdownMenuItem>
+              )}
+              {(isClaimed || business.isAsociado || business.category === 'TRANSPORT') && (
+                <DropdownMenuItem onClick={(e) => handleBookNow(e as any)}>
+                  <Calendar className="w-4 h-4 mr-2" /> {business.category === 'TRANSPORT' ? 'Contact' : 'Book Now'}
+                </DropdownMenuItem>
+              )}
+              {business.whatsapp && (
+                <DropdownMenuItem onClick={(e) => handleBookNow(e as any)}>
+                  <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                </DropdownMenuItem>
+              )}
+              {!isClaimed && !business.isAsociado && (
+                <DropdownMenuItem onClick={() => setIsOpen(true)}>
+                  <Zap className="w-4 h-4 mr-2" /> Check Availability
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       {/* Image Container */}
       <div className={cn(
         "relative overflow-hidden rounded-2xl transition-all duration-300 bg-slate-100",
@@ -169,23 +217,45 @@ export function BusinessCard({
                 </h3>
               )}
             </div>
-            {business.rating !== undefined && (
-              <div className="flex items-center gap-1 shrink-0">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span className="font-bold text-sm text-slate-900">{business.rating || "New"}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {business.rating !== undefined && (
+                <div className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="font-bold text-sm text-slate-900">{business.rating || "New"}</span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
              <span className="text-rose-600">{business.category}</span>
              {business.reviewsCount !== undefined && <span>• {business.reviewsCount} reviews</span>}
              {business.priceTier && <span>• {business.priceTier}</span>}
           </div>
+          
+          {/* Zagat Description */}
+          {business.description && (
+            <p className={cn(
+              "text-slate-500 text-xs italic leading-relaxed mt-0.5",
+              isHorizontal ? "line-clamp-2" : "line-clamp-3"
+            )}>
+              &ldquo;{business.description}&rdquo;
+            </p>
+          )}
         </div>
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
-          {hasProfile ? (
+          {exchangeTargetIndex !== null ? (
+            <Button
+              onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+              className={cn(
+                "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all",
+                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
+              )}
+            >
+              Select for Itinerary
+            </Button>
+          ) : hasProfile ? (
             <Link 
               href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)}
               className={cn(

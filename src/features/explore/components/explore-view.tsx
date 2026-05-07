@@ -42,7 +42,7 @@ export function ExploreView({
   const searchParams = useSearchParams()
   const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
   
-  const [showFilters, setShowFilters] = useState(true)
+  const [showFilters, setShowFilters] = useState(false)
 
   // Sync when server re-renders
   const [prevInitialBusinesses, setPrevInitialBusinesses] = useState(initialBusinesses)
@@ -52,13 +52,21 @@ export function ExploreView({
     setBusinesses(initialBusinesses)
     setMapBusinesses(initialMapBusinesses)
     setCategoryCounts(initialCategoryCounts)
-    setShowFilters(true)
+    setShowFilters(false)
   }
 
   useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
     setPanelMode("categories")
+    setShowFilters(false)
   }, [initialSelectedId, setSelectedId, setPanelMode])
+
+  // Hide filters when switching to Discover tab from other tabs
+  useEffect(() => {
+    if (panelMode === "categories") {
+      setShowFilters(false)
+    }
+  }, [panelMode])
 
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">
