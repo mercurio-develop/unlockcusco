@@ -52,14 +52,15 @@ export const searchDatabase = tool({
         if (a.distanceKm !== null && b.distanceKm === null) return -1;
         if (a.distanceKm === null && b.distanceKm !== null) return 1;
         
-        // If both have distance, blend distance and rating into a score
+        // If both have distance, blend distance, rating, and Asociado status into a score
         if (a.distanceKm !== null && b.distanceKm !== null) {
-          const scoreA = (a.rating || 0) * 2 - a.distanceKm;
-          const scoreB = (b.rating || 0) * 2 - b.distanceKm;
+          const scoreA = (a.rating || 0) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
+          const scoreB = (b.rating || 0) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
           return scoreB - scoreA;
         }
         
-        // Fallback to pure rating
+        // Fallback to Asociado then rating
+        if (a.isAsociado !== b.isAsociado) return a.isAsociado ? -1 : 1;
         return (b.rating || 0) - (a.rating || 0);
       });
 
@@ -68,10 +69,12 @@ export const searchDatabase = tool({
         name: b.name,
         category: b.category,
         rating: b.rating,
+        isAsociado: b.isAsociado,
         priceTier: b.priceTier,
         distanceKm: b.distanceKm ? b.distanceKm.toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
-        tagline: b.tagline
+        tagline: b.tagline,
+        recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
       }));
     }
     
@@ -81,10 +84,12 @@ export const searchDatabase = tool({
       name: b.name,
       category: b.category,
       rating: b.rating,
+      isAsociado: b.isAsociado,
       priceTier: b.priceTier,
       whatsapp: b.whatsapp,
       locationSlug: b.locationSlug,
-      tagline: b.tagline
+      tagline: b.tagline,
+      recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
     }));
   }
 });

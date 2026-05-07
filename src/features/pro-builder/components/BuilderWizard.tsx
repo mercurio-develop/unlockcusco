@@ -74,10 +74,34 @@ export function BuilderWizard() {
 
     const demoDays = generateEmptyDays(sd, 3)
     
+    // Day 1: Cusco Arrival & City Tour
+    demoDays[0].isComplete = true;
+    demoDays[0].startAnchor = { title: "Alejandro Velasco Astete Airport (CUZ)", lat: -13.5358, lng: -71.9388, time: "09:00" };
+    demoDays[0].endAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "18:00" };
     demoDays[0].events = [
-      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '08:30', title: 'Private Transfer - Pisac', from: 'Hotel', to: 'Pisac Ruins' },
-      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Hacienda Huayoccari' },
-      { id: uuidv4(), type: 'NOTE', startTime: '16:00', content: 'Free time to acclimate.', title: 'Rest Time' }
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '09:00', title: 'Airport Pickup - Cusco', from: 'Airport', to: 'Hotel Monasterio', fromLat: -13.5358, fromLng: -71.9388, toLat: -13.5155, toLng: -71.9774 },
+      { id: uuidv4(), type: 'STAY', startTime: '10:00', title: 'Drop Bags at Hotel Monasterio', lat: -13.5155, lng: -71.9774 },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Chicha', lat: -13.5173, lng: -71.9806 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Cusco City Tour & Sacsayhuaman', lat: -13.5097, lng: -71.9817 }
+    ]
+
+    // Day 2: Sacred Valley
+    demoDays[1].startAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "08:00" };
+    demoDays[1].endAnchor = { title: "Tambo del Inka", lat: -13.2983, lng: -72.1158, time: "17:30" };
+    demoDays[1].events = [
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '08:00', title: 'Private Transfer - Sacred Valley', from: 'Cusco', to: 'Pisac', fromLat: -13.5155, fromLng: -71.9774, toLat: -13.4225, toLng: -71.8492 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:30', title: 'Pisac Ruins & Market', lat: -13.4225, lng: -71.8492 },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Hacienda Huayoccari', lat: -13.3444, lng: -72.0528 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Ollantaytambo Fortress', lat: -13.2583, lng: -72.2633 }
+    ]
+
+    // Day 3: Machu Picchu
+    demoDays[2].startAnchor = { title: "Ollantaytambo Station", lat: -13.2606, lng: -72.2656, time: "07:00" };
+    demoDays[2].endAnchor = { title: "Sanctuary Lodge", lat: -13.1547, lng: -72.5256, time: "14:00" };
+    demoDays[2].events = [
+      { id: uuidv4(), type: 'TRANSPORT', method: 'TRAIN', startTime: '07:00', title: 'Vistadome Train to Aguas Calientes', from: 'Ollantaytambo Station', to: 'Aguas Calientes', fromLat: -13.2606, fromLng: -72.2656, toLat: -13.1547, toLng: -72.5256 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:00', title: 'Machu Picchu Guided Tour', lat: -13.1631, lng: -72.5450 },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:30', title: 'Lunch at Sanctuary Lodge', lat: -13.1547, lng: -72.5256 }
     ]
 
     setCurrentTrip({
@@ -87,11 +111,11 @@ export function BuilderWizard() {
       paxCount: 4,
       days: demoDays,
       status: 'DRAFT',
-      clientNotes: "Welcome to the Sacred Valley!",
-      internalNotes: "VIP Clients."
+      clientNotes: "Welcome to the Sacred Valley! We've prepared a comprehensive itinerary blending culture, history, and comfort.",
+      internalNotes: "VIP Clients. Ensure champagne in room on arrival at Monasterio."
     })
     
-    setActiveDayNumber(1)
+    setActiveDayNumber(2)
     setViewState('workspace')
   }
 

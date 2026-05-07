@@ -22,6 +22,8 @@ model Business {
   heroImages   String  @default("[]")
   whatsapp     String?
   isClaimed    Boolean @default(false)
+  isAsociado   Boolean @default(false)
+  isFeatured   Boolean @default(false)
   locationSlug String  @default("")
 
   // Extended Profile Fields

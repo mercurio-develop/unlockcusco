@@ -23,8 +23,11 @@ function mapCategory(googleCategory: string): string {
   const c = googleCategory.toLowerCase();
   if (c.match(/restaurant|cafe|food|picantería|pizza|bar|brewery|bakery|comida|restaurante|chifa|polleria|cevicheria|cafeteria/)) return "Dining";
   if (c.match(/spa|massage|yoga|wellness|therapist|sauna|retreat|meditation|masaje|terapia|bienestar/))    return "Wellness";
-  if (c.match(/tour|travel|agency|hiking|atv|rafting|zipline|adventure|trekking|agencia|turismo|aventura|cuatrimotos|caminata/)) return "Adventure";
+  if (c.match(/tour|travel|agency|agencia|turismo|operator/)) return "Agency";
+  if (c.match(/hiking|atv|rafting|zipline|adventure|trekking|aventura|cuatrimotos|caminata|paragliding/)) return "Adventure";
+  if (c.match(/taxi|transport|shuttle|transfer|colectivo|terminal|omnibus|airport|conductor|driver/)) return "Transport";
   if (c.match(/hotel|hostel|lodge|inn|camping|alojamiento|airbnb|resort|hospedaje/))        return "Stays";
+  if (c.match(/textile|tejido|weaving|artesanía|artisan|tejedoras|tejidos/)) return "Textiles";
   if (c.match(/textile|artisan|artesanía|market|clothing|souvenir|textil|tejido|mercado|artesano/)) return "Culture";
   return "Culture";
 }

@@ -2,6 +2,7 @@
 
 import { MapPin, Star, Clock, Car, ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useItinerary } from '@/lib/store/itinerary-context';
 
 type ExperienceResult = {
@@ -16,6 +17,8 @@ type ExperienceResult = {
 export default function ExperienceRecommendations({ result }: { result: ExperienceResult }) {
   const { setSelectedId, setPanelMode } = useItinerary();
 
+  const router = useRouter();
+
   if (!result.experiences || result.experiences.length === 0) {
     return (
       <div className="w-full my-4 bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col gap-2">
@@ -28,6 +31,7 @@ export default function ExperienceRecommendations({ result }: { result: Experien
 
   const handleShowOnMap = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    router.push(`/explore?id=${id}`);
     setSelectedId(id);
     setPanelMode("categories");
   };

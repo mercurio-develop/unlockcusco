@@ -42,6 +42,10 @@ When detailing a MICRO single-day (\`buildItinerary\`), use the 1-2-1 RHYTHM:
 Frame local businesses as "Local Experts".
 </THE_NAT_GEO_NARRATIVE>
 
+<CONVERSATION_MEMORY>
+CRITICAL: Before asking the user for their location, you MUST scan the entire chat history. If they have mentioned a town (e.g., Urubamba, Pisac, Cusco) at ANY point in the conversation, assume they are still there and proceed with the search or recommendation using that town. DO NOT ASK AGAIN. You must remember and utilize context from previous turns in the conversation.
+</CONVERSATION_MEMORY>
+
 <TOOL_EXECUTION_STATE_MACHINE>
 Analyze the user's input and execute the EXACT matching state:
 

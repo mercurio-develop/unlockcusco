@@ -21,7 +21,7 @@ function getEventIcon(type: EventType) {
   }
 }
 
-export function BuilderWorkspace() {
+export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: string | null, onSelectEvent?: (id: string) => void }) {
   const { currentTrip, setCurrentTrip, activeDayNumber, addEvent, removeEvent, updateEvent, setViewState } = useTrip()
   const [activeDayPicker, setActiveDayPicker] = useState<{dayNumber: number, eventId?: string, initialSearch?: string} | null>(null)
   const [viewingPackage, setViewingPackage] = useState<string | null>(null)
@@ -92,35 +92,6 @@ export function BuilderWorkspace() {
     setCurrentTrip({ ...currentTrip, days: newDays })
   }
 
-  const handleAutoCalculate = () => {
-    if (!currentTrip || !activeDay) return;
-    
-    const newEvents = [...activeDay.events].map(e => ({...e})); // deep copy to trigger render
-    let currentMins = 9 * 60; // Start at 09:00 AM by default
-    
-    if (activeDay.startAnchor?.time) {
-      const [h, m] = activeDay.startAnchor.time.split(':').map(Number);
-      currentMins = h * 60 + m;
-    }
-
-    newEvents.forEach((evt) => {
-      const h = Math.floor(currentMins / 60) % 24;
-      const m = currentMins % 60;
-      evt.startTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-
-      let duration = 60;
-      if (evt.type === 'EXPERIENCE') duration = 120;
-      else if (evt.type === 'MEAL') duration = 90;
-      else if (evt.type === 'TRANSPORT') duration = evt.durationMins || 30;
-      else if (evt.type === 'STAY') duration = 30;
-      else if (evt.type === 'NOTE') duration = 0;
-
-      currentMins += duration;
-    });
-
-    updateDay(activeDay.dayNumber, { events: newEvents });
-  };
-
   return (
     <div className="flex-1 bg-transparent relative flex flex-col h-full">
       <AnimatePresence mode="wait">
@@ -138,12 +109,6 @@ export function BuilderWorkspace() {
               <h2 className="text-4xl font-serif font-bold text-slate-900 mb-1">Day {activeDay.dayNumber}</h2>
               <p className="text-slate-500 text-lg">{activeDay.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
             </div>
-            <button 
-              onClick={handleAutoCalculate}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-md hover:bg-slate-800 transition-colors"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300" /> Auto-Arrange Time
-            </button>
           </div>
 
           <div className="max-w-2xl mx-auto relative border-l border-slate-200 ml-4 pl-8 space-y-8 pb-32">
@@ -176,12 +141,16 @@ export function BuilderWorkspace() {
               const suggestedTo = nextLocEvent?.title || activeDay.endAnchor?.title || "Destination";
 
               return (
-              <div key={evt.id} className="relative group animate-in fade-in slide-in-from-bottom-2">
-                <div className="absolute -left-[37px] top-8 w-4 h-4 rounded-full bg-white border-2 border-slate-200 z-20 flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-slate-200" />
+              <div 
+                key={evt.id} 
+                className="relative group animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
+                onClick={() => onSelectEvent && onSelectEvent(evt.id)}
+              >
+                <div className={`absolute -left-[37px] top-8 w-4 h-4 rounded-full border-2 z-20 flex items-center justify-center transition-colors ${selectedId === evt.id ? 'bg-slate-400 border-slate-400' : 'bg-white border-slate-200'}`}>
+                  <div className={`w-1 h-1 rounded-full ${selectedId === evt.id ? 'bg-white' : 'bg-slate-200'}`} />
                 </div>
                 
-                <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative">
+                <div className={`bg-white border rounded-3xl p-6 transition-shadow relative ${selectedId === evt.id ? 'border-slate-300 shadow-md ring-1 ring-slate-900/5' : 'border-slate-100 shadow-sm hover:shadow-md'}`}>
                   
                   {/* Action Buttons (appears on hover) */}
                   <div className="absolute -top-3 -right-3 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all z-10">
@@ -274,7 +243,7 @@ export function BuilderWorkspace() {
                          <div className="flex-1">
                            <LocationAutocomplete 
                              value={(evt as any).from || ""} 
-                             onChange={(val) => updateEvent(activeDay.dayNumber, evt.id, { from: val })} 
+                             onChange={(val, lat, lng) => updateEvent(activeDay.dayNumber, evt.id, { from: val, fromLat: lat, fromLng: lng })} 
                              className="w-full border-b border-slate-200 pb-1.5 outline-none focus:border-slate-900 transition-colors" 
                              placeholder={suggestedFrom}
                            />
@@ -283,7 +252,7 @@ export function BuilderWorkspace() {
                          <div className="flex-1">
                            <LocationAutocomplete 
                              value={(evt as any).to || ""} 
-                             onChange={(val) => updateEvent(activeDay.dayNumber, evt.id, { to: val })} 
+                             onChange={(val, lat, lng) => updateEvent(activeDay.dayNumber, evt.id, { to: val, toLat: lat, toLng: lng })} 
                              className="w-full border-b border-slate-200 pb-1.5 outline-none focus:border-slate-900 transition-colors" 
                              placeholder={suggestedTo}
                            />
@@ -475,6 +444,39 @@ export function BuilderWorkspace() {
               )}
             </div>
             
+            {/* END ANCHOR */}
+            <div className="relative pt-6">
+              <div 
+                className="relative group cursor-pointer"
+                onClick={() => onSelectEvent && onSelectEvent('itin-arrival')}
+              >
+                <div className={`absolute -left-[37px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 z-20 flex items-center justify-center transition-colors ${selectedId === 'itin-arrival' ? 'bg-rose-600 border-rose-600' : 'bg-white border-rose-600 group-hover:bg-rose-50'}`}>
+                  <div className={`w-1 h-1 rounded-full ${selectedId === 'itin-arrival' ? 'bg-white' : 'bg-rose-600'}`} />
+                </div>
+                <div className={`bg-white border rounded-3xl p-5 transition-shadow ${selectedId === 'itin-arrival' ? 'border-rose-200 shadow-md ring-1 ring-rose-600/5' : 'border-slate-100 shadow-sm hover:shadow'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-[0.2em] block">End of Day</span>
+                    <input 
+                      type="time" 
+                      value={activeDay.endAnchor?.time || "18:00"} 
+                      onChange={(e) => updateDay(activeDay.dayNumber, { endAnchor: { ...activeDay.endAnchor, time: e.target.value }})}
+                      className="text-sm font-mono text-slate-900 font-bold bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl hover:bg-slate-100 focus:bg-white focus:border-slate-300 outline-none cursor-pointer transition-all [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <LocationAutocomplete 
+                        placeholder="e.g. Hotel Monasterio, Cusco"
+                        value={activeDay.endAnchor?.title || ""}
+                        onChange={(val, lat, lng) => updateDay(activeDay.dayNumber, { endAnchor: { ...activeDay.endAnchor, title: val, lat, lng }})}
+                        className="w-full p-2 bg-transparent border-b border-slate-200 text-base outline-none focus:border-slate-900 font-semibold text-slate-900 transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* DAY COMPLETE TOGGLE */}
             <div className="pt-8 mb-8 border-t border-slate-200/60 flex flex-col items-center">
               <button 

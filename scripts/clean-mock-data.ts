@@ -8,7 +8,7 @@ async function main() {
   const result = await prisma.business.deleteMany({
     where: {
       name: {
-        contains: '_MOCK_DATA_'
+        contains: '_MOCK_DATA'
       }
     }
   })

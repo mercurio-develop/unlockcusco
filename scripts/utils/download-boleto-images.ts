@@ -11,7 +11,16 @@ const BOLETO_PLACES = [
   { "name": "Pikillaqta", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Piquillacta_Archaeological_site_-_street.jpg/1280px-Piquillacta_Archaeological_site_-_street.jpg" },
   { "name": "Monumento a Pachacutec", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Machu_Picchu%2C_2023_%28012%29.jpg/1280px-Machu_Picchu%2C_2023_%28012%29.jpg" },
   { "name": "Centro Qosqo de Arte Nativo", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Centro_Qosqo_3.jpg/1280px-Centro_Qosqo_3.jpg" },
-  { "name": "Museo Historico Regional", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" }
+  { "name": "Museo Historico Regional", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" },
+  { "name": "Sacsayhuaman", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Sacsayhuam%C3%A1n_-_Cuzco%2C_Per%C3%BA.jpg/1280px-Sacsayhuam%C3%A1n_-_Cuzco%2C_Per%C3%BA.jpg" },
+  { "name": "Q'enqo", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Qenqo%2C_Cuzco.jpg/1280px-Qenqo%2C_Cuzco.jpg" },
+  { "name": "Puka Pukara", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Puka_Pukara_02.jpg/1280px-Puka_Pukara_02.jpg" },
+  { "name": "Chinchero Ruins", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Chinchero_church_and_ruins.jpg/1280px-Chinchero_church_and_ruins.jpg" },
+  { "name": "Tipon", "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Tip%C3%B3n_01.jpg/1280px-Tip%C3%B3n_01.jpg" },
+  { "name": "Museo de Arte Contemporaneo", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" },
+  { "name": "Museo de Arte Popular", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" },
+  { "name": "COSITUC Ticket Office (Av. el Sol)", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" },
+  { "name": "Museo de Sitio de Qorikancha", "imageUrl": "https://images.unsplash.com/photo-1549429215-6235b2eef014?q=80&w=1000" }
 ];
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

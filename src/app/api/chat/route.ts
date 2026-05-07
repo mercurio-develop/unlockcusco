@@ -34,9 +34,28 @@ export async function POST(req: Request) {
 
     // Normalize seeded messages that have content but no parts (e.g. the welcome message)
     const normalizedMessages = messages.map((msg: any) => {
-      if (!msg.parts && msg.content) {
-        return { ...msg, parts: [{ type: 'text', text: msg.content }] };
+      let content = msg.content;
+
+      // Hidden instruction for the specific itinerary addition message
+      if (msg.role === 'user' && content && content.startsWith('I just added') && content.includes('to my itinerary.')) {
+        content += '\n\n[System Instruction: Acknowledge this addition and specifically ask the user: "I saw you added an experience to your Day itinerary. Do you want to set the start where you are? And do you have an idea where you will end this itinerary?"]';
       }
+
+      if (!msg.parts && content) {
+        return { ...msg, content, parts: [{ type: 'text', text: content }] };
+      }
+      
+      // If parts exist but we modified the content, update the parts too
+      if (msg.parts && content !== msg.content) {
+          const newParts = [...msg.parts];
+          if (newParts.length > 0 && newParts[newParts.length - 1].type === 'text') {
+              newParts[newParts.length - 1].text = content;
+          } else {
+              newParts.push({ type: 'text', text: content });
+          }
+          return { ...msg, content, parts: newParts };
+      }
+
       return msg;
     });
 

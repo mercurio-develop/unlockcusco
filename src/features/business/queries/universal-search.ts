@@ -42,7 +42,10 @@ export async function universalSearch({
         category ? { category: { equals: category } } : {}
       ]
     },
-    orderBy: { rating: 'desc' },
+    orderBy: [
+      { isAsociado: 'desc' },
+      { rating: 'desc' }
+    ],
     take: limit
   });
 

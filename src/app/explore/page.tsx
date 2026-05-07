@@ -4,8 +4,10 @@ import { ExploreView } from "@/features/explore/components/explore-view"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 
 interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; rad?: string; lat?: string; lng?: string }>
+  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; rad?: string; lat?: string; lng?: string; sort?: string }>
 }
+
+import { Loader2 } from "lucide-react"
 
 export async function generateMetadata({ searchParams }: ExplorePageProps): Promise<Metadata> {
   const { q, loc, cat } = await searchParams
@@ -38,19 +40,22 @@ export async function generateMetadata({ searchParams }: ExplorePageProps): Prom
   }
 }
 
+import { prisma } from "@/lib/prisma"
+
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id, loc, cat, rad, lat, lng } = await searchParams
+  const { q, id, loc, cat, rad, lat, lng, sort } = await searchParams
   const query = q?.toLowerCase() || ""
 
-  const { businesses, hasMore } = await fetchBusinesses({
+  const { businesses, allBusinesses, categoryCounts, hasMore } = await fetchBusinesses({
     query,
     category: cat,
     loc,
     radiusKm: rad ? parseFloat(rad) : undefined,
     userLat: lat ? parseFloat(lat) : undefined,
     userLng: lng ? parseFloat(lng) : undefined,
+    sort,
     page: 0,
-    limit: 200
+    limit: 500 // Increased limit to fetch all in the valley
   })
 
   // Ensure selected business is exactly at the top
@@ -60,18 +65,28 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
       const [selectedBusiness] = businesses.splice(selectedIndex, 1)
       businesses.unshift(selectedBusiness)
     } else if (selectedIndex === -1) {
-      // It's not in the first 20 items, so we'll need to fetch it dynamically
-      // or we can let the client handle it.
-      // For MVP, we'll let the client handle the initialSelectedId finding 
-      // but ideally we would fetch this record and prepend it here.
+      // Fetch the business dynamically if it's not in the current search results
+      const missingBusiness = await prisma.business.findUnique({
+        where: { id }
+      })
+      if (missingBusiness) {
+        businesses.unshift(missingBusiness)
+      }
     }
   }
 
   return (
     <div className="relative">
-      <Suspense fallback={<div className="h-screen w-full bg-slate-50 animate-pulse flex items-center justify-center">Loading Explore...</div>}>
+      <Suspense fallback={
+        <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
+          <p className="text-slate-500 font-medium animate-pulse">Building the workspace...</p>
+        </div>
+      }>
         <ExploreView
           initialBusinesses={businesses}
+          initialMapBusinesses={allBusinesses}
+          initialCategoryCounts={categoryCounts}
           initialHasMore={hasMore}
           initialQuery={q ?? ""}
           initialSelectedId={id ?? null}

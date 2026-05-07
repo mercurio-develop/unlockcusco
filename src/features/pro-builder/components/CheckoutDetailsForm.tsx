@@ -1,21 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { useBuilder } from "@/features/pro-builder/store/builder-context"
+import { useTrip } from "@/lib/store/trip-context"
 import { useRouter } from "next/navigation"
 import { User, FileText, Lock, ChevronLeft, Sparkles, Loader2 } from "lucide-react"
 import { generateProTrip } from "../actions/generate-trip"
 
 export function CheckoutDetailsForm() {
-  const { draftTrip, updateTripMeta, setViewState, resetBuilder } = useBuilder()
+  const { currentTrip, setCurrentTrip, setViewState } = useTrip()
   const router = useRouter()
   
-  const [name, setName] = useState(draftTrip.leadPax.name || "")
-  const [email, setEmail] = useState(draftTrip.leadPax.email || "")
-  const [phone, setPhone] = useState(draftTrip.leadPax.phone || "")
+  const trip = currentTrip || { title: "", days: [], clientNotes: "", internalNotes: "" } as any;
+
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
   
-  const [clientNotes, setClientNotes] = useState(draftTrip.clientNotes || "")
-  const [internalNotes, setInternalNotes] = useState(draftTrip.internalNotes || "")
+  const [clientNotes, setClientNotes] = useState(trip.clientNotes || "")
+  const [internalNotes, setInternalNotes] = useState(trip.internalNotes || "")
 
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -30,24 +32,26 @@ export function CheckoutDetailsForm() {
   }
 
   const handleGenerate = async () => {
+    if (!currentTrip) return;
     setIsGenerating(true)
     
-    updateTripMeta({
-      leadPax: { name, email, phone },
+    setCurrentTrip({
+      ...currentTrip,
       clientNotes,
       internalNotes
     })
 
     try {
       const result = await generateProTrip({
-        ...draftTrip,
+        ...currentTrip,
         leadPax: { name, email, phone },
         clientNotes,
         internalNotes
       })
 
       if (result.success) {
-        resetBuilder()
+        setCurrentTrip(null)
+        setViewState('wizard')
         router.push(`/trip/${result.shareToken}`)
       }
     } catch (err) {
@@ -62,18 +66,18 @@ export function CheckoutDetailsForm() {
       
       <div className="w-1/3 bg-slate-900 text-white p-8 overflow-y-auto border-r border-slate-800 hidden md:block">
         <h2 className="text-3xl font-serif font-bold mb-2 leading-tight">Finalizing</h2>
-        <p className="text-slate-400 mb-8">{draftTrip.title}</p>
+        <p className="text-slate-400 mb-8">{trip.title}</p>
         
         <div className="space-y-4">
            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
              <p className="text-xs uppercase tracking-widest font-semibold text-slate-500 mb-1">Total Days</p>
-             <p className="font-medium text-white">{draftTrip.days.length} Days</p>
+             <p className="font-medium text-white">{trip.days.length} Days</p>
            </div>
            
            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
              <p className="text-xs uppercase tracking-widest font-semibold text-slate-500 mb-1">Total Events</p>
              <p className="font-medium text-white">
-               {draftTrip.days.reduce((acc, day) => acc + day.events.length, 0)} Timeline Blocks
+               {trip.days.reduce((acc: number, day: any) => acc + day.events.length, 0)} Timeline Blocks
              </p>
            </div>
         </div>

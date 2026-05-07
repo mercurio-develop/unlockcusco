@@ -16,6 +16,8 @@ import type { Business } from "@prisma/client"
 
 interface ExploreViewProps {
   initialBusinesses: Business[]
+  initialMapBusinesses: Business[]
+  initialCategoryCounts: Record<string, number>
   initialHasMore: boolean
   initialQuery: string
   initialSelectedId?: string | null
@@ -26,8 +28,17 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
   loading: () => <div className="h-full w-full bg-slate-50 animate-pulse" />
 })
 
-export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, initialSelectedId }: ExploreViewProps) {
+export function ExploreView({ 
+  initialBusinesses, 
+  initialMapBusinesses,
+  initialCategoryCounts,
+  initialHasMore, 
+  initialQuery, 
+  initialSelectedId 
+}: ExploreViewProps) {
   const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses)
+  const [mapBusinesses, setMapBusinesses] = useState<Business[]>(initialMapBusinesses)
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>(initialCategoryCounts)
   const searchParams = useSearchParams()
   const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
   
@@ -39,6 +50,8 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
   if (initialBusinesses !== prevInitialBusinesses) {
     setPrevInitialBusinesses(initialBusinesses)
     setBusinesses(initialBusinesses)
+    setMapBusinesses(initialMapBusinesses)
+    setCategoryCounts(initialCategoryCounts)
     setShowFilters(true)
   }
 
@@ -64,6 +77,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
           initialQuery={initialQuery} 
           showFilters={showFilters}
           setShowFilters={setShowFilters}
+          categoryCounts={categoryCounts}
         />
       </div>    </div>  )
 
@@ -87,7 +101,7 @@ export function ExploreView({ initialBusinesses, initialHasMore, initialQuery, i
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={businesses} selectedId={selectedId} onSelectBusiness={setSelectedId} />}
+      map={<ExploreMap businesses={mapBusinesses} selectedId={selectedId} onSelectBusiness={setSelectedId} />}
       showMap={panelMode !== 'macro'}
     />
   )

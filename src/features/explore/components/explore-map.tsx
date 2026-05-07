@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useItinerary } from "@/lib/store/itinerary-context"
 import { cn } from "@/lib/utils"
@@ -34,12 +34,17 @@ const getCategoryStyle = (category: string | undefined | null) => {
     case 'AGENCY':
     case 'EXPERIENCE':
       return { bg: "#FFCC00", icon: Star };     // Apple Yellow
+    case 'TEXTILES':
+      return { bg: "#E91E63", icon: Scissors }; // Pink
+    case 'GUIDE':
+      return { bg: "#FF5722", icon: User };     // Deep Orange
     case 'NOTE':
       return { bg: "#8E8E93", icon: Clipboard }; // Apple Gray
     default:
       return { bg: "#8E8E93", icon: MapPin };
   }
 }
+
 
 interface ExploreMapProps {
   businesses: Business[]
@@ -95,6 +100,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     
     completedDays.forEach(day => {
       if (day.waypoints.length < 2) return;
+      
+      const fallbackFeature: GeoJSON.Feature<GeoJSON.LineString> = {
+        type: 'Feature',
+        properties: { dayNumber: day.dayNumber, isActive: day.isActive, isComplete: day.isComplete },
+        geometry: { type: 'LineString', coordinates: day.waypoints }
+      };
+
       const coordsStr = day.waypoints.map(c => `${c[0]},${c[1]}`).join(';');
       if (day.waypoints.length <= 25) {
         fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${coordsStr}?geometries=geojson&overview=full&access_token=${mapboxToken}`)
@@ -109,9 +121,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                   geometry: data.routes[0].geometry,
                 }
               }));
+            } else {
+              setMultiDayRoutes(prev => ({ ...prev, [day.dayNumber]: fallbackFeature }));
             }
           })
-          .catch(console.error);
+          .catch(err => {
+            console.error(err);
+            setMultiDayRoutes(prev => ({ ...prev, [day.dayNumber]: fallbackFeature }));
+          });
+      } else {
+        setMultiDayRoutes(prev => ({ ...prev, [day.dayNumber]: fallbackFeature }));
       }
     });
   }, [completedDays, mapboxToken]);
@@ -239,16 +258,26 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     const isItineraryId = selectedId === 'itin-start' || selectedId === 'itin-arrival';
     const pitch = isItineraryId ? 0 : (mapMode === "satellite" ? 60 : 0);
     
-    const start = activeItinerary?.startAnchor;
-    if (selectedId === 'itin-start' && start?.lat && start?.lng) {
-      mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+    let startAnchor: any = null;
+    let endAnchor: any = null;
+    
+    if (panelMode === "itinerary" && activeItinerary) {
+      startAnchor = activeItinerary.startAnchor;
+      endAnchor = activeItinerary.endAnchor;
+    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      startAnchor = activeDay?.startAnchor;
+      endAnchor = activeDay?.endAnchor;
+    }
+
+    if (selectedId === 'itin-start' && startAnchor?.lat && startAnchor?.lng) {
+      mapRef.current?.flyTo({ center: [startAnchor.lng as number, startAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
 
-    const end = activeItinerary?.endAnchor;
-    if (selectedId === 'itin-arrival' && end?.lat && end?.lng) {
-      mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+    if (selectedId === 'itin-arrival' && endAnchor?.lat && endAnchor?.lng) {
+      mapRef.current?.flyTo({ center: [endAnchor.lng as number, endAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
       setPopupBusiness(null);
       return;
     }
@@ -279,6 +308,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           }
         }
       }
+    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      if (activeDay) {
+        for (const evt of activeDay.events || []) {
+          if (evt.id === selectedId && evt.lat !== undefined && evt.lng !== undefined) {
+            targetLat = evt.lat;
+            targetLng = evt.lng;
+            break;
+          }
+          if ((evt as any).alternatives) {
+            const alt = (evt as any).alternatives.find((a: any) => a.id === selectedId);
+            if (alt && alt.lat !== undefined && alt.lng !== undefined) {
+              targetLat = alt.lat;
+              targetLng = alt.lng;
+              break;
+            }
+          }
+        }
+      }
     }
 
     if (targetLat !== null && targetLng !== null) {
@@ -287,7 +335,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     } else {
       setPopupBusiness(null);
     }
-  }, [selectedId, businesses, activeItinerary, mapMode]);
+  }, [selectedId, businesses, activeItinerary, mapMode, currentTrip, activeDayNumber, panelMode]);
 
   // Fit bounds to route ONLY when itineraryRoute is newly generated
   // Disabled as per MVP Crucible to preserve viewport unless explicitly routed
@@ -315,6 +363,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     if (businessSignature !== prevSignature) {
       setPrevSignature(businessSignature);
       
+      // Skip fitBounds if we already have a selected item to fly to, to avoid animation conflicts
+      if (selectedId && validBusinesses.some(b => b.id === selectedId)) {
+        return;
+      }
+
       let minLng = validBusinesses[0].lng;
       let maxLng = validBusinesses[0].lng;
       let minLat = validBusinesses[0].lat;
@@ -385,14 +438,18 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           const isAct = route.properties?.isActive;
           const isComp = route.properties?.isComplete;
           const dayNum = route.properties?.dayNumber as number;
-          const colors = ["#0ea5e9", "#f59e0b", "#10b981", "#8b5cf6", "#f43f5e", "#ef4444"];
-          const color = isAct ? "#0f172a" : colors[dayNum % colors.length];
-          const opacity = isAct ? 0.8 : (isComp ? 0.5 : 0.2);
+          const colors = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5AC8FA"];
+          const color = colors[(dayNum - 1) % colors.length];
+          const opacity = isAct ? 1 : (isComp ? 0.7 : 0.3);
           
           return (
             <Source key={`route-${dayNum}`} id={`route-${dayNum}`} type="geojson" data={route}>
+              {/* White glow effect matching explore map */}
+              <Layer id={`route-glow-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
+                paint={{ "line-color": "#ffffff", "line-width": isAct ? 14 : 10, "line-opacity": opacity * 0.5, "line-blur": 6 }} />
+              {/* Main line */}
               <Layer id={`route-line-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-                paint={{ "line-color": color, "line-width": isAct ? 4 : 3, "line-opacity": opacity, "line-dasharray": isAct ? [1, 2] : [1] }}
+                paint={{ "line-color": color, "line-width": isAct ? 5 : 3, "line-opacity": opacity, "line-dasharray": isAct ? [1, 2] : [1] }}
               />
             </Source>
           );
@@ -561,62 +618,83 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
             onClose={() => setPopupBusiness(null)} maxWidth="280px"
             closeButton={false} closeOnClick={false} className="z-50" offset={32}
           >
-            <div className="w-64 rounded-2xl bg-white/95 overflow-hidden border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
-              {(popupBusiness as any).imageUrl && (
-                <div className="w-full h-24 bg-slate-100 relative">
-                  <img 
-                    src={(popupBusiness as any).imageUrl} 
-                    alt={(popupBusiness as any).name} 
-                    referrerPolicy="no-referrer" 
-                    className="w-full h-full object-cover" 
-                    onError={(e) => {
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
-                      e.currentTarget.onerror = null;
-                    }}
-                  />
+            {(popupBusiness as any).category === 'NOTE' ? (
+              <div className="w-48 p-4 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-2 mb-2 text-slate-400">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Waypoint</span>
                 </div>
-              )}
-              <div className="p-3">
-                <div className="flex items-center justify-between gap-3 mb-1">
-                  <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || (popupBusiness as any).title}</h3>
-                  {(popupBusiness as any).isClaimed && <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-500 fill-emerald-500" />}
-                </div>
-                <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
-                  <span>{(popupBusiness as any).category}</span>
-                  <span className="text-slate-400 font-mono">{(popupBusiness as any).priceTier || '$$'}</span>
-                </div>
-                
-                {((popupBusiness as any).rating || (popupBusiness as any).rating) && (
-                  <div className="flex flex-col gap-1 mb-3">
-                    <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      {(popupBusiness as any).rating || (popupBusiness as any).rating}
-                    </div>
-                    {(popupBusiness as any).description && (
-                      <p className="text-xs text-slate-600 italic leading-snug">"{(popupBusiness as any).description}"</p>
-                    )}
+                <p className="text-sm font-medium leading-snug">
+                  {(popupBusiness as any).name || (popupBusiness as any).title}
+                </p>
+              </div>
+            ) : (
+              <div className="w-64 rounded-2xl bg-white/95 overflow-hidden border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
+                {(popupBusiness as any).imageUrl && (
+                  <div className="w-full h-24 bg-slate-100 relative">
+                    <img 
+                      src={(popupBusiness as any).imageUrl} 
+                      alt={(popupBusiness as any).name} 
+                      referrerPolicy="no-referrer" 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
+                        e.currentTarget.onerror = null;
+                      }}
+                    />
                   </div>
                 )}
-                
-                <div className="mt-2">
-                  {(popupBusiness as any).menuUrl ? (
-                    <a href={(popupBusiness as any).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                      View Menu ↗
-                    </a>
-                  ) : (
-                    <button onClick={() => {
-                      const isNewTrip = insertWaypoint(popupBusiness as any)
-                      if (isNewTrip) {
-                        router.push(`?ai_prompt=I just added ${encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title)} to my day. Can you help me set up an end destination and a basecamp based on this?`)
-                      }
-                      setPopupBusiness(null)
-                    }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
-                      + Add to Day
-                    </button>
+                <div className="p-3">
+                  <div className="flex items-center justify-between gap-3 mb-1">
+                    <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || (popupBusiness as any).title}</h3>
+                    {(popupBusiness as any).isClaimed && <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-500 fill-emerald-500" />}
+                  </div>
+                  <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
+                    <span>{(popupBusiness as any).category}</span>
+                    <span className="text-slate-400 font-mono">{(popupBusiness as any).priceTier || '$$'}</span>
+                  </div>
+                  
+                  {((popupBusiness as any).rating || (popupBusiness as any).rating) && (
+                    <div className="flex flex-col gap-1 mb-3">
+                      <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        {(popupBusiness as any).rating || (popupBusiness as any).rating}
+                      </div>
+                      {(popupBusiness as any).description && (
+                        <p className="text-xs text-slate-600 italic leading-snug">
+                          {(popupBusiness as any).description}
+                        </p>
+                      )}
+                    </div>
                   )}
+                  
+                  <div className="mt-2">
+                    {panelMode === "builder" ? (
+                      <button onClick={() => {
+                        setPopupBusiness(null)
+                      }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                        Close
+                      </button>
+                    ) : (popupBusiness as any).menuUrl ? (
+                      <a href={(popupBusiness as any).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                        View Menu ↗
+                      </a>
+                    ) : (
+                      <button onClick={() => {
+                        const isNewTrip = insertWaypoint(popupBusiness as any)
+                        if (isNewTrip) {
+                          const bName = encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title);
+                          router.push(`?ai_prompt=I'd like to add ${bName} to my itinerary. Can you help me plan the rest of the day? Please ask me where I'll be starting from and where I'd like to end.`)
+                        }
+                        setPopupBusiness(null)
+                      }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
+                        + Add to Day
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </Popup>
         )}
 
@@ -633,6 +711,36 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           style={{ position: 'absolute', right: controlsRightOffset, bottom: '20px', transition: 'right 0.3s ease-in-out' }}
         />
       </Map>
+
+      {/* Multi-Day Legend (Builder Mode) */}
+      {panelMode === "builder" && completedDays.length > 0 && (
+        <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 w-48 pointer-events-auto">
+          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">Itinerary Trace</h4>
+          <div className="space-y-2.5">
+            {completedDays.map(day => {
+              const DAY_COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5AC8FA"];
+              const color = DAY_COLORS[(day.dayNumber - 1) % DAY_COLORS.length];
+              return (
+                <button 
+                  key={day.dayNumber} 
+                  className={`w-full flex items-center justify-between gap-3 text-left transition-opacity hover:opacity-100 ${day.isActive ? 'opacity-100' : 'opacity-50 hover:opacity-80'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className={`w-3.5 h-3.5 rounded-full shadow-inner ${day.isActive ? 'ring-2 ring-offset-2 ring-slate-900/10' : ''}`} 
+                      style={{ backgroundColor: color }} 
+                    />
+                    <span className={`text-sm ${day.isActive ? 'text-slate-900 font-bold' : 'text-slate-600 font-medium'}`}>
+                      Day {day.dayNumber}
+                    </span>
+                  </div>
+                  {day.isActive && <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Floating Style Switcher - Apple Style */}
       <div 

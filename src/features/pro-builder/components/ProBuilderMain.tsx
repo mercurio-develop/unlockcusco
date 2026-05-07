@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useTrip } from "@/lib/store/trip-context"
 import { BuilderWizard } from "./BuilderWizard"
 import { BuilderWorkspace } from "./BuilderWorkspace"
@@ -17,7 +17,7 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 export function ProBuilderMain() {
   const { viewState, currentTrip, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen } = useTrip()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
     setPanelMode('builder')
@@ -31,17 +31,35 @@ export function ProBuilderMain() {
     return () => clearTimeout(timer);
   }, [isSidebarCollapsed, isWorkspaceCollapsed]);
 
+  const mapEntities = useMemo(() => {
+    if (!currentTrip) return [];
+    const mapEvents = currentTrip.days.filter(d => d.isComplete || d.dayNumber === activeDayNumber).flatMap(d => d.events).filter(e => e.type !== 'NOTE');
+    
+    return mapEvents.map(e => {
+      let evtLat = e.lat;
+      let evtLng = e.lng;
+      if (e.type === 'TRANSPORT') {
+        evtLat = (e as any).fromLat;
+        evtLng = (e as any).fromLng;
+      } else if (e.type === 'MEAL') {
+        evtLat = (e as any).locationLat || e.lat;
+        evtLng = (e as any).locationLng || e.lng;
+      }
+
+      return {
+        id: e.id,
+        name: e.title,
+        lat: evtLat,
+        lng: evtLng,
+        category: e.type
+      };
+    }).filter(e => e.lat != null && e.lng != null);
+  }, [currentTrip, activeDayNumber]);
+
   if (viewState === 'wizard') return <BuilderWizard />
   if (viewState === 'checkout') return <CheckoutDetailsForm />
 
   const activeDay = currentTrip?.days.find(d => d.dayNumber === activeDayNumber)
-  const mapEntities = activeDay?.events.map(e => ({
-    id: e.id,
-    name: e.title,
-    lat: e.lat,
-    lng: e.lng,
-    category: e.type
-  })) || []
 
   // Helper to get small icons for event types
   const getSmallIcon = (type: string) => {
@@ -76,66 +94,6 @@ export function ProBuilderMain() {
         <div className={`flex-1 flex flex-col transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100 overflow-hidden'}`}>
           {currentTrip && (
             <>
-              <div className="p-8 pr-14 pb-6 border-b border-slate-100 shrink-0 relative bg-transparent">
-                <div className="flex items-center justify-between mb-3">
-                   <span className="bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">{currentTrip.status || "DRAFT"}</span>
-                   <div className="flex items-center gap-4">
-                     <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                       <span>{currentTrip.startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                     </div>
-                     <button 
-                      onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-                      className="p-1.5 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
-                      title={isHeaderCollapsed ? "Expand Details" : "Collapse Details"}
-                     >
-                       {isHeaderCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                     </button>
-                   </div>
-                </div>
-                <h2 className="text-3xl font-serif font-bold text-slate-900 mb-6 leading-tight">{currentTrip.title}</h2>
-                
-                <AnimatePresence>
-                  {!isHeaderCollapsed && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                      animate={{ height: "auto", opacity: 1, marginBottom: 24 }}
-                      exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      {/* Trip Metadata Section */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <div className="flex items-center gap-2 text-slate-400 mb-1">
-                              <UserCircle2 className="w-4 h-4" />
-                              <span className="text-[10px] font-bold uppercase tracking-widest">Travelers</span>
-                            </div>
-                            <p className="text-sm font-semibold text-slate-900">{currentTrip.paxCount} Pax</p>
-                            <p className="text-xs text-slate-500 mt-0.5">Primary: Pending</p>
-                         </div>
-                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <div className="flex items-center gap-2 text-slate-400 mb-1">
-                              <AlignLeft className="w-4 h-4" />
-                              <span className="text-[10px] font-bold uppercase tracking-widest">Pace</span>
-                            </div>
-                            <p className="text-sm font-semibold text-slate-900">Balanced</p>
-                            <p className="text-xs text-slate-500 mt-0.5">Flexible start times</p>
-                         </div>
-                      </div>
-
-                      {/* Trip Notes / Intro */}
-                      <div className="relative">
-                        <textarea 
-                          className="w-full text-sm text-slate-600 outline-none resize-none h-20 bg-slate-50 p-4 rounded-2xl border border-transparent focus:border-slate-200 transition-colors leading-relaxed placeholder:text-slate-400"
-                          placeholder="Add an introduction or internal notes about this trip..."
-                          defaultValue={currentTrip.clientNotes || ""}
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              
               <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-hide bg-slate-50/50">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Itinerary Timeline</h3>
                 {currentTrip.days.map((day) => {
@@ -192,18 +150,6 @@ export function ProBuilderMain() {
               </div>
               
               <div className="p-8 bg-transparent border-t border-slate-100 shrink-0">
-                {/* Budget Summary */}
-                <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
-                   <div>
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1"><Receipt className="w-3.5 h-3.5" /> Est. Budget</span>
-                      <p className="text-xl font-bold text-slate-900">${estimatedTotal}</p>
-                   </div>
-                   <div className="text-right">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Per Person</span>
-                      <p className="text-sm font-semibold text-slate-600">${perPerson}</p>
-                   </div>
-                </div>
-
                 <button
                   onClick={() => setViewState('checkout')}
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
@@ -234,7 +180,7 @@ export function ProBuilderMain() {
         </div>
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isWorkspaceCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <BuilderWorkspace />
+          <BuilderWorkspace selectedId={selectedId} onSelectEvent={setSelectedId} />
         </div>
       </div>
     </div>

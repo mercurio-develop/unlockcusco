@@ -2,16 +2,19 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Search, X } from "lucide-react"
+import { Search, X, Star, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, User } from "lucide-react"
 
 const CATEGORIES = [
-  { label: "🎟️ Boleto", value: "Boleto" },
-  { label: "🥾 Adventure", value: "Adventure" },
-  { label: "🧘 Wellness", value: "Wellness" },
-  { label: "🍽️ Dining", value: "Dining" },
-  { label: "🏺 Culture", value: "Culture" },
-  { label: "🛌 Stays", value: "Stays" },
-  { label: "🚕 Transport", value: "Transport" },
+  { label: "Agencies", value: "Agency", icon: Star },
+  { label: "Boleto", value: "Boleto", icon: Ticket },
+  { label: "Adventure", value: "Adventure", icon: MountainIcon },
+  { label: "Wellness", value: "Wellness", icon: Sprout },
+  { label: "Dining", value: "Dining", icon: Utensils },
+  { label: "Culture", value: "Culture", icon: Landmark },
+  { label: "Textiles", value: "Textiles", icon: Scissors },
+  { label: "Stays", value: "Stays", icon: Bed },
+  { label: "Transport", value: "Transport", icon: Car },
+  { label: "Guides", value: "Guide", icon: User },
 ]
 
 const LOCATIONS = [
@@ -25,18 +28,27 @@ const LOCATIONS = [
   { label: "Cusco", value: "cusco" },
 ]
 
+const SORT_OPTIONS = [
+  { label: "Recommended", value: "recommended" },
+  { label: "Highest Rated", value: "rating_desc" },
+  { label: "Price (Low to High)", value: "price_asc" },
+  { label: "Price (High to Low)", value: "price_desc" },
+]
+
 const RADIUS_MARKS: number[] = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 10, 15];
 
 interface ExploreSearchProps {
   initialQuery: string
   showFilters?: boolean
   setShowFilters?: (v: boolean) => void
+  categoryCounts?: Record<string, number>
 }
 
 export function ExploreSearch({ 
   initialQuery,
   showFilters = true,
-  setShowFilters = () => {}
+  setShowFilters = () => {},
+  categoryCounts = {}
 }: ExploreSearchProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -50,12 +62,17 @@ export function ExploreSearch({
   const currentRad = searchParams.has("rad") ? parseFloat(searchParams.get("rad")!) : 2
   const currentLat = searchParams.get("lat") || ""
   const currentLng = searchParams.get("lng") || ""
+  const currentSort = searchParams.get("sort") || "recommended"
   
   const [localRad, setLocalRad] = useState(currentRad)
 
   const currentCats = useMemo(() => {
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
   }, [currentCatStr])
+
+  const totalCount = useMemo(() => {
+    return Object.values(categoryCounts).reduce((acc, curr) => acc + curr, 0)
+  }, [categoryCounts])
 
   useEffect(() => {
     setValue(searchParams.get("q") || "")
@@ -65,7 +82,7 @@ export function ExploreSearch({
     setLocalRad(currentRad)
   }, [currentRad])
 
-  const navigateFilters = (loc?: string, cats?: string[], q?: string, rad?: number, lat?: string, lng?: string) => {
+  const navigateFilters = (loc?: string, cats?: string[], q?: string, rad?: number, lat?: string, lng?: string, sort?: string) => {
     const params = new URLSearchParams()
     if (q) params.set("q", q)
     if (loc) params.set("loc", loc)
@@ -75,6 +92,7 @@ export function ExploreSearch({
       params.set("lat", lat)
       params.set("lng", lng)
     }
+    if (sort && sort !== "recommended") params.set("sort", sort)
     
     router.push(`/explore?${params.toString()}`)
   }
@@ -84,7 +102,7 @@ export function ExploreSearch({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     
     debounceRef.current = setTimeout(() => {
-      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)
+      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
     }, 500)
   }
 
@@ -95,7 +113,7 @@ export function ExploreSearch({
     } else {
       nextCats.push(catValue)
     }
-    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)
+    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
   }
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +123,7 @@ export function ExploreSearch({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     
     debounceRef.current = setTimeout(() => {
-      navigateFilters(currentLoc, currentCats, value.trim(), newRad, currentLat, currentLng)
+      navigateFilters(currentLoc, currentCats, value.trim(), newRad, currentLat, currentLng, currentSort)
     }, 500)
   }
 
@@ -121,7 +139,7 @@ export function ExploreSearch({
         setIsGettingLocation(false)
         const lat = position.coords.latitude.toString()
         const lng = position.coords.longitude.toString()
-        navigateFilters(currentLoc, currentCats, value.trim(), currentRad, lat, lng)
+        navigateFilters(currentLoc, currentCats, value.trim(), currentRad, lat, lng, currentSort)
       },
       (error) => {
         setIsGettingLocation(false)
@@ -238,36 +256,69 @@ export function ExploreSearch({
             </div>
           </div>
 
+          {/* Sort By */}
+          <div className="flex flex-col gap-3">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sort By</span>
+            <div className="flex flex-wrap gap-2.5">
+              {SORT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, option.value)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap ${
+                    currentSort === option.value 
+                      ? "bg-slate-900 text-white shadow-md border-slate-900" 
+                      : "bg-white text-slate-600 hover:bg-gray-50 border-gray-200 hover:border-slate-900 hover:text-slate-900"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Categories */}
           <div className="flex flex-col gap-3">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Category (Multi-Select)</span>
             <div className="flex flex-wrap gap-2.5">
               <button
                 onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap flex items-center gap-2 ${
                   currentCats.length === 0 
                     ? "bg-slate-900 text-white shadow-md border-slate-900" 
                     : "bg-white text-slate-600 hover:bg-gray-50 border-gray-200 hover:border-slate-900 hover:text-slate-900"
                 }`}
               >
                 All Experiences
+                {totalCount > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${currentCats.length === 0 ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                    {totalCount}
+                  </span>
+                )}
               </button>
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => handleCategoryToggle(cat.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap flex items-center gap-1.5 ${
-                    currentCats.includes(cat.value)
-                      ? "bg-slate-900 text-white shadow-md border-slate-900" 
-                      : "bg-white text-slate-600 hover:bg-gray-50 border-gray-200 hover:border-slate-900 hover:text-slate-900"
-                  }`}
-                >
-                  {currentCats.includes(cat.value) && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  )}
-                  {cat.label}
-                </button>
-              ))}
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon
+                const isActive = currentCats.includes(cat.value)
+                const count = categoryCounts[cat.value.toUpperCase()] || 0
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => handleCategoryToggle(cat.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border duration-200 whitespace-nowrap flex items-center gap-2 ${
+                      isActive
+                        ? "bg-slate-900 text-white shadow-md border-slate-900" 
+                        : "bg-white text-slate-600 hover:bg-gray-50 border-gray-200 hover:border-slate-900 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                    {cat.label}
+                    {count > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -276,3 +327,4 @@ export function ExploreSearch({
     </div>
   )
 }
+
