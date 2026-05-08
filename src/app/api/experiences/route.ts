@@ -3,8 +3,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   try {
-    // We fetch both TourPackages and Businesses so the builder has access to all experiences
-    
     // 1. Fetch Tour Packages
     const tourPackages = await prisma.tourPackage.findMany({
       select: { 
@@ -16,7 +14,7 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // 2. Fetch Businesses (Experiences/Places/Stays)
+    // 2. Fetch Businesses
     const businesses = await prisma.business.findMany({
       where: {
         category: {
@@ -28,6 +26,8 @@ export async function GET(req: NextRequest) {
         name: true,
         locationSlug: true,
         category: true,
+        lat: true,
+        lng: true
       }
     })
 
@@ -41,6 +41,8 @@ export async function GET(req: NextRequest) {
         name: true,
         featuresJson: true,
         category: true,
+        lat: true,
+        lng: true
       }
     })
 
@@ -54,6 +56,8 @@ export async function GET(req: NextRequest) {
         name: true,
         locationSlug: true,
         featuresJson: true,
+        lat: true,
+        lng: true
       }
     })
 
@@ -72,21 +76,25 @@ export async function GET(req: NextRequest) {
       title: b.name,
       sector: b.locationSlug || 'VALLE_SAGRADO',
       pace: 'FLEXIBLE',
-      tags: b.category
+      tags: b.category,
+      lat: b.lat,
+      lng: b.lng
     }))
 
-    // Map Business
+    // Map Transport
     const formattedTransport = transport.map(t => {
       let vehicleType = ""
       try {
-        vehicleType = JSON.parse(t.featuresJson).vehicleType || ""
+        vehicleType = t.featuresJson ? JSON.parse(t.featuresJson).vehicleType || "" : ""
       } catch (e) {}
       return {
         id: t.id,
         title: t.name,
         sector: 'VALLE_SAGRADO',
         pace: 'FIXED',
-        tags: `transport, ${vehicleType}, ${t.category}`
+        tags: `transport, ${vehicleType}, ${t.category}`,
+        lat: t.lat,
+        lng: t.lng
       }
     })
 
@@ -94,7 +102,7 @@ export async function GET(req: NextRequest) {
     const formattedTherapists = therapists.map(th => {
       let specialties = ""
       try {
-        specialties = JSON.parse(th.featuresJson).join(', ')
+        specialties = th.featuresJson ? JSON.parse(th.featuresJson).join(', ') : "wellness"
       } catch (e) {
         specialties = "wellness"
       }
@@ -103,11 +111,12 @@ export async function GET(req: NextRequest) {
         title: th.name,
         sector: th.locationSlug || 'VALLE_SAGRADO',
         pace: 'RELAXED',
-        tags: `wellness, healer, ${specialties}`
+        tags: `wellness, healer, ${specialties}`,
+        lat: th.lat,
+        lng: th.lng
       }
     })
 
-    // Combine all arrays
     const allExperiences = [
       ...formattedPackages, 
       ...formattedBusinesses,
