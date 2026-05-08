@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, Star, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, User } from "lucide-react"
+import posthog from 'posthog-js'
 
 const CATEGORIES = [
   { label: "Tourist Ticket", value: "Boleto", icon: Ticket },
@@ -98,11 +99,19 @@ export function ExploreSearch({
   const handleSearchChange = (newVal: string) => {
     setValue(newVal)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    
+
     debounceRef.current = setTimeout(() => {
+      if (newVal.trim()) {
+        posthog.capture('search_performed', {
+          query: newVal.trim(),
+          location: currentLoc,
+          categories: currentCats
+        });
+      }
       navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
-    }, 800)
+    }, 500)
   }
+
 
   const handleCategoryToggle = (catValue: string) => {
     let nextCats = [...currentCats]

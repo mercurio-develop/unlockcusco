@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import type { UniversalTrip, TimelineEvent, TripDay } from '@/lib/types/trip';
+import posthog from 'posthog-js';
 
 import { COORDS_MAP, DEFAULT_COORDS } from "@/lib/constants";
 
@@ -77,6 +78,25 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'checking_experiences' | 'checking_transport' | 'payment_required' | 'confirmed' | 'failed'>('idle');
   const [entityStatuses, setEntityStatuses] = useState<Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'>>({});
+  const [hasRequestedFeedback, setHasRequestedFeedback] = useState(false);
+
+  // Trigger feedback when reaching payment or being idle
+  useEffect(() => {
+    if (bookingStatus === 'payment_required' && !hasRequestedFeedback) {
+      setAiPromptToTrigger("I've secured your day! Before we finalize, how has your experience with Vallecito been so far? Anything I could improve?");
+      setHasRequestedFeedback(true);
+    }
+  }, [bookingStatus, hasRequestedFeedback]);
+
+  useEffect(() => {
+    if (activeItinerary && !hasRequestedFeedback) {
+        const timer = setTimeout(() => {
+            setAiPromptToTrigger("I see you have a beautiful plan shaping up. How are you finding the tool so far? I'd love to hear your thoughts on how I can be more helpful.");
+            setHasRequestedFeedback(true);
+        }, 10 * 60 * 1000); // 10 minutes
+        return () => clearTimeout(timer);
+    }
+  }, [activeItinerary, hasRequestedFeedback]);
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
@@ -274,6 +294,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   const startBookingOrchestration = useCallback(async () => {
     if (!activeItinerary) return;
+
+    posthog.capture('orchestration_started', {
+        itinerary_title: activeItinerary.title,
+        waypoints_count: activeItinerary.waypoints.length,
+        total_cost: activeItinerary.totalCost
+    });
 
     setBookingStatus('checking_experiences');
     const initialStatuses: Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'> = {};
@@ -487,6 +513,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
                 waypoints: updatedWaypoints,
                 transitEdges: updatedTransitEdges,
                 totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+            });
+            
+            posthog.capture('waypoint_added', {
+                business_id: service.id,
+                business_name: service.name,
+                category: service.category,
+                itinerary_depth: updatedWaypoints.length
             });
             
             setAiPromptToTrigger(`I just added ${service.name} to my itinerary.`);

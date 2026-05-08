@@ -4,11 +4,20 @@ import { useTrip } from "@/lib/store/trip-context";
 import { Check, Loader2, MapPin, Car, Moon, ArrowLeft, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import posthog from 'posthog-js';
 
 export function BookingProgressView() {
   const { activeItinerary, entityStatuses, bookingStatus, resetBooking } = useTrip();
 
   if (!activeItinerary) return null;
+
+  const handleFinalize = () => {
+    posthog.capture('orchestration_finalized', {
+        itinerary_title: activeItinerary.title,
+        total_cost: activeItinerary.totalCost,
+        waypoints_count: activeItinerary.waypoints.length
+    });
+  };
 
   const steps = [
     { id: 'start', title: "Start", location: activeItinerary.startAnchor.title, type: 'anchor' },
@@ -107,6 +116,7 @@ export function BookingProgressView() {
 
         <Button 
           disabled={!isConfirmed}
+          onClick={handleFinalize}
           className={cn(
             "w-full py-6 rounded-2xl font-bold text-lg transition-all",
             isConfirmed ? "bg-rose-600 hover:bg-rose-500 text-white shadow-xl hover:scale-[1.02]" : "bg-slate-800 text-slate-500 cursor-not-allowed"
