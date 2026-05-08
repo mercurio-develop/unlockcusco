@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star } from "lucide-react"
+import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star, ShieldCheck } from "lucide-react"
 
 interface ClaimPageProps {
   params: Promise<{ businessId: string }>
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: ClaimPageProps): Promise<Meta
 
 export default async function ClaimPage({ params }: ClaimPageProps) {
   const { businessId } = await params
-  
+
   const business = await prisma.business.findUnique({
     where: { id: businessId },
   })
@@ -61,7 +61,6 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
     notFound()
   }
 
-  // Redirect if already claimed
   if (business.isClaimed) {
     return (
       <div className="min-h-screen bg-[#09090B] flex items-center justify-center p-4">
@@ -69,6 +68,11 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
           <h2 className="text-2xl font-bold text-white">Verified Profile</h2>
           <p className="text-white/60">This profile has already been claimed and is actively receiving direct bookings.</p>
+          <Link href={`/dashboard?businessId=${business.id}`}>
+            <Button className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white border-white/10">
+              Go to Dashboard
+            </Button>
+          </Link>
         </Card>
       </div>
     )
@@ -77,8 +81,7 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
   return (
     <div className="min-h-screen bg-[#09090B] py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
-        
-        {/* Urgent Header */}
+
         <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm flex gap-4 items-start">
           <AlertCircle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
           <div>
@@ -88,15 +91,18 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-          
-          {/* Main Value Prop */}
+
           <div className="md:col-span-3 space-y-6">
             <div>
-              <h1 className="text-4xl font-extrabold text-white tracking-tight">
-                Don&apos;t lose any more clients in the Sacred Valley with VALLECITO.
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
+                <ShieldCheck className="w-3 h-3" />
+                Business Verification
+              </div>
+              <h1 className="text-4xl font-extrabold text-white tracking-tight leading-tight">
+                Stop losing high-value clients in the Sacred Valley.
               </h1>
               <p className="mt-4 text-lg text-white/60 leading-relaxed">
-                VALLECITO is the AI-powered directory tourists use to plan their trips. Claim your profile now to unlock client contacts and activate the &quot;Instant Booking&quot; button.
+                VALLECITO connects international tourists with local experts. Claim your profile for <span className="text-white font-bold underline decoration-[#D4AF37]">FREE</span> to unlock hidden contact details and activate direct WhatsApp booking.
               </p>
             </div>
 
@@ -106,9 +112,9 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               </div>
               <h3 className="font-bold text-lg flex items-center gap-2 mb-4 text-white">
                 <Lock className="w-5 h-5 text-white/40" />
-                Hidden Booking Details
+                Pending Client Data
               </h3>
-              
+
               <div className="space-y-3 bg-black/40 p-4 rounded-lg border border-white/5">
                 <div className="flex justify-between items-center blur-sm select-none">
                   <span className="text-white/50">Tourist Name:</span>
@@ -127,28 +133,30 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               <div className="mt-6 text-center">
                 <Link href={`/claim/${business.id}/activate`}>
                   <Button className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold text-lg py-6 shadow-xl transition-transform hover:scale-[1.02]">
-                    Claim Profile for Free
+                    Activate Live Profile (Free)
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <p className="text-xs text-white/40 mt-3">100% free. Just upload your Yape QR code.</p>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <div className="w-1.5 h-1.5 bg-[#25D366] rounded-full animate-pulse" />
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">100% Free Forever • No Commissions</p>
+                </div>
               </div>
             </Card>
           </div>
 
-          {/* Business Preview Sidebar */}
           <div className="md:col-span-2">
-            <h3 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-4">How tourists see you today</h3>
+            <h3 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-4">Live Preview</h3>
             <Card className="overflow-hidden relative opacity-75 grayscale-[30%] pointer-events-none bg-white/5 border-white/10">
               <div className="absolute inset-0 bg-black/20 z-10 backdrop-blur-[1px] flex items-center justify-center">
                 <Badge variant="secondary" className="bg-[#09090B] text-white/90 shadow-lg border-red-500/30 text-xs uppercase tracking-widest font-bold">
                   Unverified
                 </Badge>
               </div>
-              
+
               <div className="relative h-40 w-full">
                 <Image
-                  src={business.imageUrl}
+                  src={business.imageUrl || "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop"}
                   alt={business.name}
                   fill
                   unoptimized
@@ -171,14 +179,23 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
               </div>
             </Card>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-8 space-y-6">
               <div className="flex items-start gap-3">
                 <div className="bg-[#25D366]/20 p-2 rounded-full shrink-0">
                   <TrendingUp className="w-4 h-4 text-[#25D366]" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-white">Increase Your Sales</h4>
-                  <p className="text-xs text-white/60 mt-1">Connect directly via WhatsApp with high-value tourists. No booking commissions.</p>
+                  <h4 className="font-bold text-sm text-white">Direct Bookings</h4>
+                  <p className="text-xs text-white/60 mt-1">Chat directly with tourists via WhatsApp. No middlemen, no fees.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-500/20 p-2 rounded-full shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-white">Verified Trust</h4>
+                  <p className="text-xs text-white/60 mt-1">Get the &quot;Verified&quot; badge to rank higher in AI recommendations.</p>
                 </div>
               </div>
             </div>

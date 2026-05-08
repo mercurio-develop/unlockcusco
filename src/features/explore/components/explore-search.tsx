@@ -41,6 +41,10 @@ export function ExploreSearch({
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
   }, [currentCatStr])
 
+  const totalCount = useMemo(() => {
+    return Object.values(categoryCounts).reduce((acc, curr) => acc + curr, 0)
+  }, [categoryCounts])
+
   useEffect(() => {
     setValue(searchParams.get("q") || "")
   }, [searchParams])
@@ -60,6 +64,7 @@ export function ExploreSearch({
       params.set("lng", lng)
     }
     if (sort && sort !== "recommended") params.set("sort", sort)
+    if (showFilters) params.set("filter", "open")
     
     router.push(`/explore?${params.toString()}`)
   }
@@ -167,14 +172,14 @@ export function ExploreSearch({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex flex-col gap-6 pt-2 pb-4">
+            <div className="flex flex-col gap-6 pt-2 pb-4 font-sans">
               {/* Header with Clear All */}
               <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Active Filters</span>
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Active Filters</span>
                 {(currentLoc || currentCats.length > 0 || currentSort !== "recommended") && (
                   <button 
                     onClick={() => navigateFilters("", [], value.trim(), undefined, undefined, undefined, "recommended")}
-                    className="text-[10px] text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider transition-colors"
+                    className="text-[11px] text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider transition-colors"
                   >
                     Reset All
                   </button>
@@ -183,7 +188,7 @@ export function ExploreSearch({
 
               {/* Sort By - Editorial Horizontal List */}
               <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sort By</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sort By</span>
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                   {SORT_OPTIONS.map((option) => (
                     <button
@@ -192,8 +197,8 @@ export function ExploreSearch({
                       className={cn(
                         "py-1 border-b text-[11px] font-bold transition-all",
                         currentSort === option.value 
-                          ? "text-slate-900 border-slate-900 font-serif italic" 
-                          : "text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-200"
+                          ? "text-slate-900 border-slate-900 font-black uppercase tracking-[0.1em]" 
+                          : "text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-200"
                       )}
                     >
                       {option.label}
@@ -202,26 +207,21 @@ export function ExploreSearch({
                 </div>
               </div>
 
-              {/* Categories - Editorial 2-Column List */}
+              {/* Categories - Magazine / Airbnb Hybrid */}
               <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Categories</span>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Categories</span>
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                     className={cn(
-                      "py-2 border-b text-[12px] font-medium transition-all flex items-center justify-between group",
+                      "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
                       currentCats.length === 0 
-                        ? "text-slate-900 border-slate-900 font-serif italic" 
-                        : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
+                        ? "border-slate-900 bg-slate-900 text-white shadow-md" 
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                     )}
                   >
-                    <span className="flex items-center gap-2">
-                      <MapPin className={cn("w-3 h-3", currentCats.length === 0 ? "text-slate-900" : "text-slate-300")} />
-                      All Experiences
-                    </span>
-                    {totalCount > 0 && (
-                      <span className="text-[9px] opacity-40 font-sans not-italic">({totalCount})</span>
-                    )}
+                    <MapPin className={cn("w-3.5 h-3.5", currentCats.length === 0 ? "text-rose-400" : "text-slate-400")} />
+                    <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
                   </button>
                   {CATEGORIES.map((cat) => {
                     const Icon = cat.icon
@@ -232,22 +232,22 @@ export function ExploreSearch({
                         key={cat.value}
                         onClick={() => handleCategoryToggle(cat.value)}
                         className={cn(
-                          "py-2 border-b text-[12px] font-medium transition-all flex items-center justify-between group",
+                          "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
                           isActive
-                            ? "text-slate-900 border-slate-900 font-serif italic" 
-                            : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
+                            ? "border-slate-900 bg-slate-900 text-white shadow-md" 
+                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                         )}
                       >
-                        <span className="flex items-center gap-2">
-                          <Icon className={cn("w-3 h-3", isActive ? "text-slate-900" : "text-slate-300")} />
-                          {cat.label}
-                        </span>
-                        {count > 0 && (
-                          <span className={cn(
-                            "text-[9px] font-sans not-italic",
-                            isActive ? "text-slate-900 opacity-60" : "text-slate-300 group-hover:text-slate-400"
-                          )}>
-                            ({count})
+                        <Icon className={cn("w-3.5 h-3.5", isActive ? "text-rose-400" : "text-slate-400")} />
+                        <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{cat.label}</span>
+                        {count > 0 && !isActive && (
+                          <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-slate-300">
+                            {count}
+                          </span>
+                        )}
+                        {count > 0 && isActive && (
+                          <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-white/50">
+                            {count}
                           </span>
                         )}
                       </button>
@@ -256,17 +256,17 @@ export function ExploreSearch({
                 </div>
               </div>
 
-              {/* Location - Editorial 2-Column List */}
+              {/* Location - Magazine / Airbnb Hybrid Pills */}
               <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Town / Sector</span>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Town / Sector</span>
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                     className={cn(
-                      "py-2 border-b text-[12px] font-medium transition-all text-left group",
+                      "px-3.5 py-2 rounded-full border transition-all",
                       currentLoc === "" 
-                        ? "text-slate-900 border-slate-900 font-serif italic" 
-                        : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
+                        ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
                     )}
                   >
                     Anywhere
@@ -276,10 +276,10 @@ export function ExploreSearch({
                       key={loc.value}
                       onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                       className={cn(
-                        "py-2 border-b text-[12px] font-medium transition-all text-left group",
+                        "px-3.5 py-2 rounded-full border transition-all",
                         currentLoc === loc.value 
-                          ? "text-slate-900 border-slate-900 font-serif italic" 
-                          : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
+                          ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
+                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
                       )}
                     >
                       {loc.label}
@@ -292,7 +292,7 @@ export function ExploreSearch({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Radius Search</span>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Radius Search</span>
                     <button
                       onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? undefined : localRad, currentLat, currentLng, currentSort)}
                       className={cn(
@@ -309,7 +309,7 @@ export function ExploreSearch({
                   <button 
                     onClick={handleUseMyLocation}
                     disabled={isGettingLocation || !isRadEnabled}
-                    className="text-[9px] text-rose-500 hover:text-rose-600 font-black uppercase tracking-widest transition-colors disabled:opacity-30 flex items-center gap-1"
+                    className="text-[10px] text-rose-500 hover:text-rose-600 font-black uppercase tracking-widest transition-colors disabled:opacity-30 flex items-center gap-1"
                   >
                     <Navigation className="w-2.5 h-2.5" />
                     {isGettingLocation ? "Locating..." : (currentLat ? "Using GPS" : "My Location")}
@@ -328,7 +328,7 @@ export function ExploreSearch({
                     onChange={handleRadiusChange}
                     className="flex-1 accent-rose-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                   />
-                  <span className="text-[10px] font-black text-slate-900 w-8 text-right">{localRad}km</span>
+                  <span className="text-[11px] font-black text-slate-900 w-8 text-right">{localRad}km</span>
                 </div>
               </div>
             </div>

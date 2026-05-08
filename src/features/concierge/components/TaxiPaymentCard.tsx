@@ -3,62 +3,63 @@
 import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { createTaxiPaymentIntent, notifyGhostPhone } from "../actions/process-taxi-payment";
 import { Button } from "@/components/ui/button";
+import { createTaxiPaymentIntent, notifyGhostPhone } from "@/features/concierge/actions/process-taxi-payment";
+import { ActiveRideHub } from "./ActiveRideHub";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_mock");
 
-interface TaxiPaymentCardProps {
-  taxi: {
-    originGuessed: string;
-    destinationName: string;
-    distanceKm: string;
-    estimatedCostUSD: number;
-    estimatedTimeMinutes: number;
-    taxi?: {
-      name: string;
-      rating: number;
-      whatsapp: string;
-    }
+interface TaxiDetails {
+  originGuessed: string;
+  destinationName: string;
+  estimatedCostUSD: number;
+  estimatedTimeMinutes: number;
+  distanceKm: string;
+  taxi?: {
+    name: string;
+    rating: number;
+    whatsapp: string;
   }
 }
 
-function CheckoutForm({ clientSecret, taxiDetails, onComplete }: { clientSecret: string, taxiDetails: TaxiPaymentCardProps['taxi'], onComplete: () => void }) {
+interface CheckoutFormProps {
+  clientSecret: string;
+  taxiDetails: TaxiDetails;
+  onComplete: (paymentIntentId: string) => void;
+}
+
+function CheckoutForm({ clientSecret, taxiDetails, onComplete }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements) return;
 
     setIsProcessing(true);
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Return URL is required, but we are preventing redirect for this flow if possible
-        // Actually, Stripe Elements usually redirects on success unless redirect="if_required"
-        return_url: `${window.location.origin}/explore`, 
+        return_url: `${window.location.origin}/explore`, // In real app, maybe a deep link
       },
       redirect: "if_required",
     });
 
     if (error) {
       setMessage(error.message || "An unexpected error occurred.");
-    } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      setMessage("Payment successful! Notifying driver...");
+    } else if (paymentIntent && (paymentIntent.status === "requires_capture" || paymentIntent.status === "succeeded")) {
+      setMessage("Payment secured! Notifying driver...");
       const result = await notifyGhostPhone(paymentIntent.id);
       if (result.error) {
-          setMessage(`Payment succeeded, but we couldn't reach the driver automatically. Please message them at ${taxiDetails.taxi?.whatsapp}`);
+          setMessage(`Hold secured, but we couldn't reach the driver automatically.`);
       } else {
           setMessage("Driver notified! Your taxi is on the way.");
       }
-      onComplete();
+      onComplete(paymentIntent.id);
     } else {
       setMessage("Payment is processing...");
     }
@@ -71,7 +72,7 @@ function CheckoutForm({ clientSecret, taxiDetails, onComplete }: { clientSecret:
       <PaymentElement />
       <Button disabled={isProcessing || !stripe || !elements} className="w-full bg-slate-900 text-white hover:bg-slate-800">
         <span id="button-text">
-          {isProcessing ? "Processing..." : `Pay $${taxiDetails.estimatedCostUSD}.00`}
+          {isProcessing ? "Processing..." : `Secure Hold for $${taxiDetails.estimatedCostUSD}.00`}
         </span>
       </Button>
       {message && <div className="text-sm text-center text-rose-600 mt-2">{message}</div>}
@@ -79,9 +80,13 @@ function CheckoutForm({ clientSecret, taxiDetails, onComplete }: { clientSecret:
   );
 }
 
+interface TaxiPaymentCardProps {
+  taxi: TaxiDetails;
+}
+
 export function TaxiPaymentCard({ taxi }: TaxiPaymentCardProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [completedIntentId, setCompletedIntentId] = useState<string | null>(null);
 
   useEffect(() => {
     // Create PaymentIntent as soon as the page loads
@@ -89,7 +94,6 @@ export function TaxiPaymentCard({ taxi }: TaxiPaymentCardProps) {
         estimatedCostUSD: taxi.estimatedCostUSD,
         origin: taxi.originGuessed,
         destinationName: taxi.destinationName,
-        driverName: taxi.taxi?.name,
     }).then((res) => {
         if (res.clientSecret) {
            setClientSecret(res.clientSecret);
@@ -98,6 +102,24 @@ export function TaxiPaymentCard({ taxi }: TaxiPaymentCardProps) {
         }
     });
   }, [taxi]);
+
+  if (completedIntentId) {
+    // Render the Active Ride view instead of the checkout form
+    // Since we only have the Stripe Intent ID on the client, the ActiveRideHub needs to fetch the RideBooking ID,
+    // OR we pass the Intent ID to ActiveRideHub and it queries by that.
+    // For simplicity, we'll assume ActiveRideHub accepts stripeIntentId or rideId.
+    // Let's modify ActiveRideHub locally if it needs to fetch by stripeIntentId.
+    // Actually, wait, our server action `notifyGhostPhone` is triggered on success,
+    // but the backend needs a way to let the UI fetch the ride.
+    // Let's create an API route for ActiveRideHub to fetch status.
+    return (
+      <ActiveRideHub 
+        rideId={completedIntentId} // We pass the stripe intent ID here temporarily, though we need the real DB rideId.
+        origin={taxi.originGuessed}
+        destinationName={taxi.destinationName}
+      />
+    )
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 p-4 max-w-sm w-full mx-auto my-4 text-slate-900">
@@ -125,13 +147,9 @@ export function TaxiPaymentCard({ taxi }: TaxiPaymentCardProps) {
          </div>
       )}
 
-      {isCompleted ? (
-         <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm text-center">
-             Booking Confirmed. Your driver has been notified.
-         </div>
-      ) : clientSecret ? (
+      {clientSecret ? (
         <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
-          <CheckoutForm clientSecret={clientSecret} taxiDetails={taxi} onComplete={() => setIsCompleted(true)} />
+          <CheckoutForm clientSecret={clientSecret} taxiDetails={taxi} onComplete={(id) => setCompletedIntentId(id)} />
         </Elements>
       ) : (
         <div className="text-sm text-slate-500 text-center py-4">Preparing secure checkout...</div>

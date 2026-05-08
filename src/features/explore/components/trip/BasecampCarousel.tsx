@@ -19,7 +19,7 @@ interface Basecamp {
 }
 
 export function BasecampCarousel({ locationTown }: { locationTown: string }) {
-  const { selectBasecamp, setExchangeTargetIndex, setPanelMode, setSelectedId, selectedId } = useItinerary()
+  const { setStartAnchorLocation, setExchangeTargetIndex, setPanelMode, setSelectedId, selectedId } = useItinerary()
 
   // Placeholder mock data for hotels
   const mockHotels: Basecamp[] = [
@@ -136,7 +136,7 @@ export function BasecampCarousel({ locationTown }: { locationTown: string }) {
                 </div>
                 
                 <button 
-                  onClick={() => selectBasecamp(hotel)}
+                  onClick={() => setStartAnchorLocation(hotel.lat, hotel.lng)}
                   className="w-full bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-sm active:scale-[0.98]"
                 >
                   🛎️ Select Basecamp

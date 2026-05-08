@@ -35,7 +35,7 @@ export function AiConcierge() {
     {
       id: "1",
       role: "assistant",
-      content: "Welcome to Vallecito. ✨\n\nHow can I curate your day in the Sacred Valley?\n\nTip: You can set your travel style in the top menu to get better personalized recommendations!"
+      content: "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences, restaurants, and centers using the filters above. \n\n📅 **Day View**: This is your personal timeline where we'll organize your chosen experiences into a seamless itinerary.\n\nHow can I curate your expedition today?"
     }
   ];
 
@@ -156,15 +156,15 @@ Please generate my macro trip plan.`;
 
   return (
     <>
-      {/* Mobile FAB */}
-      <div className="md:hidden fixed bottom-6 right-6 z-50">
+      {/* Mobile FAB - Hidden because it's now in the bottom tab bar */}
+      {/* <div className="md:hidden fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsChatOpen(true)}
           className="w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl hover:scale-110 transition-all flex items-center justify-center border-2 border-white/20"
         >
           <Sparkles className="w-6 h-6" />
         </Button>
-      </div>
+      </div> */}
 
       <AnimatePresence>
         {isChatOpen && (

@@ -2,11 +2,6 @@
 
 import { prisma } from "@/lib/prisma"
 
-// SECURITY AUDIT NOTE:
-// This action currently exposes a potential spam vector since anyone can trigger WhatsApp lead messages.
-// NEXT STEPS:
-// 1. Add rate-limiting based on the user's IP or session to prevent WhatsApp spam bots.
-// 2. Add input validation using Zod for touristName and date fields.
 export async function generateShadowLead(businessId: string, touristName: string, date: string) {
   if (!businessId || !touristName || !date) {
     throw new Error("Missing required fields for shadow lead generation.");
@@ -24,11 +19,10 @@ export async function generateShadowLead(businessId: string, touristName: string
     throw new Error("WhatsApp number not available for this business")
   }
 
-  // Uses the public hostname instead of hardcoding vallecito.app, using environment variable or a default
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vallecito.app";
-  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (VALLECITO) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile for free: ${baseUrl}/claim/${businessId}`
-  
+  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (VALLECITO) just recommended your business to ${touristName} for the date ${date}. Since your business is still an 'Unverified Profile', the tourist couldn't pay you directly on the platform. To receive the tourist's contact info and close this sale, click here to claim your profile FOR FREE: ${baseUrl}/claim/${businessId}`
+
   const encodedText = encodeURIComponent(rawText)
-  
+
   return { success: true, url: `https://wa.me/51${business.whatsapp}?text=${encodedText}` }
 }

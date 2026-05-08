@@ -57,7 +57,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const router = useRouter()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
 
   // Calculate dynamic right offset for map controls
   // If chat is open, shift left by the chat width (450px)
@@ -522,7 +522,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               draggable={true}
               onDragEnd={(e) => {
                 if (panelMode === "itinerary") {
-                  setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                  setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng);
                 }
               }}
             >
@@ -565,10 +565,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               draggable={true}
               onDragEnd={(e) => {
                 if (panelMode === "itinerary") {
-                  setEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, "Pinned Location");
+                  // setEndAnchorLocation currently not supported in store
                 }
-              }}
-            >
+              }}            >
               <div 
                 className={`cursor-grab active:cursor-grabbing group/start flex flex-col items-center ${panelMode === "builder" ? "pointer-events-none" : ""}`} 
                 title="End location"

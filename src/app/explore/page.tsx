@@ -52,24 +52,32 @@ function ExplorePageContent() {
     load()
   }, [q, id, loc, cat, rad, lat, lng, sort])
 
-  if (loading || !data) {
+  if (!data && loading) {
     return (
       <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
-        <p className="text-slate-500 font-medium animate-pulse">Consulting the Valley...</p>
+        <p className="text-slate-500 font-medium animate-pulse">
+          Consulting the Valley...
+        </p>
       </div>
     )
   }
 
+  if (!data || !Array.isArray(data.businesses)) {
+    return null
+  }
+
   return (
-    <ExploreView
-      initialBusinesses={data.businesses}
-      initialMapBusinesses={data.allBusinesses}
-      initialCategoryCounts={data.categoryCounts}
-      initialHasMore={data.hasMore}
-      initialQuery={q}
-      initialSelectedId={id}
-    />
+    <div className={loading ? "opacity-70 pointer-events-none transition-opacity" : "transition-opacity"}>
+      <ExploreView
+        initialBusinesses={data.businesses}
+        initialMapBusinesses={data.allBusinesses || []}
+        initialCategoryCounts={data.categoryCounts || {}}
+        initialHasMore={data.hasMore || false}
+        initialQuery={q}
+        initialSelectedId={id}
+      />
+    </div>
   )
 }
 

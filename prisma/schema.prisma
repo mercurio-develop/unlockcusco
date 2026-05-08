@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Business {
@@ -14,7 +14,6 @@ model Business {
   name     String
   category String @default("DINING")
 
-  // Shared fields
   lat          Float?
   lng          Float?
   rating       Float?
@@ -27,7 +26,6 @@ model Business {
   isFeatured   Boolean @default(false)
   locationSlug String  @default("")
 
-  // Extended Profile Fields
   tagline            String  @default("")
   description        String  @default("")
   contactEmail       String  @default("")
@@ -35,7 +33,6 @@ model Business {
   instagramHandle    String?
   instagramFollowers Int     @default(0)
 
-  // Pricing & Metrics
   priceTier              String @default("$$")
   marginTier             String @default("STANDARD")
   commissionRate         Float  @default(0.05)
@@ -43,22 +40,19 @@ model Business {
   whatsappClicksCount    Int    @default(0)
   aiRecommendationsCount Int    @default(0)
 
-  // Transport Specific
   vehicleType  String?
   capacity     Int?
   serviceZones String  @default("[]")
 
-  // Agency Specific
   guideName    String?
   seoMetaTitle String?
   seoMetaDesc  String?
 
-  // Domain Specific JSONs 
   specialties  String @default("[]")
   themeConfig  String @default("{}")
   featuresJson String @default("[]")
+  qrCodeUrl    String?
 
-  // Relations
   leads        Lead[]
   reviews      Review[]
   services     BusinessService[]
@@ -188,4 +182,56 @@ model TripDay {
   isCustomized   Boolean      @default(false)
   tourPackage    TourPackage? @relation(fields: [tourPackageId], references: [id])
   trip           Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+enum RideStatus {
+  HOLD_SECURED
+  DRIVER_ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum MessageSender {
+  TOURIST
+  DRIVER
+  SYSTEM
+}
+
+model Driver {
+  id             String        @id @default(cuid())
+  name           String
+  whatsappNumber String
+  carModel       String
+  licensePlate   String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  rides          RideBooking[]
+}
+
+model RideBooking {
+  id               String        @id @default(cuid())
+  touristName      String?
+  touristPhone     String?
+  pickupLocation   String
+  dropoffLocation  String
+  priceUsd         Float
+  stripeIntentId   String?       @unique
+  status           RideStatus    @default(HOLD_SECURED)
+  scheduledFor     DateTime?
+  etaMinutes       Int?
+  driverId         String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  driver           Driver?       @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  messages         RideMessage[]
+}
+
+model RideMessage {
+  id        String        @id @default(cuid())
+  rideId    String
+  sender    MessageSender
+  text      String
+  createdAt DateTime      @default(now())
+  ride      RideBooking   @relation(fields: [rideId], references: [id], onDelete: Cascade)
 }

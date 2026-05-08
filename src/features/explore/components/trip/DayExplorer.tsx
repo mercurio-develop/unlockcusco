@@ -169,7 +169,7 @@ export function DayExplorer() {
                             let icon = '🚕';
                             let labelText = 'Taxi';
                             
-                            const isWalking = edge.defaultDriver?.name?.toLowerCase().includes('walk') || edge.isWalkingOverride;
+                            const isWalking = edge.defaultDriver?.name?.toLowerCase().includes('walk') || (edge as any).isWalkingOverride;
 
                             if (isWalking) {
                               timeMins = Math.ceil(estimate.distanceKm * 12);

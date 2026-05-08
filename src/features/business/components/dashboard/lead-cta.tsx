@@ -2,37 +2,35 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Phone, Mail, MessageCircle, Calendar, MapPin } from "lucide-react"
-
+import { X, Phone, Mail, MessageCircle, Calendar, MapPin, ExternalLink } from "lucide-react"
+import type { Lead } from "@prisma/client"
 
 interface LeadCTAProps {
   businessName: string
   businessWhatsapp?: string | null
+  lead: Lead
 }
 
-export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
+export function LeadCTA({ businessName, businessWhatsapp, lead }: LeadCTAProps) {
   const [open, setOpen] = useState(false)
 
-  const lead = {
-    name: "Sarah Jenkins",
-    flag: "🇺🇸",
-    origin: "New York, USA",
-    date: "May 15, 2026",
-    phone: "+1 (555) 234-7890",
-    email: "sarah.j@outlook.com",
-    message: `Hi! I'm looking for a relaxing experience in the Sacred Valley. I found ${businessName} through VALLECITO and I'd love to book a session for May 15th. My group is 2 people.`,
-  }
-
   const whatsappReply = businessWhatsapp
-    ? `https://wa.me/51${businessWhatsapp}?text=${encodeURIComponent(`Hi ${businessName}! We have a new booking from ${lead.name} for ${lead.date}. Her contact is ${lead.phone}.`)}`
+    ? `https://wa.me/51${businessWhatsapp}?text=${encodeURIComponent(`Hi ${businessName}! We have a new booking from ${lead.touristName} for ${new Date(lead.date).toLocaleDateString()}. His/her contact is ${lead.touristPhone || lead.touristEmail}.`)}`
     : null
+
+  const displayDate = new Date(lead.date).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  })
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-white text-indigo-900 font-bold px-6 py-3 rounded-xl shadow-md hover:bg-indigo-50 transition-colors"
+        className="bg-white text-indigo-900 font-bold px-6 py-3 rounded-xl shadow-md hover:bg-indigo-50 transition-colors flex items-center gap-2"
       >
+        <ExternalLink className="w-4 h-4" />
         View Contact Details
       </button>
 
@@ -55,7 +53,7 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-1">Lead Unlocked</div>
-                  <h2 className="text-2xl font-extrabold text-slate-900">New Client</h2>
+                  <h2 className="text-2xl font-extrabold text-slate-900">Real Client Request</h2>
                 </div>
                 <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                   <X className="w-5 h-5" />
@@ -64,12 +62,12 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
 
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl mb-6">
                 <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 shrink-0">
-                  {lead.name[0]}
+                  {lead.touristName[0]}
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900 text-lg">{lead.flag} {lead.name}</p>
+                  <p className="font-bold text-slate-900 text-lg">{lead.touristName}</p>
                   <p className="text-slate-500 text-sm flex items-center gap-1">
-                    <MapPin className="w-3 h-3" /> {lead.origin}
+                    <MapPin className="w-3 h-3" /> International Tourist
                   </p>
                 </div>
               </div>
@@ -77,27 +75,31 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3 text-sm text-slate-700">
                   <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>Requested Date: <strong>{lead.date}</strong></span>
+                  <span>Requested Date: <strong>{displayDate}</strong></span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-slate-700">
-                  <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>{lead.phone}</span>
-                </div>
+                {lead.touristPhone && (
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <span>{lead.touristPhone}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-sm text-slate-700">
                   <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <span>{lead.email}</span>
+                  <span>{lead.touristEmail}</span>
                 </div>
               </div>
 
               <div className="bg-slate-50 rounded-2xl p-4 mb-6">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Message</p>
-                <p className="text-sm text-slate-700 italic">&quot;{lead.message}&quot;</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Platform Referral</p>
+                <p className="text-sm text-slate-700 italic">
+                  &quot;Hi! I found {businessName} through VALLECITO and I&apos;m interested in booking for {displayDate}.&quot;
+                </p>
               </div>
 
               <div className="flex gap-3">
-                {whatsappReply ? (
+                {lead.touristPhone ? (
                   <a
-                    href={`https://wa.me/${lead.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${lead.name}! I am from ${businessName}. I saw your booking for ${lead.date}. Shall I confirm your appointment?`)}`}
+                    href={`https://wa.me/${lead.touristPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi ${lead.touristName}! I am from ${businessName}. I saw your inquiry on Vallecito for ${displayDate}. Shall I confirm your reservation?`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-3 rounded-xl hover:bg-green-600 transition-colors"
@@ -106,7 +108,7 @@ export function LeadCTA({ businessName, businessWhatsapp }: LeadCTAProps) {
                   </a>
                 ) : null}
                 <a
-                  href={`mailto:${lead.email}?subject=VALLECITO Booking - ${businessName}&body=Hi ${lead.name}!`}
+                  href={`mailto:${lead.touristEmail}?subject=VALLECITO Booking - ${businessName}&body=Hi ${lead.touristName}!`}
                   className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors"
                 >
                   <Mail className="w-4 h-4" /> Email

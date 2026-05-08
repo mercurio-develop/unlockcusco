@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText } from "lucide-react"
-import { homePath, explorePath, servicesPath, dashboardPath } from "@/paths"
+import { homePath, explorePath, dashboardPath } from "@/paths"
 import { useTrip } from "@/lib/store/trip-context"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -77,10 +77,10 @@ export function Navbar() {
             <>
               <button 
                 onClick={() => setIsChatOpen(!isChatOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white border-transparent shadow-lg animate-pulse hover:animate-none hover:scale-105'}`}
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white border-transparent shadow-lg animate-pulse hover:animate-none hover:scale-105'}`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Concierge</span>
+                <span>Concierge</span>
               </button>
 
               <Dialog open={isPrefsOpen} onOpenChange={setIsPrefsOpen}>

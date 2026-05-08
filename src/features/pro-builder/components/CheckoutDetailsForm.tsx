@@ -42,12 +42,19 @@ export function CheckoutDetailsForm() {
     })
 
     try {
-      const result = await generateProTrip({
+      const payload: any = {
         ...currentTrip,
+        startDate: currentTrip.startDate.toISOString(),
+        endDate: currentTrip.endDate.toISOString(),
+        days: currentTrip.days.map(d => ({
+          ...d,
+          date: d.date.toISOString()
+        })),
         leadPax: { name, email, phone },
         clientNotes,
         internalNotes
-      })
+      }
+      const result = await generateProTrip(payload)
 
       if (result.success) {
         setCurrentTrip(null)

@@ -369,11 +369,11 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     };
 
     for (let i = 0; i < transitEdges.length; i++) {
-      const edge = transitEdges[i];
+      const edge = transitEdges[i] as any;
       const fromNode = nodes[i];
       const toNode = nodes[i + 1];
       const transitKm = calculateDistance(fromNode.coords.lat, fromNode.coords.lng, toNode.coords.lat, toNode.coords.lng);
-      
+
       const isWalk = edge.defaultDriver.id?.startsWith('walk-');
       const speedKmh = isWalk ? 5 : 40;
       const transitMins = Math.max(10, Math.round((transitKm / speedKmh) * 60));
@@ -383,13 +383,12 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       edge.endTime = formatTime(currentTimeMs);
 
       if (i < waypoints.length) {
-        const wp = waypoints[i];
+        const wp = waypoints[i] as any;
         wp.startTime = formatTime(currentTimeMs);
         currentTimeMs += (wp.durationMins || 90);
         wp.endTime = formatTime(currentTimeMs);
       }
     }
-
     // Track AI Recommendations
     try {
       for (const id of Array.from(recommendedIds)) {

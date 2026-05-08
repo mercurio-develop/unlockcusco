@@ -72,7 +72,7 @@ export function BusinessCard({
       await submitLead({
         businessId: business.id,
         touristName,
-        touristEmail: "tourist@example.com",
+        touristEmail: "inquiry@vallecito.app", // Platform placeholder
         touristPhone: touristPhone || undefined,
         date: new Date(date),
       })
@@ -242,6 +242,16 @@ export function BusinessCard({
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
+          <Button
+            onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+            className={cn(
+              "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-2",
+              isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-xs uppercase tracking-tighter"
+            )}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add to Day
+          </Button>
           {exchangeTargetIndex !== null ? (
             <Button
               onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}

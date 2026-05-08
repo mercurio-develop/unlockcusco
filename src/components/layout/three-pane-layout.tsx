@@ -19,7 +19,7 @@ export function ThreePaneLayout({
   showMap = true,
   className
 }: ThreePaneLayoutProps) {
-  const { leftWidth, setLeftWidth, panelMode, setPanelMode } = useTrip()
+  const { leftWidth, setLeftWidth, panelMode, setPanelMode, isChatOpen, setIsChatOpen } = useTrip()
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -104,12 +104,11 @@ export function ThreePaneLayout({
             "md:[--map-width:calc(100%-4px-var(--left-width))]",
             !showMap ? "hidden" : ""
           )}
-          //@ts-ignore
           style={{ 
             '--left-width': `${leftWidth}%`, 
             '--map-width': showMap ? 'calc(100% - var(--left-width))' : '0%',
             width: 'var(--map-width)'
-          }}
+          } as any}
         >
           {showMap && map}
         </div>
@@ -142,6 +141,19 @@ export function ThreePaneLayout({
                    </div>
                    <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'categories' ? "text-slate-900" : "text-slate-400")}>Discover</span>
                  </button>
+
+                 <button onClick={() => setIsChatOpen(!isChatOpen)} className="flex flex-col items-center gap-1 -mt-4">
+                   <div className={cn(
+                     "p-3.5 rounded-2xl transition-all shadow-xl border-2 border-white",
+                     isChatOpen 
+                       ? "bg-rose-600 text-white" 
+                       : "bg-gradient-to-br from-rose-500 to-purple-600 text-white animate-pulse"
+                   )}>
+                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg>
+                   </div>
+                   <span className={cn("text-[10px] font-black uppercase tracking-tighter transition-colors mt-1", isChatOpen ? "text-rose-600" : "text-slate-400")}>AI Assistant</span>
+                 </button>
+
                  <button onClick={() => setPanelMode('itinerary')} className="flex flex-col items-center gap-1">
                    <div className={cn("p-2 rounded-xl transition-all", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>

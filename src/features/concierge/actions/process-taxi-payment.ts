@@ -2,34 +2,50 @@
 
 import Stripe from "stripe";
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
   apiVersion: "2026-04-22.dahlia" as any,
 });
 
-const RequestSchema = z.object({
+const CreateIntentSchema = z.object({
   estimatedCostUSD: z.number(),
   origin: z.string(),
   destinationName: z.string(),
-  driverName: z.string().optional(),
+  touristName: z.string().optional(),
+  touristPhone: z.string().optional(),
 });
 
-export async function createTaxiPaymentIntent(data: z.infer<typeof RequestSchema>) {
-  const result = RequestSchema.safeParse(data);
+export async function createTaxiPaymentIntent(data: z.infer<typeof CreateIntentSchema>) {
+  const result = CreateIntentSchema.safeParse(data);
   if (!result.success) {
     return { error: "Invalid request payload." };
   }
 
-  const { estimatedCostUSD, origin, destinationName, driverName } = result.data;
+  const { estimatedCostUSD, origin, destinationName, touristName, touristPhone } = result.data;
 
   try {
+    // 1. Create the Stripe PaymentIntent with a manual capture hold
     const paymentIntent = await stripe.paymentIntents.create({
       amount: estimatedCostUSD * 100, // Stripe expects cents
       currency: "usd",
+      capture_method: "manual", // <--- THE MAGIC LINE for holds
       metadata: {
         origin,
         destinationName,
-        driverName: driverName || "Default Driver",
+      },
+    });
+
+    // 2. Save the RideBooking to the database in PENDING state (before UI confirms it)
+    await prisma.rideBooking.create({
+      data: {
+        pickupLocation: origin,
+        dropoffLocation: destinationName,
+        priceUsd: estimatedCostUSD,
+        stripeIntentId: paymentIntent.id,
+        status: "HOLD_SECURED", // Maps to Hold secured enum
+        touristName: touristName || "Guest",
+        touristPhone: touristPhone || "",
       },
     });
 
@@ -45,11 +61,18 @@ export async function notifyGhostPhone(paymentIntentId: string) {
       // In a real app, you would retrieve the payment intent to verify status
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       
-      if (paymentIntent.status !== "succeeded") {
-          return { error: "Payment not successful." };
+      // It should be requires_capture because we used manual capture
+      if (paymentIntent.status !== "requires_capture" && paymentIntent.status !== "succeeded") {
+          return { error: "Payment hold not successful." };
       }
 
-      const { origin, destinationName, driverName } = paymentIntent.metadata;
+      // We should also update the booking status to indicate we are finding a driver or dispatched
+      await prisma.rideBooking.update({
+        where: { stripeIntentId: paymentIntentId },
+        data: { status: "IN_PROGRESS" }
+      });
+
+      const { origin, destinationName } = paymentIntent.metadata;
 
       // Mock webhook call to Ghost Phone microservice
       const webhookUrl = process.env.GHOST_PHONE_WEBHOOK_URL || "http://localhost:3001/webhook";
@@ -58,20 +81,18 @@ export async function notifyGhostPhone(paymentIntentId: string) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              type: "TAXI_BOOKING",
+              type: "TAXI_BOOKING_HOLD_SECURED",
               data: {
                   origin,
                   destinationName,
-                  driverName,
-                  amountPaid: paymentIntent.amount / 100,
-                  status: paymentIntent.status,
+                  amountHeld: paymentIntent.amount / 100,
+                  stripeIntentId: paymentIntent.id,
               }
           })
       });
 
       if (!response.ok) {
-         console.warn("Ghost Phone webhook failed, but payment succeeded.");
-         // We might return success anyway to the user since they paid, but log it.
+         console.warn("Ghost Phone webhook failed, but payment hold succeeded.");
       }
 
       return { success: true };

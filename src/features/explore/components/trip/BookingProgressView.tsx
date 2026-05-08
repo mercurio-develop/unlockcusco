@@ -58,10 +58,10 @@ export function BookingProgressView() {
         <div className="absolute left-[39px] top-10 bottom-10 w-0.5 bg-slate-100" />
 
         {steps.map((step, idx) => {
-          const status = step.statusId ? entityStatuses[step.statusId] : 'confirmed';
-          
-          return (
-            <div key={`${step.id}-${idx}`} className="relative flex gap-6 pb-8 last:pb-0">
+          const statusId = 'statusId' in step ? step.statusId : undefined;
+          const status = statusId ? entityStatuses[statusId] : 'confirmed';
+
+          return (            <div key={`${step.id}-${idx}`} className="relative flex gap-6 pb-8 last:pb-0">
               {/* Icon / Status Indicator */}
               <div className="relative z-10 flex items-center justify-center">
                 <div className={cn(

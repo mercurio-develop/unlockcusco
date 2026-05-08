@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useItinerary } from "@/lib/store/itinerary-context";
-import { MapPin, ChevronRight, Loader2 } from "lucide-react";
+import { MapPin, ChevronRight, Loader2, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DayExplorer } from "@/features/explore/components/trip/DayExplorer";
 import { BookingProgressView } from "@/features/explore/components/trip/BookingProgressView";
@@ -43,18 +43,34 @@ export function ItineraryPanel() {
 
   if (!activeItinerary && !isAILoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center bg-white">
-        <MapPin className="w-10 h-10 mb-4 text-slate-200" />
-        <h3 className="text-base font-serif text-slate-600 mb-2">No active itinerary</h3>
-        <p className="text-sm leading-relaxed">
-          Ask the AI Concierge to plan your day &mdash; e.g. <span className="italic">&quot;I&apos;m in Pisac, want coffee, then need to sleep in Ollantaytambo&quot;</span>
+      <div className="flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center bg-white animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-rose-100 rounded-full blur-2xl opacity-50 scale-150 animate-pulse" />
+          <div className="relative bg-white p-6 rounded-full shadow-sm border border-slate-50">
+            <Calendar className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+          </div>
+        </div>
+        <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">Your Expedition is Empty</h3>
+        <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
+          Start building your perfect day! Add experiences from the <strong>Discover</strong> tab or ask our <strong>AI Concierge</strong> to curate a personalized route for you.
         </p>
-        <button
-          onClick={() => setPanelMode("categories")}
-          className="mt-6 text-xs font-semibold text-rose-600 hover:text-rose-700 transition-colors"
-        >
-          Browse places instead →
-        </button>
+        <div className="flex flex-col gap-3 w-full max-w-[240px]">
+          <button
+            onClick={() => setPanelMode("categories")}
+            className="w-full bg-slate-900 text-white px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+          >
+            Go to Discover
+          </button>
+          <button
+            onClick={() => {
+              // setIsChatOpen should be available via useTrip or useItinerary
+              // For now, let's assume it's integrated or user can just click the pulsing button
+            }}
+            className="w-full bg-white text-rose-600 border border-rose-100 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:bg-rose-50 transition-all"
+          >
+            Ask Concierge
+          </button>
+        </div>
       </div>
     );
   }

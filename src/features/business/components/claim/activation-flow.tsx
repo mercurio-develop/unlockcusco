@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { CheckCircle2, UploadCloud, Smartphone, ArrowRight } from "lucide-react"
+import { CheckCircle2, UploadCloud, Smartphone, ArrowRight, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,15 +23,28 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [whatsapp, setWhatsapp] = useState("")
+  const [qrUploaded, setQrUploaded] = useState(false)
 
   const handleActivate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
+    
     // Simulate upload delay
-    await new Promise((r) => setTimeout(r, 1500))
-    await claimBusiness(business.id)
-    setIsProcessing(false)
-    setIsSuccess(true)
+    await new Promise((r) => setTimeout(r, 1000))
+    
+    try {
+      await claimBusiness(
+        business.id, 
+        whatsapp, 
+        qrUploaded ? "/images/yape-placeholder.png" : undefined
+      )
+      setIsSuccess(true)
+    } catch (error) {
+      console.error("Activation failed:", error)
+      alert("Failed to activate profile. Please try again.")
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   if (isSuccess) {
@@ -52,10 +65,13 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
           </motion.div>
           <h2 className="text-3xl font-extrabold text-white mb-4">Profile Activated</h2>
           <p className="text-white/60 mb-8 leading-relaxed">
-            Your profile for <strong>{business.name}</strong> is now verified. The client has been notified and you can now receive direct bookings commission-free via WhatsApp!
+            Your profile for <strong>{business.name}</strong> is now verified. You can now receive direct bookings commission-free via WhatsApp!
           </p>
-          <Button className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold text-lg rounded-xl py-6" onClick={() => window.location.href = `/business/${business.slug}`}>
-            View Live Profile
+          <Button 
+            className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black font-bold text-lg rounded-xl py-6" 
+            onClick={() => window.location.href = `/dashboard?businessId=${business.id}`}
+          >
+            Go to Dashboard
           </Button>
         </Card>
       </motion.div>
@@ -63,10 +79,14 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="w-full max-w-lg mx-auto py-8">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold text-white tracking-tight font-serif mb-3">Claim Your Profile</h1>
-        <p className="text-lg text-white/60">Upload your Yape QR to start accepting direct, zero-commission bookings for <strong>{business.name}</strong>.</p>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          100% Free Forever
+        </div>
+        <h1 className="text-4xl font-extrabold text-white tracking-tight font-serif mb-3">Activate Your Profile</h1>
+        <p className="text-lg text-white/60 px-4">Complete your verification to start accepting direct, zero-commission bookings for <strong>{business.name}</strong>.</p>
       </div>
 
       <Card className="p-8 rounded-3xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl">
@@ -92,12 +112,25 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
 
           <div className="space-y-3">
             <Label className="text-white/80 font-medium">Your Yape QR Code (Optional)</Label>
-            <div className="w-full h-40 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center text-white/40 hover:text-white/70 hover:border-white/40 transition-colors cursor-pointer bg-black/20 group">
-              <UploadCloud className="w-10 h-10 mb-3 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium">Click to upload image</span>
-              <span className="text-xs mt-1">PNG, JPG up to 5MB</span>
+            <div 
+              onClick={() => setQrUploaded(!qrUploaded)}
+              className={`w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group ${qrUploaded ? 'border-[#D4AF37] bg-[#D4AF37]/10' : 'border-white/20 bg-black/20 hover:border-white/40'}`}
+            >
+              {qrUploaded ? (
+                <>
+                  <CheckCircle2 className="w-10 h-10 mb-3 text-[#D4AF37]" />
+                  <span className="text-sm font-medium text-[#D4AF37]">QR Code Ready</span>
+                  <span className="text-xs mt-1 text-[#D4AF37]/60">Click to change</span>
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="w-10 h-10 mb-3 text-white/40 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium text-white/40 group-hover:text-white/70">Click to upload Yape QR</span>
+                  <span className="text-xs mt-1 text-white/30">PNG, JPG up to 5MB</span>
+                </>
+              )}
             </div>
-            <p className="text-xs text-white/40">We display this so tourists can pay you instantly via Apple Pay / Yape.</p>
+            <p className="text-xs text-white/40 text-center italic">We display this so tourists can pay you instantly via Yape.</p>
           </div>
 
           <Button 
@@ -105,12 +138,12 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
             disabled={isProcessing || !whatsapp}
             className="w-full bg-[#D4AF37] hover:bg-[#C5A059] text-black py-6 rounded-xl font-bold text-lg shadow-lg mt-4 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
           >
-            {isProcessing ? "Verifying & Activating..." : <>Activate Profile <ArrowRight className="w-5 h-5" /></>}
+            {isProcessing ? "Verifying & Activating..." : <>Activate Live Profile <ArrowRight className="w-5 h-5" /></>}
           </Button>
         </form>
-        
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-white/30">
-          100% Free Forever • No Booking Commissions
+
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">Zero Commissions • Direct Access • Vallecito</p>
         </div>
       </Card>
     </div>

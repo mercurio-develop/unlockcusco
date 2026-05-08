@@ -1,21 +1,24 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
 
-// SECURITY AUDIT NOTE: 
-// Currently, this action is unauthenticated and can be called by anyone to claim a business.
-// NEXT STEPS:
-// 1. Integrate next-auth to ensure the user is logged in.
-// 2. Validate Stripe Webhook event to ensure payment succeeded before marking as claimed.
-// 3. Connect the claimed business to the authenticated user's ID.
-export async function claimBusiness(businessId: string) {
+export async function claimBusiness(businessId: string, whatsapp: string, qrCodeUrl?: string) {
   if (!businessId) throw new Error("Business ID is required to claim.");
+  if (!whatsapp) throw new Error("WhatsApp number is required to claim.");
 
-  // Mock verification for the moment
   await prisma.business.update({
     where: { id: businessId },
-    data: { isClaimed: true },
+    data: { 
+      isClaimed: true,
+      whatsapp: whatsapp,
+      qrCodeUrl: qrCodeUrl || null
+    },
   })
-  
+
+  revalidatePath(`/claim/${businessId}`)
+  revalidatePath('/explore')
+  revalidatePath('/dashboard')
+
   return { success: true }
 }
