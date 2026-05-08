@@ -9,11 +9,47 @@ import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
 import { EXPATS_KNOWLEDGE_BASE } from '@/lib/ai/knowledge/expats-guide';
 import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { headers } from "next/headers";
 
 export const maxDuration = 30;
 
+// Create a new ratelimiter, that allows 10 requests per 1 hour
+const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(10, "1h"),
+      analytics: true,
+      prefix: "@upstash/ratelimit/vallecito-chat",
+    })
+  : null;
+
 export async function POST(req: Request) {
   try {
+    // Rate Limiting Logic
+    if (ratelimit) {
+      const headerPayload = await headers();
+      const ip = headerPayload.get("x-forwarded-for") || "anonymous";
+      const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+
+      if (!success) {
+        return new Response(JSON.stringify({ 
+            error: "Too many requests. Please try again later.",
+            limit,
+            remaining,
+            reset
+        }), { 
+            status: 429,
+            headers: {
+                "X-RateLimit-Limit": limit.toString(),
+                "X-RateLimit-Remaining": remaining.toString(),
+                "X-RateLimit-Reset": reset.toString(),
+            }
+        });
+      }
+    }
+
     // Helicone External Observability Integration
     const google = createGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
