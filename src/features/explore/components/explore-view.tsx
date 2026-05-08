@@ -42,7 +42,7 @@ export function ExploreView({
   const searchParams = useSearchParams()
   const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
   
-  const [showFilters, setShowFilters] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   // Sync when server re-renders
   const [prevInitialBusinesses, setPrevInitialBusinesses] = useState(initialBusinesses)
@@ -57,13 +57,13 @@ export function ExploreView({
   useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
     setPanelMode("categories")
-    setShowFilters(false)
+    setIsDrawerOpen(false)
   }, [initialSelectedId, setSelectedId, setPanelMode])
 
   // Hide filters when switching to Discover tab from other tabs
   useEffect(() => {
     if (panelMode === "categories") {
-      setShowFilters(false)
+      setIsDrawerOpen(false)
     }
   }, [panelMode])
 
@@ -74,7 +74,7 @@ export function ExploreView({
       </div>
 
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
-        <button onClick={() => { setPanelMode("categories"); setShowFilters(false); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
+        <button onClick={() => { setPanelMode("categories"); setIsDrawerOpen(false); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
         {macroTrip && <button onClick={() => setPanelMode("macro")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "macro" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> Trip Plan</button>}
         <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`} disabled={!activeItinerary}><CalendarDays className="w-4 h-4" /> Day View</button>
       </div>
@@ -82,8 +82,8 @@ export function ExploreView({
       <div className={panelMode === "categories" ? "block" : "hidden"}>
         <ExploreSearch 
           initialQuery={initialQuery} 
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
+          isDrawerOpen={isDrawerOpen}
+          setIsDrawerOpen={setIsDrawerOpen}
           categoryCounts={categoryCounts}
         />
       </div>    </div>  )

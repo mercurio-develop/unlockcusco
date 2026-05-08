@@ -42,6 +42,10 @@ Breaking changes — APIs, conventions, file structure may differ from training 
 /dashboard?businessId=...  → Business owner panel
 ```
 
+### Features in Development / Coming Soon
+- **Pro Builder** (`/pro`, `src/features/pro-builder/`): Advanced itinerary and package builder for agencies and experts.
+- **Trip Viewer** (`/trip`): Dedicated interface for viewing, sharing, and collaborating on planned trips.
+
 ---
 
 ## What is DONE — do not redo

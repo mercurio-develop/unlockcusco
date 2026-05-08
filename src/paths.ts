@@ -3,10 +3,6 @@ export const homePath = () => "/";
 export const explorePath = (query?: string) => 
   query ? `/explore?q=${encodeURIComponent(query)}` : "/explore";
 
-export const servicesPath = () => "/services";
-
-export const travelDesignPath = () => "/travel-design";
-
 export const exploreCategoryPath = (locationSlug: string, category: string) => 
   `/explore/${locationSlug}/${category}`;
 
@@ -21,16 +17,6 @@ export const checkoutPath = (businessId: string) =>
 
 export const dashboardPath = () => "/dashboard";
 
-export const restaurantsPath = () => "/services/restaurants";
-
-export const lodgingPath = () => "/services/lodging";
-
-export const agenciesPath = () => "/services/agencies";
-
 export const agencyPath = (slug: string) => `/services/agencies/${slug}`;
 
-export const therapistsPath = () => "/services/healers";
-
 export const therapistPath = (slug: string) => `/services/healers/${slug}`;
-
-export const transportPath = () => "/services/transport";

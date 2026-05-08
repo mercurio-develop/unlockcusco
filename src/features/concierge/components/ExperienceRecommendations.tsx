@@ -31,7 +31,6 @@ export default function ExperienceRecommendations({ result }: { result: Experien
 
   const handleShowOnMap = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    router.push(`/explore?id=${id}`);
     setSelectedId(id);
     setPanelMode("categories");
   };

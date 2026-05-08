@@ -30,7 +30,6 @@ export function SearchResultsCard({ businesses }: { businesses: Business[] }) {
     } else if (['Business', 'Guide', 'Therapy', 'Wellness'].includes(business.category) || (business as any).type === 'THERAPIST') {
       router.push('/services/healers');
     } else {
-      router.push(`/explore?id=${business.id}`);
       setSelectedId(business.id);
     }
   };
