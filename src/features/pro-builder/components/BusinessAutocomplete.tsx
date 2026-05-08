@@ -7,13 +7,16 @@ type MinimizedPackage = {
   title: string
   sector: string
   tags: string
+  lat?: number
+  lng?: number
+  isPackage?: boolean
 }
 
 interface BusinessAutocompleteProps {
   title: string;
   businessId?: string;
   type: 'MEAL' | 'STAY' | 'TRANSPORT';
-  onChange: (title: string, businessId?: string) => void;
+  onChange: (title: string, businessId?: string, lat?: number, lng?: number) => void;
 }
 
 export function BusinessAutocomplete({ title, businessId, type, onChange }: BusinessAutocompleteProps) {
@@ -32,6 +35,7 @@ export function BusinessAutocomplete({ title, businessId, type, onChange }: Busi
       .then(data => {
         if (Array.isArray(data)) {
           const filteredItems = data.filter(pkg => {
+            if (pkg.isPackage) return false;
             if (type === 'MEAL') return pkg.tags.includes('food') || pkg.tags.includes('restaurant') || pkg.tags.includes('dining') || pkg.tags.includes('DINING');
             if (type === 'STAY') return pkg.tags.includes('stays') || pkg.tags.includes('hotel') || pkg.tags.includes('lodge') || pkg.tags.includes('STAYS');
             if (type === 'TRANSPORT') return pkg.tags.includes('transport') || pkg.tags.includes('taxi') || pkg.tags.includes('TRANSPORT');
@@ -103,7 +107,7 @@ export function BusinessAutocomplete({ title, businessId, type, onChange }: Busi
         value={query} 
         onChange={(e) => {
           setQuery(e.target.value)
-          onChange(e.target.value, undefined)
+          onChange(e.target.value, undefined, undefined, undefined)
           setIsOpen(true)
         }}
         onFocus={() => setIsOpen(true)}
@@ -121,7 +125,7 @@ export function BusinessAutocomplete({ title, businessId, type, onChange }: Busi
               key={r.id}
               onClick={() => {
                 setQuery(r.title)
-                onChange(r.title, r.id)
+                onChange(r.title, r.id, r.lat, r.lng)
                 setIsOpen(false)
               }}
               className={`w-full text-left px-4 py-3 flex items-start gap-3 transition-colors border-l-2 border-transparent ${config.hoverClass}`}

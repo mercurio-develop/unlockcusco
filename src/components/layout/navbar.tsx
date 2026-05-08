@@ -73,11 +73,11 @@ export function Navbar() {
         
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {pathname !== "/pro/builder" && (
+          {pathname === "/explore" && (
             <>
               <button 
                 onClick={() => setIsChatOpen(!isChatOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white border-transparent shadow-lg animate-pulse hover:animate-none hover:scale-105'}`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Concierge</span>
@@ -109,7 +109,7 @@ export function Navbar() {
                           <button
                             key={a.id}
                             onClick={() => setTravelVibe(travelVibe === a.id ? null : a.id)}
-                            className={`px-4 py-2 text-[13px] font-bold rounded-full transition-all border flex items-center gap-1.5 hover:scale-105 active:scale-95 ${travelVibe === a.id ? a.active : a.theme}`}
+                            className={`px-4 py-2 text-[13px] font-bold rounded-full transition-all border flex items-center gap-1.5 ${travelVibe === a.id ? a.active : a.theme}`}
                           >
                             <span>{a.icon}</span> {a.label}
                           </button>
@@ -128,7 +128,7 @@ export function Navbar() {
                           <button
                             key={i.id}
                             onClick={() => setTravelIntensity(travelIntensity === i.id ? null : i.id)}
-                            className={`flex-1 py-3 px-2 flex flex-col items-center justify-center text-center rounded-xl transition-all border hover:scale-[1.02] active:scale-95 ${travelIntensity === i.id ? i.active : i.theme}`}
+                            className={`flex-1 py-3 px-2 flex flex-col items-center justify-center text-center rounded-xl transition-all border ${travelIntensity === i.id ? i.active : i.theme}`}
                           >
                             <span className="font-bold text-sm">{i.label}</span>
                             <span className={`text-[10px] mt-0.5 ${travelIntensity === i.id ? 'text-white/80' : 'opacity-70'}`}>{i.desc}</span>

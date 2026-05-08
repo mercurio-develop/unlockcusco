@@ -130,7 +130,7 @@ Please generate my macro trip plan.`;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, travelVibe, travelIntensity, pathname, router]);
 
-  if (pathname?.startsWith("/trip/")) {
+  if (pathname !== "/explore") {
     return null;
   }
 
@@ -156,34 +156,44 @@ Please generate my macro trip plan.`;
 
   return (
     <>
+      {/* Mobile FAB */}
+      <div className="md:hidden fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => setIsChatOpen(true)}
+          className="w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl hover:scale-110 transition-all flex items-center justify-center border-2 border-white/20"
+        >
+          <Sparkles className="w-6 h-6" />
+        </Button>
+      </div>
+
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0, right: sidebarOffset }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-[56px] z-40 w-full sm:w-[450px] h-[calc(100vh-56px)]"
+            initial={{ opacity: 0, y: "100%", x: 0 }}
+            animate={{ opacity: 1, y: 0, x: 0, right: sidebarOffset }}
+            exit={{ opacity: 0, y: "100%", x: 0 }}
+            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            className="fixed inset-0 sm:inset-auto sm:top-[56px] sm:right-0 z-[100] sm:z-40 w-full sm:w-[450px] h-full sm:h-[calc(100vh-56px)]"
           >
-            <Card className="flex flex-col h-full rounded-none shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
+            <Card className="flex flex-col h-full rounded-none sm:rounded-tl-3xl shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
               {/* Header */}
-              <div className="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center shrink-0">
+              <div className="bg-gray-50 border-b border-gray-200 p-4 sm:p-5 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="bg-rose-50 border border-rose-100 p-2 rounded-xl shadow-inner">
                     <Sparkles className="w-4 h-4 text-rose-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-slate-900 tracking-wide">Vallecito Concierge</h3>
-                    <p className="text-xs text-slate-500 font-medium">AI Travel Assistant</p>
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-900 tracking-wide">Vallecito Concierge</h3>
+                    <p className="text-[10px] sm:text-xs text-slate-500 font-medium">AI Travel Assistant</p>
                   </div>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-slate-400 hover:text-slate-900 hover:bg-gray-100 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-slate-900 hover:bg-gray-100 rounded-full transition-colors h-10 w-10"
                   onClick={() => setIsChatOpen(false)}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </Button>
               </div>
 
@@ -212,9 +222,11 @@ Please generate my macro trip plan.`;
                       const key = part.toolCallId || idx;
                       if (part.state === 'output-available') {
                         if (part.type === 'tool-buildItinerary') {
+                          import('posthog-js').then(ph => ph.default.capture('itinerary_generated', { title: part.output.title }));
                           return <ItinerarySummaryCard key={key} itinerary={part.output} />
                         }
                         if (part.type === 'tool-buildMacroTrip') {
+                          import('posthog-js').then(ph => ph.default.capture('macro_trip_generated', { title: part.output.title }));
                           return <MacroItineraryCard key={key} itinerary={part.output} />
                         }
                         if (part.type === 'tool-searchDatabase') {
@@ -297,7 +309,7 @@ Please generate my macro trip plan.`;
                         }
                       )
                     }}
-                    className={`whitespace-nowrap px-4 py-2 border text-[13px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 hover:scale-105 active:scale-95 ${suggestion.theme}`}
+                    className={`whitespace-nowrap px-4 py-2 border text-[13px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 ${suggestion.theme}`}
                   >
                     <span>{suggestion.icon}</span> {suggestion.label}
                   </button>

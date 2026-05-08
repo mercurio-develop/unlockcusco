@@ -43,6 +43,7 @@ export function BusinessCard({
   orientation = "vertical"
 }: BusinessCardProps) {
   const [touristName, setTouristName] = useState("")
+  const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
@@ -72,6 +73,7 @@ export function BusinessCard({
         businessId: business.id,
         touristName,
         touristEmail: "tourist@example.com",
+        touristPhone: touristPhone || undefined,
         date: new Date(date),
       })
       if (res.success) {
@@ -285,6 +287,16 @@ export function BusinessCard({
                       placeholder="e.g. Sarah Jenkins"
                       value={touristName}
                       onChange={(e) => setTouristName(e.target.value)}
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div className="grid gap-2.5">
+                    <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
+                    <Input
+                      id="phone"
+                      placeholder="e.g. +51 987 654 321"
+                      value={touristPhone}
+                      onChange={(e) => setTouristPhone(e.target.value)}
                       className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
                     />
                   </div>

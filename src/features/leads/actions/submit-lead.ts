@@ -5,6 +5,7 @@ interface LeadData {
   businessId: string
   touristName: string
   touristEmail: string
+  touristPhone?: string
   date: Date
 }
 

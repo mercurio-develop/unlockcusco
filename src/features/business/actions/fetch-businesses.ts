@@ -235,8 +235,8 @@ export async function fetchBusinesses(params: FetchBusinessesParams) {
     params.category || '',
     params.loc || '',
     params.radiusKm?.toString() || '',
-    params.userLat?.toString() || '',
-    params.userLng?.toString() || '',
+    params.userLat ? params.userLat.toFixed(3) : '',
+    params.userLng ? params.userLng.toFixed(3) : '',
     params.sort || 'recommended',
     params.page?.toString() || '0',
     params.limit.toString()

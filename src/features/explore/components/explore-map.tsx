@@ -319,7 +319,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
       if (activeDay) {
         for (const evt of activeDay.events || []) {
           if (evt.id === selectedId) {
-            if (evt.lat !== undefined && evt.lng !== undefined) {
+            if (evt.type === 'TRANSPORT' && (evt as any).fromLat !== undefined) {
+              targetLat = (evt as any).fromLat;
+              targetLng = (evt as any).fromLng;
+            } else if (evt.type === 'MEAL' && ((evt as any).locationLat !== undefined || evt.lat !== undefined)) {
+              targetLat = (evt as any).locationLat || evt.lat;
+              targetLng = (evt as any).locationLng || evt.lng;
+            } else if (evt.lat !== undefined && evt.lng !== undefined) {
               targetLat = evt.lat;
               targetLng = evt.lng;
             } else if ((evt as any).businessId) {

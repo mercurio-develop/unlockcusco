@@ -34,7 +34,7 @@ async function extractPageText(url: string): Promise<string> {
     });
     
     // Extract the remaining text
-    const text = await page.evaluate(() => document.body.innerText);
+    const text = await page.evaluate(() => document.body.textContent || "");
     await browser.close();
     return text.substring(0, 30000); // Keep within a reasonable token limit (30k chars is approx 6k-8k tokens)
   } catch (error) {

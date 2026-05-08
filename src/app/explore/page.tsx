@@ -1,80 +1,79 @@
-import type { Metadata } from "next"
-import { Suspense } from "react"
+"use client"
+
+import { Suspense, useEffect, useState, use } from "react"
 import { ExploreView } from "@/features/explore/components/explore-view"
-import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
-
-interface ExplorePageProps {
-  searchParams: Promise<{ q?: string; id?: string; loc?: string; cat?: string; rad?: string; lat?: string; lng?: string; sort?: string }>
-}
-
 import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import type { Business } from "@prisma/client"
 
-export async function generateMetadata({ searchParams }: ExplorePageProps): Promise<Metadata> {
-  const { q, loc, cat } = await searchParams
-  
-  let title = "Explore"
-  let description = "Find the best places and services in the Sacred Valley."
-  
-  if (q) {
-    title = `Search results for "${q}"`
-    description = `Discover businesses and services matching "${q}" in the Sacred Valley.`
-  } else if (loc || cat) {
-    const locName = loc ? loc.charAt(0).toUpperCase() + loc.slice(1) : "the Sacred Valley"
-    const catName = cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : "Places"
-    title = `${catName} in ${locName}`
-    description = `Explore the best ${catName.toLowerCase()} in ${locName}, curated by Vallecito.`
-  }
+function ExplorePageContent() {
+  const searchParams = useSearchParams()
+  const [data, setData] = useState<{
+    businesses: Business[],
+    allBusinesses: Business[],
+    categoryCounts: Record<string, number>,
+    hasMore: boolean
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title: `${title} | Vallecito`,
-      description,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | Vallecito`,
-      description,
-    },
-  }
-}
+  const q = searchParams.get("q") || ""
+  const id = searchParams.get("id")
+  const loc = searchParams.get("loc") || ""
+  const cat = searchParams.get("cat") || ""
+  const rad = searchParams.get("rad") || ""
+  const lat = searchParams.get("lat") || ""
+  const lng = searchParams.get("lng") || ""
+  const sort = searchParams.get("sort") || "recommended"
 
-import { prisma } from "@/lib/prisma"
+  useEffect(() => {
+    async function load() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (q) params.set("q", q)
+        if (id) params.set("id", id)
+        if (loc) params.set("loc", loc)
+        if (cat) params.set("cat", cat)
+        if (rad) params.set("rad", rad)
+        if (lat) params.set("lat", lat)
+        if (lng) params.set("lng", lng)
+        if (sort) params.set("sort", sort)
+        params.set("limit", "30")
 
-export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const { q, id, loc, cat, rad, lat, lng, sort } = await searchParams
-  const query = q?.toLowerCase() || ""
-
-  const { businesses, allBusinesses, categoryCounts, hasMore } = await fetchBusinesses({
-    query,
-    category: cat,
-    loc,
-    radiusKm: rad ? parseFloat(rad) : undefined,
-    userLat: lat ? parseFloat(lat) : undefined,
-    userLng: lng ? parseFloat(lng) : undefined,
-    sort,
-    page: 0,
-    limit: 500 // Increased limit to fetch all in the valley
-  })
-
-  // Ensure selected business is exactly at the top
-  if (id) {
-    const selectedIndex = businesses.findIndex(b => b.id === id)
-    if (selectedIndex > 0) {
-      const [selectedBusiness] = businesses.splice(selectedIndex, 1)
-      businesses.unshift(selectedBusiness)
-    } else if (selectedIndex === -1) {
-      // Fetch the business dynamically if it's not in the current search results
-      const missingBusiness = await prisma.business.findUnique({
-        where: { id }
-      })
-      if (missingBusiness) {
-        businesses.unshift(missingBusiness)
+        const res = await fetch(`/api/businesses?${params.toString()}`)
+        const result = await res.json()
+        setData(result)
+      } catch (error) {
+        console.error("Failed to load businesses:", error)
+      } finally {
+        setLoading(false)
       }
     }
+    load()
+  }, [q, id, loc, cat, rad, lat, lng, sort])
+
+  if (loading || !data) {
+    return (
+      <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">Consulting the Valley...</p>
+      </div>
+    )
   }
 
+  return (
+    <ExploreView
+      initialBusinesses={data.businesses}
+      initialMapBusinesses={data.allBusinesses}
+      initialCategoryCounts={data.categoryCounts}
+      initialHasMore={data.hasMore}
+      initialQuery={q}
+      initialSelectedId={id}
+    />
+  )
+}
+
+export default function ExplorePage() {
   return (
     <div className="relative">
       <Suspense fallback={
@@ -83,16 +82,8 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           <p className="text-slate-500 font-medium animate-pulse">Building the workspace...</p>
         </div>
       }>
-        <ExploreView
-          initialBusinesses={businesses}
-          initialMapBusinesses={allBusinesses}
-          initialCategoryCounts={categoryCounts}
-          initialHasMore={hasMore}
-          initialQuery={q ?? ""}
-          initialSelectedId={id ?? null}
-        />
+        <ExplorePageContent />
       </Suspense>
     </div>
   )
 }
-

@@ -55,20 +55,19 @@ async function main() {
       const articleData = await articlePage.evaluate(() => {
         // Extract title before removing anything
         const titleEl = document.querySelector('h1.entry-title') || document.querySelector('h1') || document.querySelector('.post-title');
-        const title = titleEl?.innerText?.trim() || '';
-        
+        const title = titleEl?.textContent?.trim() || '';
+
         // Remove noise
         document.querySelectorAll('script, style, nav, footer, iframe, svg, .sidebar, .comments, #comments, .widget').forEach(el => el.remove());
-        
+
         // Try common WordPress content classes
         const contentBody = document.querySelector('.entry-content') || document.querySelector('.post-content') || document.querySelector('article') || document.querySelector('main') || document.body;
-        
+
         // Extract text
-        const text = contentBody.innerText?.trim() || '';
-        
+        const text = contentBody?.textContent?.trim() || '';
+
         return { title, text };
       });
-
       if (articleData.title && articleData.text) {
         scrapedData.push({
           url: link,
@@ -84,7 +83,7 @@ async function main() {
       
       // Be polite to the server
       await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (err) {
+    } catch (err: any) {
       console.error(`❌ Failed to scrape ${link}:`, err.message);
     }
   }

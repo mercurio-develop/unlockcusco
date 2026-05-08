@@ -67,7 +67,8 @@ export async function GET(req: NextRequest) {
       title: pkg.title,
       sector: pkg.sector,
       pace: pkg.pace,
-      tags: pkg.tags || ''
+      tags: pkg.tags || '',
+      isPackage: true
     }))
 
     // Map Businesses
@@ -78,7 +79,8 @@ export async function GET(req: NextRequest) {
       pace: 'FLEXIBLE',
       tags: b.category,
       lat: b.lat,
-      lng: b.lng
+      lng: b.lng,
+      isPackage: false
     }))
 
     // Map Transport
@@ -94,7 +96,8 @@ export async function GET(req: NextRequest) {
         pace: 'FIXED',
         tags: `transport, ${vehicleType}, ${t.category}`,
         lat: t.lat,
-        lng: t.lng
+        lng: t.lng,
+        isPackage: false
       }
     })
 
@@ -113,7 +116,8 @@ export async function GET(req: NextRequest) {
         pace: 'RELAXED',
         tags: `wellness, healer, ${specialties}`,
         lat: th.lat,
-        lng: th.lng
+        lng: th.lng,
+        isPackage: false
       }
     })
 

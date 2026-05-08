@@ -32,7 +32,6 @@ interface TripContextType {
   setLeftWidth: (w: number) => void;
   addEvent: (dayNumber: number, event: TimelineEvent) => void;
   removeEvent: (dayNumber: number, eventId: string) => void;
-  removeWaypoint: (index: number) => void;
   updateEvent: (dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => void;
   insertWaypoint: (service: Business) => boolean;
   removeWaypoint: (index: number) => void;

@@ -1,9 +1,8 @@
-"use client"
-
 import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTrip } from "@/lib/store/trip-context"
 import { cn } from "@/lib/utils"
+import { Drawer } from "vaul"
 
 interface ThreePaneLayoutProps {
   sidebar: ReactNode
@@ -20,9 +19,8 @@ export function ThreePaneLayout({
   showMap = true,
   className
 }: ThreePaneLayoutProps) {
-  const { leftWidth, setLeftWidth } = useTrip()
+  const { leftWidth, setLeftWidth, panelMode, setPanelMode } = useTrip()
   const [isDragging, setIsDragging] = useState(false)
-  const [viewMode, setViewMode] = useState<"list" | "map">("list")
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -66,15 +64,15 @@ export function ThreePaneLayout({
 
   return (
     <div ref={containerRef} className={cn("h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
-      {/* Left / Main Content Panel */}
+      {/* Desktop Left / Main Content Panel */}
       <div 
         style={{ 
           width: showMap ? `calc(${leftWidth}% - 4px)` : '100%',
           minWidth: showMap ? '320px' : '100%',
         }}
         className={cn(
-          "transition-none flex flex-col h-full relative z-10 bg-white",
-          viewMode === "map" ? "hidden md:flex" : "w-full"
+          "transition-none hidden md:flex flex-col h-full relative z-10 bg-white",
+          showMap ? "w-full" : "w-full"
         )}
       >
         {/* Sidebar (Header/Search) */}
@@ -98,45 +96,63 @@ export function ThreePaneLayout({
         </div>
       )}
 
-      {/* Map Panel */}
+      {/* Map Panel (Full screen on mobile) */}
       {map && (
         <div 
-          style={{ width: showMap ? `calc(${100 - leftWidth}% - 4px)` : '0%' }}
           className={cn(
-            "transition-none flex flex-col relative z-10 bg-slate-100",
-            viewMode === "list" ? "hidden md:flex" : "",
-            !showMap ? "hidden" : "flex-1"
+            "transition-none flex flex-col relative z-0 bg-slate-100 flex-1",
+            "md:[--map-width:calc(100%-4px-var(--left-width))]",
+            !showMap ? "hidden" : ""
           )}
+          //@ts-ignore
+          style={{ 
+            '--left-width': `${leftWidth}%`, 
+            '--map-width': showMap ? 'calc(100% - var(--left-width))' : '0%',
+            width: 'var(--map-width)'
+          }}
         >
           {showMap && map}
         </div>
       )}
 
-      {/* Mobile Mode Toggle */}
-      {map && (
-        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-          <div className="flex items-center bg-white border border-gray-200 rounded-full p-1 shadow-2xl">
-            <button 
-              onClick={() => setViewMode("list")} 
-              className={cn(
-                "px-5 py-2 rounded-full text-sm font-semibold transition-colors",
-                viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-gray-50"
-              )}
+      {/* Mobile Drawer */}
+      <div className="md:hidden">
+        <Drawer.Root dismissible={false} open={true} modal={false}>
+          <Drawer.Portal>
+            <Drawer.Content 
+              className="md:hidden bg-white flex flex-col rounded-t-[32px] h-[92%] fixed bottom-0 left-0 right-0 z-40 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
+              style={{ pointerEvents: 'auto' }}
             >
-              List
-            </button>
-            <button 
-              onClick={() => setViewMode("map")} 
-              className={cn(
-                "px-5 py-2 rounded-full text-sm font-semibold transition-colors",
-                viewMode === "map" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-gray-50"
-              )}
-            >
-              Map
-            </button>
-          </div>
-        </div>
-      )}
+              <Drawer.Title className="sr-only">Menu</Drawer.Title>
+              <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-200 mt-4 mb-2" />
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="shrink-0 overflow-x-hidden">
+                  {sidebar}
+                </div>
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  {content}
+                </div>
+              </div>
+
+              {/* Bottom Tab Bar (Mobile) */}
+              <div className="shrink-0 h-[72px] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-2">
+                 <button onClick={() => setPanelMode('categories')} className="flex flex-col items-center gap-1">
+                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'categories' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
+                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                   </div>
+                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'categories' ? "text-slate-900" : "text-slate-400")}>Discover</span>
+                 </button>
+                 <button onClick={() => setPanelMode('itinerary')} className="flex flex-col items-center gap-1">
+                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
+                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                   </div>
+                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'itinerary' ? "text-slate-900" : "text-slate-400")}>Timeline</span>
+                 </button>
+              </div>
+            </Drawer.Content>
+          </Drawer.Portal>
+        </Drawer.Root>
+      </div>
     </div>
   )
 }

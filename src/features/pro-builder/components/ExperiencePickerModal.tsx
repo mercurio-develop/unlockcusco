@@ -13,6 +13,8 @@ type MinimizedPackage = {
   sector: string
   pace: string
   tags: string
+  lat?: number
+  lng?: number
 }
 
 const CATEGORIES = [
@@ -46,7 +48,7 @@ interface ExperiencePickerModalProps {
 }
 
 export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, initialSearch }: ExperiencePickerModalProps) {
-  const { currentTrip, addEvent, removeEvent, updateEvent } = useTrip()
+  const { currentTrip, setCurrentTrip, addEvent, removeEvent, updateEvent } = useTrip()
   const [packages, setPackages] = useState<MinimizedPackage[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
@@ -59,15 +61,17 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
   const experienceEvents = (day?.events || []).filter(e => e.type === 'EXPERIENCE') as ExperienceEvent[]
   
   // If we are in "meal mode", the selected package is the one on the meal event
-  const mealEvent = eventId ? day?.events.find(e => e.id === eventId && e.type === 'MEAL') as MealEvent | undefined : undefined;
+  const mealEvent = eventId && eventId !== 'endAnchor' ? day?.events.find(e => e.id === eventId && e.type === 'MEAL') as MealEvent | undefined : undefined;
   
   const selectedPackageIds = mealEvent 
     ? (mealEvent.title ? [mealEvent.title] : []) 
-    : experienceEvents.map(e => e.packageId)
+    : eventId === 'endAnchor'
+      ? (day?.endAnchor?.title ? [day.endAnchor.title] : [])
+      : experienceEvents.map(e => e.packageId)
 
   useEffect(() => {
     if (isOpen) {
-      setActiveCategory(mealEvent ? 'food' : 'all')
+      setActiveCategory(mealEvent ? 'food' : eventId === 'endAnchor' ? 'stays' : 'all')
       setSearch(initialSearch || "")
       
       if (packages.length === 0) {
@@ -86,7 +90,7 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
           .finally(() => setLoading(false))
       }
     }
-  }, [isOpen, mealEvent, packages.length, initialSearch])
+  }, [isOpen, mealEvent, eventId, packages.length, initialSearch])
 
   if (!isOpen) return null
 
@@ -121,15 +125,32 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
   })
 
   const togglePackage = (pkg: MinimizedPackage) => {
+    if (eventId === 'endAnchor') {
+      const isSelected = day?.endAnchor?.title === pkg.title;
+      const endAnchor = day?.endAnchor;
+      const updatedEndAnchor = isSelected
+        ? { ...endAnchor, title: "", time: endAnchor?.time || "18:00", businessId: undefined } as any
+        : { ...endAnchor, title: pkg.title, lat: pkg.lat, lng: pkg.lng, time: endAnchor?.time || "18:00", businessId: pkg.id } as any;
+      
+      if (currentTrip) {
+        setCurrentTrip({
+          ...currentTrip,
+          days: currentTrip.days.map(d => d.dayNumber === dayNumber ? { ...d, endAnchor: updatedEndAnchor } : d)
+        })
+      }
+      onClose()
+      return;
+    }
+
     const isSelected = mealEvent 
       ? mealEvent.businessId === pkg.id || mealEvent.title === pkg.title
       : selectedPackageIds.includes(pkg.id)
     
     if (mealEvent) {
       if (isSelected) {
-        updateEvent(dayNumber, mealEvent.id, { title: "Lunch", businessId: undefined } as any)
+        updateEvent(dayNumber, mealEvent.id, { title: "Lunch", businessId: undefined, locationLat: undefined, locationLng: undefined } as any)
       } else {
-        updateEvent(dayNumber, mealEvent.id, { title: pkg.title, businessId: pkg.id } as any)
+        updateEvent(dayNumber, mealEvent.id, { title: pkg.title, businessId: pkg.id, locationLat: pkg.lat, locationLng: pkg.lng } as any)
       }
       onClose()
       return;
@@ -159,7 +180,9 @@ export function ExperiencePickerModal({ isOpen, onClose, dayNumber, eventId, ini
         type: 'EXPERIENCE',
         startTime: defaultStartTime,
         packageId: pkg.id,
-        title: pkg.title
+        title: pkg.title,
+        lat: pkg.lat,
+        lng: pkg.lng
       })
     }
   }

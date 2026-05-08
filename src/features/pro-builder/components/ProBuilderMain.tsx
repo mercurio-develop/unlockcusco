@@ -33,8 +33,19 @@ export function ProBuilderMain() {
 
   const mapEntities = useMemo(() => {
     if (!currentTrip) return [];
-    const mapEvents = currentTrip.days.filter(d => d.events.length > 0 || d.dayNumber === activeDayNumber).flatMap(d => d.events).filter(e => e.type !== 'NOTE');
-    
+    const mapEvents: any[] = [];
+    currentTrip.days.forEach(d => {
+      if (d.events.length > 0 || d.dayNumber === activeDayNumber) {
+        if (d.startAnchor?.lat && d.startAnchor?.lng) {
+          mapEvents.push({ id: `startAnchor-${d.dayNumber}`, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR' });
+        }
+        d.events.filter(e => e.type !== 'NOTE').forEach(e => mapEvents.push(e));
+        if (d.endAnchor?.lat && d.endAnchor?.lng) {
+          mapEvents.push({ id: `endAnchor-${d.dayNumber}`, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR' });
+        }
+      }
+    });
+
     return mapEvents.map(e => {
       let evtLat = e.lat;
       let evtLng = e.lng;
@@ -51,7 +62,7 @@ export function ProBuilderMain() {
         name: e.title,
         lat: evtLat,
         lng: evtLng,
-        category: e.type
+        category: e.type === 'ANCHOR' ? 'STAY' : e.type
       };
     }).filter(e => e.lat != null && e.lng != null);
   }, [currentTrip, activeDayNumber]);
@@ -68,6 +79,7 @@ export function ProBuilderMain() {
       case 'TRANSPORT': return <Car className="w-3 h-3 text-blue-600" />
       case 'MEAL': return <Utensils className="w-3 h-3 text-amber-600" />
       case 'STAY': return <Moon className="w-3 h-3 text-purple-600" />
+      case 'ANCHOR': return <MapPin className="w-3 h-3 text-slate-500" />
       default: return <AlignLeft className="w-3 h-3 text-slate-500" />
     }
   }
@@ -98,6 +110,16 @@ export function ProBuilderMain() {
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Itinerary Timeline</h3>
                 {currentTrip.days.map((day) => {
                   const isActive = day.dayNumber === activeDayNumber
+                  
+                  const timelineItems: { id: string, title: string, time: string, type: string }[] = [];
+                  if (day.startAnchor) {
+                    timelineItems.push({ id: `startAnchor-${day.dayNumber}`, title: day.startAnchor.title || "Starting Point", time: day.startAnchor.time || "09:00", type: 'ANCHOR' });
+                  }
+                  day.events.forEach(e => timelineItems.push({ id: e.id, title: e.title, time: e.startTime, type: e.type }));
+                  if (day.endAnchor) {
+                    timelineItems.push({ id: `endAnchor-${day.dayNumber}`, title: day.endAnchor.title || "End of Day", time: day.endAnchor.time || "18:00", type: 'ANCHOR' });
+                  }
+
                   return (
                     <div key={day.dayNumber} className={`rounded-3xl transition-all duration-300 overflow-hidden border ${isActive ? 'bg-white border-slate-200 shadow-md ring-1 ring-slate-900/5' : 'bg-white border-transparent shadow-sm hover:shadow hover:border-slate-200'}`}>
                       <button
@@ -129,19 +151,26 @@ export function ProBuilderMain() {
                       {/* Always Expanded Timeline View for Active Day */}
                       {isActive && (
                         <div className="px-6 pb-6 pt-0 animate-in slide-in-from-top-2 fade-in duration-300">
-                          {day.events.length === 0 ? (
+                          {timelineItems.length === 0 ? (
                             <p className="text-sm text-slate-500 font-medium bg-slate-50 p-5 rounded-2xl text-center border border-slate-200 border-dashed">No events scheduled.</p>
                           ) : (
                             <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
-                              {day.events.map((e, i) => (
+                              {timelineItems.map((e, i) => (
                                 <div 
                                   key={e.id} 
                                   className="relative flex items-center justify-between group pl-8 cursor-pointer hover:bg-slate-50 py-1 -ml-2 pl-10 rounded-r-xl transition-colors"
-                                  onClick={(ev) => { ev.stopPropagation(); setSelectedId(e.id); }}
+                                  onClick={(ev) => { 
+                                    ev.stopPropagation(); 
+                                    setSelectedId(e.id);
+                                    const element = document.getElementById(`event-${e.id}`);
+                                    if (element) {
+                                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                  }}
                                 >
                                   <div className={`absolute left-[17px] w-2 h-2 rounded-full z-10 transition-colors ring-4 ring-white ${selectedId === e.id ? 'bg-slate-900 ring-rose-500/20' : 'bg-slate-300 group-hover:bg-slate-900'}`} />
                                   <span className={`text-[15px] font-medium truncate pr-4 transition-colors ${selectedId === e.id ? 'text-slate-900 font-bold' : 'text-slate-700 group-hover:text-slate-900'}`}>{e.title}</span>
-                                  <span className={`text-xs font-bold font-mono shrink-0 transition-colors ${selectedId === e.id ? 'text-rose-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{e.startTime}</span>
+                                  <span className={`text-xs font-bold font-mono shrink-0 transition-colors ${selectedId === e.id ? 'text-rose-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{e.time}</span>
                                 </div>
                               ))}
                             </div>
@@ -168,7 +197,7 @@ export function ProBuilderMain() {
 
       {/* Center Panel - Map */}
       <div className="flex-1 relative z-10 bg-slate-100 overflow-hidden">
-        <ExploreMap businesses={mapEntities as any} selectedId={null} onSelectBusiness={() => {}} />
+        <ExploreMap businesses={mapEntities as any} selectedId={selectedId} onSelectBusiness={setSelectedId} />
       </div>
 
       {/* Right Panel - Builder Workspace */}

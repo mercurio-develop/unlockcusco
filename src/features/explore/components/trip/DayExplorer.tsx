@@ -2,7 +2,7 @@
 import { TripDay, Traveler } from "@prisma/client";
 import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useItinerary } from "@/lib/store/itinerary-context"
 import { Moon, Plane, MapPin, Star, User, ChevronRight, Clock, Car, Plus, Trash2, Repeat, Navigation, ArrowUp, ArrowDown, Flag } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -16,8 +16,26 @@ export function DayExplorer() {
 
   const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null)
   const [openTransportId, setOpenTransportId] = useState<number | null>(null)
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
 
   if (!activeItinerary) return null
+
+  const isWaypointActive = (startTime?: string, durationMins?: number) => {
+    if (!startTime) return false
+    const parts = startTime.split(':')
+    if (parts.length < 2) return false
+    const hours = parseInt(parts[0])
+    const minutes = parseInt(parts[1])
+    const start = new Date(currentTime)
+    start.setHours(hours, minutes, 0, 0)
+    const end = new Date(start.getTime() + (durationMins || 120) * 60000)
+    return currentTime >= start && currentTime <= end
+  }
 
   const startAnchor = activeItinerary.startAnchor;
   const endAnchor = activeItinerary.endAnchor;
@@ -151,7 +169,13 @@ export function DayExplorer() {
                             let icon = '🚕';
                             let labelText = 'Taxi';
                             
-                            if (isColectivo) {
+                            const isWalking = edge.defaultDriver?.name?.toLowerCase().includes('walk') || edge.isWalkingOverride;
+
+                            if (isWalking) {
+                              timeMins = Math.ceil(estimate.distanceKm * 12);
+                              icon = '🚶‍♂️';
+                              labelText = 'Walking';
+                            } else if (isColectivo) {
                               timeMins = Math.ceil(estimate.distanceKm * 3.5);
                               icon = '🚌';
                               labelText = 'Bus';
@@ -161,7 +185,21 @@ export function DayExplorer() {
                               labelText = 'Moto Taxi';
                             }
                             
-                            return `${icon} ${labelText} (approx ${timeMins} mins)`;
+                            return (
+                              <div className="flex items-center gap-2">
+                                <span>{icon} {labelText} (approx {timeMins} mins)</span>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // This is a placeholder for updating the context
+                                    alert("Mode toggle coming soon! Switching to " + (isWalking ? "Taxi" : "Walking"));
+                                  }}
+                                  className="ml-1 p-1 rounded-md bg-white/50 hover:bg-white text-[9px] font-bold uppercase tracking-tighter"
+                                >
+                                  {isWalking ? "Use Taxi" : "Use Walk"}
+                                </button>
+                              </div>
+                            );
                           })()}
                         </span>
                       )}
@@ -216,16 +254,22 @@ export function DayExplorer() {
                   onClick={() => setSelectedId(wp.id)}
                 >
                   <div className={cn(
-                    "w-8 h-8 rounded-full bg-white border-2 z-20 shrink-0 transition-all hover:scale-110 shadow-sm",
-                    selectedId === wp.id ? "border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]" : "border-rose-400"
-                  )} />
+                    "w-8 h-8 rounded-full bg-white border-2 z-20 shrink-0 transition-all hover:scale-110 shadow-sm flex items-center justify-center",
+                    selectedId === wp.id ? "border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]" : 
+                    isWaypointActive(wp.startTime, wp.durationMins) ? "border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" : "border-rose-400"
+                  )}>
+                    {isWaypointActive(wp.startTime, wp.durationMins) && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                  </div>
                   <div className="w-0.5 h-full bg-rose-200 mt-2 min-h-6" />
                 </div>
 
                 <div className="flex-1">
                   <div 
                     onClick={() => setSelectedId(wp.id)}
-                    className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-rose-300 transition-all cursor-pointer"
+                    className={cn(
+                      "bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-rose-300 transition-all cursor-pointer",
+                      isWaypointActive(wp.startTime, wp.durationMins) && "ring-2 ring-emerald-500/20 border-emerald-200 bg-emerald-50/10"
+                    )}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">

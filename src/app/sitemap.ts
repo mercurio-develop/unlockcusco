@@ -37,14 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 3. Business Profile Pages (Long-tail)
   const businesses = await prisma.business.findMany({
-    select: { slug: true, updatedAt: true },
+    select: { slug: true },
   })
 
   const businessPages: MetadataRoute.Sitemap = businesses
     .filter(b => b.slug)
     .map(b => ({
       url: `${baseUrl}/business/${b.slug}`,
-      lastModified: b.updatedAt,
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     }))

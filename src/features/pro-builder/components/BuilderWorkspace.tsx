@@ -40,24 +40,36 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
 
   const handleAddMockEvent = (type: EventType) => {
     const id = uuidv4()
+    let defaultStartTime = "10:00"
+    if (activeDay && activeDay.events.length > 0) {
+      const lastEvent = activeDay.events[activeDay.events.length - 1]
+      if (lastEvent.startTime) {
+        const [hours, minutes] = lastEvent.startTime.split(':').map(Number)
+        defaultStartTime = `${String((hours + 2) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+      }
+    } else if (activeDay && activeDay.startAnchor?.time) {
+      const [hours, minutes] = activeDay.startAnchor.time.split(':').map(Number)
+      defaultStartTime = `${String((hours + 1) % 24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    }
+
     let newEvent: TimelineEvent;
 
     switch (type) {
       case 'TRANSPORT':
-        newEvent = { id, type, startTime: "10:00", title: 'Private Transfer', method: 'CAR', from: '', to: '' };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Private Transfer', method: 'CAR', from: '', to: '' };
         break;
       case 'MEAL':
-        newEvent = { id, type, startTime: "10:00", title: 'Lunch Reservation' };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Lunch Reservation' };
         break;
       case 'STAY':
-        newEvent = { id, type, startTime: "10:00", title: 'Hotel Check-in' };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Hotel Check-in' };
         break;
       case 'NOTE':
-        newEvent = { id, type, startTime: "10:00", title: 'Note', content: '' };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Note', content: '' };
         break;
       case 'EXPERIENCE':
       default:
-        newEvent = { id, type: 'EXPERIENCE', startTime: "10:00", title: 'New Block' };
+        newEvent = { id, type: 'EXPERIENCE', startTime: defaultStartTime, title: 'New Block' };
         break;
     }
     
@@ -143,6 +155,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
               return (
               <div 
                 key={evt.id} 
+                id={`event-${evt.id}`}
                 className="relative group animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
                 onClick={() => onSelectEvent && onSelectEvent(evt.id)}
               >
@@ -195,12 +208,14 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                       <h4 className="font-bold text-slate-900 font-serif text-xl mb-1">{evt.title || "Selected Vallecito Experience"}</h4>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
                         <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">ID: {(evt as any).packageId?.substring(0,8) || evt.id.substring(0,8)}...</p>
-                        <button 
-                          onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId || evt.id)} 
-                          className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
-                        >
-                          View Details
-                        </button>
+                        {((evt as any).packageId || (evt as any).businessId) && (
+                          <button 
+                            onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId)} 
+                            className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
+                          >
+                            View Details
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -330,7 +345,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                             type="MEAL"
                             title={evt.title || ""}
                             businessId={(evt as any).businessId}
-                            onChange={(title, businessId) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId } as any)}
+                            onChange={(title: string, businessId?: string, lat?: number, lng?: number) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId, locationLat: lat, locationLng: lng } as any)}
                           />
                           <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value } as any)} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
                           <div className="flex items-center mt-1">
@@ -392,7 +407,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                             type="STAY"
                             title={evt.title || ""}
                             businessId={(evt as any).businessId}
-                            onChange={(title, businessId) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId } as any)}
+                            onChange={(title: string, businessId?: string, lat?: number, lng?: number) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId, lat, lng } as any)}
                           />
                           <div className="flex items-center mt-1">
                             <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700 transition-colors">
@@ -448,12 +463,12 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
             <div className="relative pt-6">
               <div 
                 className="relative group cursor-pointer"
-                onClick={() => onSelectEvent && onSelectEvent('itin-arrival')}
+                onClick={() => onSelectEvent && onSelectEvent(`endAnchor-${activeDay.dayNumber}`)}
               >
-                <div className={`absolute -left-[37px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 z-20 flex items-center justify-center transition-colors ${selectedId === 'itin-arrival' ? 'bg-rose-600 border-rose-600' : 'bg-white border-rose-600 group-hover:bg-rose-50'}`}>
-                  <div className={`w-1 h-1 rounded-full ${selectedId === 'itin-arrival' ? 'bg-white' : 'bg-rose-600'}`} />
+                <div className={`absolute -left-[37px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 z-20 flex items-center justify-center transition-colors ${selectedId === `endAnchor-${activeDay.dayNumber}` ? 'bg-rose-600 border-rose-600' : 'bg-white border-rose-600 group-hover:bg-rose-50'}`}>
+                  <div className={`w-1 h-1 rounded-full ${selectedId === `endAnchor-${activeDay.dayNumber}` ? 'bg-white' : 'bg-rose-600'}`} />
                 </div>
-                <div className={`bg-white border rounded-3xl p-5 transition-shadow ${selectedId === 'itin-arrival' ? 'border-rose-200 shadow-md ring-1 ring-rose-600/5' : 'border-slate-100 shadow-sm hover:shadow'}`}>
+                <div className={`bg-white border rounded-3xl p-5 transition-shadow ${selectedId === `endAnchor-${activeDay.dayNumber}` ? 'border-rose-200 shadow-md ring-1 ring-rose-600/5' : 'border-slate-100 shadow-sm hover:shadow'}`}>
                   <div className="flex justify-between items-start mb-3">
                     <span className="text-[10px] font-bold text-rose-500 uppercase tracking-[0.2em] block">End of Day</span>
                     <input 
@@ -472,6 +487,19 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                         className="w-full p-2 bg-transparent border-b border-slate-200 text-base outline-none focus:border-slate-900 font-semibold text-slate-900 transition-colors"
                       />
                     </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
+                    <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: 'endAnchor', initialSearch: activeDay.endAnchor?.title })} className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors">
+                      <Search className="w-3.5 h-3.5" /> Browse Vallecito Library
+                    </button>
+                    {(activeDay.endAnchor as any)?.businessId && (
+                      <button 
+                        onClick={() => setViewingPackage((activeDay.endAnchor as any).businessId!)} 
+                        className="text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-xl transition-colors"
+                      >
+                        View Details
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
