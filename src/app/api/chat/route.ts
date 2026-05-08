@@ -7,6 +7,7 @@ import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
+import { EXPATS_KNOWLEDGE_BASE } from '@/lib/ai/knowledge/expats-guide';
 import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
 
 export const maxDuration = 30;
@@ -63,6 +64,8 @@ export async function POST(req: Request) {
       .replace('{localTime}', localTime || 'unknown')
       .replace('{userLat}', userLat || 'unknown')
       .replace('{userLng}', userLng || 'unknown');
+
+    systemPrompt += `\n\n<EXPATS_KNOWLEDGE_BASE>\n${EXPATS_KNOWLEDGE_BASE}\n</EXPATS_KNOWLEDGE_BASE>\n`;
 
     if (archetype && intensity && PSYCHOGRAPHIC_MATRIX[archetype]?.[intensity]) {
       systemPrompt += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;

@@ -33,7 +33,7 @@ export function ProBuilderMain() {
 
   const mapEntities = useMemo(() => {
     if (!currentTrip) return [];
-    const mapEvents = currentTrip.days.filter(d => d.isComplete || d.dayNumber === activeDayNumber).flatMap(d => d.events).filter(e => e.type !== 'NOTE');
+    const mapEvents = currentTrip.days.filter(d => d.events.length > 0 || d.dayNumber === activeDayNumber).flatMap(d => d.events).filter(e => e.type !== 'NOTE');
     
     return mapEvents.map(e => {
       let evtLat = e.lat;
@@ -134,10 +134,14 @@ export function ProBuilderMain() {
                           ) : (
                             <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
                               {day.events.map((e, i) => (
-                                <div key={e.id} className="relative flex items-center justify-between group pl-8">
-                                  <div className="absolute left-[9px] w-2 h-2 rounded-full bg-slate-300 z-10 group-hover:bg-slate-900 transition-colors ring-4 ring-white" />
-                                  <span className="text-slate-700 text-[15px] font-medium truncate pr-4">{e.title}</span>
-                                  <span className="text-slate-400 text-xs font-bold font-mono shrink-0">{e.startTime}</span>
+                                <div 
+                                  key={e.id} 
+                                  className="relative flex items-center justify-between group pl-8 cursor-pointer hover:bg-slate-50 py-1 -ml-2 pl-10 rounded-r-xl transition-colors"
+                                  onClick={(ev) => { ev.stopPropagation(); setSelectedId(e.id); }}
+                                >
+                                  <div className={`absolute left-[17px] w-2 h-2 rounded-full z-10 transition-colors ring-4 ring-white ${selectedId === e.id ? 'bg-slate-900 ring-rose-500/20' : 'bg-slate-300 group-hover:bg-slate-900'}`} />
+                                  <span className={`text-[15px] font-medium truncate pr-4 transition-colors ${selectedId === e.id ? 'text-slate-900 font-bold' : 'text-slate-700 group-hover:text-slate-900'}`}>{e.title}</span>
+                                  <span className={`text-xs font-bold font-mono shrink-0 transition-colors ${selectedId === e.id ? 'text-rose-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{e.startTime}</span>
                                 </div>
                               ))}
                             </div>

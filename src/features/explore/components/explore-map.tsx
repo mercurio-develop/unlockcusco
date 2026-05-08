@@ -57,7 +57,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const router = useRouter()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, setEndAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
 
   // Calculate dynamic right offset for map controls
   // If chat is open, shift left by the chat width (450px)
@@ -78,7 +78,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
   const completedDays = useMemo(() => {
     if (panelMode !== "builder" || !currentTrip) return [];
-    const daysToRender = currentTrip.days.filter(d => d.isComplete || d.dayNumber === activeDayNumber);
+    const daysToRender = currentTrip.days.filter(d => (d.events && d.events.length > 0) || d.dayNumber === activeDayNumber);
     return daysToRender.map(d => {
       const pts: [number, number][] = [];
       if (d.startAnchor?.lat && d.startAnchor?.lng) pts.push([d.startAnchor.lng, d.startAnchor.lat]);
@@ -286,13 +286,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     let targetLng: number | null = null;
     let targetBusiness: Business | null = null;
 
+    // 1. Direct Business Match
     const b = businesses.find(b => b.id === selectedId);
     if (b && b.lat !== null && b.lng !== null) {
       targetLat = b.lat;
       targetLng = b.lng;
       targetBusiness = b;
-    } else if (activeItinerary) {
-      // Check waypoints and their alternatives
+    } 
+    
+    // 2. Active Itinerary (Micro-Day) Match
+    if (!targetLat && activeItinerary) {
       for (const wp of activeItinerary.waypoints) {
         if (wp.id === selectedId && wp.lat !== undefined && wp.lng !== undefined) {
           targetLat = wp.lat;
@@ -308,13 +311,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           }
         }
       }
-    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
+    } 
+    
+    // 3. Pro Builder (Multi-Day) Match
+    if (!targetLat && panelMode === "builder" && currentTrip && activeDayNumber) {
       const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
       if (activeDay) {
         for (const evt of activeDay.events || []) {
-          if (evt.id === selectedId && evt.lat !== undefined && evt.lng !== undefined) {
-            targetLat = evt.lat;
-            targetLng = evt.lng;
+          if (evt.id === selectedId) {
+            if (evt.lat !== undefined && evt.lng !== undefined) {
+              targetLat = evt.lat;
+              targetLng = evt.lng;
+            } else if ((evt as any).businessId) {
+              const b = businesses.find(b => b.id === (evt as any).businessId);
+              if (b && b.lat !== null && b.lng !== null) {
+                targetLat = b.lat;
+                targetLng = b.lng;
+                targetBusiness = b;
+              }
+            }
             break;
           }
           if ((evt as any).alternatives) {
@@ -326,6 +341,19 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
             }
           }
         }
+      }
+    }
+
+    // 4. Mock Hotel Fallback (Basecamp Carousel)
+    if (!targetLat && selectedId?.startsWith('hotel-')) {
+      const mockCoords: Record<string, [number, number]> = {
+        'hotel-1': [-13.3135, -72.1158],
+        'hotel-2': [-13.3100, -72.0800],
+        'hotel-3': [-13.3150, -72.1200]
+      };
+      if (mockCoords[selectedId]) {
+        targetLng = mockCoords[selectedId][1];
+        targetLat = mockCoords[selectedId][0];
       }
     }
 
@@ -342,6 +370,21 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   useEffect(() => {
     // We keep this empty so we don't automatically recenter the map on tab change or route generation.
   }, []);
+
+  // Fly to active day start when day changes
+  useEffect(() => {
+    if (!mapRef.current || !activeDayNumber || !currentTrip || selectedId) return;
+
+    const day = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+    if (day?.startAnchor?.lat && day?.startAnchor?.lng) {
+      mapRef.current.flyTo({
+        center: [day.startAnchor.lng, day.startAnchor.lat],
+        zoom: 13,
+        pitch: (mapMode === "satellite" ? 45 : 0),
+        duration: 1500
+      });
+    }
+  }, [activeDayNumber, currentTrip, mapMode, selectedId]);
 
   if (!mapboxToken) {
     return (
@@ -684,7 +727,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                         const isNewTrip = insertWaypoint(popupBusiness as any)
                         if (isNewTrip) {
                           const bName = encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title);
-                          router.push(`?ai_prompt=I'd like to add ${bName} to my itinerary. Can you help me plan the rest of the day? Please ask me where I'll be starting from and where I'd like to end.`)
+                          router.push(`?ai_prompt=I'd like to add ${bName} to my itinerary.`)
                         }
                         setPopupBusiness(null)
                       }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
@@ -723,18 +766,19 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               return (
                 <button 
                   key={day.dayNumber} 
-                  className={`w-full flex items-center justify-between gap-3 text-left transition-opacity hover:opacity-100 ${day.isActive ? 'opacity-100' : 'opacity-50 hover:opacity-80'}`}
+                  onClick={() => setActiveDayNumber(day.dayNumber)}
+                  className={`w-full flex items-center justify-between gap-3 text-left transition-all hover:translate-x-1 ${day.isActive ? 'opacity-100 scale-105' : 'opacity-50 hover:opacity-100'}`}
                 >
                   <div className="flex items-center gap-3">
                     <div 
-                      className={`w-3.5 h-3.5 rounded-full shadow-inner ${day.isActive ? 'ring-2 ring-offset-2 ring-slate-900/10' : ''}`} 
+                      className={`w-3.5 h-3.5 rounded-full shadow-inner transition-all ${day.isActive ? 'ring-2 ring-offset-2 ring-slate-900/10' : ''}`} 
                       style={{ backgroundColor: color }} 
                     />
-                    <span className={`text-sm ${day.isActive ? 'text-slate-900 font-bold' : 'text-slate-600 font-medium'}`}>
+                    <span className={`text-sm transition-colors ${day.isActive ? 'text-slate-900 font-bold' : 'text-slate-600 font-medium'}`}>
                       Day {day.dayNumber}
                     </span>
                   </div>
-                  {day.isActive && <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
+                  {day.isActive && <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" />}
                 </button>
               )
             })}

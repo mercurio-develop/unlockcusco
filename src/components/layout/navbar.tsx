@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText } from "lucide-react"
-import { homePath, explorePath, servicesPath, dashboardPath, travelDesignPath } from "@/paths"
+import { homePath, explorePath, servicesPath, dashboardPath } from "@/paths"
 import { useTrip } from "@/lib/store/trip-context"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,6 @@ export function Navbar() {
   const navItems = [
     { href: homePath(), label: "Home", icon: Home },
     { href: explorePath(), label: "Explore", icon: Compass },
-    { href: travelDesignPath(), label: "Travel Design", icon: Route },
   ]
 
   const isProfilePage = pathname?.match(/^\/services\/(agencies|healers)\/[^\/]+$/)

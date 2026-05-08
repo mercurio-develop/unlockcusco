@@ -98,19 +98,24 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
     }
   }
 
-  const whereClause: Record<string, unknown> = {}
+  const whereClause: Record<string, any> = {
+    category: { notIn: ['AGENCY', 'Agency', 'agency'] }
+  }
   if (targetCategory) {
     const categories = targetCategory.split(',').map(c => c.trim()).filter(Boolean)
     if (categories.length > 0) {
       // Expand to cover different casings present in the DB (e.g. 'Dining', 'DINING', 'dining')
       const expandedCategories = new Set<string>();
       for (const cat of categories) {
+        if (cat.toUpperCase() === 'AGENCY') continue; // Skip agency searches
         expandedCategories.add(cat);
         expandedCategories.add(cat.toUpperCase());
         expandedCategories.add(cat.toLowerCase());
         expandedCategories.add(cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase());
       }
-      whereClause.category = { in: Array.from(expandedCategories) };
+      if (expandedCategories.size > 0) {
+        whereClause.category = { in: Array.from(expandedCategories), notIn: ['AGENCY', 'Agency', 'agency'] };
+      }
     }
   }
   if (loc && radiusKm === undefined) {

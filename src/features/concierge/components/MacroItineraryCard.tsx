@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 export function MacroItineraryCard({ itinerary, isExploreView = false }: { itinerary: FullTrip, isExploreView?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { setPanelMode } = useItinerary()
+  const { setPanelMode, setActiveDayNumber, setActiveItinerary } = useItinerary()
 
   if (!itinerary) return null
 
@@ -78,9 +78,14 @@ export function MacroItineraryCard({ itinerary, isExploreView = false }: { itine
                   const prompt = `Day ${day.dayNumber} Plan: I'm in ${day.sleepTown}, focusing on ${day.documentaryChapterTitle}. Build my micro-itinerary following the 1-2-1 rhythm.`
                   
                   if (isExploreView) {
+                    // Clear state to avoid overlap and update active day
+                    if (setActiveDayNumber) setActiveDayNumber(day.dayNumber);
+                    if (setActiveItinerary) setActiveItinerary(null);
+                    
                     setPanelMode("itinerary")
                     const params = new URLSearchParams(searchParams.toString())
                     params.set("ai_prompt", prompt)
+                    params.set("day", day.dayNumber.toString())
                     router.push(`/explore?${params.toString()}`)
                   } else {
                     window.location.href = `/explore?ai_prompt=${encodeURIComponent(prompt)}`;

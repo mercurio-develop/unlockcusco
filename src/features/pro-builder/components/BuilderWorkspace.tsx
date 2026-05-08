@@ -194,9 +194,9 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                     <div>
                       <h4 className="font-bold text-slate-900 font-serif text-xl mb-1">{evt.title || "Selected Vallecito Experience"}</h4>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                        <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">ID: {evt.id.substring(0,8)}...</p>
+                        <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">ID: {(evt as any).packageId?.substring(0,8) || evt.id.substring(0,8)}...</p>
                         <button 
-                          onClick={() => setViewingPackage(evt.id)} 
+                          onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId || evt.id)} 
                           className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
                         >
                           View Details

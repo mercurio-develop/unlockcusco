@@ -74,6 +74,8 @@ export const searchDatabase = tool({
         distanceKm: b.distanceKm ? b.distanceKm.toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
         tagline: b.tagline,
+        imageUrl: b.imageUrl,
+        slug: b.slug,
         recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
       }));
     }
@@ -89,6 +91,8 @@ export const searchDatabase = tool({
       whatsapp: b.whatsapp,
       locationSlug: b.locationSlug,
       tagline: b.tagline,
+      imageUrl: b.imageUrl,
+      slug: b.slug,
       recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
     }));
   }

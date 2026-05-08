@@ -99,21 +99,21 @@ export function BusinessCard({
         isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"
       )}
     >
-      {/* Top Right Action Menu - Absolute positioned to avoid event bubbling issues */}
-      {exchangeTargetIndex === null && (
+      {/* Top Right Action Menu */}
+      {false && exchangeTargetIndex === null && (
         <div 
-          className="absolute top-3 right-3 z-30" 
+          className="absolute top-3 right-3 z-30 flex items-center justify-center" 
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <DropdownMenu>
             <DropdownMenuTrigger render={
-              <Button 
-                variant="outline" 
-                size="icon-xs" 
-                className="rounded-full bg-white/90 border-white shadow-sm text-slate-600 hover:text-rose-600 hover:bg-white backdrop-blur-md transition-all"
+              <button 
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 border border-slate-200 shadow-md text-slate-600 hover:text-rose-600 hover:scale-110 transition-all cursor-pointer backdrop-blur-sm"
               >
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
             } />
             <DropdownMenuContent>
               {hasProfile && (
@@ -121,14 +121,9 @@ export function BusinessCard({
                   <ExternalLink className="w-4 h-4 mr-2" /> View Profile
                 </DropdownMenuItem>
               )}
-              {(isClaimed || business.isAsociado || business.category === 'TRANSPORT') && (
-                <DropdownMenuItem onClick={(e) => handleBookNow(e as any)}>
-                  <Calendar className="w-4 h-4 mr-2" /> {business.category === 'TRANSPORT' ? 'Contact' : 'Book Now'}
-                </DropdownMenuItem>
-              )}
               {business.whatsapp && (
-                <DropdownMenuItem onClick={(e) => handleBookNow(e as any)}>
-                  <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }}>
+                  <MessageCircle className="w-4 h-4 mr-2" /> Contact
                 </DropdownMenuItem>
               )}
               {!isClaimed && !business.isAsociado && (
@@ -255,44 +250,32 @@ export function BusinessCard({
             >
               Select for Itinerary
             </Button>
-          ) : hasProfile ? (
-            <Link 
-              href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)}
-              className={cn(
-                "flex-1 inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl transition-all",
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              View Profile
-            </Link>
-          ) : isClaimed || business.category === 'TRANSPORT' ? (
+          ) : isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
             <Button
               onClick={handleBookNow}
               className={cn(
-                "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold rounded-xl transition-all",
+                "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
                 isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
               )}
             >
-              {business.category === 'TRANSPORT' ? 'Contact' : 'Book Now'}
+              Contact
             </Button>
           ) : (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger render={
                 <Button 
                   onClick={(e) => e.stopPropagation()} 
-                  variant="outline" 
                   className={cn(
-                    "flex-1 bg-white text-slate-900 border-gray-200 hover:bg-gray-50 hover:text-slate-900 font-semibold rounded-xl transition-all",
+                    "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
                     isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
                   )}
                 >
-                  Check Availability
+                  Contact
                 </Button>
               } />
               <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
                 <DialogHeader className="mb-4">
-                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Check Availability</DialogTitle>
+                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-5 py-4">
                   <div className="grid gap-2.5">

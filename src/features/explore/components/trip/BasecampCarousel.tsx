@@ -19,7 +19,7 @@ interface Basecamp {
 }
 
 export function BasecampCarousel({ locationTown }: { locationTown: string }) {
-  const { selectBasecamp, setExchangeTargetIndex, setPanelMode } = useItinerary()
+  const { selectBasecamp, setExchangeTargetIndex, setPanelMode, setSelectedId, selectedId } = useItinerary()
 
   // Placeholder mock data for hotels
   const mockHotels: Basecamp[] = [
@@ -93,9 +93,13 @@ export function BasecampCarousel({ locationTown }: { locationTown: string }) {
         {filteredHotels.map((hotel) => (
           <div 
             key={hotel.id}
-            className="flex-none w-[260px] snap-start group"
+            className="flex-none w-[260px] snap-start group cursor-pointer"
+            onClick={() => setSelectedId(hotel.id)}
           >
-            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-rose-400 hover:shadow-lg transition-all duration-300">
+            <div className={cn(
+              "bg-white border rounded-2xl overflow-hidden transition-all duration-300",
+              selectedId === hotel.id ? "border-rose-500 shadow-xl ring-1 ring-rose-500/20" : "border-gray-200 hover:border-rose-400 hover:shadow-lg"
+            )}>
               {/* Image Placeholder */}
               <div className="h-32 bg-slate-100 relative overflow-hidden">
                 <img 

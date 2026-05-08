@@ -73,15 +73,21 @@ export interface TripDay {
   sleepTown?: string;
   startAnchor?: {
     title: string;
+    locationStr?: string;
+    type?: string;
     lat?: number;
     lng?: number;
     time: string;
+    service?: Business;
   };
   endAnchor?: {
     title: string;
+    locationStr?: string;
+    type?: string;
     lat?: number;
     lng?: number;
     time: string;
+    service?: Business;
   };
   events: TimelineEvent[];
 }

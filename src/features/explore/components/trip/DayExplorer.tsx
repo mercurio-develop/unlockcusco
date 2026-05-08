@@ -11,7 +11,7 @@ import { BasecampCarousel } from "./BasecampCarousel"
 import { useSearchParams } from "next/navigation"
 
 export function DayExplorer() {
-  const { activeItinerary, setSelectedId, macroTrip, setPanelMode, removeWaypoint, setExchangeTargetIndex, setStartAnchorLocation, swapDriverAlternative, moveWaypoint, truncateAfterWaypoint } = useItinerary()
+  const { activeItinerary, setSelectedId, selectedId, macroTrip, setPanelMode, removeWaypoint, setExchangeTargetIndex, setStartAnchorLocation, swapDriverAlternative, moveWaypoint, truncateAfterWaypoint } = useItinerary()
   const searchParams = useSearchParams()
 
   const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null)
@@ -58,7 +58,7 @@ export function DayExplorer() {
           onClick={() => setSelectedId('itin-start')}
         >
           <div className="flex flex-col items-center pt-2">
-            <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] z-20 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] z-20 flex items-center justify-center shrink-0 hover:scale-110 transition-transform">
               {startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4 text-rose-500" /> : <div className="w-2 h-2 rounded-full bg-rose-500" />}
             </div>
             <div className="w-0.5 h-full bg-rose-200 mt-2 min-h-6" />
@@ -211,8 +211,14 @@ export function DayExplorer() {
               )}
 
               <div className="relative group flex gap-4">
-                <div className="flex flex-col items-center pt-2">
-                  <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.2)] z-20 shrink-0" />
+                <div 
+                  className="flex flex-col items-center pt-2 cursor-pointer"
+                  onClick={() => setSelectedId(wp.id)}
+                >
+                  <div className={cn(
+                    "w-8 h-8 rounded-full bg-white border-2 z-20 shrink-0 transition-all hover:scale-110 shadow-sm",
+                    selectedId === wp.id ? "border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]" : "border-rose-400"
+                  )} />
                   <div className="w-0.5 h-full bg-rose-200 mt-2 min-h-6" />
                 </div>
 
@@ -235,6 +241,11 @@ export function DayExplorer() {
                         <p className="text-slate-500 text-xs leading-relaxed mt-1">{wp.locationStr}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
+                        {wp.startTime && (
+                          <div className="text-rose-600 text-xs font-bold bg-rose-50 px-2 py-1 rounded-md">
+                            {wp.startTime}
+                          </div>
+                        )}
                         {wp.durationMins && (
                           <div className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1">
                             <Clock className="w-3 h-3" /> {wp.durationMins}m
@@ -276,6 +287,16 @@ export function DayExplorer() {
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Remove
                     </button>
+                    {wp.service?.slug && (
+                      <a
+                        href={wp.service.category === 'AGENCY' ? `/agencies/${wp.service.slug}` : `/therapists/${wp.service.slug}`}
+                        target="_blank"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View Details
+                      </a>
+                    )}
                     
                     {/* Final Destination Set Button */}
                     {idx < waypoints.length - 1 && (
@@ -422,7 +443,7 @@ export function DayExplorer() {
           onClick={() => setSelectedId('itin-arrival')}
         >
           <div className="flex flex-col items-center pt-2">
-            <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] z-20 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-white border-2 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)] z-20 flex items-center justify-center shrink-0 hover:scale-110 transition-transform">
               <Moon className="w-4 h-4 text-rose-500" />
             </div>
           </div>
@@ -441,6 +462,19 @@ export function DayExplorer() {
                 <Repeat className="w-3 h-3" /> Exchange
               </button>
             </div>
+            
+            {endAnchor?.service?.slug && (
+              <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2 justify-end">
+                <a
+                  href={endAnchor.service.category === 'AGENCY' ? `/agencies/${endAnchor.service.slug}` : `/therapists/${endAnchor.service.slug}`}
+                  target="_blank"
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  View Details
+                </a>
+              </div>
+            )}
           </div>
         </div>
 

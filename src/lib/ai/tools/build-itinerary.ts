@@ -357,6 +357,39 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       }
     }
 
+    // --- Time Awareness Engine ---
+    let currentTimeMs = 8 * 60; // Start at 08:00 AM by default
+
+    const formatTime = (mins: number) => {
+      const h = Math.floor(mins / 60) % 24;
+      const m = Math.floor(mins % 60);
+      const isPM = h >= 12;
+      const displayH = h % 12 === 0 ? 12 : h % 12;
+      return `${displayH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
+    };
+
+    for (let i = 0; i < transitEdges.length; i++) {
+      const edge = transitEdges[i];
+      const fromNode = nodes[i];
+      const toNode = nodes[i + 1];
+      const transitKm = calculateDistance(fromNode.coords.lat, fromNode.coords.lng, toNode.coords.lat, toNode.coords.lng);
+      
+      const isWalk = edge.defaultDriver.id?.startsWith('walk-');
+      const speedKmh = isWalk ? 5 : 40;
+      const transitMins = Math.max(10, Math.round((transitKm / speedKmh) * 60));
+
+      edge.startTime = formatTime(currentTimeMs);
+      currentTimeMs += transitMins;
+      edge.endTime = formatTime(currentTimeMs);
+
+      if (i < waypoints.length) {
+        const wp = waypoints[i];
+        wp.startTime = formatTime(currentTimeMs);
+        currentTimeMs += (wp.durationMins || 90);
+        wp.endTime = formatTime(currentTimeMs);
+      }
+    }
+
     // Track AI Recommendations
     try {
       for (const id of Array.from(recommendedIds)) {

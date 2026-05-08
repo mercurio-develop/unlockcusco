@@ -11,6 +11,7 @@ export const microDaySchema = z.object({
     type: z.enum(['AIRPORT', 'HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
+    service: z.any().optional(),
   }),
   endAnchor: z.object({
     title: z.string(),
@@ -19,6 +20,7 @@ export const microDaySchema = z.object({
     type: z.enum(['HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
+    service: z.any().optional(),
   }),
   waypoints: z.array(
     z.object({
@@ -31,13 +33,18 @@ export const microDaySchema = z.object({
       lat: z.number().optional(),
       lng: z.number().optional(),
       rating: z.number().optional(),
-      alternatives: z.array(z.any()).optional()
+      startTime: z.string().optional(),
+      endTime: z.string().optional(),
+      alternatives: z.array(z.any()).optional(),
+      service: z.any().optional(),
     })
   ),
   transitEdges: z.array(
     z.object({
       fromLocation: z.string(),
       toLocation: z.string(),
+      startTime: z.string().optional(),
+      endTime: z.string().optional(),
       defaultDriver: z.object({
         id: z.string().optional(),
         name: z.string(),

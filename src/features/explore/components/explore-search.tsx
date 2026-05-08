@@ -5,8 +5,7 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, Star, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, User } from "lucide-react"
 
 const CATEGORIES = [
-  { label: "Agencies", value: "Agency", icon: Star },
-  { label: "Boleto", value: "Boleto", icon: Ticket },
+  { label: "Tourist Ticket", value: "Boleto", icon: Ticket },
   { label: "Adventure", value: "Adventure", icon: MountainIcon },
   { label: "Wellness", value: "Wellness", icon: Sprout },
   { label: "Dining", value: "Dining", icon: Utensils },
@@ -14,7 +13,6 @@ const CATEGORIES = [
   { label: "Textiles", value: "Textiles", icon: Scissors },
   { label: "Stays", value: "Stays", icon: Bed },
   { label: "Transport", value: "Transport", icon: Car },
-  { label: "Guides", value: "Guide", icon: User },
 ]
 
 const LOCATIONS = [
@@ -103,7 +101,7 @@ export function ExploreSearch({
     
     debounceRef.current = setTimeout(() => {
       navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
-    }, 500)
+    }, 800)
   }
 
   const handleCategoryToggle = (catValue: string) => {
@@ -124,7 +122,7 @@ export function ExploreSearch({
     
     debounceRef.current = setTimeout(() => {
       navigateFilters(currentLoc, currentCats, value.trim(), newRad, currentLat, currentLng, currentSort)
-    }, 500)
+    }, 800)
   }
 
   const handleUseMyLocation = () => {

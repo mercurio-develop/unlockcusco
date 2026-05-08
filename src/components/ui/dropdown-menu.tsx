@@ -21,17 +21,17 @@ function DropdownMenuContent({
   ...props
 }: MenuPrimitive.Popup.Props) {
   return (
-    <DropdownMenuPortal>
-      <MenuPrimitive.Positioner sideOffset={4}>
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner sideOffset={4} className="z-[9999]">
         <MenuPrimitive.Popup
           className={cn(
-            "z-50 min-w-[10rem] overflow-hidden rounded-xl border border-gray-100 bg-white p-1 text-slate-900 shadow-xl outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 text-slate-900 shadow-2xl outline-none animate-in fade-in zoom-in-95 duration-100",
             className
           )}
           {...props}
         />
       </MenuPrimitive.Positioner>
-    </DropdownMenuPortal>
+    </MenuPrimitive.Portal>
   )
 }
 
