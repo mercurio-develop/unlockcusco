@@ -8,6 +8,7 @@ import { AsociadoBadge } from "@/features/business/components/asociado-badge"
 import { GastronomicTemplate } from "@/features/business/components/templates/GastronomicTemplate"
 import { ExpeditionTemplate } from "@/features/business/components/templates/ExpeditionTemplate"
 import { SanctuaryTemplate } from "@/features/business/components/templates/SanctuaryTemplate"
+import { siteConfig } from "@/lib/config/site"
 
 interface BusinessPageProps {
   params: Promise<{ slug: string }>
@@ -76,8 +77,40 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   const isAsociado = business.isAsociado || false
 
+  // JSON-LD Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": business.name,
+    "image": business.imageUrl,
+    "description": business.tagline || business.description,
+    "url": `${siteConfig.url}/business/${business.slug}`,
+    "telephone": business.whatsapp ? `+51${business.whatsapp.replace(/\D/g, '')}` : undefined,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": business.locationSlug,
+      "addressRegion": "Cusco",
+      "addressCountry": "PE"
+    },
+    "geo": (business.lat && business.lng) ? {
+      "@type": "GeoCoordinates",
+      "latitude": business.lat,
+      "longitude": business.lng
+    } : undefined,
+    "aggregateRating": (business.rating && business.reviewsCount) ? {
+      "@type": "AggregateRating",
+      "ratingValue": business.rating,
+      "reviewCount": business.reviewsCount
+    } : undefined
+  }
+
   return (
     <div className="min-h-screen bg-[#09090B] font-sans pb-24">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Image Header */}
       <div className="relative h-[50vh] md:h-[60vh] w-full border-b border-white/10">
         <Image

@@ -1,49 +1,53 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
+import { siteConfig } from '@/lib/config/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const combinations = await prisma.business.groupBy({
-    by: ['locationSlug', 'category'],
-  })
+  const baseUrl = siteConfig.url
 
-  const businesses = await prisma.business.findMany({
-    select: { id: true },
-  })
-
-  const urls: MetadataRoute.Sitemap = [
+  // 1. Static Pages
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: 'https://vallecito.app',
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
-      url: 'https://vallecito.app/explore',
+      url: `${baseUrl}/explore`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
   ]
 
-  for (const combo of combinations) {
-    if (!combo.locationSlug || !combo.category) continue
-    urls.push({
-      url: `https://vallecito.app/explore/${combo.locationSlug}/${combo.category}`,
+  // 2. Category + Location Combinations (Discovery Spoke Pages)
+  const combinations = await prisma.business.groupBy({
+    by: ['locationSlug', 'category'],
+  })
+
+  const categoryPages: MetadataRoute.Sitemap = combinations
+    .filter(combo => combo.locationSlug && combo.category)
+    .map(combo => ({
+      url: `${baseUrl}/explore/${combo.locationSlug}/${combo.category.toLowerCase()}`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
-    })
-  }
+    }))
 
-  for (const b of businesses) {
-    if (!b.id) continue
-    urls.push({
-      url: `https://vallecito.app/business/${b.id}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
+  // 3. Business Profile Pages (Long-tail)
+  const businesses = await prisma.business.findMany({
+    select: { slug: true, updatedAt: true },
+  })
+
+  const businessPages: MetadataRoute.Sitemap = businesses
+    .filter(b => b.slug)
+    .map(b => ({
+      url: `${baseUrl}/business/${b.slug}`,
+      lastModified: b.updatedAt,
+      changeFrequency: 'monthly',
       priority: 0.7,
-    })
-  }
+    }))
 
-  return urls
+  return [...staticPages, ...categoryPages, ...businessPages]
 }

@@ -99,9 +99,42 @@ export default async function CategoryPage({
   const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
   const description = CATEGORY_DESCRIPTIONS[category] ?? `Explore the best ${cat.label} options in ${loc}.`
 
+  // JSON-LD Structured Data (Breadcrumbs)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Explore",
+        "item": "https://vallecito.app/explore"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": loc,
+        "item": `https://vallecito.app/explore/${location}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": cat.label,
+        "item": `https://vallecito.app/explore/${location}/${category}`
+      }
+    ]
+  }
+
   return (
-    <div className="min-h-screen bg-[#09090B] font-sans">
-      {/* Header */}
+    <div className="min-h-screen bg-[#09090B] font-sans pb-24">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Hero Section */}
+
       <div className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 opacity-30 mix-blend-overlay">
           <Image
