@@ -128,13 +128,13 @@ export function ExploreSearch({
       {/* Search and Toggle Row */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
           <input 
             type="text" 
             placeholder="Search Sacred Valley..." 
             value={value}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-slate-50 border border-gray-100 text-slate-900 text-sm font-medium pl-10 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900/5 focus:bg-white transition-all"
+            className="w-full bg-slate-50/50 border-b border-slate-100 text-slate-900 text-sm font-medium pl-10 pr-10 py-3 focus:outline-none focus:border-slate-900 focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-normal"
           />
           {value && (
             <button 
@@ -148,13 +148,13 @@ export function ExploreSearch({
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            "shrink-0 flex items-center gap-2 text-xs font-bold px-4 py-3 rounded-xl border transition-all",
+            "shrink-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-2 py-3 border-b transition-all",
             showFilters 
-              ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/20" 
-              : "bg-white text-slate-600 border-gray-100 hover:border-slate-200"
+              ? "text-rose-600 border-rose-600" 
+              : "text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-100"
           )}
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <SlidersHorizontal className="w-3 h-3" />
           <span>Refine</span>
         </button>
       </div>
@@ -181,19 +181,19 @@ export function ExploreSearch({
                 )}
               </div>
 
-              {/* Sort By - High visibility pill row */}
+              {/* Sort By - Editorial Horizontal List */}
               <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sort Results</span>
-                <div className="flex flex-wrap gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sort By</span>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
                   {SORT_OPTIONS.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, option.value)}
                       className={cn(
-                        "px-3 py-1.5 rounded-full text-[11px] font-bold transition-all border",
+                        "py-1 border-b text-[11px] font-bold transition-all",
                         currentSort === option.value 
-                          ? "bg-slate-900 text-white border-slate-900 shadow-sm" 
-                          : "bg-slate-50 text-slate-500 border-transparent hover:border-slate-200"
+                          ? "text-slate-900 border-slate-900 font-serif italic" 
+                          : "text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-200"
                       )}
                     >
                       {option.label}
@@ -202,21 +202,26 @@ export function ExploreSearch({
                 </div>
               </div>
 
-              {/* Categories - 3 Column Grid for maximum visibility */}
+              {/* Categories - Editorial 2-Column List */}
               <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Category</span>
-                <div className="grid grid-cols-3 gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Categories</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                   <button
                     onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                     className={cn(
-                      "px-2 py-2 rounded-lg text-[11px] font-bold transition-all border flex flex-col items-center justify-center gap-1",
+                      "py-2 border-b text-[12px] font-medium transition-all flex items-center justify-between group",
                       currentCats.length === 0 
-                        ? "bg-slate-900 text-white border-slate-900 shadow-md" 
-                        : "bg-slate-50 text-slate-600 border-transparent hover:border-slate-200"
+                        ? "text-slate-900 border-slate-900 font-serif italic" 
+                        : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
                     )}
                   >
-                    <MapPin className="w-3.5 h-3.5" />
-                    All
+                    <span className="flex items-center gap-2">
+                      <MapPin className={cn("w-3 h-3", currentCats.length === 0 ? "text-slate-900" : "text-slate-300")} />
+                      All Experiences
+                    </span>
+                    {totalCount > 0 && (
+                      <span className="text-[9px] opacity-40 font-sans not-italic">({totalCount})</span>
+                    )}
                   </button>
                   {CATEGORIES.map((cat) => {
                     const Icon = cat.icon
@@ -227,20 +232,22 @@ export function ExploreSearch({
                         key={cat.value}
                         onClick={() => handleCategoryToggle(cat.value)}
                         className={cn(
-                          "px-2 py-2 rounded-lg text-[11px] font-bold transition-all border flex flex-col items-center justify-center gap-1 relative",
+                          "py-2 border-b text-[12px] font-medium transition-all flex items-center justify-between group",
                           isActive
-                            ? "bg-slate-900 text-white border-slate-900 shadow-md" 
-                            : "bg-slate-50 text-slate-600 border-transparent hover:border-slate-200"
+                            ? "text-slate-900 border-slate-900 font-serif italic" 
+                            : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
                         )}
                       >
-                        <Icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-slate-400")} />
-                        {cat.label}
+                        <span className="flex items-center gap-2">
+                          <Icon className={cn("w-3 h-3", isActive ? "text-slate-900" : "text-slate-300")} />
+                          {cat.label}
+                        </span>
                         {count > 0 && (
                           <span className={cn(
-                            "absolute top-1 right-1 text-[8px] px-1 rounded-full",
-                            isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                            "text-[9px] font-sans not-italic",
+                            isActive ? "text-slate-900 opacity-60" : "text-slate-300 group-hover:text-slate-400"
                           )}>
-                            {count}
+                            ({count})
                           </span>
                         )}
                       </button>
@@ -249,17 +256,17 @@ export function ExploreSearch({
                 </div>
               </div>
 
-              {/* Location - 2 Column Grid */}
+              {/* Location - Editorial 2-Column List */}
               <div className="flex flex-col gap-3">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Town / Sector</span>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                   <button
                     onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                     className={cn(
-                      "px-3 py-2 rounded-lg text-[11px] font-bold transition-all border text-left",
+                      "py-2 border-b text-[12px] font-medium transition-all text-left group",
                       currentLoc === "" 
-                        ? "bg-slate-900 text-white border-slate-900 shadow-sm" 
-                        : "bg-slate-50 text-slate-600 border-transparent hover:border-slate-200"
+                        ? "text-slate-900 border-slate-900 font-serif italic" 
+                        : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
                     )}
                   >
                     Anywhere
@@ -269,10 +276,10 @@ export function ExploreSearch({
                       key={loc.value}
                       onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                       className={cn(
-                        "px-3 py-2 rounded-lg text-[11px] font-bold transition-all border text-left",
+                        "py-2 border-b text-[12px] font-medium transition-all text-left group",
                         currentLoc === loc.value 
-                          ? "bg-slate-900 text-white border-slate-900 shadow-sm" 
-                          : "bg-slate-50 text-slate-600 border-transparent hover:border-slate-200"
+                          ? "text-slate-900 border-slate-900 font-serif italic" 
+                          : "text-slate-400 border-slate-50 hover:text-slate-600 hover:border-slate-200"
                       )}
                     >
                       {loc.label}
