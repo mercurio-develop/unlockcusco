@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -288,6 +289,9 @@ export function BusinessCard({
               <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
                 <DialogHeader className="mb-4">
                   <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 mt-1">
+                    Send an inquiry to {business.name} to check for availability and pricing.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-5 py-4">
                   <div className="grid gap-2.5">

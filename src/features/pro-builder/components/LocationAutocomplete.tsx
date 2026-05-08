@@ -25,6 +25,7 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(value || "")
   }, [value])
 

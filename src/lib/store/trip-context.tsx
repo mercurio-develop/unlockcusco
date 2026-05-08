@@ -39,6 +39,7 @@ interface TripContextType {
   swapDriverAlternative: (edgeIndex: number, altIndex: number) => void;
   truncateAfterWaypoint: (index: number) => void;
   setStartAnchorLocation: (lat: number, lng: number) => void;
+  createDay: () => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
   bookingStatus: 'idle' | 'checking_experiences' | 'checking_transport' | 'payment_required' | 'confirmed' | 'failed';
@@ -79,10 +80,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [entityStatuses, setEntityStatuses] = useState<Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'>>({});
   const [hasRequestedFeedback, setHasRequestedFeedback] = useState(false);
 
-  // Trigger feedback when reaching payment or being idle
   useEffect(() => {
     if (bookingStatus === 'payment_required' && !hasRequestedFeedback) {
-      setAiPromptToTrigger("I've secured your day! Before we finalize, how has your experience with Vallecito been so far? Anything I could improve?");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAiPromptToTrigger("[INTERNAL] The day is secured and ready for payment. Proactively ask the user for feedback on their experience with Vallecito so far and if there's anything to improve.");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasRequestedFeedback(true);
     }
   }, [bookingStatus, hasRequestedFeedback]);
@@ -90,7 +92,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (activeItinerary && !hasRequestedFeedback) {
         const timer = setTimeout(() => {
-            setAiPromptToTrigger("I see you have a beautiful plan shaping up. How are you finding the tool so far? I'd love to hear your thoughts on how I can be more helpful.");
+            setAiPromptToTrigger("[INTERNAL] The user has a plan shaping up. Ask them how they are finding the tool so far and if I can be more helpful in any way.");
             setHasRequestedFeedback(true);
         }, 10 * 60 * 1000); // 10 minutes
         return () => clearTimeout(timer);
@@ -120,8 +122,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
             }]
         };
         setCurrentTrip(mappedTrip);
+        if (activeDayNumber === null) {
+            setActiveDayNumber(1);
+        }
     }
-  }, [activeItinerary, currentTrip]);
+  }, [activeItinerary, currentTrip, activeDayNumber]);
 
   const addEvent = useCallback((dayNumber: number, event: TimelineEvent) => {
     setCurrentTrip(prev => {
@@ -160,12 +165,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
       if (!prev) return null;
       const newWaypoints = [...prev.waypoints];
       newWaypoints.splice(index, 1);
-      
+
       const newTransitEdges = [...prev.transitEdges];
-      // Remove the edge leading to this waypoint
       newTransitEdges.splice(index, 1);
-      
-      // Update the edge that now points to the successor
+
       if (newTransitEdges[index]) {
           const prevLoc = index === 0 ? prev.startAnchor.locationStr : newWaypoints[index-1].locationStr;
           newTransitEdges[index] = {
@@ -190,7 +193,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
       const [moved] = newWaypoints.splice(fromIndex, 1);
       newWaypoints.splice(toIndex, 0, moved);
 
-      // Rebuild transit edges for simplicity and consistency
       const nodes = [
         { locationStr: prev.startAnchor.locationStr },
         ...newWaypoints.map(w => ({ locationStr: w.locationStr })),
@@ -200,8 +202,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       const newTransitEdges = nodes.slice(0, -1).map((node, i) => {
         const existing = prev.transitEdges.find(e => e.fromLocation === node.locationStr && e.toLocation === nodes[i+1].locationStr);
         if (existing) return existing;
-        
-        // Fallback edge
+
         return {
           fromLocation: node.locationStr,
           toLocation: nodes[i+1].locationStr,
@@ -252,9 +253,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
       if (!prev) return null;
       const newWaypoints = prev.waypoints.slice(0, index + 1);
       const newTransitEdges = prev.transitEdges.slice(0, index + 1);
-      
+
       const lastWp = newWaypoints[newWaypoints.length - 1];
-      
+
       return {
         ...prev,
         waypoints: newWaypoints,
@@ -286,6 +287,26 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const createDay = useCallback(() => {
+    setCurrentTrip(prev => {
+      if (!prev) return null;
+      const nextDayNumber = prev.days.length + 1;
+
+      const newDay: TripDay = {
+        dayNumber: nextDayNumber,
+        date: new Date(prev.startDate.getTime() + (nextDayNumber - 1) * 24 * 60 * 60 * 1000),
+        events: []
+      };
+
+      setTimeout(() => setActiveDayNumber(nextDayNumber), 0);
+
+      return {
+        ...prev,
+        days: [...prev.days, newDay]
+      };
+    });
+  }, [setActiveDayNumber]);
+
   const resetBooking = useCallback(() => {
     setBookingStatus('idle');
     setEntityStatuses({});
@@ -310,15 +331,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
     setEntityStatuses(initialStatuses);
 
-    // Stage A: Checking Experiences
     for (const wp of activeItinerary.waypoints) {
       setEntityStatuses(prev => ({ ...prev, [wp.id]: 'checking' }));
-      // Simulate real checking delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       setEntityStatuses(prev => ({ ...prev, [wp.id]: 'confirmed' }));
     }
 
-    // Stage B: Checking Transport
     setBookingStatus('checking_transport');
     for (let i = 0; i < activeItinerary.transitEdges.length; i++) {
       const edgeId = `transit-${i}`;
@@ -351,7 +369,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const dayNum = activeDayNumber || 1;
     const isTransport = service.category === 'TRANSPORT';
     const isStay = service.category === 'LODGING' || service.category === 'STAYS';
-    
+
     if (exchangeTargetIndex !== null) {
       if (exchangeTargetIndex === -1 && activeItinerary) {
         const startLocName = service.locationSlug 
@@ -391,7 +409,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         setPanelMode("itinerary");
         return false;
       }
-      
+
       if (exchangeTargetIndex >= 0 && activeItinerary) {
         const newWp = {
             id: crypto.randomUUID(),
@@ -405,10 +423,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
             rating: service.rating || undefined,
             service: service
         };
-        
+
         const updatedWaypoints = [...activeItinerary.waypoints];
         updatedWaypoints[exchangeTargetIndex] = newWp;
-        
+
         const updatedTransitEdges = [...activeItinerary.transitEdges];
         if (exchangeTargetIndex < updatedTransitEdges.length) {
              updatedTransitEdges[exchangeTargetIndex].toLocation = service.name;
@@ -416,7 +434,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         if (exchangeTargetIndex + 1 < updatedTransitEdges.length) {
              updatedTransitEdges[exchangeTargetIndex + 1].fromLocation = service.name;
         }
-        
+
         setActiveItinerary({
             ...activeItinerary,
             waypoints: updatedWaypoints,
@@ -430,9 +448,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setExchangeTargetIndex(null);
     }
 
-    // We build the object incrementally to satisfy the discriminated union
     let newEvent: TimelineEvent;
-    
+
     if (isTransport) {
       newEvent = {
         id: crypto.randomUUID(),
@@ -466,11 +483,76 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    let isNewTrip = false;
+    if (activeItinerary) {
+        const newWp = {
+            id: newEvent.id,
+            category: service.category,
+            title: service.name,
+            locationStr: service.name,
+            durationMins: 120,
+            priceUsd: 0,
+            lat: service.lat || undefined,
+            lng: service.lng || undefined,
+            rating: service.rating || undefined
+        };
 
-    if (panelMode === 'itinerary' || panelMode === 'builder' || activeItinerary || currentTrip) {
-        if (activeItinerary) {
-            const newWp = {
+        const updatedWaypoints = [...activeItinerary.waypoints, newWp];
+        const prevLoc = activeItinerary.waypoints.length > 0 
+            ? activeItinerary.waypoints[activeItinerary.waypoints.length - 1].locationStr 
+            : activeItinerary.startAnchor.locationStr;
+
+        const newEdge = {
+            fromLocation: prevLoc,
+            toLocation: service.name,
+            defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
+            alternativeDrivers: []
+        };
+
+        const updatedTransitEdges = [...activeItinerary.transitEdges];
+        if (updatedTransitEdges.length > activeItinerary.waypoints.length) {
+            const returnEdge = updatedTransitEdges.pop()!;
+            updatedTransitEdges.push(newEdge);
+            updatedTransitEdges.push({
+                ...returnEdge,
+                fromLocation: service.name
+            });
+        } else {
+            updatedTransitEdges.push(newEdge);
+        }
+
+        setActiveItinerary({
+            ...activeItinerary,
+            waypoints: updatedWaypoints,
+            transitEdges: updatedTransitEdges,
+            totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+        });
+
+        posthog.capture('waypoint_added', {
+            business_id: service.id,
+            business_name: service.name,
+            category: service.category,
+            itinerary_depth: updatedWaypoints.length
+        });
+    } else {
+        const newItin: OptimizedPlan = {
+            title: "New Expedition",
+            startAnchor: {
+                title: "Urubamba",
+                locationStr: "Urubamba",
+                type: 'GENERIC_TOWN',
+                lat: COORDS_MAP.urubamba.lat,
+                lng: COORDS_MAP.urubamba.lng,
+                time: "09:00"
+            },
+            endAnchor: {
+                title: "Urubamba",
+                locationStr: "Urubamba",
+                type: 'GENERIC_TOWN',
+                lat: COORDS_MAP.urubamba.lat,
+                lng: COORDS_MAP.urubamba.lng,
+                time: "18:00"
+            },
+            waypoints: [{
                 id: newEvent.id,
                 category: service.category,
                 title: service.name,
@@ -480,112 +562,61 @@ export function TripProvider({ children }: { children: ReactNode }) {
                 lat: service.lat || undefined,
                 lng: service.lng || undefined,
                 rating: service.rating || undefined
-            };
-
-            const updatedWaypoints = [...activeItinerary.waypoints, newWp];
-            const prevLoc = activeItinerary.waypoints.length > 0 
-                ? activeItinerary.waypoints[activeItinerary.waypoints.length - 1].locationStr 
-                : activeItinerary.startAnchor.locationStr;
-            
-            const newEdge = {
-                fromLocation: prevLoc,
-                toLocation: service.name,
-                defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
-                alternativeDrivers: []
-            };
-
-            const updatedTransitEdges = [...activeItinerary.transitEdges];
-            // If we had a return edge, it was at the end. We need to insert before it or replace it.
-            if (updatedTransitEdges.length > activeItinerary.waypoints.length) {
-                const returnEdge = updatedTransitEdges.pop()!;
-                updatedTransitEdges.push(newEdge);
-                updatedTransitEdges.push({
-                    ...returnEdge,
-                    fromLocation: service.name
-                });
-            } else {
-                updatedTransitEdges.push(newEdge);
-            }
-
-            setActiveItinerary({
-                ...activeItinerary,
-                waypoints: updatedWaypoints,
-                transitEdges: updatedTransitEdges,
-                totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
-            });
-            
-            posthog.capture('waypoint_added', {
-                business_id: service.id,
-                business_name: service.name,
-                category: service.category,
-                itinerary_depth: updatedWaypoints.length
-            });
-            
-            setAiPromptToTrigger(`I just added ${service.name} to my itinerary.`);
-            setIsChatOpen(true);
-        } else {
-            // Initialize a new itinerary if none exists
-            const newItin: OptimizedPlan = {
-                title: "New Expedition",
-                startAnchor: {
-                    title: "Urubamba",
-                    locationStr: "Urubamba",
-                    type: 'GENERIC_TOWN',
-                    lat: COORDS_MAP.urubamba.lat,
-                    lng: COORDS_MAP.urubamba.lng,
-                    time: "09:00"
+            }],
+            transitEdges: [
+                {
+                    fromLocation: "Urubamba",
+                    toLocation: service.name,
+                    defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
+                    alternativeDrivers: []
                 },
-                endAnchor: {
-                    title: "Urubamba",
-                    locationStr: "Urubamba",
-                    type: 'GENERIC_TOWN',
-                    lat: COORDS_MAP.urubamba.lat,
-                    lng: COORDS_MAP.urubamba.lng,
-                    time: "18:00"
-                },
-                waypoints: [{
-                    id: crypto.randomUUID(),
-                    category: service.category,
-                    title: service.name,
-                    locationStr: service.name,
-                    durationMins: 120,
-                    priceUsd: 0,
-                    lat: service.lat || undefined,
-                    lng: service.lng || undefined,
-                    rating: service.rating || undefined
-                }],
-                transitEdges: [
-                    {
-                        fromLocation: "Urubamba",
-                        toLocation: service.name,
-                        defaultDriver: { name: 'Sacred Valley Transfers', priceUsd: 15 },
-                        alternativeDrivers: []
-                    },
-                    {
-                        fromLocation: service.name,
-                        toLocation: "Urubamba",
-                        defaultDriver: { name: 'Return Transfer', priceUsd: 15 },
-                        alternativeDrivers: []
-                    }
-                ],
-                needsAccommodationUpsell: true,
-                totalCost: 30
-            };
-            setActiveItinerary(newItin);
-            setAiPromptToTrigger(`I just added ${service.name} to my itinerary.`);
-            setIsChatOpen(true);
-        }
-
-        if (currentTrip) {
-            addEvent(dayNum, newEvent);
-        }
-        setPanelMode('itinerary');
-    } else {
-        isNewTrip = true;
+                {
+                    fromLocation: service.name,
+                    toLocation: "Urubamba",
+                    defaultDriver: { name: 'Return Transfer', priceUsd: 15 },
+                    alternativeDrivers: []
+                }
+            ],
+            needsAccommodationUpsell: true,
+            totalCost: 30
+        };
+        setActiveItinerary(newItin);
     }
 
-    return isNewTrip;
-  }, [activeDayNumber, addEvent, activeItinerary, currentTrip, panelMode, setIsChatOpen, setActiveItinerary, setPanelMode]);
+    // Always ensure currentTrip exists and add the event to it
+    if (!currentTrip) {
+        const initialTrip: UniversalTrip = {
+            title: "My Expedition",
+            startDate: new Date(),
+            endDate: new Date(),
+            paxCount: 1,
+            status: 'DRAFT',
+            days: [{
+                dayNumber: 1,
+                date: new Date(),
+                events: [newEvent]
+            }]
+        };
+        setCurrentTrip(initialTrip);
+        setActiveDayNumber(1);
+    } else {
+        addEvent(dayNum, newEvent);
+    }
+
+    // If it's a new itinerary or using default anchors, ask for locations to establish a trace
+    const isDefaultItin = !activeItinerary || (activeItinerary.startAnchor.title === "Urubamba" && activeItinerary.endAnchor.title === "Urubamba");
+
+    if (isDefaultItin) {
+      setAiPromptToTrigger(`[INTERNAL] User added ${service.name} to their day. Acknowledge this and proactively ask where they will start and end their day (Cusco, Pisac, etc.) to establish a route and coordinate transport.`);
+    } else {
+      setAiPromptToTrigger(`[INTERNAL] User added ${service.name} to their itinerary. Acknowledge this and ask if they need help adjusting their transport stops.`);
+    }
+
+    setIsChatOpen(true);
+    setPanelMode('itinerary');
+
+    return false;
+    }, [activeDayNumber, addEvent, activeItinerary, currentTrip, setIsChatOpen, setActiveItinerary, setPanelMode, exchangeTargetIndex, setExchangeTargetIndex, setCurrentTrip, setAiPromptToTrigger]);
 
   return (
     <TripContext.Provider value={{
@@ -614,6 +645,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       swapDriverAlternative,
       truncateAfterWaypoint,
       setStartAnchorLocation,
+      createDay,
       updateEvent,
       insertWaypoint,
       isChatOpen,

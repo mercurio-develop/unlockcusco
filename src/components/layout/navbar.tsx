@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
 import { useTrip } from "@/lib/store/trip-context"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
 export function Navbar() {
@@ -92,7 +92,9 @@ export function Navbar() {
                 <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200">
                   <DialogHeader className="mb-4">
                     <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Travel Preferences</DialogTitle>
-                    <p className="text-sm text-slate-500 mt-1">Set your vibe and intensity to get highly personalized recommendations from the Concierge.</p>
+                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                      Set your vibe and intensity to get highly personalized recommendations from the Concierge.
+                    </DialogDescription>
                   </DialogHeader>
                   
                   <div className="flex flex-col gap-6 py-2">

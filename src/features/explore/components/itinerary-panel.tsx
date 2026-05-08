@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useItinerary } from "@/lib/store/itinerary-context";
-import { MapPin, ChevronRight, Loader2, Calendar } from "lucide-react";
+import { MapPin, ChevronRight, Loader2, Calendar, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DayExplorer } from "@/features/explore/components/trip/DayExplorer";
+import { BuilderWorkspace } from "@/features/pro-builder/components/BuilderWorkspace";
 import { BookingProgressView } from "@/features/explore/components/trip/BookingProgressView";
 
 export function ItineraryPanel() {
@@ -12,10 +12,16 @@ export function ItineraryPanel() {
     activeItinerary, 
     setPanelMode, 
     macroTrip, 
+    activeDayNumber,
     setActiveDayNumber, 
     setActiveItinerary, 
     bookingStatus, 
-    startBookingOrchestration 
+    startBookingOrchestration,
+    currentTrip,
+    createDay,
+    selectedId,
+    setSelectedId,
+    setIsChatOpen
   } = useItinerary();
   
   const searchParams = useSearchParams();
@@ -62,10 +68,7 @@ export function ItineraryPanel() {
             Go to Discover
           </button>
           <button
-            onClick={() => {
-              // setIsChatOpen should be available via useTrip or useItinerary
-              // For now, let's assume it's integrated or user can just click the pulsing button
-            }}
+            onClick={() => setIsChatOpen(true)}
             className="w-full bg-white text-rose-600 border border-rose-100 px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:bg-rose-50 transition-all"
           >
             Ask Concierge
@@ -149,7 +152,7 @@ export function ItineraryPanel() {
                 </p>
               </div>
             ) : (
-              <DayExplorer />
+              <BuilderWorkspace selectedId={selectedId} onSelectEvent={setSelectedId} />
             )}
           </div>
 

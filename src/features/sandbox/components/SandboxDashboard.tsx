@@ -76,7 +76,7 @@ export function SandboxDashboard({ rides }: { rides: any[] }) {
                     disabled={loading}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm disabled:opacity-50"
                   >
-                    Simulate Driver "ACCEPT"
+                    Simulate Driver &quot;ACCEPT&quot;
                   </button>
                 )}
                 {ride.status === 'DRIVER_ASSIGNED' && (
@@ -86,7 +86,7 @@ export function SandboxDashboard({ rides }: { rides: any[] }) {
                       disabled={loading}
                       className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-900 rounded-lg text-sm font-bold shadow-sm disabled:opacity-50"
                     >
-                      Simulate "I am outside" Msg
+                      Simulate &quot;I am outside&quot; Msg
                     </button>
                     <button 
                       onClick={() => handleComplete(ride.id)} 

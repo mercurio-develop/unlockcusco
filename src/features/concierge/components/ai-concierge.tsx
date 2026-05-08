@@ -4,7 +4,7 @@ import { Business } from "@prisma/client";
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, X, Send, Bot, User } from "lucide-react"
+import { Sparkles, X, Send, Bot, User, Settings2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -35,7 +35,7 @@ export function AiConcierge() {
     {
       id: "1",
       role: "assistant",
-      content: "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences, restaurants, and centers using the filters above. \n\n📅 **Day View**: This is your personal timeline where we'll organize your chosen experiences into a seamless itinerary.\n\nHow can I curate your expedition today?"
+      content: "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nHow can I curate your expedition today?"
     }
   ];
 
@@ -199,11 +199,15 @@ Please generate my macro trip plan.`;
 
               {/* Chat Area */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white">
-                {messages.map((msg) => (
-                  <div key={msg.id} className="flex flex-col gap-2">
-                    <div 
-                      className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
-                    >
+                {messages.map((msg) => {
+                  const content = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
+                  if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
+                  
+                  return (
+                    <div key={msg.id} className="flex flex-col gap-2">
+                      <div 
+                        className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
+                      >
                       <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
                         {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-rose-600" />}
                       </div>
@@ -214,7 +218,19 @@ Please generate my macro trip plan.`;
                             : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
                         }`}
                       >
-                        {(msg as any).content || msg.parts?.map((p: { type: string, text?: string }) => p.type === 'text' ? p.text : '').join('')}
+                        {(() => {
+                          const text = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('') || '';
+                          if (!text.includes('[[SETTINGS_ICON]]')) return text;
+                          
+                          const parts = text.split('[[SETTINGS_ICON]]');
+                          return (
+                            <>
+                              {parts[0]}
+                              <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
+                              {parts[1]}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                       {/* AI SDK v6: ToolUIPart uses type `tool-${toolName}`, state 'output-available', field `output` */}
@@ -248,7 +264,7 @@ Please generate my macro trip plan.`;
                       return null;
                     })}
                   </div>
-                ))}
+                )})}
                 {isLoading && messages[messages.length - 1]?.role === "user" && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
