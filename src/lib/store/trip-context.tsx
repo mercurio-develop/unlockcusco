@@ -41,6 +41,10 @@ interface TripContextType {
   setStartAnchorLocation: (lat: number, lng: number) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
+  bookingStatus: 'idle' | 'checking_experiences' | 'checking_transport' | 'payment_required' | 'confirmed' | 'failed';
+  entityStatuses: Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'>;
+  startBookingOrchestration: () => Promise<void>;
+  resetBooking: () => void;
   isChatOpen: boolean;
   setIsChatOpen: (open: boolean) => void;
   travelVibe: string | null;
@@ -71,6 +75,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
   const [exchangeTargetIndex, setExchangeTargetIndex] = useState<number | null>(null);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
+  const [bookingStatus, setBookingStatus] = useState<'idle' | 'checking_experiences' | 'checking_transport' | 'payment_required' | 'confirmed' | 'failed'>('idle');
+  const [entityStatuses, setEntityStatuses] = useState<Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'>>({});
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
@@ -261,6 +267,44 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const resetBooking = useCallback(() => {
+    setBookingStatus('idle');
+    setEntityStatuses({});
+  }, []);
+
+  const startBookingOrchestration = useCallback(async () => {
+    if (!activeItinerary) return;
+
+    setBookingStatus('checking_experiences');
+    const initialStatuses: Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'> = {};
+    activeItinerary.waypoints.forEach(w => {
+      initialStatuses[w.id] = 'pending';
+    });
+    activeItinerary.transitEdges.forEach((e, i) => {
+      initialStatuses[`transit-${i}`] = 'pending';
+    });
+    setEntityStatuses(initialStatuses);
+
+    // Stage A: Checking Experiences
+    for (const wp of activeItinerary.waypoints) {
+      setEntityStatuses(prev => ({ ...prev, [wp.id]: 'checking' }));
+      // Simulate real checking delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setEntityStatuses(prev => ({ ...prev, [wp.id]: 'confirmed' }));
+    }
+
+    // Stage B: Checking Transport
+    setBookingStatus('checking_transport');
+    for (let i = 0; i < activeItinerary.transitEdges.length; i++) {
+      const edgeId = `transit-${i}`;
+      setEntityStatuses(prev => ({ ...prev, [edgeId]: 'checking' }));
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setEntityStatuses(prev => ({ ...prev, [edgeId]: 'confirmed' }));
+    }
+
+    setBookingStatus('payment_required');
+  }, [activeItinerary]);
+
   const updateEvent = useCallback((dayNumber: number, eventId: string, updates: Partial<TimelineEvent>) => {
     setCurrentTrip(prev => {
       if (!prev) return null;
@@ -296,6 +340,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
             locationStr: startLocName,
             lat: service.lat || undefined,
             lng: service.lng || undefined,
+            service: service
           }
         });
         setExchangeTargetIndex(null);
@@ -314,7 +359,44 @@ export function TripProvider({ children }: { children: ReactNode }) {
             locationStr: endLocName,
             lat: service.lat || undefined,
             lng: service.lng || undefined,
+            service: service
           }
+        });
+        setExchangeTargetIndex(null);
+        setPanelMode("itinerary");
+        return false;
+      }
+      
+      if (exchangeTargetIndex >= 0 && activeItinerary) {
+        const newWp = {
+            id: crypto.randomUUID(),
+            category: service.category,
+            title: service.name,
+            locationStr: service.name,
+            durationMins: 120,
+            priceUsd: 0,
+            lat: service.lat || undefined,
+            lng: service.lng || undefined,
+            rating: service.rating || undefined,
+            service: service
+        };
+        
+        const updatedWaypoints = [...activeItinerary.waypoints];
+        updatedWaypoints[exchangeTargetIndex] = newWp;
+        
+        const updatedTransitEdges = [...activeItinerary.transitEdges];
+        if (exchangeTargetIndex < updatedTransitEdges.length) {
+             updatedTransitEdges[exchangeTargetIndex].toLocation = service.name;
+        }
+        if (exchangeTargetIndex + 1 < updatedTransitEdges.length) {
+             updatedTransitEdges[exchangeTargetIndex + 1].fromLocation = service.name;
+        }
+        
+        setActiveItinerary({
+            ...activeItinerary,
+            waypoints: updatedWaypoints,
+            transitEdges: updatedTransitEdges,
+            totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
         });
         setExchangeTargetIndex(null);
         setPanelMode("itinerary");
@@ -496,6 +578,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
       addEvent,
       removeEvent,
       removeWaypoint,
+      moveWaypoint,
+      swapDriverAlternative,
+      truncateAfterWaypoint,
+      setStartAnchorLocation,
       updateEvent,
       insertWaypoint,
       isChatOpen,
@@ -507,7 +593,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
       isWorkspaceCollapsed,
       setIsWorkspaceCollapsed,
       exchangeTargetIndex,
-      setExchangeTargetIndex
+      setExchangeTargetIndex,
+      aiPromptToTrigger,
+      setAiPromptToTrigger,
+      bookingStatus,
+      entityStatuses,
+      startBookingOrchestration,
+      resetBooking
     }}>
       {children}
     </TripContext.Provider>
