@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -55,13 +55,33 @@ interface ExploreMapProps {
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const router = useRouter()
+  const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, updateEndAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed, isMapPicking, setIsMapPicking } = useItinerary()
+
+  // Handle map click for manual location selection
+  const handleMapClick = (e: any) => {
+    if (isMapPicking?.active && isMapPicking.target) {
+      const { lng, lat } = e.lngLat;
+      const title = `Map Point (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      
+      if (isMapPicking.target === 'start') {
+        setStartAnchorLocation(lat, lng, title);
+      } else {
+        updateEndAnchorLocation(lat, lng, title);
+      }
+      
+      setIsMapPicking({ active: false, target: null });
+      return;
+    }
+    setPopupBusiness(null);
+  };
 
   // Calculate dynamic right offset for map controls
   // If chat is open, shift left by the chat width (450px)
-  const controlsRightOffset = isChatOpen ? "466px" : "16px"
+  const isProBuilder = pathname?.startsWith('/pro')
+  const controlsRightOffset = (isChatOpen && panelMode !== 'builder' && !isProBuilder) ? "466px" : "16px"
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -450,7 +470,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     : [-72.1167, -13.3047];
 
   return (
-    <div className="relative w-full h-full group">
+    <div className={cn(
+        "relative w-full h-full group",
+        isMapPicking?.active ? "cursor-crosshair" : ""
+    )}>
       <Map
         ref={mapRef}
         initialViewState={{ longitude: center[0], latitude: center[1], zoom: 11, pitch: 0, bearing: 0 }}
@@ -458,7 +481,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         mapboxAccessToken={mapboxToken}
         style={{ width: "100%", height: "100%" }}
         terrain={mapMode === "satellite" ? { source: "mapbox-dem", exaggeration: 1.5 } : undefined}
-        onClick={() => setPopupBusiness(null)}
+        onClick={handleMapClick}
       >
         <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}

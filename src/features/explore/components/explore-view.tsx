@@ -12,6 +12,7 @@ import { useTrip } from "@/lib/store/trip-context"
 import { ItineraryPanel } from "./itinerary-panel"
 import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
+import { PlanningDatePicker } from "@/components/layout/planning-date-picker"
 
 import type { Business } from "@prisma/client"
 
@@ -75,6 +76,8 @@ export function ExploreView({
         <h1 className="text-2xl font-serif tracking-tight text-slate-900">Explore Vallecito</h1>
       </div>
 
+      <PlanningDatePicker />
+
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
         <button onClick={() => { setPanelMode("categories"); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
         {macroTrip && <button onClick={() => setPanelMode("macro")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "macro" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> Trip Plan</button>}
@@ -93,7 +96,7 @@ export function ExploreView({
   )
 
   const content = (
-    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden text-slate-900">
       {panelMode === "macro" && macroTrip ? (
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
           <MacroItineraryCard itinerary={macroTrip} isExploreView={true} />

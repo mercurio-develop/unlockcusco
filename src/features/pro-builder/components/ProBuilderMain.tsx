@@ -9,7 +9,7 @@ import { CheckoutDetailsForm } from "./CheckoutDetailsForm"
 import { DiscoverPanel } from "@/features/explore/components/DiscoverPanel"
 import { ExploreSearch } from "@/features/explore/components/explore-search"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
-import { MapPin, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ListCollapse, Utensils, Car, Moon, AlignLeft, Receipt, UserCircle2, ChevronDown, ChevronUp, X, Search } from "lucide-react"
+import { MapPin, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ListCollapse, Utensils, Car, Moon, AlignLeft, Receipt, UserCircle2, ChevronDown, ChevronUp, X, Search, Plus } from "lucide-react"
 import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -20,11 +20,34 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 })
 
 export function ProBuilderMain() {
-  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen, setSelectedId, selectedId } = useTrip()
+  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen, setSelectedId, selectedId, createDay } = useTrip()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [leftTab, setLeftTab] = useState<'discover' | 'itinerary'>('itinerary')
+  
+  const [workspaceWidth, setWorkspaceWidth] = useState(500)
+  const [isResizing, setIsResizing] = useState(false)
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const newWidth = document.body.clientWidth - e.clientX;
+      if (newWidth >= 300 && newWidth <= 800) {
+        setWorkspaceWidth(newWidth);
+      }
+    };
+    const handleMouseUp = () => setIsResizing(false);
+    
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
   
   const isDrawerOpen = searchParams.get("filter") === "open"
   const setIsDrawerOpen = (open: boolean) => {
@@ -165,10 +188,10 @@ export function ProBuilderMain() {
       {/* Left Panel - Tabbed Discover & Timeline */}
       <div className={`shrink-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-16' : 'w-[420px]'} bg-[#FAF9F6] h-full flex flex-col z-20 shadow-xl border-r border-slate-100 relative`}>
         {/* Left Rail Toggle */}
-        <div className="absolute top-6 right-3 z-30">
+        <div className="absolute top-6 -right-5 z-30">
           <button 
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="w-10 h-10 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-xl transition-all flex items-center justify-center"
+            className="w-10 h-10 bg-white border border-slate-200 shadow-md hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-full transition-all flex items-center justify-center"
           >
             {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
@@ -177,8 +200,12 @@ export function ProBuilderMain() {
         {/* Content Container */}
         <div className={`flex-1 flex flex-col transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100 overflow-hidden'}`}>
           
+          <div className="px-6 pt-6 pb-2">
+             <h2 className="text-2xl font-serif font-bold text-slate-900 mb-4">Pro Planner</h2>
+          </div>
+
           {/* Sidebar Tabs */}
-          <div className="px-6 pt-6 pb-2 shrink-0">
+          <div className="px-6 pt-2 pb-2 shrink-0">
              <div className="bg-slate-100 p-1 rounded-2xl flex w-full">
                 <button 
                   onClick={() => setLeftTab('discover')} 
@@ -212,6 +239,7 @@ export function ProBuilderMain() {
                     categoryCounts={{}}
                   />
                 </div>
+
                 <div className="flex-1 overflow-hidden flex flex-col relative">
                   {loading && (
                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
@@ -299,6 +327,13 @@ export function ProBuilderMain() {
                     </div>
                   )
                 })}
+                
+                <button
+                  onClick={createDay}
+                  className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Add Day
+                </button>
               </div>
             )}
           </div>
@@ -315,17 +350,30 @@ export function ProBuilderMain() {
       </div>
 
       {/* Center Panel - Map (Always working) */}
-      <div className="flex-1 relative z-10 bg-slate-100 overflow-hidden">
+      <div className="flex-1 relative z-10 bg-slate-100 overflow-hidden flex flex-col">
         <ExploreMap businesses={mapEntities as any} selectedId={selectedId} onSelectBusiness={setSelectedId} />
       </div>
 
       {/* Right Panel - Builder Workspace (Day details) */}
-      <div className={`shrink-0 transition-all duration-300 ease-in-out ${isWorkspaceCollapsed ? 'w-16' : 'w-[500px]'} z-20 bg-[#FAF9F6] shadow-[-10px_0_20px_rgba(0,0,0,0.03)] relative flex flex-col border-l border-slate-200`}>
-        {/* Right Rail Toggle */}
-        <div className="absolute top-6 left-3 z-30">
+      <div 
+        style={{ width: isWorkspaceCollapsed ? 64 : workspaceWidth }}
+        className={cn(
+          "shrink-0 z-20 bg-[#FAF9F6] shadow-[-10px_0_20px_rgba(0,0,0,0.03)] relative flex flex-col border-l border-slate-200",
+          isResizing ? "transition-none" : "transition-all duration-300 ease-in-out"
+        )}
+      >
+        {/* Resize Handle */}
+        {!isWorkspaceCollapsed && (
+          <div 
+            onMouseDown={() => setIsResizing(true)}
+            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-slate-200/50 active:bg-slate-300/50 transition-colors z-40"
+          />
+        )}
+
+        <div className="absolute top-6 -left-5 z-30">
           <button 
             onClick={() => setIsWorkspaceCollapsed(!isWorkspaceCollapsed)}
-            className="w-10 h-10 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-xl transition-all flex items-center justify-center"
+            className="w-10 h-10 bg-white border border-slate-200 shadow-md hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-full transition-all flex items-center justify-center"
           >
             {isWorkspaceCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>

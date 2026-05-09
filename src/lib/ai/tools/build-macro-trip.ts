@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { defineTool as tool } from '@/lib/ai/tool-utils';
 import { macroTripSchema } from '../schemas/planner-schema';
 
 export const buildMacroTrip = tool({

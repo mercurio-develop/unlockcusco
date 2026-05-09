@@ -8,6 +8,12 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+enum BookingType {
+  WALK_IN
+  INSTANT_CONFIRMATION
+  REQUEST_ONLY
+}
+
 model Business {
   id       String @id @default(cuid())
   slug     String @unique
@@ -25,6 +31,9 @@ model Business {
   isAsociado   Boolean @default(false)
   isFeatured   Boolean @default(false)
   locationSlug String  @default("")
+
+  bookingType     BookingType @default(WALK_IN)
+  minAdvanceHours Int         @default(0)
 
   tagline            String  @default("")
   description        String  @default("")

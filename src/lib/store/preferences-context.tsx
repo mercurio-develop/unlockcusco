@@ -9,6 +9,10 @@ interface PreferencesContextType {
   setTravelVibe: (vibe: string | null) => void;
   travelIntensity: number | null;
   setTravelIntensity: (intensity: number | null) => void;
+  targetDate: Date;
+  setTargetDate: (date: Date) => void;
+  isMapPicking: { active: boolean, target: 'start' | 'end' | null };
+  setIsMapPicking: (val: { active: boolean, target: 'start' | 'end' | null }) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -17,6 +21,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [travelVibe, setTravelVibe] = useState<string | null>(null);
   const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
+  const [targetDate, setTargetDate] = useState<Date>(new Date());
+  const [isMapPicking, setIsMapPicking] = useState<{ active: boolean, target: 'start' | 'end' | null }>({ active: false, target: null });
 
   return (
     <PreferencesContext.Provider value={{
@@ -25,7 +31,11 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       travelVibe,
       setTravelVibe,
       travelIntensity,
-      setTravelIntensity
+      setTravelIntensity,
+      targetDate,
+      setTargetDate,
+      isMapPicking,
+      setIsMapPicking
     }}>
       {children}
     </PreferencesContext.Provider>

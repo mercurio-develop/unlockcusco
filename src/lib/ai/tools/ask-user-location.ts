@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { defineTool as tool } from '@/lib/ai/tool-utils';
 import { z } from 'zod';
 
 /**

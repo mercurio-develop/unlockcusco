@@ -9,7 +9,20 @@ export const MOCK_LOCATIONS = [
   { name: "MIL Centro, Moray", lat: -13.3297, lng: -72.1958 },
   { name: "Ollantaytambo Train Station", lat: -13.2625, lng: -72.2662 },
   { name: "Alejandro Velasco Astete Airport, Cusco", lat: -13.5358, lng: -71.9389 },
-  { name: "Pisac Ruins", lat: -13.4077, lng: -71.8465 },
+  { name: "Pisac Market", lat: -13.4225, lng: -71.8517 },
+  { name: "Chinchero Main Square", lat: -13.3917, lng: -72.0494 },
+  { name: "Maras Salt Mines", lat: -13.3000, lng: -72.1550 },
+  { name: "Urubamba Main Square", lat: -13.3039, lng: -72.1164 },
+  { name: "Cusco Main Square (Plaza de Armas)", lat: -13.5171, lng: -71.9785 },
+  { name: "Belmond Hotel Rio Sagrado, Urubamba", lat: -13.3150, lng: -72.1000 },
+  { name: "Sol y Luna, Urubamba", lat: -13.2980, lng: -72.1320 },
+  { name: "Explora Sacred Valley", lat: -13.3250, lng: -72.0800 },
+  { name: "Pisac Town Center", lat: -13.4222, lng: -71.8503 },
+  { name: "Urubamba Town Center", lat: -13.3039, lng: -72.1164 },
+  { name: "Cusco City Center", lat: -13.5171, lng: -71.9785 },
+  { name: "Ollantaytambo Town Center", lat: -13.2583, lng: -72.2639 },
+  { name: "Chinchero Town Center", lat: -13.3917, lng: -72.0494 },
+  { name: "Calca Town Center", lat: -13.3314, lng: -71.9525 },
 ]
 
 interface LocationAutocompleteProps {

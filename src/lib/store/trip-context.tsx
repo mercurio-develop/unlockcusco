@@ -39,7 +39,8 @@ interface TripContextType {
   moveWaypoint: (fromIndex: number, toIndex: number) => void;
   swapDriverAlternative: (edgeIndex: number, altIndex: number) => void;
   truncateAfterWaypoint: (index: number) => void;
-  setStartAnchorLocation: (lat: number, lng: number) => void;
+  setStartAnchorLocation: (lat: number, lng: number, title?: string) => void;
+  updateEndAnchorLocation: (lat: number, lng: number, title?: string) => void;
   createDay: () => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
@@ -263,7 +264,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const setStartAnchorLocation = useCallback((lat: number, lng: number) => {
+  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location") => {
     setActiveItinerary(prev => {
       if (!prev) return null;
       return {
@@ -272,8 +273,24 @@ export function TripProvider({ children }: { children: ReactNode }) {
           ...prev.startAnchor,
           lat,
           lng,
-          locationStr: "My Location",
-          title: "Current Location"
+          locationStr: title,
+          title: title
+        }
+      };
+    });
+  }, []);
+
+  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location") => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        endAnchor: {
+          ...prev.endAnchor,
+          lat,
+          lng,
+          locationStr: title,
+          title: title
         }
       };
     });
@@ -648,6 +665,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       swapDriverAlternative,
       truncateAfterWaypoint,
       setStartAnchorLocation,
+      updateEndAnchorLocation,
       createDay,
       updateEvent,
       insertWaypoint,

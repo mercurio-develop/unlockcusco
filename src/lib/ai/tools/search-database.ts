@@ -1,19 +1,27 @@
-import { tool } from 'ai';
+import { defineTool as tool } from '@/lib/ai/tool-utils';
 import { z } from 'zod';
 import { universalSearch } from '@/features/business/queries/universal-search';
 import { kv } from '@vercel/kv';
 import { calculateDistance } from '@/lib/utils/geo';
 
-export const searchDatabase = tool({
-  description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries. Supports Spatial RAG by calculating real-world distances if coordinates are provided.',
+interface SearchContext {
+  userLat?: number;
+  userLng?: number;
+  targetDate?: string;
+  archetype?: string | null;
+  intensity?: number | null;
+}
+
+export const createSearchDatabaseTool = (context: SearchContext) => tool({
+  description: 'Search the Vallecito library for local businesses, restaurants, food (e.g. ceviche, coffee), and activities. Use this tool immediately when a user asks for recommendations or mentions specific towns like Urubamba, Pisac, or Cusco. Supports Spatial RAG by calculating real-world distances using the user\'s real-time context.',
   inputSchema: z.object({
-    query: z.string().describe("The type of business, e.g. coffee, textiles, taxi"),
+    query: z.string().describe("The type of business, e.g. ceviche, coffee, textiles, taxi"),
     location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
-    userLat: z.number().optional().describe("User's current latitude for distance calculation"),
-    userLng: z.number().optional().describe("User's current longitude for distance calculation"),
+    category: z.string().optional().describe("Optional Prisma BusinessCategory to filter by, e.g. DINING, EXPERIENCE, STAY"),
   }),
-  execute: async ({ query, location, userLat, userLng }) => {
-    const cacheKey = `vallecito:search:v2:${query.toLowerCase().trim()}:${location ?? 'any'}`;
+  execute: async ({ query, location, category }) => {
+    // Incorporate context into the cache key so different profiles don't poison each other's cache
+    const cacheKey = `vallecito:search:v6:${query.toLowerCase().trim()}:${location ?? 'any'}:${category ?? 'any'}`;
     
     let results;
     try {
@@ -26,7 +34,7 @@ export const searchDatabase = tool({
     }
 
     if (!results) {
-      results = await universalSearch({ query, location, limit: 15 });
+      results = await universalSearch({ query, location, category, limit: 15 });
 
       try {
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
@@ -36,6 +44,9 @@ export const searchDatabase = tool({
         console.warn("KV Cache write failed:", e);
       }
     }
+
+    // Use context variables directly from the chat request
+    const { userLat, userLng, archetype, intensity } = context;
 
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
     if (userLat && userLng) {
@@ -54,8 +65,15 @@ export const searchDatabase = tool({
         
         // If both have distance, blend distance, rating, and Asociado status into a score
         if (a.distanceKm !== null && b.distanceKm !== null) {
-          const scoreA = (a.rating || 0) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
-          const scoreB = (b.rating || 0) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
+          let scoreA = (a.rating || 0) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
+          let scoreB = (b.rating || 0) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
+          
+          // Psychographic boosting
+          if (archetype === 'ADVENTURER' && a.category === 'EXPERIENCE') scoreA += 5;
+          if (archetype === 'LUXURY' && a.priceTier === '$$$') scoreA += 5;
+          if (archetype === 'ADVENTURER' && b.category === 'EXPERIENCE') scoreB += 5;
+          if (archetype === 'LUXURY' && b.priceTier === '$$$') scoreB += 5;
+
           return scoreB - scoreA;
         }
         
@@ -71,6 +89,8 @@ export const searchDatabase = tool({
         rating: b.rating,
         isAsociado: b.isAsociado,
         priceTier: b.priceTier,
+        bookingType: b.bookingType,
+        minAdvanceHours: b.minAdvanceHours,
         distanceKm: b.distanceKm ? b.distanceKm.toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
         tagline: b.tagline,
@@ -88,6 +108,8 @@ export const searchDatabase = tool({
       rating: b.rating,
       isAsociado: b.isAsociado,
       priceTier: b.priceTier,
+      bookingType: b.bookingType,
+      minAdvanceHours: b.minAdvanceHours,
       whatsapp: b.whatsapp,
       locationSlug: b.locationSlug,
       tagline: b.tagline,

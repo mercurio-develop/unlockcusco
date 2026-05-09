@@ -8,8 +8,8 @@ import { Sparkles, X, Send, Bot, User, Settings2, Check, Navigation } from "luci
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
+import { useCustomChat as useChat } from './use-custom-chat'
+
 import { DEFAULT_COORDS } from "@/lib/constants"
 import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
@@ -32,12 +32,14 @@ export function AiConcierge() {
     setActiveItinerary,
     activeDayNumber,
     setStartAnchorLocation,
-    setPanelMode
+    setPanelMode,
+    targetDate
   } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const processedToolCalls = useRef<Set<string>>(new Set())
 
   const isBuilder = panelMode === 'builder'
   const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
@@ -50,11 +52,9 @@ export function AiConcierge() {
     }
   ];
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-    }),
-    messages: initialMessages
+  const { messages, sendMessage, status, error } = useChat({
+    api: '/api/chat',
+    initialMessages
   });
 
   const handleShareLocation = () => {
@@ -90,6 +90,7 @@ export function AiConcierge() {
             userLat: DEFAULT_COORDS.lat,
             userLng: DEFAULT_COORDS.lng,
             localTime: new Date().toLocaleTimeString(),
+            targetDate: targetDate.toLocaleDateString(),
             archetype: travelVibe,
             intensity: travelIntensity
           }
@@ -97,71 +98,76 @@ export function AiConcierge() {
       );
       setAiPromptToTrigger(null);
     }
-  }, [aiPromptToTrigger, travelVibe, travelIntensity, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
+  }, [aiPromptToTrigger, travelVibe, travelIntensity, targetDate, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
 
+  // Sync background state with tool results
   useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage?.role === 'assistant' && lastMessage.parts) {
-      const mutatePart = lastMessage.parts.find((p: any) => p.type === 'tool-invocation' && p.toolName === 'mutateItinerary' && p.state === 'result');
-      if (mutatePart && (mutatePart as any).result?.success) {
-        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = (mutatePart as any).result;
-
-        if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
-          const updatedWaypoints = activeItinerary.waypoints.map((w: any) => 
-            w.id === targetId ? {
-              ...w,
-              id: resolvedBusiness.id,
-              category: resolvedBusiness.category,
-              title: resolvedBusiness.name,
-              locationStr: resolvedBusiness.name,
-              lat: resolvedBusiness.lat,
-              lng: resolvedBusiness.lng,
-              service: resolvedBusiness
-            } : w
-          );
-          setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
-        }
-
-        if (action === 'SET_START' && activeItinerary) {
-          setActiveItinerary({
-            ...activeItinerary,
-            startAnchor: {
-              ...activeItinerary.startAnchor,
-              title: resolvedLocation,
-              locationStr: resolvedLocation,
-              lat: coords?.lat,
-              lng: coords?.lng,
-              service: resolvedBusiness
+    messages.forEach((msg: any) => {
+      if (msg.role === 'assistant' && msg.toolInvocations) {
+        msg.toolInvocations.forEach((p: any) => {
+          if (p?.state === 'result' && p?.result?.success && p?.toolCallId && !processedToolCalls.current.has(p.toolCallId)) {
+            const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = p.result;
+            
+            if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
+              const updatedWaypoints = activeItinerary.waypoints.map((w: any) => 
+                w.id === targetId ? {
+                  ...w,
+                  id: resolvedBusiness.id,
+                  category: resolvedBusiness.category,
+                  title: resolvedBusiness.name,
+                  locationStr: resolvedBusiness.name,
+                  lat: resolvedBusiness.lat,
+                  lng: resolvedBusiness.lng,
+                  service: resolvedBusiness
+                } : w
+              );
+              setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
             }
-          });
-        }
 
-        if (action === 'SET_END' && activeItinerary) {
-          setActiveItinerary({
-            ...activeItinerary,
-            endAnchor: {
-              ...activeItinerary.endAnchor,
-              title: resolvedLocation,
-              locationStr: resolvedLocation,
-              lat: coords?.lat,
-              lng: coords?.lng,
-              service: resolvedBusiness
+            if (action === 'SET_START' && activeItinerary) {
+              setActiveItinerary({
+                ...activeItinerary,
+                startAnchor: {
+                  ...activeItinerary.startAnchor,
+                  title: resolvedLocation,
+                  locationStr: resolvedLocation,
+                  lat: coords?.lat,
+                  lng: coords?.lng,
+                  service: resolvedBusiness
+                }
+              });
             }
-          });
-        }
 
-        if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
-          if (targetId === 'itin-start') {
-            setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time }});
-          } else if (targetId === 'itin-arrival') {
-            setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time }});
-          } else {
-            const updatedWaypoints = activeItinerary.waypoints.map((w: any) => w.id === targetId ? { ...w, startTime: time } : w);
-            setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+            if (action === 'SET_END' && activeItinerary) {
+              setActiveItinerary({
+                ...activeItinerary,
+                endAnchor: {
+                  ...activeItinerary.endAnchor,
+                  title: resolvedLocation,
+                  locationStr: resolvedLocation,
+                  lat: coords?.lat,
+                  lng: coords?.lng,
+                  service: resolvedBusiness
+                }
+              });
+            }
+
+            if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
+              if (targetId === 'itin-start') {
+                setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time }});
+              } else if (targetId === 'itin-arrival') {
+                setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time }});
+              } else {
+                const updatedWaypoints = activeItinerary.waypoints.map((w: any) => w.id === targetId ? { ...w, startTime: time } : w);
+                setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+              }
+            }
+            
+            processedToolCalls.current.add(p.toolCallId);
           }
-        }
+        });
       }
-    }
+    });
   }, [messages, activeItinerary, setActiveItinerary]);
 
   const scrollToBottom = () => {
@@ -208,6 +214,7 @@ Please generate my macro trip plan.`;
           userLat: DEFAULT_COORDS.lat,
           userLng: DEFAULT_COORDS.lng,
           localTime: new Date().toLocaleTimeString(),
+          targetDate: targetDate.toLocaleDateString(),
           archetype: travelVibe,
           intensity: travelIntensity
         }
@@ -222,9 +229,9 @@ Please generate my macro trip plan.`;
       const newUrl = newSearch ? `${pathname}?${newSearch}` : pathname;
       router.replace(newUrl, { scroll: false });
     }
-  }, [searchParams, travelVibe, travelIntensity, pathname, router]);
+  }, [searchParams, travelVibe, travelIntensity, pathname, router, targetDate, sendMessage, setIsChatOpen]);
 
-  if (pathname !== "/explore") {
+  if (pathname !== "/explore" || pathname?.startsWith('/pro')) {
     return null;
   }
 
@@ -240,6 +247,7 @@ Please generate my macro trip plan.`;
           userLat: DEFAULT_COORDS.lat,
           userLng: DEFAULT_COORDS.lng,
           localTime: new Date().toLocaleTimeString(),
+          targetDate: targetDate.toLocaleDateString(),
           archetype: travelVibe,
           intensity: travelIntensity
         }
@@ -280,54 +288,62 @@ Please generate my macro trip plan.`;
                 </Button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white">
-                {messages.map((msg) => {
-                  const content = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white text-slate-900">
+                {messages.map((msg, index) => {
+                  const content = (msg as any).content || (msg as any).parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
                   if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
 
                   return (
-                    <div key={msg.id} className="flex flex-col gap-2">
-                      <div 
-                        className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
-                      >
-                        <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
-                          {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-rose-600" />}
-                        </div>
+                    <div key={`${msg.id}-${index}`} className="flex flex-col gap-2">
+                      {content && (
                         <div 
-                          className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
-                            msg.role === "user" 
-                              ? "bg-slate-900 text-white rounded-tr-sm" 
-                              : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
-                          }`}
+                          className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                         >
-                          {(() => {
-                            const text = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('') || '';
-                            if (!text.includes('[[SETTINGS_ICON]]')) return text;
+                          <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
+                            {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-rose-600" />}
+                          </div>
+                          <div 
+                            className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
+                              msg.role === "user" 
+                                ? "bg-slate-900 text-white rounded-tr-sm" 
+                                : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
+                            }`}
+                          >
+                            {(() => {
+                              const text = content || '';
+                              if (!text.includes('[[SETTINGS_ICON]]')) return text;
 
-                            const parts = text.split('[[SETTINGS_ICON]]');
-                            return (
-                              <>
-                                {parts[0]}
-                                <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
-                                {parts[1]}
-                              </>
-                            );
-                          })()}
+                              const parts = text.split('[[SETTINGS_ICON]]');
+                              return (
+                                <>
+                                  {parts[0]}
+                                  <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
+                                  {parts[1]}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       
-                      {msg.parts && msg.parts.map((part: any, idx: number) => {
-                        const key = part.toolCallId || idx;
+                      {/* Tool Invocations & Results */}
+                      {(msg as any).toolInvocations?.map((toolInvocation: any, idx: number) => {
+                        if (!toolInvocation) return null;
+                        const key = toolInvocation.toolCallId || idx;
+                        const toolName = toolInvocation.toolName;
+                        const state = toolInvocation.state;
+                        const result = toolInvocation.result;
+                        const args = toolInvocation.args;
                         
-                        if (part.type === 'tool-invocation') {
-                           if (part.toolName === 'askAvailability' && part.state !== 'result') {
+                        if (state !== 'result') {
+                           if (toolName === 'askAvailability') {
                               return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
                            }
-                           if (part.toolName === 'askUserLocation' && part.state !== 'result') {
+                           if (toolName === 'askUserLocation') {
                               return (
-                                <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11">
+                                <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
                                   <p className="text-sm text-rose-900 font-medium leading-relaxed">
-                                    {part.args.message}
+                                    {args?.message || "Please share your location"}
                                   </p>
                                   <button 
                                     onClick={handleShareLocation}
@@ -338,30 +354,49 @@ Please generate my macro trip plan.`;
                                 </div>
                               )
                            }
+                           if (toolName === 'searchDatabase') {
+                              return <PendingAvailability key={key} message="Searching Vallecito library..." />
+                           }
+                           return null;
                         }
 
-                        if (part.state === 'result') {
-                          if (part.toolName === 'buildItinerary') {
-                            return <ItinerarySummaryCard key={key} itinerary={part.result} />
-                          }
-                          if (part.toolName === 'buildMacroTrip') {
-                            return <MacroItineraryCard key={key} itinerary={part.result} />
-                          }
-                          if (part.toolName === 'searchDatabase') {
-                            return <SearchResultsCard key={key} businesses={part.result} />
-                          }
-                          if (part.toolName === 'askAvailability') {
-                            return <PendingAvailability key={key} message={part.result.message} />
-                          }
-                          if (part.toolName === 'showBoletoInfo') {
-                            return <BoletoInfoCard key={key} data={part.result.data} message={part.result.message} />
-                          }
-                          if (part.toolName === 'estimateTaxiFare') {
-                            return <TaxiFareCard key={key} data={part.result} />
-                          }
-                          if (part.toolName === 'mutateItinerary') {
+                        if (state === 'result' && result) {
+                          if (toolName === 'askUserLocation') {
                             return (
-                              <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11">
+                              <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
+                                <p className="text-sm text-rose-900 font-medium leading-relaxed">
+                                  {result?.message || args?.message || "Please share your location"}
+                                </p>
+                                <button 
+                                  onClick={handleShareLocation}
+                                  className="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-rose-500 transition-all flex items-center justify-center gap-2"
+                                >
+                                  <Navigation className="w-4 h-4" /> Share My GPS Position
+                                </button>
+                              </div>
+                            )
+                          }
+                          if (toolName === 'buildItinerary') {
+                            return <ItinerarySummaryCard key={key} itinerary={result} />
+                          }
+                          if (toolName === 'buildMacroTrip') {
+                            return <MacroItineraryCard key={key} itinerary={result} />
+                          }
+                          if (toolName === 'searchDatabase') {
+                            return <SearchResultsCard key={key} businesses={result} />
+                          }
+                          if (toolName === 'askAvailability') {
+                            return <PendingAvailability key={key} message={result.message} />
+                          }
+                          if (toolName === 'showBoletoInfo') {
+                            return <BoletoInfoCard key={key} data={result.data} message={result.message} />
+                          }
+                          if (toolName === 'estimateTaxiFare') {
+                            return <TaxiFareCard key={key} data={result} />
+                          }
+                          if (toolName === 'mutateItinerary') {
+                            return (
+                              <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
                                  <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
                                     <Check className="w-3.5 h-3.5 text-white" />
                                  </div>
@@ -392,6 +427,15 @@ Please generate my macro trip plan.`;
                 <div ref={messagesEndRef} />
               </div>
 
+              {error && (
+                <div className="mx-4 mb-2 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-2">
+                  <Bot className="w-4 h-4 text-rose-600 shrink-0" />
+                  <p className="text-xs text-rose-800 font-medium leading-tight">
+                    I encountered a small hiccup. Please try asking again or refresh the page.
+                  </p>
+                </div>
+              )}
+
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
                 {[
                   { label: "Plan my day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
@@ -410,6 +454,7 @@ Please generate my macro trip plan.`;
                             userLat: DEFAULT_COORDS.lat,
                             userLng: DEFAULT_COORDS.lng,
                             localTime: new Date().toLocaleTimeString(),
+                            targetDate: targetDate.toLocaleDateString(),
                             archetype: travelVibe,
                             intensity: travelIntensity
                           }

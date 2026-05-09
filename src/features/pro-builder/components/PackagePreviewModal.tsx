@@ -41,7 +41,7 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
         
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-serif font-bold text-slate-900">Experience Details</h2>
+          <h2 className="text-xl font-serif font-bold text-slate-900 capitalize">{pkg ? (pkg.category ? pkg.category.toLowerCase().replace('_', ' ') : 'Experience') : 'Details'} Details</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
             <X className="w-5 h-5 text-slate-500" />
           </button>
@@ -76,31 +76,44 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
               
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-600 mb-2">
-                  <span>{pkg.sector?.replace('_', ' ')}</span>
-                  <span className="text-slate-300">•</span>
-                  <span>{pkg.pace} Pace</span>
+                  {pkg.sector && <span>{pkg.sector.replace('_', ' ')}</span>}
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-slate-900 leading-tight">{pkg.title}</h3>
                 {pkg.tagline && <p className="text-lg text-slate-500 font-serif mt-1 italic">{pkg.tagline}</p>}
               </div>
 
-              <div className="flex flex-wrap gap-4 py-4 border-y border-slate-100">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-700">{pkg.durationStr || 'Half Day'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mountain className="w-5 h-5 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-700">{pkg.difficulty}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-700">{pkg.pace} Pace</span>
-                </div>
-              </div>
+              {(() => {
+                const tagsStr = (pkg.tags || '').toLowerCase();
+                const catStr = (pkg.category || '').toUpperCase();
+                const isFoodOrStay = 
+                  ['MEAL', 'DINING', 'RESTAURANT', 'FOOD', 'STAY', 'HOTEL', 'LODGE', 'TRANSPORT', 'TAXI'].includes(catStr) ||
+                  tagsStr.includes('food') || tagsStr.includes('restaurant') || tagsStr.includes('dining') || tagsStr.includes('stay') || tagsStr.includes('hotel') || tagsStr.includes('lodge') || tagsStr.includes('transport') || tagsStr.includes('taxi');
+                const isExperienceCat = ['EXPERIENCE', 'TOURPACKAGE', 'PACKAGE', 'ADVENTURE', 'WELLNESS', 'CULTURE', 'TEXTILES', 'TOURIST_TICKET', 'TOURIST TICKET'].includes(catStr);
+                
+                return (!isFoodOrStay && (isExperienceCat || pkg.pace || pkg.difficulty)) && (
+                  <div className="flex flex-wrap gap-4 py-4 border-y border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-slate-400" />
+                      <span className="text-sm font-semibold text-slate-700">{pkg.durationStr || 'Half Day'}</span>
+                    </div>
+                    {pkg.difficulty && (
+                      <div className="flex items-center gap-2">
+                        <Mountain className="w-5 h-5 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-700">{pkg.difficulty}</span>
+                      </div>
+                    )}
+                    {pkg.pace && (
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-slate-400" />
+                        <span className="text-sm font-semibold text-slate-700">{pkg.pace} Pace</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div>
-                <h4 className="font-bold text-slate-900 mb-2">About this Experience</h4>
+                <h4 className="font-bold text-slate-900 mb-2 capitalize">About this {pkg.category ? pkg.category.toLowerCase().replace('_', ' ') : 'Experience'}</h4>
                 <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">{pkg.description}</p>
               </div>
               

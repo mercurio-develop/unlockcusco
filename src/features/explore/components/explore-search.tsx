@@ -187,27 +187,6 @@ export function ExploreSearch({
                 )}
               </div>
 
-              {/* Sort By - Editorial Horizontal List */}
-              <div className="flex flex-col gap-3">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sort By</span>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {SORT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, option.value)}
-                      className={cn(
-                        "py-1 border-b text-[11px] font-bold transition-all",
-                        currentSort === option.value 
-                          ? "text-slate-900 border-slate-900 font-black uppercase tracking-[0.1em]" 
-                          : "text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-200"
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Categories - Magazine / Airbnb Hybrid */}
               <div className="flex flex-col gap-3">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Categories</span>

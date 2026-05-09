@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar } from "lucide-react"
+import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Clock, AlertCircle } from "lucide-react"
 import { trackWhatsappClick } from "@/features/business/actions/track-click"
 import { trackBusinessView } from "@/features/business/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
@@ -47,12 +47,37 @@ export function BusinessCard({
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
+  const [showLeadTimeWarning, setShowLeadTimeWarning] = useState(false)
+  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint, targetDate, setTargetDate, setAiPromptToTrigger } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
   const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
+
+  // Lead time calculation
+  const now = new Date()
+  const diffInHours = (targetDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+  const hasSufficientNotice = business.minAdvanceHours === 0 || diffInHours >= business.minAdvanceHours
+  const isTooSoon = !hasSufficientNotice && business.bookingType === 'REQUEST_ONLY'
+
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (isTooSoon) {
+      setShowLeadTimeWarning(true)
+    } else {
+      insertWaypoint(business)
+    }
+  }
+
+  const handleMoveToTomorrow = () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    setTargetDate(tomorrow)
+    insertWaypoint(business)
+    setShowLeadTimeWarning(false)
+    setAiPromptToTrigger(`[INTERNAL] User moved itinerary to Tomorrow because ${business.name} required ${business.minAdvanceHours}h notice. Acknowledge the change and confirm the experience is now added.`)
+  }
 
   const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -61,7 +86,7 @@ export function BusinessCard({
     const msg = encodeURIComponent(
       `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to make a reservation. When do you have availability?`
     )
-    window.open(`https://wa.me/51${business.whatsapp.replace(/\\D/g, '')}?text=${msg}`, "_blank")
+    window.open(`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${msg}`, "_blank")
   }
 
   const handleConsult = async (e: React.MouseEvent) => {
@@ -95,54 +120,25 @@ export function BusinessCard({
 
   return (
     <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/json", JSON.stringify(business));
+      }}
       onClick={handleCardClick}
       className={cn(
         "group cursor-pointer transition-all duration-300 relative",
-        isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100",
-        isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"
+        isHorizontal 
+          ? "flex flex-row items-center gap-4 p-3 bg-white border border-slate-100 rounded-[20px] hover:shadow-md hover:border-slate-200" 
+          : "flex flex-col gap-3",
+        isHighlighted 
+          ? (isHorizontal ? "opacity-100 scale-[1.01] border-rose-200 shadow-md ring-1 ring-rose-600/5" : "opacity-100 scale-[1.02]") 
+          : "opacity-90 hover:opacity-100"
       )}
     >
-      {/* Top Right Action Menu */}
-      {false && exchangeTargetIndex === null && (
-        <div 
-          className="absolute top-3 right-3 z-30 flex items-center justify-center" 
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <DropdownMenu>
-            <DropdownMenuTrigger render={
-              <button 
-                type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 border border-slate-200 shadow-md text-slate-600 hover:text-rose-600 hover:scale-110 transition-all cursor-pointer backdrop-blur-sm"
-              >
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
-            } />
-            <DropdownMenuContent>
-              {hasProfile && (
-                <DropdownMenuItem onClick={() => router.push(business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug))}>
-                  <ExternalLink className="w-4 h-4 mr-2" /> View Profile
-                </DropdownMenuItem>
-              )}
-              {business.whatsapp && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }}>
-                  <MessageCircle className="w-4 h-4 mr-2" /> Contact
-                </DropdownMenuItem>
-              )}
-              {!isClaimed && !business.isAsociado && (
-                <DropdownMenuItem onClick={() => setIsOpen(true)}>
-                  <Zap className="w-4 h-4 mr-2" /> Check Availability
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
-
       {/* Image Container */}
       <div className={cn(
         "relative overflow-hidden rounded-2xl transition-all duration-300 bg-slate-100",
-        isHorizontal ? "w-32 sm:w-48 aspect-square shrink-0" : "w-full aspect-[4/3] sm:aspect-[4/3]",
+        isHorizontal ? "w-20 sm:w-24 aspect-[4/3] shrink-0" : "w-full aspect-[4/3] sm:aspect-[4/3]",
         isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
       )}>
         {business.imageUrl ? (
@@ -186,21 +182,21 @@ export function BusinessCard({
 
       {/* Info Container */}
       <div className={cn(
-        "flex flex-col",
-        isHorizontal ? "flex-1 py-1 h-28 sm:h-40 justify-center sm:justify-between" : "gap-1"
+        "flex flex-col min-w-0",
+        isHorizontal ? "flex-1 py-0.5 justify-between" : "gap-1"
       )}>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5">
           <div className={cn(
             "flex justify-between gap-2",
-            isHorizontal ? "flex-col sm:flex-row sm:items-start" : "items-start"
+            isHorizontal ? "items-center" : "items-start"
           )}>
-            <div className={cn("flex-1", isHorizontal ? "line-clamp-2 sm:line-clamp-1" : "line-clamp-1")}>
+            <div className={cn("flex-1", isHorizontal ? "line-clamp-1" : "line-clamp-1")}>
               {hasProfile ? (
                 <Link 
                   href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)} 
                   className={cn(
                     "font-bold text-slate-900 leading-tight hover:text-rose-600 transition-colors",
-                    isHorizontal ? "text-base sm:text-lg" : "text-[15px]"
+                    isHorizontal ? "text-[15px] sm:text-base" : "text-[15px]"
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -209,32 +205,47 @@ export function BusinessCard({
               ) : (
                 <h3 className={cn(
                   "font-bold text-slate-900 leading-tight",
-                  isHorizontal ? "text-base sm:text-lg" : "text-[15px]"
+                  isHorizontal ? "text-[15px] sm:text-base" : "text-[15px]"
                 )}>
                   {business.name}
                 </h3>
               )}
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {business.rating !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="font-bold text-sm text-slate-900">{business.rating || "New"}</span>
-                </div>
-              )}
+            <div className="flex items-center gap-1 shrink-0 bg-white/80 px-1.5 py-0.5 rounded-lg border border-slate-50">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span className="font-bold text-[11px] text-slate-900">{business.rating || "New"}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-             <span className="text-rose-600">{business.category}</span>
-             {business.reviewsCount !== undefined && <span>• {business.reviewsCount} reviews</span>}
-             {business.priceTier && <span>• {business.priceTier}</span>}
+          <div className="flex items-center gap-1.5 flex-wrap">
+             <span className="bg-rose-50 text-rose-600 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-rose-100/50">
+               {business.category}
+             </span>
+             {business.priceTier && <span className="text-slate-400 text-[10px] font-bold">{business.priceTier}</span>}
+             
+             {business.bookingType === 'REQUEST_ONLY' && business.minAdvanceHours > 0 && (
+                <span className={cn(
+                  "px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight flex items-center gap-1 border",
+                  isTooSoon 
+                    ? "bg-amber-50 text-amber-600 border-amber-100" 
+                    : "bg-slate-50 text-slate-500 border-slate-100"
+                )}>
+                  <Clock className="w-2.5 h-2.5" />
+                  {business.minAdvanceHours}h Notice
+                </span>
+             )}
+
+             {isHorizontal && (
+                <span className="text-slate-400 text-[10px] font-medium truncate max-w-[150px]">
+                   • {business.locationSlug?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                </span>
+             )}
           </div>
           
           {/* Zagat Description */}
           {business.description && (
             <p className={cn(
-              "text-slate-500 text-xs italic leading-relaxed mt-0.5",
-              isHorizontal ? "line-clamp-2" : "line-clamp-3"
+              "text-slate-500 text-[11px] italic leading-relaxed mt-1",
+              isHorizontal ? "line-clamp-1" : "line-clamp-3"
             )}>
               &ldquo;{business.description}&rdquo;
             </p>
@@ -242,33 +253,33 @@ export function BusinessCard({
         </div>
 
         {/* Action Row */}
-        <div className={cn(isHorizontal ? "mt-3 sm:mt-auto" : "mt-2", "flex gap-2")}>
+        <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
           <Button
-            onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+            onClick={handleAddClick}
             className={cn(
-              "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-2",
-              isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-xs uppercase tracking-tighter"
+              "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
+              isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
             )}
           >
-            <Plus className="w-3.5 h-3.5" />
-            Add to Day
+            <Plus className="w-3 h-3" />
+            {isHorizontal ? "Add" : "Add to Day"}
           </Button>
           {exchangeTargetIndex !== null ? (
             <Button
               onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
               className={cn(
                 "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all",
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
+                isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
               )}
             >
-              Select for Itinerary
+              Select
             </Button>
           ) : isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
             <Button
               onClick={handleBookNow}
               className={cn(
                 "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
+                isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
               )}
             >
               Contact
@@ -280,7 +291,7 @@ export function BusinessCard({
                   onClick={(e) => e.stopPropagation()} 
                   className={cn(
                     "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                    isHorizontal ? "py-2 h-9 text-xs sm:text-sm" : "py-2.5 text-sm"
+                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
                   )}
                 >
                   Contact
@@ -333,7 +344,38 @@ export function BusinessCard({
           )}
         </div>
       </div>
+
+      <Dialog open={showLeadTimeWarning} onOpenChange={setShowLeadTimeWarning}>
+          <DialogContent className="sm:max-w-md p-8 rounded-3xl bg-white border border-gray-200 shadow-2xl z-[150]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-6">
+                 <AlertCircle className="w-8 h-8 text-amber-600" />
+              </div>
+              <DialogTitle className="text-2xl font-serif font-bold text-slate-900 mb-2">Advance Notice Required</DialogTitle>
+              <DialogDescription className="text-slate-500 leading-relaxed mb-8">
+                {business.name} typically requires at least <strong>{business.minAdvanceHours} hours</strong> notice to prepare guides and equipment.
+                <br/><br/>
+                Since you&apos;re planning for today, we might not be able to secure this instantly.
+              </DialogDescription>
+              
+              <div className="flex flex-col gap-3 w-full">
+                <Button 
+                  onClick={handleMoveToTomorrow}
+                  className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold shadow-lg hover:bg-slate-800 transition-all"
+                >
+                  Move Planning to Tomorrow
+                </Button>
+                <Button 
+                  variant="ghost"
+                  onClick={() => { insertWaypoint(business); setShowLeadTimeWarning(false); }}
+                  className="w-full text-slate-400 hover:text-slate-600 font-bold"
+                >
+                  Add Anyway (Request Only)
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+      </Dialog>
     </div>
   )
 }
-

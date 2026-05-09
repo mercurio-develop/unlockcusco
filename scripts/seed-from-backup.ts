@@ -38,10 +38,25 @@ async function main() {
   for (let i = 0; i < businesses.length; i += 50) {
     const chunk = businesses.slice(i, i + 50);
     await prisma.business.createMany({
-      data: chunk.map((b: any) => ({
-        ...b,
-        // Ensure data consistency for date/time if any were missed
-      }))
+      data: chunk.map((b: any) => {
+        let bookingType = 'WALK_IN';
+        let minAdvanceHours = 0;
+
+        const category = (b.category || '').toUpperCase();
+        if (category === 'EXPERIENCE' || category === 'ADVENTURE' || category === 'WELLNESS') {
+          bookingType = 'REQUEST_ONLY';
+          minAdvanceHours = 24;
+        } else if (category === 'TRANSPORT') {
+          bookingType = 'INSTANT_CONFIRMATION';
+          minAdvanceHours = 0;
+        }
+
+        return {
+          ...b,
+          bookingType,
+          minAdvanceHours
+        };
+      })
     });
   }
 

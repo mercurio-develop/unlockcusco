@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { tool } from 'ai';
+import { defineTool as tool } from '@/lib/ai/tool-utils';
 
 export const getBusinessDetails = tool({
   description: 'Looks up specific details for a local business by its exact name, returning operating hours, contact phone, website, and editorial summary.',
