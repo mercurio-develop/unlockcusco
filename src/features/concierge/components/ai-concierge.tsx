@@ -4,7 +4,7 @@ import { Business } from "@prisma/client";
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, X, Send, Bot, User, Settings2 } from "lucide-react"
+import { Sparkles, X, Send, Bot, User, Settings2, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -21,7 +21,22 @@ import { useTrip } from "@/lib/store/trip-context"
 
 export function AiConcierge() {
   const [input, setInput] = useState("")
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, isWorkspaceCollapsed, panelMode, aiPromptToTrigger, setAiPromptToTrigger } = useTrip()
+  const { 
+    isChatOpen, 
+    setIsChatOpen, 
+    travelVibe, 
+    travelIntensity, 
+    isWorkspaceCollapsed, 
+    panelMode, 
+    aiPromptToTrigger, 
+    setAiPromptToTrigger,
+    activeItinerary,
+    setActiveItinerary,
+    currentTrip,
+    setCurrentTrip,
+    updateEvent,
+    activeDayNumber
+  } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
@@ -65,6 +80,72 @@ export function AiConcierge() {
       setAiPromptToTrigger(null);
     }
   }, [aiPromptToTrigger, travelVibe, travelIntensity, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
+
+  // Listen for itinerary mutations from the AI
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'assistant' && lastMessage.parts) {
+      const mutatePart = lastMessage.parts.find((p: any) => p.type === 'tool-invocation' && p.toolName === 'mutateItinerary' && p.state === 'result');
+      if (mutatePart && (mutatePart as any).result?.success) {
+        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = (mutatePart as any).result;
+        
+        if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
+          const updatedWaypoints = activeItinerary.waypoints.map(w => 
+            w.id === targetId ? {
+              ...w,
+              id: resolvedBusiness.id,
+              category: resolvedBusiness.category,
+              title: resolvedBusiness.name,
+              locationStr: resolvedBusiness.name,
+              lat: resolvedBusiness.lat,
+              lng: resolvedBusiness.lng,
+              service: resolvedBusiness
+            } : w
+          );
+          setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+        }
+
+        if (action === 'SET_START' && activeItinerary) {
+          setActiveItinerary({
+            ...activeItinerary,
+            startAnchor: {
+              ...activeItinerary.startAnchor,
+              title: resolvedLocation,
+              locationStr: resolvedLocation,
+              lat: coords?.lat,
+              lng: coords?.lng,
+              service: resolvedBusiness
+            }
+          });
+        }
+
+        if (action === 'SET_END' && activeItinerary) {
+          setActiveItinerary({
+            ...activeItinerary,
+            endAnchor: {
+              ...activeItinerary.endAnchor,
+              title: resolvedLocation,
+              locationStr: resolvedLocation,
+              lat: coords?.lat,
+              lng: coords?.lng,
+              service: resolvedBusiness
+            }
+          });
+        }
+
+        if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
+          if (targetId === 'itin-start') {
+            setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time }});
+          } else if (targetId === 'itin-arrival') {
+            setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time }});
+          } else {
+            const updatedWaypoints = activeItinerary.waypoints.map(w => w.id === targetId ? { ...w, startTime: time } : w);
+            setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+          }
+        }
+      }
+    }
+  }, [messages, activeItinerary, setActiveItinerary]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -256,6 +337,16 @@ Please generate my macro trip plan.`;
                         }
                         if (part.type === 'tool-estimateTaxiFare') {
                           return <TaxiFareCard key={key} data={part.output} />
+                        }
+                        if (part.type === 'tool-mutateItinerary') {
+                          return (
+                            <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2">
+                               <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                  <Check className="w-3.5 h-3.5 text-white" />
+                               </div>
+                               <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">Itinerary Updated</span>
+                            </div>
+                          )
                         }
                       }
                       if (part.type === 'tool-askAvailability' && part.state !== 'output-available') {

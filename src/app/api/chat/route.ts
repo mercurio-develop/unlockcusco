@@ -6,6 +6,7 @@ import { searchDatabase } from '@/lib/ai/tools/search-database';
 import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
+import { mutateItinerary } from '@/lib/ai/tools/mutate-itinerary';
 import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
 import { EXPATS_KNOWLEDGE_BASE } from '@/lib/ai/knowledge/expats-guide';
 import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
@@ -118,6 +119,7 @@ export async function POST(req: Request) {
         buildMacroTrip,
         showBoletoInfo,
         estimateTaxiFare,
+        mutateItinerary,
       },
     });
 

@@ -152,7 +152,7 @@ export function ItineraryPanel() {
                 </p>
               </div>
             ) : (
-              <BuilderWorkspace selectedId={selectedId} onSelectEvent={setSelectedId} />
+              <BuilderWorkspace variant="live" selectedId={selectedId} onSelectEvent={setSelectedId} />
             )}
           </div>
 

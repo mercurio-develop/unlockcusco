@@ -306,7 +306,7 @@ export function ProBuilderMain() {
         </div>
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isWorkspaceCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <BuilderWorkspace selectedId={selectedId} onSelectEvent={setSelectedId} />
+          <BuilderWorkspace variant="pro" selectedId={selectedId} onSelectEvent={setSelectedId} />
         </div>
       </div>
     </div>

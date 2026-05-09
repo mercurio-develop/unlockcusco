@@ -41,7 +41,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
 
   const handleExportICS = () => {
-    let icsContent = [
+    const icsContent = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
       "PRODID:-//Vallecito//Travel Planner//EN",

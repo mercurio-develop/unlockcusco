@@ -206,7 +206,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
           }
           
           // Boost score if the town hasn't been used yet to encourage distribution
-          let locationBoost = usedLocationSlugs.has(b.locationSlug) ? 0 : 0.5;
+          const locationBoost = usedLocationSlugs.has(b.locationSlug) ? 0 : 0.5;
           
           return { b, dist: distFromOrigin, detourKm, s: score(b.rating! + locationBoost, detourKm) };
         })

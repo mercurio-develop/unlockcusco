@@ -31,7 +31,7 @@ export interface ExperienceEvent extends BaseEvent {
 
 export interface TransportEvent extends BaseEvent {
   type: 'TRANSPORT';
-  method: 'CAR' | 'TRAIN' | 'FLIGHT' | 'WALK';
+  method: 'CAR' | 'TRAIN' | 'FLIGHT' | 'WALK' | 'PUBLIC';
   from: string;
   fromLat?: number;
   fromLng?: number;
@@ -39,6 +39,7 @@ export interface TransportEvent extends BaseEvent {
   toLat?: number;
   toLng?: number;
   details?: string;
+  pickupTime?: string;
   transportId?: string;
   service?: Business;
 }

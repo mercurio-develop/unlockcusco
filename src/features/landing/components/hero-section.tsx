@@ -161,8 +161,8 @@ export function HeroSection() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-slate-900 cursor-pointer hover:text-black transition-colors font-medium"
-        onClick={() => window.scrollBy({ top: window.innerHeight, behavior: "smooth" })}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-slate-500 cursor-pointer hover:text-rose-600 transition-colors font-medium"
+        onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: "smooth" })}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}

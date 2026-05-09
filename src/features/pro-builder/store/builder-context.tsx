@@ -115,7 +115,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
       days: prev.days.map(day => {
         if (day.dayNumber !== dayNumber) return day
         
-        let events = day.events.map(e => e.id === eventId ? { ...e, ...updates } as TimelineEvent : e)
+        const events = day.events.map(e => e.id === eventId ? { ...e, ...updates } as TimelineEvent : e)
         // Re-sort in case time changed
         events.sort((a, b) => a.startTime.localeCompare(b.startTime))
 

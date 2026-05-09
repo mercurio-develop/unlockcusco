@@ -57,7 +57,7 @@ export default function TouristMap({ trip, activeDayNum, selectedEventId, onEven
   // Extract all points for the day
   const { startCoords, sleepCoords, routeCoords, markers } = useMemo(() => {
     let coords: [number, number][] = []
-    let ms: Array<{ coords: [number, number], type: string, id: string }> = []
+    const ms: Array<{ coords: [number, number], type: string, id: string }> = []
     
     events.forEach((evt: TimelineEvent) => {
       if (evt.type === 'TRANSPORT') {

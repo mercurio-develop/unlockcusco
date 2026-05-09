@@ -84,7 +84,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (bookingStatus === 'payment_required' && !hasRequestedFeedback) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAiPromptToTrigger("[INTERNAL] The day is secured and ready for payment. Proactively ask the user for feedback on their experience with Vallecito so far and if there's anything to improve.");
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setHasRequestedFeedback(true);
     }
   }, [bookingStatus, hasRequestedFeedback]);
