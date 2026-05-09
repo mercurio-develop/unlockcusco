@@ -20,23 +20,27 @@ export async function universalSearch({
 }: UniversalSearchParams): Promise<Business[]> {
   const queryLower = query?.toLowerCase().trim() || "";
   const locLower = location?.toLowerCase().trim() || "";
+  const queryWords = queryLower.split(/\s+/).filter(word => word.length > 1);
 
   // 1. Single unified DB query
   const businesses = await prisma.business.findMany({
     where: {
       AND: [
-        queryLower ? {
+        // Match all words in the query (if provided)
+        ...queryWords.map(word => ({
           OR: [
-            { name: { contains: queryLower } },
-            { category: { contains: queryLower } },
-            { tagline: { contains: queryLower } },
-            { vehicleType: { contains: queryLower } },
+            { name: { contains: word, mode: 'insensitive' as const } },
+            { category: { contains: word, mode: 'insensitive' as const } },
+            { tagline: { contains: word, mode: 'insensitive' as const } },
+            { description: { contains: word, mode: 'insensitive' as const } },
+            { specialties: { contains: word, mode: 'insensitive' as const } },
+            { vehicleType: { contains: word, mode: 'insensitive' as const } },
           ]
-        } : {},
+        })),
         locLower ? {
           OR: [
-            { locationSlug: { contains: locLower } },
-            { serviceZones: { contains: locLower } },
+            { locationSlug: { contains: locLower, mode: 'insensitive' as const } },
+            { serviceZones: { contains: locLower, mode: 'insensitive' as const } },
           ]
         } : {},
         category ? { category: { equals: category } } : {}

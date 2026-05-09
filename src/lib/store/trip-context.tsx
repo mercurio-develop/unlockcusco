@@ -387,7 +387,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           }
         });
         setExchangeTargetIndex(null);
-        setPanelMode("itinerary");
+        setPanelMode(panelMode === 'categories' ? 'itinerary' : panelMode);
         return false;
       }
       if (exchangeTargetIndex === -2 && activeItinerary) {
@@ -406,7 +406,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           }
         });
         setExchangeTargetIndex(null);
-        setPanelMode("itinerary");
+        setPanelMode(panelMode === 'categories' ? 'itinerary' : panelMode);
         return false;
       }
 

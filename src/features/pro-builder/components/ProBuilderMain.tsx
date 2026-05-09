@@ -1,13 +1,18 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
 import { useTrip } from "@/lib/store/trip-context"
 import { BuilderWizard } from "./BuilderWizard"
 import { BuilderWorkspace } from "./BuilderWorkspace"
 import { CheckoutDetailsForm } from "./CheckoutDetailsForm"
-import { MapPin, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ListCollapse, Utensils, Car, Moon, AlignLeft, Receipt, UserCircle2, ChevronDown, ChevronUp } from "lucide-react"
+import { DiscoverPanel } from "@/features/explore/components/DiscoverPanel"
+import { ExploreSearch } from "@/features/explore/components/explore-search"
+import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
+import { MapPin, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ListCollapse, Utensils, Car, Moon, AlignLeft, Receipt, UserCircle2, ChevronDown, ChevronUp, X, Search } from "lucide-react"
 import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 const ExploreMap = dynamic(() => import("@/features/explore/components/explore-map"), {
   ssr: false,
@@ -15,13 +20,57 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 })
 
 export function ProBuilderMain() {
-  const { viewState, currentTrip, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen } = useTrip()
+  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen, setSelectedId, selectedId } = useTrip()
+  const searchParams = useSearchParams()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [leftTab, setLeftTab] = useState<'discover' | 'itinerary'>('itinerary')
+  
+  const [businesses, setBusinesses] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const q = searchParams.get("q") || ""
+  const loc = searchParams.get("loc") || ""
+  const cat = searchParams.get("cat") || ""
+  const rad = searchParams.get("rad") ? Number(searchParams.get("rad")) : undefined
+  const lat = searchParams.get("lat") || undefined
+  const lng = searchParams.get("lng") || undefined
+  const sort = searchParams.get("sort") || "recommended"
 
   useEffect(() => {
-    setPanelMode('builder')
-  }, [setPanelMode])
+    async function load() {
+      setLoading(true)
+      try {
+        const result = await fetchBusinesses({ 
+          query: q, 
+          loc, 
+          category: cat, 
+          radiusKm: rad,
+          userLat: lat ? Number(lat) : undefined,
+          userLng: lng ? Number(lng) : undefined,
+          sort,
+          limit: 100 
+        })
+        setBusinesses(result.businesses)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [q, loc, cat, rad, lat, lng, sort])
+
+  useEffect(() => {
+    if (panelMode === 'categories') {
+      setLeftTab('discover')
+    }
+  }, [panelMode])
+
+  useEffect(() => {
+    if (leftTab === 'discover') {
+      setPanelMode('categories')
+    } else {
+      setPanelMode('builder')
+    }
+  }, [leftTab, setPanelMode])
 
   // Fix white gap: Trigger Mapbox resize when sidebars toggle
   useEffect(() => {
@@ -84,13 +133,9 @@ export function ProBuilderMain() {
     }
   }
 
-  // Calculate mock budget
-  const estimatedTotal = currentTrip ? (currentTrip.days.length * 150 * currentTrip.paxCount) : 0;
-  const perPerson = currentTrip ? estimatedTotal / currentTrip.paxCount : 0;
-
   return (
-    <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-[#FAF9F6] font-sans relative">
-      {/* Left Panel - Days List (Magazine / Airbnb Style) */}
+    <div className="h-[calc(100vh-56px)] w-full flex overflow-hidden bg-[#FAF9F6] font-sans relative text-slate-900">
+      {/* Left Panel - Tabbed Discover & Timeline */}
       <div className={`shrink-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-16' : 'w-[420px]'} bg-[#FAF9F6] h-full flex flex-col z-20 shadow-xl border-r border-slate-100 relative`}>
         {/* Left Rail Toggle */}
         <div className="absolute top-6 right-3 z-30">
@@ -102,15 +147,67 @@ export function ProBuilderMain() {
           </button>
         </div>
 
-        {/* Content Container - fades out when collapsed */}
+        {/* Content Container */}
         <div className={`flex-1 flex flex-col transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100 overflow-hidden'}`}>
-          {currentTrip && (
-            <>
-              <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-hide bg-slate-50/50">
+          
+          {/* Sidebar Tabs */}
+          <div className="px-6 pt-6 pb-2 shrink-0">
+             <div className="bg-slate-100 p-1 rounded-2xl flex w-full">
+                <button 
+                  onClick={() => setLeftTab('discover')} 
+                  className={cn(
+                    "flex-1 flex justify-center items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest rounded-xl transition-all",
+                    leftTab === 'discover' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <Search className="w-3.5 h-3.5" /> Library
+                </button>
+                <button 
+                  onClick={() => setLeftTab('itinerary')} 
+                  className={cn(
+                    "flex-1 flex justify-center items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest rounded-xl transition-all",
+                    leftTab === 'itinerary' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <ListCollapse className="w-3.5 h-3.5" /> Days
+                </button>
+             </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            {leftTab === 'discover' ? (
+              <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="shrink-0 p-6 bg-white border-b border-slate-50">
+                  <ExploreSearch 
+                    initialQuery="" 
+                    isDrawerOpen={true}
+                    setIsDrawerOpen={() => {}}
+                    categoryCounts={{}}
+                  />
+                </div>
+
+                <div className="flex-1 overflow-hidden flex flex-col relative">
+                  {loading && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-rose-600 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Consulting Library...</p>
+                      </div>
+                    </div>
+                  )}
+                  <DiscoverPanel 
+                    businesses={businesses} 
+                    selectedId={selectedId} 
+                    setSelectedId={setSelectedId} 
+                    onReset={() => setLeftTab('itinerary')}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-hide bg-slate-50/50 animate-in fade-in slide-in-from-left-4 duration-300">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Itinerary Timeline</h3>
-                {currentTrip.days.map((day) => {
+                {currentTrip?.days.map((day) => {
                   const isActive = day.dayNumber === activeDayNumber
-                  
                   const timelineItems: { id: string, title: string, time: string, type: string }[] = [];
                   if (day.startAnchor) {
                     timelineItems.push({ id: `startAnchor-${day.dayNumber}`, title: day.startAnchor.title || "Starting Point", time: day.startAnchor.time || "09:00", type: 'ANCHOR' });
@@ -130,8 +227,6 @@ export function ProBuilderMain() {
                           <h3 className={`font-bold text-xl mb-1 font-serif ${isActive ? 'text-slate-900' : 'text-slate-700'}`}>Day {day.dayNumber}</h3>
                           <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{day.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                         </div>
-                        
-                        {/* Condensed summary for non-active days */}
                         {(!isActive) && day.events.length > 0 && (
                           <div className="flex flex-wrap justify-end gap-1 max-w-[120px]">
                             {day.events.slice(0, 4).map(e => (
@@ -147,8 +242,6 @@ export function ProBuilderMain() {
                           </div>
                         )}
                       </button>
-                      
-                      {/* Always Expanded Timeline View for Active Day */}
                       {isActive && (
                         <div className="px-6 pb-6 pt-0 animate-in slide-in-from-top-2 fade-in duration-300">
                           {timelineItems.length === 0 ? (
@@ -181,26 +274,26 @@ export function ProBuilderMain() {
                   )
                 })}
               </div>
-              
-              <div className="p-8 bg-transparent border-t border-slate-100 shrink-0">
-                <button
-                  onClick={() => setViewState('checkout')}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  Proceed to Checkout
-                </button>
-              </div>
-            </>
-          )}
+            )}
+          </div>
+          
+          <div className="p-8 bg-transparent border-t border-slate-100 shrink-0">
+            <button
+              onClick={() => setViewState('checkout')}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Center Panel - Map */}
+      {/* Center Panel - Map (Always working) */}
       <div className="flex-1 relative z-10 bg-slate-100 overflow-hidden">
         <ExploreMap businesses={mapEntities as any} selectedId={selectedId} onSelectBusiness={setSelectedId} />
       </div>
 
-      {/* Right Panel - Builder Workspace */}
+      {/* Right Panel - Builder Workspace (Day details) */}
       <div className={`shrink-0 transition-all duration-300 ease-in-out ${isWorkspaceCollapsed ? 'w-16' : 'w-[500px]'} z-20 bg-[#FAF9F6] shadow-[-10px_0_20px_rgba(0,0,0,0.03)] relative flex flex-col border-l border-slate-200`}>
         {/* Right Rail Toggle */}
         <div className="absolute top-6 left-3 z-30">

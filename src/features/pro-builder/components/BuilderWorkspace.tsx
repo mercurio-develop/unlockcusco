@@ -6,7 +6,6 @@ import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moo
 import { motion, AnimatePresence } from "framer-motion"
 import { LocationAutocomplete } from "./LocationAutocomplete"
 import { BusinessAutocomplete } from "./BusinessAutocomplete"
-import { ExperiencePickerModal } from "./ExperiencePickerModal"
 import { PackagePreviewModal } from "./PackagePreviewModal"
 import { EventType, TimelineEvent, MealEvent } from "@/lib/types/trip"
 import { v4 as uuidv4 } from "uuid"
@@ -22,8 +21,7 @@ function getEventIcon(type: EventType) {
 }
 
 export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: string | null, onSelectEvent?: (id: string) => void }) {
-  const { currentTrip, setCurrentTrip, activeDayNumber, addEvent, removeEvent, updateEvent, setViewState } = useTrip()
-  const [activeDayPicker, setActiveDayPicker] = useState<{dayNumber: number, eventId?: string, initialSearch?: string} | null>(null)
+  const { currentTrip, setCurrentTrip, activeDayNumber, addEvent, removeEvent, updateEvent, setViewState, setPanelMode, setExchangeTargetIndex } = useTrip()
   const [viewingPackage, setViewingPackage] = useState<string | null>(null)
   const [showAddMenu, setShowAddMenu] = useState(false)
 
@@ -74,7 +72,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
     }
     
     if (type === 'EXPERIENCE') {
-        setActiveDayPicker({ dayNumber: activeDayNumber! })
+        setPanelMode('categories')
         setShowAddMenu(false)
         return
     }
@@ -131,19 +129,39 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                 <div className="w-1 h-1 rounded-full bg-slate-900" />
               </div>
               <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow transition-shadow">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] block mb-3">Starting Point</span>
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] block">Starting Point</span>
+                  <input 
+                    type="time" 
+                    value={activeDay.startAnchor?.time || "09:00"} 
+                    onChange={(e) => updateDay(activeDay.dayNumber, { startAnchor: { ...activeDay.startAnchor, time: e.target.value }})}
+                    className="text-sm font-mono text-slate-900 font-bold bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl hover:bg-slate-100 focus:bg-white focus:border-slate-300 outline-none cursor-pointer transition-all [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                  />
+                </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <LocationAutocomplete 
                       placeholder="e.g. Hotel Monasterio, Cusco"
                       value={activeDay.startAnchor?.title || ""}
-                      onChange={(val) => updateDay(activeDay.dayNumber, { startAnchor: { ...activeDay.startAnchor, title: val }})}
+                      onChange={(val, lat, lng) => updateDay(activeDay.dayNumber, { startAnchor: { ...activeDay.startAnchor, title: val, lat, lng }})}
                       className="w-full p-2 bg-transparent border-b border-slate-200 text-base outline-none focus:border-slate-900 font-semibold text-slate-900 transition-colors"
                     />
                   </div>
                 </div>
-              </div>
-            </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
+                  <button onClick={() => { setExchangeTargetIndex(-1); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                    <Search className="w-3.5 h-3.5" /> Browse Vallecito Library
+                  </button>
+                  {(activeDay.startAnchor as any)?.service && (
+                    <button 
+                      onClick={() => setViewingPackage((activeDay.startAnchor as any).service.id)} 
+                      className="text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-xl transition-colors"
+                    >
+                      View Details
+                    </button>
+                  )}
+                </div>
+              </div>            </div>
 
             {/* EVENTS LOOP */}
             {activeDay.events.map((evt, index) => {
@@ -332,7 +350,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                               View Details
                             </button>
                             <button 
-                              onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} 
+                              onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} 
                               className="text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 px-4 py-2 rounded-xl transition-colors shadow-sm"
                             >
                               Change
@@ -347,9 +365,9 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                             businessId={(evt as any).businessId}
                             onChange={(title: string, businessId?: string, lat?: number, lng?: number) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId, locationLat: lat, locationLng: lng } as any)}
                           />
-                          <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value } as any)} className="w-full text-sm text-slate-500 outline-none bg-slate-50 p-3 rounded-xl border border-transparent focus:border-slate-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
+                          <input type="text" value={(evt as any).notes || ''} onChange={(e) => updateEvent(activeDay.dayNumber, evt.id, { notes: e.target.value } as any)} className="w-full text-sm text-slate-600 outline-none bg-white p-3 rounded-xl border border-amber-100/50 focus:border-amber-200 transition-colors" placeholder="Reservation notes or dietary requirements..." />
                           <div className="flex items-center mt-1">
-                            <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
+                            <button onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors">
                               <Search className="w-3.5 h-3.5" /> Browse Vallecito Library
                             </button>
                           </div>
@@ -394,7 +412,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                               View Details
                             </button>
                             <button 
-                              onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} 
+                              onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} 
                               className="text-xs font-bold text-slate-500 bg-white hover:bg-slate-50 px-4 py-2 rounded-xl transition-colors shadow-sm"
                             >
                               Change
@@ -410,7 +428,7 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                             onChange={(title: string, businessId?: string, lat?: number, lng?: number) => updateEvent(activeDay.dayNumber, evt.id, { title, businessId, lat, lng } as any)}
                           />
                           <div className="flex items-center mt-1">
-                            <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: evt.id, initialSearch: evt.title })} className="flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700 transition-colors">
+                            <button onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700 transition-colors">
                               <Search className="w-3.5 h-3.5" /> Browse Vallecito Library
                             </button>
                           </div>
@@ -489,12 +507,12 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                    <button onClick={() => setActiveDayPicker({ dayNumber: activeDay.dayNumber, eventId: 'endAnchor', initialSearch: activeDay.endAnchor?.title })} className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors">
+                    <button onClick={() => { setExchangeTargetIndex(-2); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors">
                       <Search className="w-3.5 h-3.5" /> Browse Vallecito Library
                     </button>
-                    {(activeDay.endAnchor as any)?.businessId && (
+                    {(activeDay.endAnchor as any)?.service && (
                       <button 
-                        onClick={() => setViewingPackage((activeDay.endAnchor as any).businessId!)} 
+                        onClick={() => setViewingPackage((activeDay.endAnchor as any).service.id)} 
                         className="text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-xl transition-colors"
                       >
                         View Details
@@ -523,14 +541,6 @@ export function BuilderWorkspace({ selectedId, onSelectEvent }: { selectedId?: s
           </div>
         </motion.div>
       </AnimatePresence>
-
-      <ExperiencePickerModal 
-        isOpen={activeDayPicker !== null} 
-        onClose={() => setActiveDayPicker(null)} 
-        dayNumber={activeDayPicker?.dayNumber || 1}
-        eventId={activeDayPicker?.eventId}
-        initialSearch={activeDayPicker?.initialSearch}
-      />
 
       <PackagePreviewModal 
         packageId={viewingPackage}

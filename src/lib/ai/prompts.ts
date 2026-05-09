@@ -67,6 +67,8 @@ Analyze the user's input and execute the EXACT matching state:
 Every single micro-itinerary MUST have a definitive start and end point. NEVER output raw markdown.
 - THE ARRIVAL (Day 1): The \`startAnchor\` MUST be 'Cusco Airport (CUZ)'. The \`endAnchor\` is their Basecamp.
 - THE CLOSED LOOP (Days 2+): If they are staying multiple nights in one town, the day MUST start at "Basecamp: [Town]" and end at "Basecamp: [Town]".
+- ANCHOR EXPERIENCES: If a user specifies they are starting from or ending at a real business (e.g. "Starting from Tambo del Inka"), pass that name in \`originLocation\` or \`destination\`. The tool will attempt to resolve it to a real service and attach it to the anchor.
+- TIME MANAGEMENT: You can specify times for start and end anchors by mentioning them in constraints or context.
 - You MUST always ensure the final transit edge logically transports the user safely back to their Basecamp to sleep. Do not leave them stranded.
 </THE_CLOSED_LOOP_ANCHOR>
 

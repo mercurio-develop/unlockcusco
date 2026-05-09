@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, SlidersHorizontal, Navigation, MapPin } from "lucide-react"
 import posthog from 'posthog-js'
@@ -22,6 +22,7 @@ export function ExploreSearch({
   categoryCounts = {}
 }: ExploreSearchProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [value, setValue] = useState(initialQuery)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
@@ -66,7 +67,7 @@ export function ExploreSearch({
     if (sort && sort !== "recommended") params.set("sort", sort)
     if (showFilters) params.set("filter", "open")
     
-    router.push(`/explore?${params.toString()}`)
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   const handleSearchChange = (newVal: string) => {

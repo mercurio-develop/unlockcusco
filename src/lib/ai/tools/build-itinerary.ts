@@ -61,16 +61,46 @@ USE THIS for any request involving: travel between towns, coffee/food/activities
 CALL IT as soon as you have origin + destination. Ask for missing info conversationally first if needed.`,
 
   inputSchema: z.object({
-    originLocation: z.string().describe('Tourist\'s current location, e.g. "Pisac"'),
-    destination:    z.string().describe('Final destination for the night, e.g. "Ollantaytambo"'),
+    originLocation: z.string().describe('Tourist\'s current location, e.g. "Pisac" or a specific hotel/business name'),
+    destination:    z.string().describe('Final destination for the night, e.g. "Ollantaytambo" or a specific restaurant/business'),
     desires:        z.array(z.string()).describe('Stops the tourist wants, e.g. ["coffee", "market"]'),
     constraints:    z.string().optional().describe('Any constraints: "train at 6am", "vegetarian", "budget"'),
+    userLat:        z.number().optional().describe('User\'s current latitude'),
+    userLng:        z.number().optional().describe('User\'s current longitude'),
   }),
 
-  execute: async ({ originLocation, destination, desires, constraints }) => {
-    const originCoords = getCoords(originLocation);
-    const destCoords   = getCoords(destination);
+  execute: async ({ originLocation, destination, desires, constraints, userLat, userLng }) => {
+    // RESOLVE ANCHORS TO BUSINESSES IF POSSIBLE
+    const resolveAnchor = async (locStr: string) => {
+       const business = await prisma.business.findFirst({
+         where: {
+           OR: [
+             { name: { contains: locStr, mode: 'insensitive' } },
+             { slug: { equals: locStr.toLowerCase() } }
+           ]
+         }
+       });
+       if (business) return { title: business.name, lat: business.lat || undefined, lng: business.lng || undefined, service: business };
+       
+       const coords = getCoords(locStr);
+       return { title: locStr, lat: coords.lat, lng: coords.lng };
+    };
+
+    const startAnchor = await resolveAnchor(originLocation);
+    const endAnchor   = await resolveAnchor(destination);
+
+    const originCoords = { lat: startAnchor.lat || COORDS_MAP.urubamba.lat, lng: startAnchor.lng || COORDS_MAP.urubamba.lng };
+    const destCoords   = { lat: endAnchor.lat || COORDS_MAP.urubamba.lat, lng: endAnchor.lng || COORDS_MAP.urubamba.lng };
     
+    // OVERRIDE WITH GPS IF USER IS IN SACRED VALLEY AND ASKS FOR "current location"
+    if ((originLocation.toLowerCase().includes('current') || originLocation.toLowerCase().includes('here')) && userLat && userLng) {
+       originCoords.lat = userLat;
+       originCoords.lng = userLng;
+       startAnchor.title = "Current Location";
+       startAnchor.lat = userLat;
+       startAnchor.lng = userLng;
+    }
+
     // BOUNDED CORRIDOR ALGORITHM
     const VALLEY_ARRAY = ["cusco", "taray", "pisac", "calca", "urubamba", "ollantaytambo"];
     const PLATEAU_ARRAY = ["cusco", "poroy", "chinchero", "maras", "moray", "urubamba", "ollantaytambo"];
@@ -400,18 +430,16 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
 
     return {
       startAnchor: {
-        title: originLocation,
-        locationStr: originLocation,
-        type: 'GENERIC_TOWN',
-        lat: originCoords.lat,
-        lng: originCoords.lng,
+        ...startAnchor,
+        locationStr: startAnchor.title,
+        type: 'GENERIC_TOWN' as const,
+        time: (transitEdges[0] as any)?.startTime || "09:00"
       },
       endAnchor: {
-        title: destination,
-        locationStr: destination,
-        type: 'GENERIC_TOWN',
-        lat: destCoords.lat,
-        lng: destCoords.lng,
+        ...endAnchor,
+        locationStr: endAnchor.title,
+        type: 'GENERIC_TOWN' as const,
+        time: (transitEdges[transitEdges.length - 1] as any)?.endTime || "18:00"
       },
       needsAccommodationUpsell: true,
       waypoints,
