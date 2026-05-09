@@ -94,14 +94,16 @@ export function ProBuilderMain() {
     
     // 1. Add current trip events
     if (currentTrip) {
-      currentTrip.days.forEach(d => {
+      currentTrip.days.forEach((d: any) => {
         if (d.events.length > 0 || d.dayNumber === activeDayNumber) {
           if (d.startAnchor?.lat && d.startAnchor?.lng) {
-            entities.push({ id: `startAnchor-${d.dayNumber}`, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR' });
+            const id = `startAnchor-${d.dayNumber}`;
+            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR', isItineraryItem: true });
           }
-          d.events.filter(e => e.type !== 'NOTE').forEach(e => entities.push(e));
+          d.events.filter((e: any) => e.type !== 'NOTE').forEach((e: any) => entities.push({ ...e, isItineraryItem: true }));
           if (d.endAnchor?.lat && d.endAnchor?.lng) {
-            entities.push({ id: `endAnchor-${d.dayNumber}`, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR' });
+            const id = `endAnchor-${d.dayNumber}`;
+            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR', isItineraryItem: true });
           }
         }
       });
@@ -109,14 +111,17 @@ export function ProBuilderMain() {
 
     // 2. Add library businesses (if on discover tab)
     if (leftTab === 'discover' && businesses.length > 0) {
-      businesses.forEach(b => {
-        if (!entities.find(e => e.id === b.id)) {
-          entities.push(b);
+      businesses.forEach((b: any) => {
+        const existing = entities.find((e: any) => e.id === b.id);
+        if (existing) {
+          existing.isLibraryItem = true;
+        } else {
+          entities.push({ ...b, isLibraryItem: true });
         }
       });
     }
 
-    return entities.map(e => {
+    return entities.map((e: any) => {
       let evtLat = e.lat;
       let evtLng = e.lng;
       if (e.type === 'TRANSPORT') {
@@ -141,7 +146,7 @@ export function ProBuilderMain() {
   if (viewState === 'wizard') return <BuilderWizard />
   if (viewState === 'checkout') return <CheckoutDetailsForm />
 
-  const activeDay = currentTrip?.days.find(d => d.dayNumber === activeDayNumber)
+  const activeDay = currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)
 
   // Helper to get small icons for event types
   const getSmallIcon = (type: string) => {
@@ -227,13 +232,13 @@ export function ProBuilderMain() {
             ) : (
               <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-hide bg-slate-50/50 animate-in fade-in slide-in-from-left-4 duration-300">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Itinerary Timeline</h3>
-                {currentTrip?.days.map((day) => {
+                {currentTrip?.days.map((day: any) => {
                   const isActive = day.dayNumber === activeDayNumber
                   const timelineItems: { id: string, title: string, time: string, type: string }[] = [];
                   if (day.startAnchor) {
                     timelineItems.push({ id: `startAnchor-${day.dayNumber}`, title: day.startAnchor.title || "Starting Point", time: day.startAnchor.time || "09:00", type: 'ANCHOR' });
                   }
-                  day.events.forEach(e => timelineItems.push({ id: e.id, title: e.title, time: e.startTime, type: e.type }));
+                  day.events.forEach((e: any) => timelineItems.push({ id: e.id, title: e.title, time: e.startTime, type: e.type }));
                   if (day.endAnchor) {
                     timelineItems.push({ id: `endAnchor-${day.dayNumber}`, title: day.endAnchor.title || "End of Day", time: day.endAnchor.time || "18:00", type: 'ANCHOR' });
                   }
@@ -250,7 +255,7 @@ export function ProBuilderMain() {
                         </div>
                         {(!isActive) && day.events.length > 0 && (
                           <div className="flex flex-wrap justify-end gap-1 max-w-[120px]">
-                            {day.events.slice(0, 4).map(e => (
+                            {day.events.slice(0, 4).map((e: any) => (
                               <div key={e.id} className="w-6 h-6 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center" title={e.title}>
                                 {getSmallIcon(e.type)}
                               </div>
@@ -269,7 +274,7 @@ export function ProBuilderMain() {
                             <p className="text-sm text-slate-500 font-medium bg-slate-50 p-5 rounded-2xl text-center border border-slate-200 border-dashed">No events scheduled.</p>
                           ) : (
                             <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
-                              {timelineItems.map((e, i) => (
+                              {timelineItems.map((e: any, i: number) => (
                                 <div 
                                   key={e.id} 
                                   className="relative flex items-center justify-between group pl-8 cursor-pointer hover:bg-slate-50 py-1 -ml-2 pl-10 rounded-r-xl transition-colors"

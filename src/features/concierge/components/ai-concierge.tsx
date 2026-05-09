@@ -4,12 +4,12 @@ import { Business } from "@prisma/client";
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, X, Send, Bot, User, Settings2, Check } from "lucide-react"
+import { Sparkles, X, Send, Bot, User, Settings2, Check, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport, type UIMessage } from 'ai'
+import { DefaultChatTransport } from 'ai'
 import { DEFAULT_COORDS } from "@/lib/constants"
 import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
@@ -18,31 +18,27 @@ import { MacroItineraryCard } from "@/features/concierge/components/MacroItinera
 import { BoletoInfoCard } from "./BoletoInfoCard"
 import { TaxiFareCard } from "./TaxiFareCard"
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 
 export function AiConcierge() {
   const [input, setInput] = useState("")
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity } = usePreferences()
   const { 
-    isChatOpen, 
-    setIsChatOpen, 
-    travelVibe, 
-    travelIntensity, 
     isWorkspaceCollapsed, 
     panelMode, 
     aiPromptToTrigger, 
     setAiPromptToTrigger,
     activeItinerary,
     setActiveItinerary,
-    currentTrip,
-    setCurrentTrip,
-    updateEvent,
-    activeDayNumber
+    activeDayNumber,
+    setStartAnchorLocation,
+    setPanelMode
   } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Determine the offset: if in builder mode and sidebar is open, push left by 500px
   const isBuilder = panelMode === 'builder'
   const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
 
@@ -61,7 +57,29 @@ export function AiConcierge() {
     messages: initialMessages
   });
 
-  // Listen for manual trigger from TripContext
+  const handleShareLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setStartAnchorLocation(latitude, longitude);
+        setPanelMode('itinerary');
+        
+        // Notify AI that location was shared
+        sendMessage({
+          text: `[INTERNAL] User shared GPS coordinates: ${latitude}, ${longitude}. Starting point set to 'Current Location'. Acknowledge and proceed.`
+        });
+      },
+      () => {
+        alert("Unable to retrieve your location. Please check permissions.");
+      }
+    );
+  };
+
   useEffect(() => {
     if (aiPromptToTrigger) {
       setIsChatOpen(true);
@@ -81,16 +99,15 @@ export function AiConcierge() {
     }
   }, [aiPromptToTrigger, travelVibe, travelIntensity, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
 
-  // Listen for itinerary mutations from the AI
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === 'assistant' && lastMessage.parts) {
       const mutatePart = lastMessage.parts.find((p: any) => p.type === 'tool-invocation' && p.toolName === 'mutateItinerary' && p.state === 'result');
       if (mutatePart && (mutatePart as any).result?.success) {
         const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = (mutatePart as any).result;
-        
+
         if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
-          const updatedWaypoints = activeItinerary.waypoints.map(w => 
+          const updatedWaypoints = activeItinerary.waypoints.map((w: any) => 
             w.id === targetId ? {
               ...w,
               id: resolvedBusiness.id,
@@ -139,7 +156,7 @@ export function AiConcierge() {
           } else if (targetId === 'itin-arrival') {
             setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time }});
           } else {
-            const updatedWaypoints = activeItinerary.waypoints.map(w => w.id === targetId ? { ...w, startTime: time } : w);
+            const updatedWaypoints = activeItinerary.waypoints.map((w: any) => w.id === targetId ? { ...w, startTime: time } : w);
             setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
           }
         }
@@ -159,14 +176,13 @@ export function AiConcierge() {
     scrollToBottom()
   }, [messages, status])
 
-  // Seamless Handoff: auto-submit ai_prompt if present
   useEffect(() => {
     const aiPrompt = searchParams.get("ai_prompt");
     const data = searchParams.get("data");
-    
+
     if (aiPrompt) {
       setIsChatOpen(true);
-      
+
       let promptText = aiPrompt;
       if (aiPrompt === "macro_trip" && data) {
         try {
@@ -184,7 +200,6 @@ Please generate my macro trip plan.`;
         }
       }
 
-      // Wait a tiny bit for UI to mount before sending message
       setTimeout(() => {
         sendMessage(
           { text: promptText },
@@ -199,8 +214,7 @@ Please generate my macro trip plan.`;
           }
         );
       }, 300);
-      
-      // Clean up the URL
+
       const params = new URLSearchParams(searchParams.toString());
       params.delete("ai_prompt");
       params.delete("data");
@@ -208,7 +222,6 @@ Please generate my macro trip plan.`;
       const newUrl = newSearch ? `${pathname}?${newSearch}` : pathname;
       router.replace(newUrl, { scroll: false });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, travelVibe, travelIntensity, pathname, router]);
 
   if (pathname !== "/explore") {
@@ -237,16 +250,6 @@ Please generate my macro trip plan.`;
 
   return (
     <>
-      {/* Mobile FAB - Hidden because it's now in the bottom tab bar */}
-      {/* <div className="md:hidden fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={() => setIsChatOpen(true)}
-          className="w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl hover:scale-110 transition-all flex items-center justify-center border-2 border-white/20"
-        >
-          <Sparkles className="w-6 h-6" />
-        </Button>
-      </div> */}
-
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
@@ -257,7 +260,6 @@ Please generate my macro trip plan.`;
             className="fixed inset-0 sm:inset-auto sm:top-[56px] sm:right-0 z-[100] sm:z-40 w-full sm:w-[450px] h-full sm:h-[calc(100vh-56px)]"
           >
             <Card className="flex flex-col h-full rounded-none sm:rounded-tl-3xl shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
-              {/* Header */}
               <div className="bg-gray-50 border-b border-gray-200 p-4 sm:p-5 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="bg-rose-50 border border-rose-100 p-2 rounded-xl shadow-inner">
@@ -278,84 +280,101 @@ Please generate my macro trip plan.`;
                 </Button>
               </div>
 
-              {/* Chat Area */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white">
                 {messages.map((msg) => {
                   const content = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
                   if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
-                  
+
                   return (
                     <div key={msg.id} className="flex flex-col gap-2">
                       <div 
                         className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                       >
-                      <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
-                        {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-rose-600" />}
+                        <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
+                          {msg.role === "user" ? <User className="w-4 h-4 text-slate-600" /> : <Bot className="w-4 h-4 text-rose-600" />}
+                        </div>
+                        <div 
+                          className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
+                            msg.role === "user" 
+                              ? "bg-slate-900 text-white rounded-tr-sm" 
+                              : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
+                          }`}
+                        >
+                          {(() => {
+                            const text = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('') || '';
+                            if (!text.includes('[[SETTINGS_ICON]]')) return text;
+
+                            const parts = text.split('[[SETTINGS_ICON]]');
+                            return (
+                              <>
+                                {parts[0]}
+                                <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
+                                {parts[1]}
+                              </>
+                            );
+                          })()}
+                        </div>
                       </div>
-                      <div 
-                        className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
-                          msg.role === "user" 
-                            ? "bg-slate-900 text-white rounded-tr-sm" 
-                            : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
-                        }`}
-                      >
-                        {(() => {
-                          const text = (msg as any).content || msg.parts?.map((p: any) => p.type === 'text' ? p.text : '').join('') || '';
-                          if (!text.includes('[[SETTINGS_ICON]]')) return text;
-                          
-                          const parts = text.split('[[SETTINGS_ICON]]');
-                          return (
-                            <>
-                              {parts[0]}
-                              <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
-                              {parts[1]}
-                            </>
-                          );
-                        })()}
-                      </div>
+                      
+                      {msg.parts && msg.parts.map((part: any, idx: number) => {
+                        const key = part.toolCallId || idx;
+                        
+                        if (part.type === 'tool-invocation') {
+                           if (part.toolName === 'askAvailability' && part.state !== 'result') {
+                              return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
+                           }
+                           if (part.toolName === 'askUserLocation' && part.state !== 'result') {
+                              return (
+                                <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11">
+                                  <p className="text-sm text-rose-900 font-medium leading-relaxed">
+                                    {part.args.message}
+                                  </p>
+                                  <button 
+                                    onClick={handleShareLocation}
+                                    className="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-rose-500 transition-all flex items-center justify-center gap-2"
+                                  >
+                                    <Navigation className="w-4 h-4" /> Share My GPS Position
+                                  </button>
+                                </div>
+                              )
+                           }
+                        }
+
+                        if (part.state === 'result') {
+                          if (part.toolName === 'buildItinerary') {
+                            return <ItinerarySummaryCard key={key} itinerary={part.result} />
+                          }
+                          if (part.toolName === 'buildMacroTrip') {
+                            return <MacroItineraryCard key={key} itinerary={part.result} />
+                          }
+                          if (part.toolName === 'searchDatabase') {
+                            return <SearchResultsCard key={key} businesses={part.result} />
+                          }
+                          if (part.toolName === 'askAvailability') {
+                            return <PendingAvailability key={key} message={part.result.message} />
+                          }
+                          if (part.toolName === 'showBoletoInfo') {
+                            return <BoletoInfoCard key={key} data={part.result.data} message={part.result.message} />
+                          }
+                          if (part.toolName === 'estimateTaxiFare') {
+                            return <TaxiFareCard key={key} data={part.result} />
+                          }
+                          if (part.toolName === 'mutateItinerary') {
+                            return (
+                              <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11">
+                                 <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                    <Check className="w-3.5 h-3.5 text-white" />
+                                 </div>
+                                 <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">Itinerary Updated</span>
+                              </div>
+                            )
+                          }
+                        }
+                        return null;
+                      })}
                     </div>
-                      {/* AI SDK v6: ToolUIPart uses type `tool-${toolName}`, state 'output-available', field `output` */}
-                    {msg.parts && msg.parts.map((part: any, idx: number) => {
-                      const key = part.toolCallId || idx;
-                      if (part.state === 'output-available') {
-                        if (part.type === 'tool-buildItinerary') {
-                          import('posthog-js').then(ph => ph.default.capture('itinerary_generated', { title: part.output.title }));
-                          return <ItinerarySummaryCard key={key} itinerary={part.output} />
-                        }
-                        if (part.type === 'tool-buildMacroTrip') {
-                          import('posthog-js').then(ph => ph.default.capture('macro_trip_generated', { title: part.output.title }));
-                          return <MacroItineraryCard key={key} itinerary={part.output} />
-                        }
-                        if (part.type === 'tool-searchDatabase') {
-                          return <SearchResultsCard key={key} businesses={part.output} />
-                        }
-                        if (part.type === 'tool-askAvailability') {
-                          return <PendingAvailability key={key} message={part.output.message} />
-                        }
-                        if (part.type === 'tool-showBoletoInfo') {
-                          return <BoletoInfoCard key={key} data={part.output.data} message={part.output.message} />
-                        }
-                        if (part.type === 'tool-estimateTaxiFare') {
-                          return <TaxiFareCard key={key} data={part.output} />
-                        }
-                        if (part.type === 'tool-mutateItinerary') {
-                          return (
-                            <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2">
-                               <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-                                  <Check className="w-3.5 h-3.5 text-white" />
-                               </div>
-                               <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">Itinerary Updated</span>
-                            </div>
-                          )
-                        }
-                      }
-                      if (part.type === 'tool-askAvailability' && part.state !== 'output-available') {
-                        return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
-                      }
-                      return null;
-                    })}
-                  </div>
-                )})}
+                  )
+                })}
                 {isLoading && messages[messages.length - 1]?.role === "user" && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
@@ -368,30 +387,11 @@ Please generate my macro trip plan.`;
                         <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
                       </div>
                     </div>
-                    {(messages[messages.length - 1] as any)?.content?.includes("I have completed the Journey Designer") && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-2 rounded-xl overflow-hidden shadow-lg border border-rose-100 relative h-48 w-[300px]"
-                      >
-                        <img 
-                          src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop" 
-                          alt="Designing Journey" 
-                          className="absolute inset-0 w-full h-full object-cover filter brightness-75"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex flex-col justify-end p-4">
-                          <Sparkles className="w-6 h-6 text-rose-400 mb-2 animate-pulse" />
-                          <h4 className="text-white font-serif font-bold text-lg leading-tight">Designing your expedition...</h4>
-                          <p className="text-slate-300 text-xs mt-1">Consulting the ancestral routes.</p>
-                        </div>
-                      </motion.div>
-                    )}
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Suggestions / Multi-Chip Selection */}
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
                 {[
                   { label: "Plan my day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
@@ -423,7 +423,6 @@ Please generate my macro trip plan.`;
                 ))}
               </div>
 
-              {/* Input Area */}
               <div className="px-4 pb-6 pt-2 bg-white shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input 

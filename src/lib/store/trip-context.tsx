@@ -5,6 +5,7 @@ import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import type { UniversalTrip, TimelineEvent, TripDay } from '@/lib/types/trip';
 import posthog from 'posthog-js';
+import { usePreferences } from './preferences-context';
 
 import { COORDS_MAP, DEFAULT_COORDS } from "@/lib/constants";
 
@@ -46,12 +47,6 @@ interface TripContextType {
   entityStatuses: Record<string, 'pending' | 'checking' | 'confirmed' | 'unavailable'>;
   startBookingOrchestration: () => Promise<void>;
   resetBooking: () => void;
-  isChatOpen: boolean;
-  setIsChatOpen: (open: boolean) => void;
-  travelVibe: string | null;
-  setTravelVibe: (vibe: string | null) => void;
-  travelIntensity: number | null;
-  setTravelIntensity: (intensity: number | null) => void;
   isWorkspaceCollapsed: boolean;
   setIsWorkspaceCollapsed: (collapsed: boolean) => void;
   exchangeTargetIndex: number | null;
@@ -61,6 +56,7 @@ interface TripContextType {
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
 export function TripProvider({ children }: { children: ReactNode }) {
+  const { setIsChatOpen } = usePreferences();
   const [activeItinerary, setActiveItinerary] = useState<OptimizedPlan | null>(null);
   const [macroTrip, setMacroTrip] = useState<any | null>(null);
   const [currentTrip, setCurrentTrip] = useState<UniversalTrip | null>(null);
@@ -70,9 +66,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [activeDayNumber, setActiveDayNumber] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [leftWidth, setLeftWidth] = useState(40);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [travelVibe, setTravelVibe] = useState<string | null>(null);
-  const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
   const [isWorkspaceCollapsed, setIsWorkspaceCollapsed] = useState(false);
   const [exchangeTargetIndex, setExchangeTargetIndex] = useState<number | null>(null);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
@@ -82,9 +75,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (bookingStatus === 'payment_required' && !hasRequestedFeedback) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAiPromptToTrigger("[INTERNAL] The day is secured and ready for payment. Proactively ask the user for feedback on their experience with Vallecito so far and if there's anything to improve.");
-       
       setHasRequestedFeedback(true);
     }
   }, [bookingStatus, hasRequestedFeedback]);
@@ -281,7 +272,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
           ...prev.startAnchor,
           lat,
           lng,
-          locationStr: "My Location"
+          locationStr: "My Location",
+          title: "Current Location"
         }
       };
     });
@@ -448,6 +440,19 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setExchangeTargetIndex(null);
     }
 
+    let calculatedStartTime = '10:00';
+    if (currentTrip && dayNum) {
+      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === dayNum);
+      if (activeDay && activeDay.events && activeDay.events.length > 0) {
+        const lastEvent = activeDay.events[activeDay.events.length - 1];
+        if (lastEvent.startTime) {
+          const [hours, minutes] = lastEvent.startTime.split(':').map(Number);
+          const nextHours = Math.min(23, hours + 2);
+          calculatedStartTime = `${nextHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
+    }
+
     let newEvent: TimelineEvent;
 
     if (isTransport) {
@@ -457,7 +462,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         method: 'CAR', // Default
         from: 'Current Location', 
         to: service.name,
-        startTime: '10:00',
+        startTime: calculatedStartTime,
         title: service.name,
         service: service
       };
@@ -465,7 +470,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       newEvent = {
         id: crypto.randomUUID(),
         type: 'STAY',
-        startTime: '10:00',
+        startTime: calculatedStartTime,
         title: service.name,
         lat: service.lat || undefined,
         lng: service.lng || undefined,
@@ -475,7 +480,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       newEvent = {
         id: crypto.randomUUID(),
         type: 'EXPERIENCE',
-        startTime: '10:00',
+        startTime: calculatedStartTime,
         title: service.name,
         lat: service.lat || undefined,
         lng: service.lng || undefined,
@@ -583,7 +588,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
         setActiveItinerary(newItin);
     }
 
-    // Always ensure currentTrip exists and add the event to it
     if (!currentTrip) {
         const initialTrip: UniversalTrip = {
             title: "My Expedition",
@@ -603,7 +607,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
         addEvent(dayNum, newEvent);
     }
 
-    // If it's a new itinerary or using default anchors, ask for locations to establish a trace
     const isDefaultItin = !activeItinerary || (activeItinerary.startAnchor.title === "Urubamba" && activeItinerary.endAnchor.title === "Urubamba");
 
     if (isDefaultItin) {
@@ -648,12 +651,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
       createDay,
       updateEvent,
       insertWaypoint,
-      isChatOpen,
-      setIsChatOpen,
-      travelVibe,
-      setTravelVibe,
-      travelIntensity,
-      setTravelIntensity,
       isWorkspaceCollapsed,
       setIsWorkspaceCollapsed,
       exchangeTargetIndex,
@@ -670,10 +667,13 @@ export function TripProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useTrip() {
-  const context = useContext(TripContext);
-  if (context === undefined) {
-    throw new Error('useTrip must be used within a TripProvider');
+export function useTrip(): any {
+  const trip = useContext(TripContext);
+  const prefs = usePreferences();
+  
+  if (trip === undefined) {
+    return { ...prefs };
   }
-  return context;
+  
+  return { ...trip, ...prefs };
 }

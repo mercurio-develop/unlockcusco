@@ -78,8 +78,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
 
   const completedDays = useMemo(() => {
     if (panelMode !== "builder" || !currentTrip) return [];
-    const daysToRender = currentTrip.days.filter(d => (d.events && d.events.length > 0) || d.dayNumber === activeDayNumber);
-    return daysToRender.map(d => {
+    const daysToRender = currentTrip.days.filter((d: any) => (d.events && d.events.length > 0) || d.dayNumber === activeDayNumber);
+    return daysToRender.map((d: any) => {
       const pts: [number, number][] = [];
       if (d.startAnchor?.lat && d.startAnchor?.lng) pts.push([d.startAnchor.lng, d.startAnchor.lat]);
       for (const evt of d.events || []) {
@@ -98,7 +98,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   useEffect(() => {
     if (!mapboxToken || completedDays.length === 0) return;
     
-    completedDays.forEach(day => {
+    completedDays.forEach((day: any) => {
       if (day.waypoints.length < 2) return;
       
       const fallbackFeature: GeoJSON.Feature<GeoJSON.LineString> = {
@@ -107,7 +107,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         geometry: { type: 'LineString', coordinates: day.waypoints }
       };
 
-      const coordsStr = day.waypoints.map(c => `${c[0]},${c[1]}`).join(';');
+      const coordsStr = day.waypoints.map((c: any) => `${c[0]},${c[1]}`).join(';');
       if (day.waypoints.length <= 25) {
         fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${coordsStr}?geometries=geojson&overview=full&access_token=${mapboxToken}`)
           .then(res => res.json())
@@ -149,7 +149,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
       }
       if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
     } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
       if (activeDay) {
         const start = activeDay.startAnchor;
         const end = activeDay.endAnchor;
@@ -178,7 +178,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
       if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
       if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
     } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
       if (activeDay) {
         const start = activeDay.startAnchor;
         const end = activeDay.endAnchor;
@@ -247,8 +247,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const itineraryMarkers = useMemo(() => {
     if (panelMode !== "itinerary" || !activeItinerary) return [];
     return activeItinerary.waypoints
-      .filter(w => w.lat && w.lng)
-      .map((w, idx) => ({ pick: w, idx }));
+      .filter((w: any) => w.lat && w.lng)
+      .map((w: any, idx: number) => ({ pick: w, idx }));
   }, [activeItinerary, panelMode]);
 
   // Fly to selected business or itinerary point
@@ -265,7 +265,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
       startAnchor = activeItinerary.startAnchor;
       endAnchor = activeItinerary.endAnchor;
     } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
       startAnchor = activeDay?.startAnchor;
       endAnchor = activeDay?.endAnchor;
     }
@@ -303,7 +303,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           break;
         }
         if (wp.alternatives) {
-          const alt = wp.alternatives.find(a => a.id === selectedId);
+          const alt = wp.alternatives.find((a: any) => a.id === selectedId);
           if (alt && alt.lat !== undefined && alt.lng !== undefined) {
             targetLat = alt.lat;
             targetLng = alt.lng;
@@ -315,7 +315,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     
     // 3. Pro Builder (Multi-Day) Match
     if (!targetLat && panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
       if (activeDay) {
         for (const evt of activeDay.events || []) {
           if (evt.id === selectedId) {
@@ -381,7 +381,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   useEffect(() => {
     if (!mapRef.current || !activeDayNumber || !currentTrip || selectedId) return;
 
-    const day = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+    const day = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
     if (day?.startAnchor?.lat && day?.startAnchor?.lng) {
       mapRef.current.flyTo({
         center: [day.startAnchor.lng, day.startAnchor.lat],
@@ -510,7 +510,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           if (panelMode === "itinerary" && activeItinerary) {
             start = activeItinerary.startAnchor;
           } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-            const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+            const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
             start = activeDay?.startAnchor;
           }
           if (!start?.lat || !start?.lng) return null;
@@ -553,7 +553,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
           if (panelMode === "itinerary" && activeItinerary) {
             end = activeItinerary.endAnchor;
           } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-            const activeDay = currentTrip.days.find(d => d.dayNumber === activeDayNumber);
+            const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
             end = activeDay?.endAnchor;
           }
           if (!end?.lat || !end?.lng) return null;
@@ -590,7 +590,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         })()}
 
         {/* Itinerary waypoint markers */}
-        {itineraryMarkers.map(({ pick, idx }) => {
+        {itineraryMarkers.map(({ pick, idx }: { pick: any, idx: number }) => {
           const style = getCategoryStyle(pick.category);
           const isSelected = selectedId === pick.id;
           const Icon = style.icon;
@@ -640,7 +640,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
               <div
                 className={cn(
                   "cursor-pointer transition-all duration-300 relative flex flex-col items-center animate-in zoom-in fade-in slide-in-from-bottom-4",
-                  isSelected ? "scale-125 z-50" : "scale-100 z-10"
+                  isSelected ? "scale-125 z-50" : "scale-100 z-10",
+                  (panelMode === "categories" && (business as any).isItineraryItem && !(business as any).isLibraryItem) ? "opacity-50 grayscale hover:opacity-100 hover:grayscale-0" : ""
                 )}
                 style={{ animationDuration: `${300 + (index % 10) * 50}ms` }}
               >
@@ -765,8 +766,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 w-48 pointer-events-auto">
           <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">Itinerary Trace</h4>
           <div className="space-y-2.5">
-            {completedDays.map(day => {
-              const DAY_COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5AC8FA"];
+            {completedDays.map((day: any) => {
+              const DAY_COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5856D6"];
               const color = DAY_COLORS[(day.dayNumber - 1) % DAY_COLORS.length];
               return (
                 <button 

@@ -34,7 +34,7 @@ export function BuilderWorkspace({
   const [viewingPackage, setViewingPackage] = useState<string | null>(null)
   const [showAddMenu, setShowAddMenu] = useState(false)
 
-  const activeDay = currentTrip?.days.find(d => d.dayNumber === activeDayNumber)
+  const activeDay = currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -115,22 +115,22 @@ export function BuilderWorkspace({
 
   const moveEvent = (dayNumber: number, eventId: string, direction: number) => {
     if (!currentTrip) return
-    const day = currentTrip.days.find(d => d.dayNumber === dayNumber)
+    const day = currentTrip.days.find((d: any) => d.dayNumber === dayNumber)
     if (!day) return
-    const index = day.events.findIndex(e => e.id === eventId)
+    const index = day.events.findIndex((e: any) => e.id === eventId)
     if (index < 0) return
     if (index + direction < 0 || index + direction >= day.events.length) return
     const newEvents = [...day.events]
     const temp = newEvents[index]
     newEvents[index] = newEvents[index + direction]
     newEvents[index + direction] = temp
-    const newDays = currentTrip.days.map(d => d.dayNumber === dayNumber ? { ...d, events: newEvents } : d)
+    const newDays = currentTrip.days.map((d: any) => d.dayNumber === dayNumber ? { ...d, events: newEvents } : d)
     setCurrentTrip({ ...currentTrip, days: newDays })
   }
 
   const updateDay = (dayNumber: number, updates: any) => {
     if (!currentTrip) return
-    const newDays = currentTrip.days.map(d => d.dayNumber === dayNumber ? { ...d, ...updates } : d)
+    const newDays = currentTrip.days.map((d: any) => d.dayNumber === dayNumber ? { ...d, ...updates } : d)
     setCurrentTrip({ ...currentTrip, days: newDays })
   }
 
@@ -215,9 +215,9 @@ export function BuilderWorkspace({
               </div>            </div>
 
             {/* EVENTS LOOP */}
-            {activeDay.events.map((evt, index) => {
-              const prevLocEvent = activeDay.events.slice(0, index).reverse().find(e => ['EXPERIENCE', 'MEAL', 'STAY'].includes(e.type));
-              const nextLocEvent = activeDay.events.slice(index + 1).find(e => ['EXPERIENCE', 'MEAL', 'STAY'].includes(e.type));
+            {activeDay.events.map((evt: any, index: number) => {
+              const prevLocEvent = activeDay.events.slice(0, index).reverse().find((e: any) => ['EXPERIENCE', 'MEAL', 'STAY'].includes(e.type));
+              const nextLocEvent = activeDay.events.slice(index + 1).find((e: any) => ['EXPERIENCE', 'MEAL', 'STAY'].includes(e.type));
               const suggestedFrom = prevLocEvent?.title || activeDay.startAnchor?.title || "Starting Location";
               const suggestedTo = nextLocEvent?.title || activeDay.endAnchor?.title || "Destination";
 
@@ -277,35 +277,45 @@ export function BuilderWorkspace({
                   </div>
                   
                   {evt.type === 'EXPERIENCE' && (
-                    <div>
-                      <h4 className="font-bold text-slate-900 font-serif text-xl mb-1">{evt.title || "Selected Vallecito Experience"}</h4>
-                      {variant === 'live' && (evt as any).service?.description && (
-                        <p className="text-sm text-slate-500 line-clamp-2 mt-2 leading-relaxed italic font-serif">
-                          "{(evt as any).service.description}"
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                        {variant === 'pro' ? (
-                          <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">ID: {(evt as any).packageId?.substring(0,8) || evt.id.substring(0,8)}...</p>
-                        ) : (
-                          <span className="bg-emerald-50 text-emerald-700 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md">Expedition</span>
-                        )}
-                        {((evt as any).packageId || (evt as any).businessId) && (
-                          <div className="flex gap-2">
+                    <div className="space-y-4">
+                      <div className={cn(variant === 'pro' ? "p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50" : "", "flex flex-col gap-3")}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h4 className="font-serif font-bold text-slate-900 text-lg leading-tight">{evt.title || "Selected Vallecito Experience"}</h4>
+                            <p className={cn("text-[11px] font-bold uppercase tracking-widest mt-0.5 flex items-center gap-1.5", variant === 'pro' ? "text-emerald-700/80" : "text-slate-400")}>
+                              <MapPin className="w-3.5 h-3.5" /> {variant === 'pro' ? ((evt as any).service?.category || "Experience") : "Expedition"}
+                            </p>
+                          </div>
+                          {variant === 'pro' && (
                             <button 
-                              onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} 
-                              className="text-xs font-bold text-slate-500 bg-white border border-slate-100 hover:bg-slate-50 px-4 py-2 rounded-xl transition-colors shadow-sm"
+                              onClick={() => removeEvent(activeDay.dayNumber, evt.id)}
+                              className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm transition-colors"
                             >
-                              Change
+                              <X className="w-4 h-4" />
                             </button>
+                          )}
+                        </div>
+
+                        {variant === 'live' && (evt as any).service?.description && (
+                          <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif">"{(evt as any).service.description}"</p>
+                        )}
+
+                        <div className="flex items-center gap-2 mt-1">
+                          <button 
+                            onClick={() => { setExchangeTargetIndex(index); setPanelMode('categories'); }} 
+                            className="text-xs font-bold text-slate-500 bg-white border border-slate-100 hover:bg-slate-50 px-4 py-2 rounded-xl transition-colors shadow-sm"
+                          >
+                            Change
+                          </button>
+                          {((evt as any).packageId || (evt as any).businessId || (evt as any).service?.id) && (
                             <button 
-                              onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId)} 
+                              onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId || (evt as any).service?.id)} 
                               className="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
                             >
                               View Details
                             </button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -515,7 +525,7 @@ export function BuilderWorkspace({
 
                   {evt.type === 'STAY' && (
                     <div className="space-y-4">
-                      {(evt as any).businessId ? (
+                      {((evt as any).businessId || (evt as any).packageId || (evt as any).service) ? (
                         <div className={cn(variant === 'pro' ? "p-4 bg-purple-50/50 rounded-2xl border border-purple-100/50" : "", "flex flex-col gap-3")}>
                           <div className="flex items-start justify-between gap-4">
                             <div>
@@ -526,7 +536,7 @@ export function BuilderWorkspace({
                             </div>
                             {variant === 'pro' && (
                               <button 
-                                onClick={() => updateEvent(activeDay.dayNumber, evt.id, { businessId: undefined } as any)}
+                                onClick={() => updateEvent(activeDay.dayNumber, evt.id, { businessId: undefined, packageId: undefined, service: undefined } as any)}
                                 className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm transition-colors"
                               >
                                 <X className="w-4 h-4" />
@@ -545,12 +555,14 @@ export function BuilderWorkspace({
                             >
                               Change
                             </button>
-                            <button 
-                              onClick={() => setViewingPackage((evt as any).businessId!)} 
-                              className="text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 px-4 py-2 rounded-xl transition-colors"
-                            >
-                              View Details
-                            </button>
+                            {((evt as any).packageId || (evt as any).businessId || (evt as any).service?.id) && (
+                              <button 
+                                onClick={() => setViewingPackage((evt as any).packageId || (evt as any).businessId || (evt as any).service?.id)} 
+                                className="text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 px-4 py-2 rounded-xl transition-colors"
+                              >
+                                View Details
+                              </button>
+                            )}
                           </div>
                         </div>
                       ) : (

@@ -46,7 +46,7 @@ export function CheckoutDetailsForm() {
         ...currentTrip,
         startDate: currentTrip.startDate.toISOString(),
         endDate: currentTrip.endDate.toISOString(),
-        days: currentTrip.days.map(d => ({
+        days: currentTrip.days.map((d: any) => ({
           ...d,
           date: d.date.toISOString()
         })),

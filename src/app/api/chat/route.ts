@@ -1,5 +1,6 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText, convertToModelMessages } from 'ai';
+import { streamText, convertToModelMessages, generateObject } from 'ai';
+import { z } from 'zod';
 import { buildItinerary } from '@/lib/ai/tools/build-itinerary';
 import { askAvailability } from '@/lib/ai/tools/ask-availability';
 import { searchDatabase } from '@/lib/ai/tools/search-database';
@@ -7,7 +8,10 @@ import { buildMacroTrip } from '@/lib/ai/tools/build-macro-trip';
 import { showBoletoInfo } from '@/lib/ai/tools/show-boleto-info';
 import { estimateTaxiFare } from '@/lib/ai/tools/taxi-estimator';
 import { mutateItinerary } from '@/lib/ai/tools/mutate-itinerary';
-import { SYSTEM_PROMPT_CONCIERGE } from '@/lib/ai/prompts';
+import { searchDayTours } from '@/lib/ai/tools/search-day-tours';
+import { triggerSupportAlert } from '@/lib/ai/tools/trigger-support';
+import { askUserLocation } from '@/lib/ai/tools/ask-user-location';
+import { SYSTEM_PROMPT_CONCIERGE, PLANNING_PROMPT, RESEARCH_PROMPT, SUPPORT_PROMPT } from '@/lib/ai/prompts';
 import { EXPATS_KNOWLEDGE_BASE } from '@/lib/ai/knowledge/expats-guide';
 import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
 import { Ratelimit } from "@upstash/ratelimit";
@@ -108,19 +112,55 @@ export async function POST(req: Request) {
       systemPrompt += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;
     }
 
+    // --- Intent Router ---
+    const lastMessage = messages[messages.length - 1]?.content || "";
+    let intent: 'PLANNING' | 'RESEARCH' | 'SUPPORT' = 'RESEARCH'; // default
+
+    try {
+      const { object } = await generateObject({
+        model: google('gemini-2.5-flash'), // Fast model for routing
+        schema: z.object({
+          intent: z.enum(['PLANNING', 'RESEARCH', 'SUPPORT']),
+        }),
+        prompt: `Classify the intent of the following user message from a travel app in the Sacred Valley:
+        PLANNING: Asking to build, create, or modify an itinerary or a day plan.
+        RESEARCH: Asking general questions about places, food, opening hours, tickets, or alternatives.
+        SUPPORT: Expressing frustration, being lost, missing a transport, or needing urgent human help.
+        
+        Message: "${lastMessage}"`
+      });
+      intent = object.intent;
+    } catch (e) {
+      console.warn("Intent router failed, falling back to RESEARCH", e);
+    }
+
+    console.log(`🧭 [INTENT ROUTER] Classified as: ${intent}`);
+
+    // --- Dynamic Prompt & Tools ---
+    let finalSystemPrompt = systemPrompt;
+    let activeTools: any = {};
+
+    switch (intent) {
+      case 'PLANNING':
+        finalSystemPrompt += `\n\n${PLANNING_PROMPT}`;
+        activeTools = { buildItinerary, mutateItinerary, estimateTaxiFare, searchDayTours, askUserLocation };
+        break;
+      case 'SUPPORT':
+        finalSystemPrompt += `\n\n${SUPPORT_PROMPT}`;
+        activeTools = { triggerSupportAlert, estimateTaxiFare, askUserLocation };
+        break;
+      case 'RESEARCH':
+      default:
+        finalSystemPrompt += `\n\n${RESEARCH_PROMPT}`;
+        activeTools = { searchDatabase, showBoletoInfo, askAvailability, estimateTaxiFare, searchDayTours, askUserLocation };
+        break;
+    }
+
     const result = streamText({
       model: google('gemini-2.5-pro'),
-      system: systemPrompt,
+      system: finalSystemPrompt,
       messages: await convertToModelMessages(normalizedMessages),
-      tools: {
-        buildItinerary,
-        askAvailability,
-        searchDatabase,
-        buildMacroTrip,
-        showBoletoInfo,
-        estimateTaxiFare,
-        mutateItinerary,
-      },
+      tools: activeTools,
     });
 
     return result.toUIMessageStreamResponse();

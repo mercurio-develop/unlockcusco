@@ -21,8 +21,8 @@ export function BookingProgressView() {
 
   const steps = [
     { id: 'start', title: "Start", location: activeItinerary.startAnchor.title, type: 'anchor' },
-    ...activeItinerary.waypoints.flatMap((wp, i) => [
-      { id: `transit-${i}`, title: "Transport", location: activeItinerary.transitEdges[i]?.defaultDriver.name || "Taxi", type: 'transit', statusId: `transit-${i}` },
+    ...activeItinerary.waypoints.flatMap((wp: any, i: number) => [
+      { id: `transit-${i}`, title: "Transport", location: activeItinerary.transitEdges[i]?.toLocation, type: 'transit', statusId: `transit-${i}` },
       { id: wp.id, title: wp.category, location: wp.title, type: 'waypoint', statusId: wp.id }
     ]),
     { 
