@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTrip } from "@/lib/store/trip-context"
-import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search, Check, ChevronDown } from "lucide-react"
+import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search, Check, ChevronDown, Navigation } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { LocationAutocomplete } from "./LocationAutocomplete"
@@ -35,6 +35,29 @@ export function BuilderWorkspace({
   const [showAddMenu, setShowAddMenu] = useState(false)
 
   const activeDay = currentTrip?.days.find(d => d.dayNumber === activeDayNumber)
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser")
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        updateDay(activeDay?.dayNumber || 1, { 
+          startAnchor: { 
+            ...activeDay?.startAnchor, 
+            title: "Current Location", 
+            lat: latitude, 
+            lng: longitude 
+          } 
+        })
+      },
+      () => {
+        alert("Unable to retrieve your location")
+      }
+    )
+  }
 
   if (!activeDay) {
     return (
@@ -167,9 +190,19 @@ export function BuilderWorkspace({
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                  <button onClick={() => { setExchangeTargetIndex(-1); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
-                    <Search className="w-3.5 h-3.5" /> {variant === 'live' ? "Set Location" : "Browse Vallecito Library"}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => { setExchangeTargetIndex(-1); setPanelMode('categories'); }} className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
+                      <Search className="w-3.5 h-3.5" /> {variant === 'live' ? "Set Location" : "Browse Vallecito Library"}
+                    </button>
+                    {variant === 'live' && (
+                      <button 
+                        onClick={handleUseCurrentLocation}
+                        className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors"
+                      >
+                        <Navigation className="w-3.5 h-3.5" /> Use My Position
+                      </button>
+                    )}
+                  </div>
                   {(activeDay.startAnchor as any)?.service && (
                     <button 
                       onClick={() => setViewingPackage((activeDay.startAnchor as any).service.id)} 

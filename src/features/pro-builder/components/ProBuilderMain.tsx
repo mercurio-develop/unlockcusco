@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTrip } from "@/lib/store/trip-context"
 import { BuilderWizard } from "./BuilderWizard"
 import { BuilderWorkspace } from "./BuilderWorkspace"
@@ -22,8 +22,17 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 export function ProBuilderMain() {
   const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen, setSelectedId, selectedId } = useTrip()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [leftTab, setLeftTab] = useState<'discover' | 'itinerary'>('itinerary')
+  
+  const isDrawerOpen = searchParams.get("filter") === "open"
+  const setIsDrawerOpen = (open: boolean) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (open) params.set("filter", "open")
+    else params.delete("filter")
+    router.push(`?${params.toString()}`, { scroll: false })
+  }
   
   const [businesses, setBusinesses] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -81,21 +90,33 @@ export function ProBuilderMain() {
   }, [isSidebarCollapsed, isWorkspaceCollapsed]);
 
   const mapEntities = useMemo(() => {
-    if (!currentTrip) return [];
-    const mapEvents: any[] = [];
-    currentTrip.days.forEach(d => {
-      if (d.events.length > 0 || d.dayNumber === activeDayNumber) {
-        if (d.startAnchor?.lat && d.startAnchor?.lng) {
-          mapEvents.push({ id: `startAnchor-${d.dayNumber}`, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR' });
+    const entities: any[] = [];
+    
+    // 1. Add current trip events
+    if (currentTrip) {
+      currentTrip.days.forEach(d => {
+        if (d.events.length > 0 || d.dayNumber === activeDayNumber) {
+          if (d.startAnchor?.lat && d.startAnchor?.lng) {
+            entities.push({ id: `startAnchor-${d.dayNumber}`, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR' });
+          }
+          d.events.filter(e => e.type !== 'NOTE').forEach(e => entities.push(e));
+          if (d.endAnchor?.lat && d.endAnchor?.lng) {
+            entities.push({ id: `endAnchor-${d.dayNumber}`, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR' });
+          }
         }
-        d.events.filter(e => e.type !== 'NOTE').forEach(e => mapEvents.push(e));
-        if (d.endAnchor?.lat && d.endAnchor?.lng) {
-          mapEvents.push({ id: `endAnchor-${d.dayNumber}`, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR' });
-        }
-      }
-    });
+      });
+    }
 
-    return mapEvents.map(e => {
+    // 2. Add library businesses (if on discover tab)
+    if (leftTab === 'discover' && businesses.length > 0) {
+      businesses.forEach(b => {
+        if (!entities.find(e => e.id === b.id)) {
+          entities.push(b);
+        }
+      });
+    }
+
+    return entities.map(e => {
       let evtLat = e.lat;
       let evtLng = e.lng;
       if (e.type === 'TRANSPORT') {
@@ -107,14 +128,15 @@ export function ProBuilderMain() {
       }
 
       return {
+        ...e,
         id: e.id,
-        name: e.title,
+        name: e.name || e.title,
         lat: evtLat,
         lng: evtLng,
-        category: e.type === 'ANCHOR' ? 'STAY' : e.type
+        category: e.type === 'ANCHOR' ? 'STAY' : (e.category || e.type)
       };
     }).filter(e => e.lat != null && e.lng != null);
-  }, [currentTrip, activeDayNumber]);
+  }, [leftTab, businesses, currentTrip, activeDayNumber]);
 
   if (viewState === 'wizard') return <BuilderWizard />
   if (viewState === 'checkout') return <CheckoutDetailsForm />
@@ -179,13 +201,12 @@ export function ProBuilderMain() {
               <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300">
                 <div className="shrink-0 p-6 bg-white border-b border-slate-50">
                   <ExploreSearch 
-                    initialQuery="" 
-                    isDrawerOpen={true}
-                    setIsDrawerOpen={() => {}}
+                    initialQuery={q} 
+                    isDrawerOpen={isDrawerOpen}
+                    setIsDrawerOpen={setIsDrawerOpen}
                     categoryCounts={{}}
                   />
                 </div>
-
                 <div className="flex-1 overflow-hidden flex flex-col relative">
                   {loading && (
                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
