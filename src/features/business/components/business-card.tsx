@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Clock, AlertCircle } from "lucide-react"
+import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket } from "lucide-react"
 import { trackWhatsappClick } from "@/features/business/actions/track-click"
 import { trackBusinessView } from "@/features/business/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
@@ -47,37 +47,12 @@ export function BusinessCard({
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const [showLeadTimeWarning, setShowLeadTimeWarning] = useState(false)
-  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint, targetDate, setTargetDate, setAiPromptToTrigger } = useTrip()
+  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
   const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
-
-  // Lead time calculation
-  const now = new Date()
-  const diffInHours = (targetDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-  const hasSufficientNotice = business.minAdvanceHours === 0 || diffInHours >= business.minAdvanceHours
-  const isTooSoon = !hasSufficientNotice && business.bookingType === 'REQUEST_ONLY'
-
-  const handleAddClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (isTooSoon) {
-      setShowLeadTimeWarning(true)
-    } else {
-      insertWaypoint(business)
-    }
-  }
-
-  const handleMoveToTomorrow = () => {
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    setTargetDate(tomorrow)
-    insertWaypoint(business)
-    setShowLeadTimeWarning(false)
-    setAiPromptToTrigger(`[INTERNAL] User moved itinerary to Tomorrow because ${business.name} required ${business.minAdvanceHours}h notice. Acknowledge the change and confirm the experience is now added.`)
-  }
 
   const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -86,7 +61,7 @@ export function BusinessCard({
     const msg = encodeURIComponent(
       `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to make a reservation. When do you have availability?`
     )
-    window.open(`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${msg}`, "_blank")
+    window.open(`https://wa.me/51${business.whatsapp.replace(/\\D/g, '')}?text=${msg}`, "_blank")
   }
 
   const handleConsult = async (e: React.MouseEvent) => {
@@ -127,14 +102,47 @@ export function BusinessCard({
       onClick={handleCardClick}
       className={cn(
         "group cursor-pointer transition-all duration-300 relative",
-        isHorizontal 
-          ? "flex flex-row items-center gap-4 p-3 bg-white border border-slate-100 rounded-[20px] hover:shadow-md hover:border-slate-200" 
-          : "flex flex-col gap-3",
-        isHighlighted 
-          ? (isHorizontal ? "opacity-100 scale-[1.01] border-rose-200 shadow-md ring-1 ring-rose-600/5" : "opacity-100 scale-[1.02]") 
-          : "opacity-90 hover:opacity-100"
+        isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100",
+        isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"
       )}
     >
+      {/* Top Right Action Menu */}
+      {false && exchangeTargetIndex === null && (
+        <div 
+          className="absolute top-3 right-3 z-30 flex items-center justify-center" 
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger render={
+              <button 
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 border border-slate-200 shadow-md text-slate-600 hover:text-rose-600 hover:scale-110 transition-all cursor-pointer backdrop-blur-sm"
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+            } />
+            <DropdownMenuContent>
+              {hasProfile && (
+                <DropdownMenuItem onClick={() => router.push(business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug))}>
+                  <ExternalLink className="w-4 h-4 mr-2" /> View Profile
+                </DropdownMenuItem>
+              )}
+              {business.whatsapp && (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }}>
+                  <MessageCircle className="w-4 h-4 mr-2" /> Contact
+                </DropdownMenuItem>
+              )}
+              {!isClaimed && !business.isAsociado && (
+                <DropdownMenuItem onClick={() => setIsOpen(true)}>
+                  <Zap className="w-4 h-4 mr-2" /> Check Availability
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       {/* Image Container */}
       <div className={cn(
         "relative overflow-hidden rounded-2xl transition-all duration-300 bg-slate-100",
@@ -216,29 +224,29 @@ export function BusinessCard({
               <span className="font-bold text-[11px] text-slate-900">{business.rating || "New"}</span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-             <span className="bg-rose-50 text-rose-600 text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-rose-100/50">
+          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+             <span className={cn(
+               "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1",
+               business.category?.toUpperCase() === 'DINING'
+                 ? "bg-amber-50 text-amber-700 border-amber-200/50"
+                 : business.category?.toUpperCase() === 'CULTURE'
+                 ? "bg-purple-50 text-purple-700 border-purple-200/50"
+                 : business.category?.toUpperCase() === 'BOLETO'
+                 ? "bg-sky-50 text-sky-700 border-sky-200/50"
+                 : "bg-rose-50 text-rose-600 border-rose-100/50"
+             )}>
+               {business.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+               {business.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+               {business.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
                {business.category}
              </span>
-             {business.priceTier && <span className="text-slate-400 text-[10px] font-bold">{business.priceTier}</span>}
-             
-             {business.bookingType === 'REQUEST_ONLY' && business.minAdvanceHours > 0 && (
-                <span className={cn(
-                  "px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight flex items-center gap-1 border",
-                  isTooSoon 
-                    ? "bg-amber-50 text-amber-600 border-amber-100" 
-                    : "bg-slate-50 text-slate-500 border-slate-100"
-                )}>
-                  <Clock className="w-2.5 h-2.5" />
-                  {business.minAdvanceHours}h Notice
-                </span>
+             {business.locationSlug && (
+               <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                 <MapPin className="w-2.5 h-2.5" />
+                 {business.locationSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+               </span>
              )}
-
-             {isHorizontal && (
-                <span className="text-slate-400 text-[10px] font-medium truncate max-w-[150px]">
-                   • {business.locationSlug?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                </span>
-             )}
+             {business.priceTier && <span className="text-emerald-600 text-[10px] font-bold ml-1">{business.priceTier}</span>}
           </div>
           
           {/* Zagat Description */}
@@ -254,41 +262,32 @@ export function BusinessCard({
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
-          <Button
-            onClick={handleAddClick}
-            className={cn(
-              "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-              isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
-            )}
-          >
-            <Plus className="w-3 h-3" />
-            {isHorizontal ? "Add" : "Add to Day"}
-          </Button>
           {exchangeTargetIndex !== null ? (
             <Button
               onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
               className={cn(
-                "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-all",
-                isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md",
+                isHorizontal ? "h-8 text-[10px] uppercase tracking-widest" : "py-2.5 text-xs uppercase tracking-widest"
               )}
             >
-              Select
-            </Button>
-          ) : isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
-            <Button
-              onClick={handleBookNow}
-              className={cn(
-                "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
-              )}
-            >
-              Contact
+              <Repeat className="w-3.5 h-3.5" />
+              Exchange
             </Button>
           ) : (
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger render={
-                <Button 
-                  onClick={(e) => e.stopPropagation()} 
+            <>
+              <Button
+                onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+                className={cn(
+                  "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
+                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                )}
+              >
+                <Plus className="w-3 h-3" />
+                {isHorizontal ? "Add" : "Add to Day"}
+              </Button>
+              {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
+                <Button
+                  onClick={handleBookNow}
                   className={cn(
                     "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
                     isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
@@ -296,86 +295,69 @@ export function BusinessCard({
                 >
                   Contact
                 </Button>
-              } />
-              <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
-                <DialogHeader className="mb-4">
-                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 mt-1">
-                    Send an inquiry to {business.name} to check for availability and pricing.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-5 py-4">
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="e.g. Sarah Jenkins"
-                      value={touristName}
-                      onChange={(e) => setTouristName(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
-                    <Input
-                      id="phone"
-                      placeholder="e.g. +51 987 654 321"
-                      value={touristPhone}
-                      onChange={(e) => setTouristPhone(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
-                  Send Inquiry
-                </Button>
-              </DialogContent>
-            </Dialog>
+              ) : (
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogTrigger render={
+                    <Button 
+                      onClick={(e) => e.stopPropagation()} 
+                      className={cn(
+                        "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
+                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                      )}
+                    >
+                      Contact
+                    </Button>
+                  } />
+                  <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader className="mb-4">
+                      <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
+                      <DialogDescription className="text-sm text-slate-500 mt-1">
+                        Send an inquiry to {business.name} to check for availability and pricing.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-5 py-4">
+                      <div className="grid gap-2.5">
+                        <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
+                        <Input
+                          id="name"
+                          placeholder="e.g. Sarah Jenkins"
+                          value={touristName}
+                          onChange={(e) => setTouristName(e.target.value)}
+                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                        />
+                      </div>
+                      <div className="grid gap-2.5">
+                        <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
+                        <Input
+                          id="phone"
+                          placeholder="e.g. +51 987 654 321"
+                          value={touristPhone}
+                          onChange={(e) => setTouristPhone(e.target.value)}
+                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                        />
+                      </div>
+                      <div className="grid gap-2.5">
+                        <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
+                        <Input
+                          id="date"
+                          type="date"
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                      Send Inquiry
+                    </Button>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </>
           )}
         </div>
       </div>
-
-      <Dialog open={showLeadTimeWarning} onOpenChange={setShowLeadTimeWarning}>
-          <DialogContent className="sm:max-w-md p-8 rounded-3xl bg-white border border-gray-200 shadow-2xl z-[150]" onClick={(e) => e.stopPropagation()}>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-6">
-                 <AlertCircle className="w-8 h-8 text-amber-600" />
-              </div>
-              <DialogTitle className="text-2xl font-serif font-bold text-slate-900 mb-2">Advance Notice Required</DialogTitle>
-              <DialogDescription className="text-slate-500 leading-relaxed mb-8">
-                {business.name} typically requires at least <strong>{business.minAdvanceHours} hours</strong> notice to prepare guides and equipment.
-                <br/><br/>
-                Since you&apos;re planning for today, we might not be able to secure this instantly.
-              </DialogDescription>
-              
-              <div className="flex flex-col gap-3 w-full">
-                <Button 
-                  onClick={handleMoveToTomorrow}
-                  className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold shadow-lg hover:bg-slate-800 transition-all"
-                >
-                  Move Planning to Tomorrow
-                </Button>
-                <Button 
-                  variant="ghost"
-                  onClick={() => { insertWaypoint(business); setShowLeadTimeWarning(false); }}
-                  className="w-full text-slate-400 hover:text-slate-600 font-bold"
-                >
-                  Add Anyway (Request Only)
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-      </Dialog>
     </div>
   )
 }
+

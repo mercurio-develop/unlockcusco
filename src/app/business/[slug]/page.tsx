@@ -293,7 +293,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-white/40">
                   <span>Price Range</span>
-                  <span className="text-white/80">{business.priceTier || "$$"}</span>
+                  <span className="text-emerald-400 font-bold">{business.priceTier || "$$"}</span>
                </div>
             </div>
           </div>

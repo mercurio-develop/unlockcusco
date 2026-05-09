@@ -161,7 +161,11 @@ async function main() {
             continue
           }
 
-          // Try Instagram extraction for high-quality authenticated photos
+          const websiteUrl = (item.website as string) || null;
+          let igHandle = null;
+          let igFollowers = 0;
+          
+          // Try Instagram extraction for high-quality authenticated photos and social handle
           try {
             console.log(`   📸 Searching Instagram for: ${name}`);
             const igRun = await apifyClient.actor("apify/instagram-scraper").call({
@@ -173,8 +177,12 @@ async function main() {
             });
             const { items: igItems } = await apifyClient.dataset(igRun.defaultDatasetId).listItems();
             if (igItems.length > 0 && (igItems[0] as Record<string, unknown>).displayUrl) {
-              imageUrl = (igItems[0] as Record<string, unknown>).displayUrl as string;
-              console.log(`   ✨ Found authentic Instagram image!`);
+              const igData = igItems[0] as Record<string, any>;
+              imageUrl = igData.displayUrl as string;
+              if (igData.ownerUsername) {
+                igHandle = igData.ownerUsername;
+              }
+              console.log(`   ✨ Found authentic Instagram image! Handle: ${igHandle || 'unknown'}`);
             } else {
               console.log(`   ⚠️ No IG image, using enhanced Google Maps photo.`);
             }
@@ -183,6 +191,12 @@ async function main() {
           }
 
           const whatsapp = extractWhatsApp(item.phoneUnformatted as string | undefined);
+          
+          // Construct social links
+          const socialLinks: any = {};
+          if (websiteUrl) socialLinks.website = websiteUrl;
+          if (igHandle) socialLinks.instagram = `https://instagram.com/${igHandle}`;
+          const socialLinksJson = JSON.stringify(socialLinks);
 
           const originalReviews = ((item.reviews as Record<string, unknown>[]) || [])
             .filter((r) => r.textTranslated || r.text)
@@ -226,6 +240,9 @@ async function main() {
               reviewsCount: (item.reviewsCount as number) ?? 0,
               imageUrl,
               whatsapp,
+              socialLinks: socialLinksJson,
+              instagramHandle: igHandle,
+              instagramFollowers: igFollowers,
               isClaimed: false,
               ...(reviewsData.length > 0 && { reviews: { create: reviewsData } }),
             },

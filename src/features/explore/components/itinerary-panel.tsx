@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useItinerary } from "@/lib/store/itinerary-context";
+import { usePreferences } from "@/lib/store/preferences-context";
 import { MapPin, ChevronRight, Loader2, Calendar, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BuilderWorkspace } from "@/features/pro-builder/components/BuilderWorkspace";
@@ -20,9 +21,9 @@ export function ItineraryPanel() {
     currentTrip,
     createDay,
     selectedId,
-    setSelectedId,
-    setIsChatOpen
+    setSelectedId
   } = useItinerary();
+  const { setIsChatOpen } = usePreferences();
   
   const searchParams = useSearchParams();
   const router = useRouter();

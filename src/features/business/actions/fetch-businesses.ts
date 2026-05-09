@@ -1,16 +1,17 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { Business } from "@prisma/client"
+import { Business, TourPackage } from "@prisma/client"
 import { COORDS_MAP } from "@/lib/constants"
 import { unstable_cache } from "next/cache"
 
 // Helper to interleave categories while maintaining relative rating sort
-function interleaveCategories(sortedBusinesses: Business[]) {
-  const byCategory: Record<string, Business[]> = {}
+function interleaveCategories(sortedBusinesses: any[]) {
+  const byCategory: Record<string, any[]> = {}
   sortedBusinesses.forEach((b) => {
-    if (!byCategory[b.category]) byCategory[b.category] = []
-    byCategory[b.category].push(b)
+    const cat = b.category || 'EXPERIENCE'
+    if (!byCategory[cat]) byCategory[cat] = []
+    byCategory[cat].push(b)
   })
 
   const interleaved = []
@@ -40,6 +41,7 @@ export interface FetchBusinessesParams {
   sort?: string
   page?: number
   limit: number
+  includePackages?: boolean
 }
 
 // Helper for mapping price tier
@@ -63,7 +65,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * c;
 }
 
-async function fetchBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20 }: FetchBusinessesParams) {
+async function fetchBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20, includePackages = false }: FetchBusinessesParams) {
   let targetCategory = category
   const q = query.trim()
   let isHeuristicMatch = false
@@ -101,6 +103,7 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   const whereClause: Record<string, any> = {
     category: { notIn: ['AGENCY', 'Agency', 'agency'] }
   }
+  let fetchPackages = false
   if (targetCategory) {
     const categories = targetCategory.split(',').map(c => c.trim()).filter(Boolean)
     if (categories.length > 0) {
@@ -112,12 +115,23 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
         expandedCategories.add(cat.toUpperCase());
         expandedCategories.add(cat.toLowerCase());
         expandedCategories.add(cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase());
+        if (cat.toUpperCase() === 'EXPERIENCE' || cat.toUpperCase() === 'ADVENTURE' || cat.toUpperCase() === 'CULTURE') {
+           fetchPackages = true;
+        }
       }
       if (expandedCategories.size > 0) {
         whereClause.category = { in: Array.from(expandedCategories), notIn: ['AGENCY', 'Agency', 'agency'] };
       }
     }
+  } else {
+    fetchPackages = true; // no category filter, fetch packages too
   }
+  
+  // Enforce includePackages flag if provided
+  if (!includePackages) {
+     fetchPackages = false;
+  }
+
   if (loc && radiusKm === undefined) {
     whereClause.locationSlug = loc
   }
@@ -125,6 +139,7 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   // Combine OR queries
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orConditions: any[] = []
+  const pkgOrConditions: any[] = []
 
   if (q && !isHeuristicMatch) {
      const titleCase = q.charAt(0).toUpperCase() + q.slice(1).toLowerCase();
@@ -136,15 +151,84 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
      orConditions.push({ description: { contains: q } })
      orConditions.push({ description: { contains: q.toLowerCase() } })
      orConditions.push({ description: { contains: titleCase } })
+     
+     pkgOrConditions.push({ title: { contains: q } })
+     pkgOrConditions.push({ title: { contains: q.toLowerCase() } })
+     pkgOrConditions.push({ title: { contains: titleCase } })
+     pkgOrConditions.push({ title: { contains: q.toUpperCase() } })
+     pkgOrConditions.push({ description: { contains: q } })
+     pkgOrConditions.push({ tags: { contains: q } })
+     pkgOrConditions.push({ sector: { contains: q } })
   }
 
   if (orConditions.length > 0) {
     whereClause.OR = orConditions
   }
 
-  let businesses = await prisma.business.findMany({
+  let businesses: any[] = await prisma.business.findMany({
     where: whereClause,
   })
+  
+  if (fetchPackages) {
+     const pkgWhereClause: Record<string, any> = {};
+     if (loc && radiusKm === undefined) {
+       // Packages use sector instead of locationSlug
+       if (loc.toLowerCase() === 'urubamba') pkgWhereClause.sector = 'URUBAMBA';
+       else pkgWhereClause.sector = 'VALLE_SAGRADO';
+     }
+     if (pkgOrConditions.length > 0) {
+       pkgWhereClause.OR = pkgOrConditions;
+     }
+     
+     const packages = await prisma.tourPackage.findMany({
+       where: pkgWhereClause,
+       include: { business: true }
+     });
+     
+     const mappedPackages = packages.map(pkg => ({
+        id: pkg.id,
+        slug: `pkg-${pkg.id}`,
+        name: pkg.title,
+        category: "EXPERIENCE",
+        lat: pkg.business?.lat || null,
+        lng: pkg.business?.lng || null,
+        rating: pkg.business?.rating || 5.0,
+        reviewsCount: pkg.business?.reviewsCount || 10,
+        imageUrl: pkg.heroImage || pkg.business?.imageUrl || "",
+        heroImages: "[]",
+        whatsapp: pkg.business?.whatsapp || null,
+        isClaimed: pkg.business?.isClaimed || false,
+        isAsociado: pkg.business?.isAsociado || false,
+        isFeatured: false,
+        locationSlug: pkg.sector || "",
+        tagline: pkg.tagline || "",
+        description: pkg.description,
+        contactEmail: pkg.business?.contactEmail || "",
+        socialLinks: "{}",
+        instagramHandle: pkg.business?.instagramHandle || null,
+        instagramFollowers: pkg.business?.instagramFollowers || 0,
+        priceTier: pkg.basePriceUsd > 150 ? "$$$" : pkg.basePriceUsd > 75 ? "$$" : "$",
+        marginTier: "STANDARD",
+        commissionRate: 0.05,
+        viewsCount: 0,
+        whatsappClicksCount: 0,
+        aiRecommendationsCount: 0,
+        vehicleType: null,
+        capacity: null,
+        serviceZones: "[]",
+        guideName: null,
+        seoMetaTitle: null,
+        seoMetaDesc: null,
+        specialties: "[]",
+        themeConfig: "{}",
+        featuresJson: "[]",
+        qrCodeUrl: null,
+        isPackage: true,
+        tags: pkg.tags
+     }));
+     
+     businesses = [...businesses, ...mappedPackages];
+  }
 
   // Distance Filter
   if (radiusKm !== undefined) {
@@ -189,8 +273,8 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
       return (b.rating || 0) - (a.rating || 0)
     } else {
       // Default: recommended
-      const scoreA = (a.rating || 0) * Math.log10(a.reviewsCount + 10) + (a.isAsociado ? 50 : 0) + (a.isClaimed ? 2 : 0) + ((a.instagramFollowers || 0) * 0.001)
-      const scoreB = (b.rating || 0) * Math.log10(b.reviewsCount + 10) + (b.isAsociado ? 50 : 0) + (b.isClaimed ? 2 : 0) + ((b.instagramFollowers || 0) * 0.001)
+      const scoreA = (a.rating || 0) * Math.log10((a.reviewsCount || 0) + 10) + (a.isAsociado ? 50 : 0) + (a.isClaimed ? 2 : 0) + ((a.instagramFollowers || 0) * 0.001)
+      const scoreB = (b.rating || 0) * Math.log10((b.reviewsCount || 0) + 10) + (b.isAsociado ? 50 : 0) + (b.isClaimed ? 2 : 0) + ((b.instagramFollowers || 0) * 0.001)
       return scoreB - scoreA
     }
   })
@@ -219,6 +303,13 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   counts.forEach(c => {
     categoryCounts[c.category.toUpperCase()] = c._count._all
   })
+  
+  if (fetchPackages) {
+     const pkgCount = await prisma.tourPackage.count({
+        where: {}
+     });
+     categoryCounts['EXPERIENCE'] = (categoryCounts['EXPERIENCE'] || 0) + pkgCount;
+  }
 
   return {
     businesses: paginatedBusinesses,
@@ -239,7 +330,8 @@ export async function fetchBusinesses(params: FetchBusinessesParams) {
     params.userLng ? params.userLng.toFixed(3) : '',
     params.sort || 'recommended',
     params.page?.toString() || '0',
-    params.limit.toString()
+    params.limit.toString(),
+    params.includePackages?.toString() || 'false'
   ]
 
   const fetcher = unstable_cache(

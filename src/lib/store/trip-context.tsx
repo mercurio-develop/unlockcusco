@@ -93,6 +93,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (activeItinerary && !currentTrip) {
+      setTimeout(() => {
         const mappedTrip: UniversalTrip = {
             title: activeItinerary.title || "AI Planned Trip",
             startDate: new Date(),
@@ -117,6 +118,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
         if (activeDayNumber === null) {
             setActiveDayNumber(1);
         }
+      }, 0);
     }
   }, [activeItinerary, currentTrip, activeDayNumber]);
 
@@ -376,8 +378,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   const insertWaypoint = useCallback((service: Business): boolean => {
     const dayNum = activeDayNumber || 1;
-    const isTransport = service.category === 'TRANSPORT';
-    const isStay = service.category === 'LODGING' || service.category === 'STAYS';
+    const isTransport = service.category?.toUpperCase() === 'TRANSPORT';
+    const isStay = service.category?.toUpperCase() === 'LODGING' || service.category?.toUpperCase() === 'STAYS';
+    const isMeal = service.category?.toUpperCase() === 'DINING';
 
     if (exchangeTargetIndex !== null) {
       if (exchangeTargetIndex === -1 && activeItinerary) {
@@ -419,37 +422,60 @@ export function TripProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      if (exchangeTargetIndex >= 0 && activeItinerary) {
-        const newWp = {
-            id: crypto.randomUUID(),
-            category: service.category,
-            title: service.name,
-            locationStr: service.name,
-            durationMins: 120,
-            priceUsd: 0,
-            lat: service.lat || undefined,
-            lng: service.lng || undefined,
-            rating: service.rating || undefined,
-            service: service
-        };
+      if (exchangeTargetIndex >= 0) {
+        if (activeItinerary) {
+            const newWp = {
+                id: crypto.randomUUID(),
+                category: service.category,
+                title: service.name,
+                locationStr: service.name,
+                durationMins: 120,
+                priceUsd: 0,
+                lat: service.lat || undefined,
+                lng: service.lng || undefined,
+                rating: service.rating || undefined,
+                service: service
+            };
 
-        const updatedWaypoints = [...activeItinerary.waypoints];
-        updatedWaypoints[exchangeTargetIndex] = newWp;
+            const updatedWaypoints = [...activeItinerary.waypoints];
+            updatedWaypoints[exchangeTargetIndex] = newWp;
 
-        const updatedTransitEdges = [...activeItinerary.transitEdges];
-        if (exchangeTargetIndex < updatedTransitEdges.length) {
-             updatedTransitEdges[exchangeTargetIndex].toLocation = service.name;
+            const updatedTransitEdges = [...activeItinerary.transitEdges];
+            if (exchangeTargetIndex < updatedTransitEdges.length) {
+                 updatedTransitEdges[exchangeTargetIndex].toLocation = service.name;
+            }
+            if (exchangeTargetIndex + 1 < updatedTransitEdges.length) {
+                 updatedTransitEdges[exchangeTargetIndex + 1].fromLocation = service.name;
+            }
+
+            setActiveItinerary({
+                ...activeItinerary,
+                waypoints: updatedWaypoints,
+                transitEdges: updatedTransitEdges,
+                totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
+            });
         }
-        if (exchangeTargetIndex + 1 < updatedTransitEdges.length) {
-             updatedTransitEdges[exchangeTargetIndex + 1].fromLocation = service.name;
+        
+        if (currentTrip) {
+          const activeDay = currentTrip.days.find(d => d.dayNumber === dayNum);
+          if (activeDay && activeDay.events[exchangeTargetIndex]) {
+            const targetEvent = activeDay.events[exchangeTargetIndex];
+            
+            let newType: "EXPERIENCE" | "MEAL" | "STAY" | "TRANSPORT" | "NOTE" = 'EXPERIENCE';
+            if (isTransport) newType = 'TRANSPORT';
+            else if (isStay) newType = 'STAY';
+            else if (isMeal) newType = 'MEAL';
+            
+            updateEvent(dayNum, targetEvent.id, {
+              title: service.name,
+              type: newType,
+              lat: service.lat || undefined,
+              lng: service.lng || undefined,
+              service: service as any
+            });
+          }
         }
-
-        setActiveItinerary({
-            ...activeItinerary,
-            waypoints: updatedWaypoints,
-            transitEdges: updatedTransitEdges,
-            totalCost: updatedWaypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + updatedTransitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
-        });
+        
         setExchangeTargetIndex(null);
         setPanelMode("itinerary");
         return false;
@@ -487,6 +513,16 @@ export function TripProvider({ children }: { children: ReactNode }) {
       newEvent = {
         id: crypto.randomUUID(),
         type: 'STAY',
+        startTime: calculatedStartTime,
+        title: service.name,
+        lat: service.lat || undefined,
+        lng: service.lng || undefined,
+        service: service
+      };
+    } else if (isMeal) {
+      newEvent = {
+        id: crypto.randomUUID(),
+        type: 'MEAL',
         startTime: calculatedStartTime,
         title: service.name,
         lat: service.lat || undefined,
@@ -636,10 +672,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     setPanelMode('itinerary');
 
     return false;
-    }, [activeDayNumber, addEvent, activeItinerary, currentTrip, setIsChatOpen, setActiveItinerary, setPanelMode, exchangeTargetIndex, setExchangeTargetIndex, setCurrentTrip, setAiPromptToTrigger]);
+    }, [activeDayNumber, addEvent, activeItinerary, currentTrip, setIsChatOpen, setActiveItinerary, setPanelMode, panelMode, exchangeTargetIndex, setExchangeTargetIndex, setCurrentTrip, setAiPromptToTrigger]);
 
-  return (
-    <TripContext.Provider value={{
+  const value = React.useMemo(() => ({
       activeItinerary,
       setActiveItinerary,
       macroTrip,
@@ -679,19 +714,28 @@ export function TripProvider({ children }: { children: ReactNode }) {
       entityStatuses,
       startBookingOrchestration,
       resetBooking
-    }}>
+  }), [
+      activeItinerary, macroTrip, currentTrip, panelMode, viewState, selectedId, 
+      activeDayNumber, isEditMode, leftWidth, isWorkspaceCollapsed, exchangeTargetIndex, 
+      aiPromptToTrigger, bookingStatus, entityStatuses, addEvent, removeEvent, 
+      removeWaypoint, moveWaypoint, swapDriverAlternative, truncateAfterWaypoint, 
+      setStartAnchorLocation, updateEndAnchorLocation, createDay, updateEvent, 
+      insertWaypoint, startBookingOrchestration, resetBooking
+  ]);
+
+  return (
+    <TripContext.Provider value={value}>
       {children}
     </TripContext.Provider>
   );
 }
 
-export function useTrip(): any {
+export function useTrip(): TripContextType {
   const trip = useContext(TripContext);
-  const prefs = usePreferences();
   
   if (trip === undefined) {
-    return { ...prefs };
+    throw new Error('useTrip must be used within a TripProvider');
   }
   
-  return { ...trip, ...prefs };
+  return trip;
 }

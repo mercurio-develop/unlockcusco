@@ -1,10 +1,10 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 
-export const findNearbyBusinesses = tool({
+export const findNearby = tool({
   description: 'Finds the top nearest verified businesses based on user coordinates, category, and weighted premium ranking.',
-  inputSchema: z.object({
+  parameters: z.object({
     userLat: z.number(),
     userLng: z.number(),
     category: z.string().describe("e.g., 'textiles', 'food'"),

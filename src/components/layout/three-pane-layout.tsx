@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import { Drawer } from "vaul"
 
@@ -19,7 +20,8 @@ export function ThreePaneLayout({
   showMap = true,
   className
 }: ThreePaneLayoutProps) {
-  const { leftWidth, setLeftWidth, panelMode, setPanelMode, isChatOpen, setIsChatOpen } = useTrip()
+  const { leftWidth, setLeftWidth, panelMode, setPanelMode } = useTrip()
+  const { isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 

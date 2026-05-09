@@ -24,19 +24,23 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [targetDate, setTargetDate] = useState<Date>(new Date());
   const [isMapPicking, setIsMapPicking] = useState<{ active: boolean, target: 'start' | 'end' | null }>({ active: false, target: null });
 
+  const value = React.useMemo(() => ({
+    isChatOpen,
+    setIsChatOpen,
+    travelVibe,
+    setTravelVibe,
+    travelIntensity,
+    setTravelIntensity,
+    targetDate,
+    setTargetDate,
+    isMapPicking,
+    setIsMapPicking
+  }), [
+    isChatOpen, travelVibe, travelIntensity, targetDate, isMapPicking
+  ]);
+
   return (
-    <PreferencesContext.Provider value={{
-      isChatOpen,
-      setIsChatOpen,
-      travelVibe,
-      setTravelVibe,
-      travelIntensity,
-      setTravelIntensity,
-      targetDate,
-      setTargetDate,
-      isMapPicking,
-      setIsMapPicking
-    }}>
+    <PreferencesContext.Provider value={value}>
       {children}
     </PreferencesContext.Provider>
   );

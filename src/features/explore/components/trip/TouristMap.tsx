@@ -82,6 +82,10 @@ export default function TouristMap({ trip, activeDayNum, selectedEventId, onEven
       } else if (evt.type === 'STAY') {
         const pt = (evt.lng && evt.lat) ? [evt.lng, evt.lat] as [number, number] : getCoordsForLocation(evt.title);
         coords.push(pt)
+        
+        const isOverlapping = ms.some(m => Math.abs(m.coords[0] - pt[0]) < 0.0001 && Math.abs(m.coords[1] - pt[1]) < 0.0001);
+        const markerPt: [number, number] = isOverlapping ? [pt[0] + 0.0015, pt[1] + 0.0015] : pt;
+        ms.push({ coords: markerPt, type: 'STAY', id: evt.id })
       }
     })
     
@@ -266,10 +270,10 @@ export default function TouristMap({ trip, activeDayNum, selectedEventId, onEven
               className={`relative flex flex-col items-center group transition-transform hover:-translate-y-1 cursor-pointer z-10 ${selectedEventId === m.id ? 'scale-110' : ''}`}
             >
               <div className="absolute bottom-0 w-4 h-1 bg-black/40 blur-[2px] rounded-full" />
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-white z-10 ${m.type === 'MEAL' ? 'bg-amber-500' : 'bg-emerald-500'}`}>
-                {m.type === 'MEAL' ? <Utensils className="w-4 h-4 text-white" /> : <Mountain className="w-4 h-4 text-white" />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-white z-10 ${m.type === 'MEAL' ? 'bg-amber-500' : m.type === 'STAY' ? 'bg-indigo-600' : 'bg-emerald-500'}`}>
+                {m.type === 'MEAL' ? <Utensils className="w-4 h-4 text-white" /> : m.type === 'STAY' ? <Bed className="w-4 h-4 text-white" /> : <Mountain className="w-4 h-4 text-white" />}
               </div>
-              <div className={`w-1.5 h-1.5 -mt-1 rotate-45 border-r-2 border-b-2 border-white z-10 ${m.type === 'MEAL' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+              <div className={`w-1.5 h-1.5 -mt-1 rotate-45 border-r-2 border-b-2 border-white z-10 ${m.type === 'MEAL' ? 'bg-amber-500' : m.type === 'STAY' ? 'bg-indigo-600' : 'bg-emerald-500'}`} />
             </div>
           </Marker>
         ))}

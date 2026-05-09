@@ -1,15 +1,14 @@
 "use client"
 import { Business } from "@prisma/client";
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User, Settings2, Check, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { useCustomChat as useChat } from './use-custom-chat'
-
+import { useChat } from '@ai-sdk/react';
 import { DEFAULT_COORDS } from "@/lib/constants"
 import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
@@ -21,8 +20,7 @@ import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 
 export function AiConcierge() {
-  const [input, setInput] = useState("")
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity } = usePreferences()
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate } = usePreferences()
   const { 
     isWorkspaceCollapsed, 
     panelMode, 
@@ -32,8 +30,7 @@ export function AiConcierge() {
     setActiveItinerary,
     activeDayNumber,
     setStartAnchorLocation,
-    setPanelMode,
-    targetDate
+    setPanelMode
   } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -44,18 +41,49 @@ export function AiConcierge() {
   const isBuilder = panelMode === 'builder'
   const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
 
-  const initialMessages: any[] = [
+  const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
       role: "assistant",
       content: "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?"
     }
-  ];
+  ], []);
 
-  const { messages, sendMessage, status, error } = useChat({
+  const [input, setInput] = useState("");
+
+  const chat = useChat({
     api: '/api/chat',
-    initialMessages
-  });
+    initialMessages,
+    body: {
+      userLat: DEFAULT_COORDS.lat,
+      userLng: DEFAULT_COORDS.lng,
+      localTime: new Date().toLocaleTimeString(),
+      targetDate: targetDate?.toLocaleDateString() || 'today',
+      archetype: travelVibe,
+      intensity: travelIntensity
+    }
+  } as any) as any;
+
+  const messages = chat.messages || [];
+  const append = chat.append;
+  const isLoading = chat.status === 'submitted' || chat.status === 'streaming' || chat.isLoading;
+
+  useEffect(() => {
+    console.log("Chat Messages:", messages);
+  }, [messages]);
+
+  const sendMessage = useMemo(() => (msg: { text: string }, options?: any) => {
+    if (append) {
+      append({ role: 'user', content: msg.text } as any, options);
+    }
+  }, [append]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    sendMessage({ text: input });
+    setInput("");
+  };
 
   const handleShareLocation = () => {
     if (!navigator.geolocation) {
@@ -105,7 +133,7 @@ export function AiConcierge() {
     messages.forEach((msg: any) => {
       if (msg.role === 'assistant' && msg.toolInvocations) {
         msg.toolInvocations.forEach((p: any) => {
-          if (p?.state === 'result' && p?.result?.success && p?.toolCallId && !processedToolCalls.current.has(p.toolCallId)) {
+          if (p?.state === 'result' && p?.result?.success && !processedToolCalls.current.has(p.toolCallId)) {
             const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = p.result;
             
             if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
@@ -180,7 +208,7 @@ export function AiConcierge() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, status])
+  }, [messages, isLoading])
 
   useEffect(() => {
     const aiPrompt = searchParams.get("ai_prompt");
@@ -235,27 +263,6 @@ Please generate my macro trip plan.`;
     return null;
   }
 
-  const isLoading = status === 'submitted' || status === 'streaming';
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-    sendMessage(
-      { text: input.trim() },
-      {
-        body: {
-          userLat: DEFAULT_COORDS.lat,
-          userLng: DEFAULT_COORDS.lng,
-          localTime: new Date().toLocaleTimeString(),
-          targetDate: targetDate.toLocaleDateString(),
-          archetype: travelVibe,
-          intensity: travelIntensity
-        }
-      }
-    )
-    setInput("")
-  }
-
   return (
     <>
       <AnimatePresence>
@@ -289,7 +296,7 @@ Please generate my macro trip plan.`;
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white text-slate-900">
-                {messages.map((msg, index) => {
+                {messages.map((msg: any, index: number) => {
                   const content = (msg as any).content || (msg as any).parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
                   if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
 
@@ -328,7 +335,6 @@ Please generate my macro trip plan.`;
                       
                       {/* Tool Invocations & Results */}
                       {(msg as any).toolInvocations?.map((toolInvocation: any, idx: number) => {
-                        if (!toolInvocation) return null;
                         const key = toolInvocation.toolCallId || idx;
                         const toolName = toolInvocation.toolName;
                         const state = toolInvocation.state;
@@ -361,6 +367,15 @@ Please generate my macro trip plan.`;
                         }
 
                         if (state === 'result' && result) {
+                          if (result.error) {
+                            return (
+                              <div key={key} className="p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1 ml-11 mt-2 font-mono text-xs">
+                                <span className="font-bold text-red-800">Dev Log: Tool Error ({toolName})</span>
+                                <span className="text-red-600 break-words">{result.error}</span>
+                              </div>
+                            )
+                          }
+                          
                           if (toolName === 'askUserLocation') {
                             return (
                               <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
@@ -410,7 +425,7 @@ Please generate my macro trip plan.`;
                     </div>
                   )
                 })}
-                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                {isLoading && (messages[messages.length - 1] as any)?.role === "assistant" && !(messages[messages.length - 1] as any)?.content && (!(messages[messages.length - 1] as any)?.toolInvocations || (messages[messages.length - 1] as any)?.toolInvocations?.length === 0) && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
                       <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-rose-100">
@@ -427,15 +442,6 @@ Please generate my macro trip plan.`;
                 <div ref={messagesEndRef} />
               </div>
 
-              {error && (
-                <div className="mx-4 mb-2 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-rose-600 shrink-0" />
-                  <p className="text-xs text-rose-800 font-medium leading-tight">
-                    I encountered a small hiccup. Please try asking again or refresh the page.
-                  </p>
-                </div>
-              )}
-
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
                 {[
                   { label: "Plan my day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
@@ -447,19 +453,7 @@ Please generate my macro trip plan.`;
                   <button
                     key={suggestion.label}
                     onClick={() => { 
-                      sendMessage(
-                        { text: suggestion.label },
-                        {
-                          body: {
-                            userLat: DEFAULT_COORDS.lat,
-                            userLng: DEFAULT_COORDS.lng,
-                            localTime: new Date().toLocaleTimeString(),
-                            targetDate: targetDate.toLocaleDateString(),
-                            archetype: travelVibe,
-                            intensity: travelIntensity
-                          }
-                        }
-                      )
+                      sendMessage({ text: suggestion.label });
                     }}
                     className={`whitespace-nowrap px-4 py-2 border text-[13px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 ${suggestion.theme}`}
                   >

@@ -5,13 +5,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
-import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
 export function Navbar() {
   const pathname = usePathname()
-  const { isChatOpen, setIsChatOpen, travelVibe, setTravelVibe, travelIntensity, setTravelIntensity } = useTrip()
+  const { isChatOpen, setIsChatOpen, travelVibe, setTravelVibe, travelIntensity, setTravelIntensity } = usePreferences()
   const [isPrefsOpen, setIsPrefsOpen] = useState(false)
 
   const navItems = [

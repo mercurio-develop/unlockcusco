@@ -61,10 +61,17 @@ export type DraftDay = {
   events: TimelineEvent[]; // Replaces packageIds
 };
 
-export type DraftPax = {
-  name: string;
+export type FullTraveler = {
+  isLeadGuest: boolean;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone: string;
+  passportNumber: string;
+  nationality: string;
+  dateOfBirth: string;
+  whatsappNumber: string;
+  dietaryRestrictions: string;
+  medicalNotes: string;
 };
 
 export type DraftTrip = {
@@ -73,7 +80,7 @@ export type DraftTrip = {
   endDate: string;
   paxCount: number;
   days: DraftDay[];
-  leadPax: DraftPax;
+  travelers: FullTraveler[];
   clientNotes: string;
   internalNotes: string;
 };

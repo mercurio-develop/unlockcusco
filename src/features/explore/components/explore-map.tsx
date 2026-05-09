@@ -8,6 +8,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useItinerary } from "@/lib/store/itinerary-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 
 const getCategoryStyle = (category: string | undefined | null) => {
@@ -58,25 +59,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, updateEndAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isChatOpen, isWorkspaceCollapsed, isMapPicking, setIsMapPicking } = useItinerary()
-
-  // Handle map click for manual location selection
-  const handleMapClick = (e: any) => {
-    if (isMapPicking?.active && isMapPicking.target) {
-      const { lng, lat } = e.lngLat;
-      const title = `Map Point (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-      
-      if (isMapPicking.target === 'start') {
-        setStartAnchorLocation(lat, lng, title);
-      } else {
-        updateEndAnchorLocation(lat, lng, title);
-      }
-      
-      setIsMapPicking({ active: false, target: null });
-      return;
-    }
-    setPopupBusiness(null);
-  };
+  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isWorkspaceCollapsed } = useItinerary()
+  const { isChatOpen } = usePreferences()
 
   // Calculate dynamic right offset for map controls
   // If chat is open, shift left by the chat width (450px)
@@ -470,10 +454,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
     : [-72.1167, -13.3047];
 
   return (
-    <div className={cn(
-        "relative w-full h-full group",
-        isMapPicking?.active ? "cursor-crosshair" : ""
-    )}>
+    <div className="relative w-full h-full group">
       <Map
         ref={mapRef}
         initialViewState={{ longitude: center[0], latitude: center[1], zoom: 11, pitch: 0, bearing: 0 }}
@@ -481,7 +462,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
         mapboxAccessToken={mapboxToken}
         style={{ width: "100%", height: "100%" }}
         terrain={mapMode === "satellite" ? { source: "mapbox-dem", exaggeration: 1.5 } : undefined}
-        onClick={handleMapClick}
+        onClick={() => setPopupBusiness(null)}
       >
         <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}
@@ -723,7 +704,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness }:
                   </div>
                   <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
                     <span>{(popupBusiness as any).category}</span>
-                    <span className="text-slate-400 font-mono">{(popupBusiness as any).priceTier || '$$'}</span>
+                    <span className="text-emerald-500 font-mono font-bold">{(popupBusiness as any).priceTier || '$$'}</span>
                   </div>
                   
                   {((popupBusiness as any).rating || (popupBusiness as any).rating) && (

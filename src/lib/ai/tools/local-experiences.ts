@@ -1,11 +1,11 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
 
 export const findLocalExperiences = tool({
   description: 'Finds local experiences (e.g., textiles, markets, dining, wellness) near a specific location, calculates the travel time/distance from the user\'s current location, and returns top recommendations.',
-  inputSchema: z.object({
+  parameters: z.object({
     intent: z.string().describe('The user\'s intent, what they want to do or buy (e.g., "buy textiles", "eat traditional food", "get a massage").'),
     targetLocation: z.string().describe('The town or location the user wants to search in (e.g., "pisac", "urubamba", "maras", "ollantaytambo", "chinchero").'),
     userLocation: z.string().optional().describe('The user\'s current location. If not provided, defaults to the targetLocation.'),

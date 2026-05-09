@@ -1,9 +1,9 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 
 export const triggerSupportAlert = tool({
   description: 'Triggers an emergency or high-priority support alert to human operators via the Ghost Phone. Use this when a user is lost, a service fails, or they explicitly request urgent human assistance.',
-  inputSchema: z.object({
+  parameters: z.object({
     message: z.string().describe('A detailed explanation of the user\'s issue, including any relevant context from the conversation.'),
     urgencyLevel: z.enum(['low', 'medium', 'high', 'critical']).describe('The severity of the issue. Use "critical" for safety concerns or completely failed logistics.')
   }),

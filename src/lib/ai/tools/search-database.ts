@@ -1,40 +1,32 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { universalSearch } from '@/features/business/queries/universal-search';
 import { kv } from '@vercel/kv';
 import { calculateDistance } from '@/lib/utils/geo';
 
-interface SearchContext {
-  userLat?: number;
-  userLng?: number;
-  targetDate?: string;
-  archetype?: string | null;
-  intensity?: number | null;
-}
-
-export const createSearchDatabaseTool = (context: SearchContext) => tool({
-  description: 'Search the Vallecito library for local businesses, restaurants, food (e.g. ceviche, coffee), and activities. Use this tool immediately when a user asks for recommendations or mentions specific towns like Urubamba, Pisac, or Cusco. Supports Spatial RAG by calculating real-world distances using the user\'s real-time context.',
-  inputSchema: z.object({
-    query: z.string().describe("The type of business, e.g. ceviche, coffee, textiles, taxi"),
+export const searchDatabase = tool({
+  description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries. Supports Spatial RAG by calculating real-world distances if coordinates are provided.',
+  parameters: z.object({
+    query: z.string().describe("The type of business, e.g. coffee, textiles, taxi"),
     location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
-    category: z.string().optional().describe("Optional Prisma BusinessCategory to filter by, e.g. DINING, EXPERIENCE, STAY"),
+    userLat: z.number().optional().describe("User's current latitude for distance calculation"),
+    userLng: z.number().optional().describe("User's current longitude for distance calculation"),
   }),
-  execute: async ({ query, location, category }) => {
-    // Incorporate context into the cache key so different profiles don't poison each other's cache
-    const cacheKey = `vallecito:search:v6:${query.toLowerCase().trim()}:${location ?? 'any'}:${category ?? 'any'}`;
+  execute: async ({ query, location, userLat, userLng }) => {
+    const cacheKey = `vallecito:search:v4:${query.toLowerCase().trim()}:${location ?? 'any'}`;
     
     let results;
     try {
       if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
         const cached = await kv.get(cacheKey);
-        if (cached) results = cached as any[];
+        if (cached) results = cached as Record<string, unknown>[];
       }
     } catch (e) {
       console.warn("KV Cache read failed:", e);
     }
 
     if (!results) {
-      results = await universalSearch({ query, location, category, limit: 15 });
+      results = await universalSearch({ query, location, limit: 15 });
 
       try {
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
@@ -45,35 +37,25 @@ export const createSearchDatabaseTool = (context: SearchContext) => tool({
       }
     }
 
-    // Use context variables directly from the chat request
-    const { userLat, userLng, archetype, intensity } = context;
-
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
     if (userLat && userLng) {
       const withDistance = results.map((b: any) => {
         let distanceKm = null;
         if (b.lat && b.lng) {
-          distanceKm = calculateDistance(userLat, userLng, b.lat, b.lng);
+          distanceKm = calculateDistance(userLat, userLng, b.lat as number, b.lng as number);
         }
         return { ...b, distanceKm };
       });
 
-      withDistance.sort((a: any, b: any) => {
+      withDistance.sort((a: { distanceKm?: number | null; isAsociado?: boolean; rating?: number | null }, b: { distanceKm?: number | null; isAsociado?: boolean; rating?: number | null }) => {
         // If one has distance and other doesn't, prioritize the one with distance
         if (a.distanceKm !== null && b.distanceKm === null) return -1;
         if (a.distanceKm === null && b.distanceKm !== null) return 1;
         
         // If both have distance, blend distance, rating, and Asociado status into a score
-        if (a.distanceKm !== null && b.distanceKm !== null) {
-          let scoreA = (a.rating || 0) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
-          let scoreB = (b.rating || 0) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
-          
-          // Psychographic boosting
-          if (archetype === 'ADVENTURER' && a.category === 'EXPERIENCE') scoreA += 5;
-          if (archetype === 'LUXURY' && a.priceTier === '$$$') scoreA += 5;
-          if (archetype === 'ADVENTURER' && b.category === 'EXPERIENCE') scoreB += 5;
-          if (archetype === 'LUXURY' && b.priceTier === '$$$') scoreB += 5;
-
+        if (a.distanceKm !== null && a.distanceKm !== undefined && b.distanceKm !== null && b.distanceKm !== undefined) {
+          const scoreA = (a.rating || 0) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
+          const scoreB = (b.rating || 0) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
           return scoreB - scoreA;
         }
         
@@ -82,16 +64,14 @@ export const createSearchDatabaseTool = (context: SearchContext) => tool({
         return (b.rating || 0) - (a.rating || 0);
       });
 
-      return withDistance.slice(0, 10).map((b: any) => ({
+      return withDistance.slice(0, 10).map((b: Record<string, unknown>) => ({
         id: b.id,
         name: b.name,
         category: b.category,
         rating: b.rating,
         isAsociado: b.isAsociado,
         priceTier: b.priceTier,
-        bookingType: b.bookingType,
-        minAdvanceHours: b.minAdvanceHours,
-        distanceKm: b.distanceKm ? b.distanceKm.toFixed(1) + ' km away' : 'Distance unknown',
+        distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
         tagline: b.tagline,
         imageUrl: b.imageUrl,
@@ -101,15 +81,13 @@ export const createSearchDatabaseTool = (context: SearchContext) => tool({
     }
     
     // Return compressed view to save LLM tokens if no coords
-    return results.slice(0, 10).map((b: any) => ({
+    return results.slice(0, 10).map((b: Record<string, unknown>) => ({
       id: b.id,
       name: b.name,
       category: b.category,
       rating: b.rating,
       isAsociado: b.isAsociado,
       priceTier: b.priceTier,
-      bookingType: b.bookingType,
-      minAdvanceHours: b.minAdvanceHours,
       whatsapp: b.whatsapp,
       locationSlug: b.locationSlug,
       tagline: b.tagline,

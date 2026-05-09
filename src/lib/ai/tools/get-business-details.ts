@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 
 export const getBusinessDetails = tool({
   description: 'Looks up specific details for a local business by its exact name, returning operating hours, contact phone, website, and editorial summary.',
-  inputSchema: z.object({
+  parameters: z.object({
     businessName: z.string().describe('The exact name of the business to look up.'),
   }),
   execute: async ({ businessName }) => {

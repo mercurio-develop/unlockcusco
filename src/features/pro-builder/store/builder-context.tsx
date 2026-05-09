@@ -1,14 +1,14 @@
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode } from "react"
-import { DraftTrip, DraftDay, DraftPax, TimelineEvent } from "../types"
+import { DraftTrip, DraftDay, FullTraveler, TimelineEvent } from "../types"
 
 interface BuilderContextType {
   draftTrip: DraftTrip
   setDraftTrip: React.Dispatch<React.SetStateAction<DraftTrip>>
   updateTripMeta: (meta: Partial<DraftTrip>) => void
   updateDay: (dayNumber: number, updates: Partial<DraftDay>) => void
-  
+
   // Event Management
   addEventToDay: (dayNumber: number, event: TimelineEvent) => void
   removeEventFromDay: (dayNumber: number, eventId: string) => void
@@ -30,11 +30,10 @@ const initialDraftTrip: DraftTrip = {
   endDate: "",
   paxCount: 1,
   days: [],
-  leadPax: { name: "", email: "", phone: "" },
+  travelers: [],
   clientNotes: "",
   internalNotes: "",
 }
-
 const BuilderContext = createContext<BuilderContextType | undefined>(undefined)
 
 export function BuilderProvider({ children }: { children: ReactNode }) {

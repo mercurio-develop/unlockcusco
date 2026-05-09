@@ -100,6 +100,7 @@ export interface UniversalTrip {
   endDate: Date;
   paxCount: number;
   days: TripDay[];
+  travelers?: any[];
   status: 'DRAFT' | 'PROPOSED' | 'CONFIRMED';
   shareToken?: string;
   clientNotes?: string;

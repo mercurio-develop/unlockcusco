@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { BuilderWizard } from "./BuilderWizard"
 import { BuilderWorkspace } from "./BuilderWorkspace"
 import { CheckoutDetailsForm } from "./CheckoutDetailsForm"
@@ -20,7 +21,8 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
 })
 
 export function ProBuilderMain() {
-  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, isChatOpen, setSelectedId, selectedId, createDay } = useTrip()
+  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, setSelectedId, selectedId, createDay } = useTrip()
+  const { isChatOpen } = usePreferences()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -80,9 +82,10 @@ export function ProBuilderMain() {
           userLat: lat ? Number(lat) : undefined,
           userLng: lng ? Number(lng) : undefined,
           sort,
-          limit: 100 
+          limit: 100,
+          includePackages: true
         })
-        setBusinesses(result.businesses)
+        setBusinesses(result.allBusinesses)
       } finally {
         setLoading(false)
       }

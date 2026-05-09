@@ -1,11 +1,11 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
 
 export const buildChronoRelay = tool({
   description: 'Generates a Chrono-Spatial Relay (multi-stop itinerary) for a user who needs food, transit across the valley, and a place to stay. Use this when the user needs to travel between towns and wants a complete logistical plan.',
-  inputSchema: z.object({
+  parameters: z.object({
     currentLocation: z.string().optional().default("").describe('The user\'s current starting location. If unknown, default to empty string.'),
     foodLocation: z.string().optional().default("").describe('The town or location where they want to eat (e.g. Urubamba)'),
     destination: z.string().optional().default("").describe('The final destination town or location to sleep (e.g. Ollantaytambo)'),

@@ -17,12 +17,6 @@ export const MOCK_LOCATIONS = [
   { name: "Belmond Hotel Rio Sagrado, Urubamba", lat: -13.3150, lng: -72.1000 },
   { name: "Sol y Luna, Urubamba", lat: -13.2980, lng: -72.1320 },
   { name: "Explora Sacred Valley", lat: -13.3250, lng: -72.0800 },
-  { name: "Pisac Town Center", lat: -13.4222, lng: -71.8503 },
-  { name: "Urubamba Town Center", lat: -13.3039, lng: -72.1164 },
-  { name: "Cusco City Center", lat: -13.5171, lng: -71.9785 },
-  { name: "Ollantaytambo Town Center", lat: -13.2583, lng: -72.2639 },
-  { name: "Chinchero Town Center", lat: -13.3917, lng: -72.0494 },
-  { name: "Calca Town Center", lat: -13.3314, lng: -71.9525 },
 ]
 
 interface LocationAutocompleteProps {
@@ -38,7 +32,7 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setQuery(value || "")
   }, [value])
 
@@ -62,8 +56,14 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
         value={query}
         onChange={e => {
           setQuery(e.target.value)
-          onChange(e.target.value) // reset lat/lng on manual type
           setIsOpen(true)
+        }}
+        onBlur={() => {
+          setTimeout(() => {
+            if (query !== value) {
+              onChange(query)
+            }
+          }, 150)
         }}
         onFocus={() => setIsOpen(true)}
         className={className}
@@ -73,7 +73,8 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
           {filtered.map(loc => (
             <button
               key={loc.name}
-              onClick={() => {
+              onMouseDown={(e) => {
+                e.preventDefault()
                 setQuery(loc.name)
                 onChange(loc.name, loc.lat, loc.lng)
                 setIsOpen(false)

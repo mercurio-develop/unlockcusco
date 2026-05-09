@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 const fs = require('fs');
 const glob = require('glob'); // Note: we can use a recursive function instead if glob is not guaranteed to be installed.
 

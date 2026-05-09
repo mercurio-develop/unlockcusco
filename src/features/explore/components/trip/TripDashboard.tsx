@@ -5,6 +5,7 @@ import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { SecureManifestForm } from "@/features/checkout/components/SecureManifestForm"
+import { PackagePreviewModal } from "@/features/pro-builder/components/PackagePreviewModal"
 import { ChevronLeft, ChevronRight, MapPin, Clock, Navigation, Bed, ChevronDown, X, Download, Share, CheckCircle2 } from "lucide-react"
 import dynamic from "next/dynamic"
 import ReactMarkdown from 'react-markdown'
@@ -39,6 +40,7 @@ export function TripDashboard({ trip }: TripDashboardProps) {
   const [isSuccess, setIsSuccess] = useState(false)
   const [sidebarTab, setSidebarTab] = useState<"itinerary" | "travelers" | "summary">("itinerary")
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [viewingPackage, setViewingPackage] = useState<string | null>(null)
 
   const handleExportICS = () => {
     const icsContent = [
@@ -521,6 +523,17 @@ export function TripDashboard({ trip }: TripDashboardProps) {
                       </div>
                     </div>
                   )}
+
+                  {((selectedEvent as any).service || selectedEvent.packageId || selectedEvent.businessId) && (
+                    <div className="pt-4 border-t border-slate-100">
+                      <button
+                        onClick={() => setViewingPackage(selectedEvent.packageId || selectedEvent.businessId || (selectedEvent as any).service?.id)}
+                        className="w-full bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 px-4 py-3 rounded-xl text-sm font-bold shadow-sm transition-colors"
+                      >
+                        View Service Details
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="p-6 border-t border-slate-100 bg-slate-50 shrink-0">
@@ -679,6 +692,11 @@ export function TripDashboard({ trip }: TripDashboardProps) {
           )}
         </AnimatePresence>
       </div>
+
+      <PackagePreviewModal 
+        packageId={viewingPackage}
+        onClose={() => setViewingPackage(null)}
+      />
     </div>
   )
 }

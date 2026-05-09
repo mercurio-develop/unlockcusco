@@ -1,4 +1,4 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
@@ -60,7 +60,7 @@ Queries the real database for best-rated places near each location, returns top 
 USE THIS for any request involving: travel between towns, coffee/food/activities, accommodation, or planning a day.
 CALL IT as soon as you have origin + destination. Ask for missing info conversationally first if needed.`,
 
-  inputSchema: z.object({
+  parameters: z.object({
     originLocation: z.string().describe('Tourist\'s current location, e.g. "Pisac" or a specific hotel/business name'),
     destination:    z.string().describe('Final destination for the night, e.g. "Ollantaytambo" or a specific restaurant/business'),
     desires:        z.array(z.string()).describe('Stops the tourist wants, e.g. ["coffee", "market"]'),
@@ -70,6 +70,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
   }),
 
   execute: async ({ originLocation, destination, desires, constraints, userLat, userLng }) => {
+    console.log("=== EXECUTING buildItinerary ===", { originLocation, destination, desires });
     // RESOLVE ANCHORS TO BUSINESSES IF POSSIBLE
     const resolveAnchor = async (locStr: string) => {
        const business = await prisma.business.findFirst({
@@ -81,6 +82,37 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
          }
        });
        if (business) return { title: business.name, lat: business.lat || undefined, lng: business.lng || undefined, service: business };
+       
+       const pkg = await prisma.tourPackage.findFirst({
+         where: {
+           OR: [
+             { title: { contains: locStr, mode: 'insensitive' } }
+           ]
+         },
+         include: { business: true }
+       });
+       if (pkg) {
+         const mapped = {
+           id: pkg.id,
+           slug: `pkg-${pkg.id}`,
+           name: pkg.title,
+           category: pkg.tags.toLowerCase().includes('stay') || pkg.tags.toLowerCase().includes('hotel') ? "STAY" : "EXPERIENCE",
+           lat: pkg.business?.lat || null,
+           lng: pkg.business?.lng || null,
+           rating: pkg.business?.rating || 5.0,
+           reviewsCount: pkg.business?.reviewsCount || 10,
+           imageUrl: pkg.heroImage || pkg.business?.imageUrl || "",
+           description: pkg.description,
+           priceTier: pkg.basePriceUsd > 150 ? "$$$" : pkg.basePriceUsd > 75 ? "$$" : "$",
+           isPackage: true
+         };
+         return { title: pkg.title, lat: mapped.lat || undefined, lng: mapped.lng || undefined, service: mapped };
+       }
+
+       if (locStr.toLowerCase().includes('monasterio')) {
+          const mapped = { id: 'h1', name: "Hotel Monasterio", type: "STAY", category: "STAY", description: "A 16th-century monastery transformed into a luxury hotel.", imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80", lat: -13.5152, lng: -71.9774, rating: 5.0, priceTier: "$$$" };
+          return { title: "Hotel Monasterio", lat: mapped.lat, lng: mapped.lng, service: mapped };
+       }
        
        const coords = getCoords(locStr);
        return { title: locStr, lat: coords.lat, lng: coords.lng };
@@ -433,13 +465,13 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
         ...startAnchor,
         locationStr: startAnchor.title,
         type: 'GENERIC_TOWN' as const,
-        time: (transitEdges[0] as any)?.startTime || "09:00"
+        time: (transitEdges[0] as Record<string, unknown>)?.startTime || "09:00"
       },
       endAnchor: {
         ...endAnchor,
         locationStr: endAnchor.title,
         type: 'GENERIC_TOWN' as const,
-        time: (transitEdges[transitEdges.length - 1] as any)?.endTime || "18:00"
+        time: (transitEdges[transitEdges.length - 1] as Record<string, unknown>)?.endTime || "18:00"
       },
       needsAccommodationUpsell: true,
       waypoints,

@@ -1,11 +1,13 @@
 "use client"
 
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import { Calendar } from "lucide-react"
 
 export function PlanningDatePicker() {
-  const { targetDate, setTargetDate, setAiPromptToTrigger } = useTrip()
+  const { setAiPromptToTrigger } = useTrip()
+  const { targetDate, setTargetDate } = usePreferences()
 
   const isToday = (date: Date) => {
     const today = new Date()

@@ -4,19 +4,37 @@ import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 
 import { useState, useEffect } from "react"
 import { useItinerary } from "@/lib/store/itinerary-context"
-import { Moon, Plane, MapPin, Star, User, ChevronRight, Clock, Car, Plus, Trash2, Repeat, Navigation, ArrowUp, ArrowDown, Flag } from "lucide-react"
+import { Moon, Plane, MapPin, Star, User, ChevronRight, Clock, Car, Plus, Trash2, Repeat, Navigation, ArrowUp, ArrowDown, Flag, Utensils, Landmark, Ticket } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { calculateTravelEstimate } from "@/lib/utils/geo-math"
+import { LocationPicker } from "@/components/ui/LocationPicker"
 import { BasecampCarousel } from "./BasecampCarousel"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export function DayExplorer() {
   const { activeItinerary, setSelectedId, selectedId, macroTrip, setPanelMode, removeWaypoint, setExchangeTargetIndex, setStartAnchorLocation, swapDriverAlternative, moveWaypoint, truncateAfterWaypoint } = useItinerary()
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null)
   const [openTransportId, setOpenTransportId] = useState<number | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
+
+  const handleExchange = (index: number, type: string) => {
+    setExchangeTargetIndex(index)
+    setPanelMode('categories')
+    
+    let cat = ""
+    if (type === "MEAL" || type === "DINING") cat = "Dining"
+    else if (type === "STAY" || type === "LODGING") cat = "Stays"
+    else if (type === "TRANSPORT") cat = "Transport"
+    
+    if (cat) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("cat", cat)
+      router.push(`?${params.toString()}`, { scroll: false })
+    }
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -83,14 +101,11 @@ export function DayExplorer() {
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-rose-300 transition-all flex-1">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] block mb-1">Start Anchor</span>
-                <h3 className="text-slate-900 font-serif font-bold text-lg">{startAnchor?.title}</h3>
-                <p className="text-slate-500 text-xs">{startAnchor?.locationStr}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                {startAnchor?.time && <div className="text-slate-500 text-xs font-mono">{startAnchor.time}</div>}
                 <button
                   onClick={(e) => { e.stopPropagation(); setExchangeTargetIndex(-1); setPanelMode("categories"); }}
                   className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-rose-600 transition-colors uppercase tracking-widest"
@@ -100,14 +115,37 @@ export function DayExplorer() {
               </div>
             </div>
             
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <button
-                onClick={handleUseCurrentLocation}
-                className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors w-full justify-center"
-              >
-                <Navigation className="w-3.5 h-3.5" />
-                Use Current Location
-              </button>
+            <div className="flex flex-col gap-1 w-full px-2">
+              <h4 className="text-lg font-serif font-bold text-slate-900">{startAnchor?.title || "Establish your starting point"}</h4>
+              {(startAnchor as any)?.service && (
+                <>
+                  <div className="flex items-center gap-2 mb-1 mt-1">
+                    <span className={cn(
+                      "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 w-fit",
+                      (startAnchor as any).service?.category?.toUpperCase() === 'DINING'
+                        ? "bg-amber-50 text-amber-700 border-amber-200/50"
+                        : (startAnchor as any).service?.category?.toUpperCase() === 'CULTURE'
+                        ? "bg-purple-50 text-purple-700 border-purple-200/50"
+                        : (startAnchor as any).service?.category?.toUpperCase() === 'BOLETO'
+                        ? "bg-sky-50 text-sky-700 border-sky-200/50"
+                        : "bg-rose-50 text-rose-600 border-rose-100/50"
+                    )}>
+                      {(startAnchor as any).service?.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+                      {(startAnchor as any).service?.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+                      {(startAnchor as any).service?.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
+                      {(startAnchor as any).service?.category || 'LOCATION'}
+                    </span>
+                    {(startAnchor as any).service?.rating && (
+                      <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
+                        <Star className="w-3 h-3 fill-current" /> {(startAnchor as any).service.rating}
+                      </div>
+                    )}
+                  </div>
+                  {(startAnchor as any).service?.description && (
+                    <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">"{(startAnchor as any).service.description}"</p>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -274,7 +312,21 @@ export function DayExplorer() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[9px] font-bold text-rose-600 uppercase tracking-widest">{wp.category}</span>
+                          <span className={cn(
+                            "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 w-fit",
+                            wp.category?.toUpperCase() === 'DINING'
+                              ? "bg-amber-50 text-amber-700 border-amber-200/50"
+                              : wp.category?.toUpperCase() === 'CULTURE'
+                              ? "bg-purple-50 text-purple-700 border-purple-200/50"
+                              : wp.category?.toUpperCase() === 'BOLETO'
+                              ? "bg-sky-50 text-sky-700 border-sky-200/50"
+                              : "bg-rose-50 text-rose-600 border-rose-100/50"
+                          )}>
+                            {wp.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+                            {wp.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+                            {wp.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
+                            {wp.category}
+                          </span>
                           {wp.rating && (
                             <div className="flex items-center gap-0.5 text-[9px] text-amber-500 font-bold">
                               <Star className="w-2.5 h-2.5 fill-current" /> {wp.rating}
@@ -285,11 +337,6 @@ export function DayExplorer() {
                         <p className="text-slate-500 text-xs leading-relaxed mt-1">{wp.locationStr}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        {wp.startTime && (
-                          <div className="text-rose-600 text-xs font-bold bg-rose-50 px-2 py-1 rounded-md">
-                            {wp.startTime}
-                          </div>
-                        )}
                         {wp.durationMins && (
                           <div className="text-slate-500 text-[10px] font-bold uppercase flex items-center gap-1">
                             <Clock className="w-3 h-3" /> {wp.durationMins}m
@@ -320,7 +367,7 @@ export function DayExplorer() {
                       </button>
                     )}
                     <button
-                      onClick={(e) => { e.stopPropagation(); setExchangeTargetIndex(idx); setPanelMode("categories"); }}
+                      onClick={(e) => { e.stopPropagation(); handleExchange(idx, wp.category || "EXPERIENCE"); }}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-slate-900 transition-colors shadow-sm"
                     >
                       <Repeat className="w-3.5 h-3.5" /> Exchange
@@ -493,11 +540,9 @@ export function DayExplorer() {
           </div>
 
           <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-rose-300 transition-all flex-1">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-2">
               <div>
                 <span className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] block mb-1">End Anchor</span>
-                <h3 className="text-slate-900 font-serif font-bold text-lg">{endAnchor?.title}</h3>
-                <p className="text-slate-500 text-xs">{endAnchor?.locationStr}</p>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setExchangeTargetIndex(-2); setPanelMode("categories"); }}
@@ -506,7 +551,40 @@ export function DayExplorer() {
                 <Repeat className="w-3 h-3" /> Exchange
               </button>
             </div>
-            
+
+            <div className="flex flex-col gap-1 w-full px-2">
+              <h4 className="text-lg font-serif font-bold text-slate-900">{endAnchor?.title || "Where will your journey end?"}</h4>
+              {(endAnchor as any)?.service && (
+                <>
+                  <div className="flex items-center gap-2 mb-1 mt-1">
+                    <span className={cn(
+                      "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 w-fit",
+                      (endAnchor as any).service?.category?.toUpperCase() === 'DINING'
+                        ? "bg-amber-50 text-amber-700 border-amber-200/50"
+                        : (endAnchor as any).service?.category?.toUpperCase() === 'CULTURE'
+                        ? "bg-purple-50 text-purple-700 border-purple-200/50"
+                        : (endAnchor as any).service?.category?.toUpperCase() === 'BOLETO'
+                        ? "bg-sky-50 text-sky-700 border-sky-200/50"
+                        : "bg-rose-50 text-rose-600 border-rose-100/50"
+                    )}>
+                      {(endAnchor as any).service?.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+                      {(endAnchor as any).service?.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+                      {(endAnchor as any).service?.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
+                      {(endAnchor as any).service?.category || 'LOCATION'}
+                    </span>
+                    {(endAnchor as any).service?.rating && (
+                      <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
+                        <Star className="w-3 h-3 fill-current" /> {(endAnchor as any).service.rating}
+                      </div>
+                    )}
+                  </div>
+                  {(endAnchor as any).service?.description && (
+                    <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">"{(endAnchor as any).service.description}"</p>
+                  )}
+                </>
+              )}
+            </div>
+
             {endAnchor?.service?.slug && (
               <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2 justify-end">
                 <a
@@ -520,14 +598,14 @@ export function DayExplorer() {
               </div>
             )}
           </div>
-        </div>
+          </div>
 
-        {endAnchor?.type === 'GENERIC_TOWN' && (
+          {endAnchor?.type === 'GENERIC_TOWN' && (
           <div className="mt-2 p-6 border border-gray-200 rounded-3xl bg-white shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <BasecampCarousel locationTown={endAnchor.locationStr} />
           </div>
-        )}
-      </div>
-    </div>
-  )
-}
+          )}
+          </div>
+          </div>
+          )
+          }

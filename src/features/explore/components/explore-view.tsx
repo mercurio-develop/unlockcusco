@@ -9,6 +9,7 @@ import { DiscoverPanel } from "./DiscoverPanel"
 import { BusinessCard } from "@/features/business/components/business-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { ItineraryPanel } from "./itinerary-panel"
 import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
@@ -41,9 +42,13 @@ export function ExploreView({
   const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses || [])
   const [mapBusinesses, setMapBusinesses] = useState<Business[]>(initialMapBusinesses || [])
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>(initialCategoryCounts || {})
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId, setIsChatOpen } = useTrip()
+  const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
+  const { setIsChatOpen } = usePreferences()
   
   const isDrawerOpen = searchParams.get("filter") === "open"
   const setIsDrawerOpen = (open: boolean) => {
@@ -61,7 +66,36 @@ export function ExploreView({
     setBusinesses(initialBusinesses)
     setMapBusinesses(initialMapBusinesses)
     setCategoryCounts(initialCategoryCounts)
+    setPage(0)
+    setHasMore(initialHasMore)
   }
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return
+    setIsLoadingMore(true)
+    try {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("page", (page + 1).toString())
+      params.set("limit", "30")
+      
+      const res = await fetch(`/api/businesses?${params.toString()}`)
+      if (!res.ok) throw new Error("Failed to fetch")
+      const result = await res.json()
+      
+      setBusinesses(prev => {
+        // Simple deduplication based on ID just in case
+        const existingIds = new Set(prev.map(b => b.id))
+        const newBusinesses = (result.businesses || []).filter((b: Business) => !existingIds.has(b.id))
+        return [...prev, ...newBusinesses]
+      })
+      setPage(p => p + 1)
+      setHasMore(result.hasMore)
+    } catch (error) {
+      console.error("Failed to load more businesses:", error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [page, hasMore, isLoadingMore, searchParams])
 
   useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
@@ -107,6 +141,9 @@ export function ExploreView({
           selectedId={selectedId} 
           setSelectedId={setSelectedId} 
           onReset={() => router.push('/explore')}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
         />
       ) : (
         <ItineraryPanel />

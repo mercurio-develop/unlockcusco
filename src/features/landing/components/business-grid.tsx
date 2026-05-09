@@ -46,7 +46,7 @@ export function BusinessGrid({initialBusinesses, initialHasMore}: BusinessGridPr
 
   useEffect(() => {
     if (inView) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       loadMore()
     }
   }, [inView, loadMore])

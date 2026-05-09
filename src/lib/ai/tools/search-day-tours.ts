@@ -1,11 +1,11 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
 
 export const searchDayTours = tool({
   description: 'Search the database for single-day tours, treks, and activities that can be done in one day. Supports Spatial RAG by calculating real-world distances from the user to the activity sector.',
-  inputSchema: z.object({
+  parameters: z.object({
     query: z.string().describe("The type of activity to search for, e.g., 'ruins', 'trekking', 'solo', 'mountain'"),
     userLat: z.number().optional().describe("User's current latitude for distance calculation"),
     userLng: z.number().optional().describe("User's current longitude for distance calculation"),
@@ -15,7 +15,7 @@ export const searchDayTours = tool({
     const queryLower = query.toLowerCase().trim();
     const queryWords = queryLower.split(/\s+/).filter(word => word.length > 2);
 
-    const whereClause: any = {
+    const whereClause: Record<string, unknown> = {
       durationDays: 1, // Only 1-day packages
     };
 

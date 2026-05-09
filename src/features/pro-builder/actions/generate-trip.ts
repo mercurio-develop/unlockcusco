@@ -26,6 +26,19 @@ export async function generateProTrip(draft: DraftTrip) {
         baseCampStrategy: "FLEXIBLE", 
         shareToken,
         status: "PROPOSED",
+        travelers: {
+          create: draft.travelers?.map((t, idx) => ({
+            isLeadGuest: idx === 0,
+            firstName: t.firstName || `Traveler ${idx + 1}`,
+            lastName: t.lastName || '',
+            passportNumber: t.passportNumber || '',
+            nationality: t.nationality || '',
+            dateOfBirth: t.dateOfBirth ? new Date(t.dateOfBirth) : new Date('1990-01-01'),
+            whatsappNumber: t.whatsappNumber || null,
+            dietaryRestrictions: t.dietaryRestrictions || null,
+            medicalNotes: t.medicalNotes || null,
+          })) || []
+        },
         days: {
           create: draft.days.map((day, idx) => ({
             dayNumber: day.dayNumber || idx + 1,

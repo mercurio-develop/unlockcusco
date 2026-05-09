@@ -74,34 +74,48 @@ export function BuilderWizard() {
 
     const demoDays = generateEmptyDays(sd, 3)
     
-    // Day 1: Cusco Arrival & City Tour
+    // Day 1: Arrival & Acclimatization (Cusco)
     demoDays[0].isComplete = true;
+    demoDays[0].title = "Cusco Arrival & Acclimatization"
+    demoDays[0].sleepTown = "Cusco"
     demoDays[0].startAnchor = { title: "Alejandro Velasco Astete Airport (CUZ)", lat: -13.5358, lng: -71.9388, time: "09:00" };
-    demoDays[0].endAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "18:00" };
+    demoDays[0].endAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "18:00", service: { id: "h1", name: "Hotel Monasterio", category: "STAY", imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80" } as any };
     demoDays[0].events = [
-      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '09:00', title: 'Airport Pickup - Cusco', from: 'Airport', to: 'Hotel Monasterio', fromLat: -13.5358, fromLng: -71.9388, toLat: -13.5155, toLng: -71.9774 },
-      { id: uuidv4(), type: 'STAY', startTime: '10:00', title: 'Drop Bags at Hotel Monasterio', lat: -13.5155, lng: -71.9774 },
-      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Chicha', lat: -13.5173, lng: -71.9806 },
-      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Cusco City Tour & Sacsayhuaman', lat: -13.5097, lng: -71.9817 }
+      { id: uuidv4(), type: 'NOTE', startTime: '08:30', title: 'Arrival Briefing', content: 'Welcome to Cusco! Please take it easy today due to the altitude (3,400m). Drink plenty of coca tea.' },
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '09:00', title: 'VIP Airport Pickup', from: 'Airport', to: 'Hotel Monasterio', fromLat: -13.5358, fromLng: -71.9388, toLat: -13.5155, toLng: -71.9774, details: 'SUV with English-speaking driver', priceUsd: 45 },
+      { id: uuidv4(), type: 'STAY', startTime: '10:00', title: 'Check-in: Hotel Monasterio', lat: -13.5155, lng: -71.9774, checkIn: '10:00', priceUsd: 350, service: { id: "h1", name: "Hotel Monasterio", category: "STAY", description: "A 16th-century monastery transformed into a luxury hotel.", imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Chicha', lat: -13.5173, lng: -71.9806, notes: 'Reservation under Jenkins. Try the Alpaca.', priceUsd: 65, service: { id: "m1", name: "Chicha por Gaston Acurio", category: "DINING", description: "Renowned Peruvian chef's take on regional Cusco cuisine.", imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Cusco City Tour & Sacsayhuaman', lat: -13.5097, lng: -71.9817, durationMins: 180, priceUsd: 120, service: { id: "e1", name: "Sacsayhuaman Guided Tour", category: "CULTURE", description: "Explore the colossal stone walls of the Incan fortress above Cusco.", imageUrl: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'NOTE', startTime: '18:00', title: 'Evening Free Time', content: 'Evening free to explore Plaza de Armas. Enjoy the vibrant atmosphere.' }
     ]
 
-    // Day 2: Sacred Valley
+    // Day 2: Sacred Valley Descent
+    demoDays[1].title = "Sacred Valley Descent"
+    demoDays[1].sleepTown = "Urubamba"
     demoDays[1].startAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "08:00" };
-    demoDays[1].endAnchor = { title: "Tambo del Inka", lat: -13.2983, lng: -72.1158, time: "17:30" };
+    demoDays[1].endAnchor = { title: "Tambo del Inka", lat: -13.2983, lng: -72.1158, time: "17:30", service: { id: "h2", name: "Tambo del Inka", category: "STAY", imageUrl: "https://images.unsplash.com/photo-1542314831-c6a420325142?w=500&q=80" } as any };
     demoDays[1].events = [
-      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '08:00', title: 'Private Transfer - Sacred Valley', from: 'Cusco', to: 'Pisac', fromLat: -13.5155, fromLng: -71.9774, toLat: -13.4225, toLng: -71.8492 },
-      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:30', title: 'Pisac Ruins & Market', lat: -13.4225, lng: -71.8492 },
-      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Hacienda Huayoccari', lat: -13.3444, lng: -72.0528 },
-      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Ollantaytambo Fortress', lat: -13.2583, lng: -72.2633 }
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '08:00', title: 'Private Transfer - Sacred Valley', from: 'Cusco', to: 'Pisac', fromLat: -13.5155, fromLng: -71.9774, toLat: -13.4225, toLng: -71.8492, pickupTime: '08:00', details: 'Full day transport included' },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:30', title: 'Pisac Ruins & Market', lat: -13.4225, lng: -71.8492, durationMins: 150, priceUsd: 40, service: { id: "e2", name: "Pisac Archaeological Park", category: "RUINS", description: "Incredible terraces and Incan ruins overlooking the Sacred Valley.", imageUrl: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:00', title: 'Lunch at Hacienda Huayoccari', lat: -13.3444, lng: -72.0528, notes: 'Included in package. Beautiful hacienda with private collection.', priceUsd: 45, service: { id: "m2", name: "Hacienda Huayoccari", category: "DINING", description: "Traditional Peruvian lunch amidst a vast collection of colonial art.", imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '14:30', title: 'Drive to Ollantaytambo', from: 'Huayoccari', to: 'Ollantaytambo', fromLat: -13.3444, fromLng: -72.0528, toLat: -13.2583, toLng: -72.2633 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '15:00', title: 'Ollantaytambo Fortress', lat: -13.2583, lng: -72.2633, durationMins: 90, priceUsd: 30, service: { id: "e3", name: "Ollantaytambo Fortress", category: "RUINS", description: "Massive Incan fortress that served as the last stronghold against the Spanish.", imageUrl: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'STAY', startTime: '17:00', title: 'Check-in: Tambo del Inka', lat: -13.2983, lng: -72.1158, checkIn: '17:00', priceUsd: 450, service: { id: "h2", name: "Tambo del Inka", category: "STAY", description: "Luxury resort nestled in the heart of the Sacred Valley with private train station.", imageUrl: "https://images.unsplash.com/photo-1542314831-c6a420325142?w=500&q=80" } as any }
     ]
 
-    // Day 3: Machu Picchu
+    // Day 3: The Citadel (Machu Picchu)
+    demoDays[2].title = "The Citadel: Machu Picchu"
+    demoDays[2].sleepTown = "Cusco"
     demoDays[2].startAnchor = { title: "Ollantaytambo Station", lat: -13.2606, lng: -72.2656, time: "07:00" };
-    demoDays[2].endAnchor = { title: "Sanctuary Lodge", lat: -13.1547, lng: -72.5256, time: "14:00" };
+    demoDays[2].endAnchor = { title: "Hotel Monasterio", lat: -13.5155, lng: -71.9774, time: "20:00", service: { id: "h1", name: "Hotel Monasterio", category: "STAY", imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80" } as any };
     demoDays[2].events = [
-      { id: uuidv4(), type: 'TRANSPORT', method: 'TRAIN', startTime: '07:00', title: 'Vistadome Train to Aguas Calientes', from: 'Ollantaytambo Station', to: 'Aguas Calientes', fromLat: -13.2606, fromLng: -72.2656, toLat: -13.1547, toLng: -72.5256 },
-      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:00', title: 'Machu Picchu Guided Tour', lat: -13.1631, lng: -72.5450 },
-      { id: uuidv4(), type: 'MEAL', startTime: '13:30', title: 'Lunch at Sanctuary Lodge', lat: -13.1547, lng: -72.5256 }
+      { id: uuidv4(), type: 'TRANSPORT', method: 'TRAIN', startTime: '07:00', title: 'Vistadome Train to Aguas Calientes', from: 'Ollantaytambo Station', to: 'Aguas Calientes', fromLat: -13.2606, fromLng: -72.2656, toLat: -13.1547, toLng: -72.5256, details: 'Vistadome Observatory Car C, Seats 14-17', priceUsd: 115 },
+      { id: uuidv4(), type: 'TRANSPORT', method: 'PUBLIC', startTime: '08:30', title: 'Consettur Bus to Entrance', from: 'Aguas Calientes', to: 'Machu Picchu Entrance', details: 'Tickets provided by guide', priceUsd: 24 },
+      { id: uuidv4(), type: 'EXPERIENCE', startTime: '09:00', title: 'Machu Picchu Guided Tour', lat: -13.1631, lng: -72.5450, durationMins: 180, priceUsd: 160, service: { id: "e4", name: "Machu Picchu Citadel", category: "WONDER", description: "One of the New Seven Wonders of the World. A mystical ancient city in the clouds.", imageUrl: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'MEAL', startTime: '13:30', title: 'Lunch at Sanctuary Lodge', lat: -13.1547, lng: -72.5256, notes: 'Buffet lunch included. Relax after the tour.', priceUsd: 55, service: { id: "m3", name: "Tinkuy Buffet Restaurant", category: "DINING", description: "The only dining option adjacent to the ancient citadel of Machu Picchu.", imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=500&q=80" } as any },
+      { id: uuidv4(), type: 'TRANSPORT', method: 'TRAIN', startTime: '15:20', title: 'Return Train to Poroy', from: 'Aguas Calientes', to: 'Poroy Station', details: 'Vistadome return', priceUsd: 115 },
+      { id: uuidv4(), type: 'TRANSPORT', method: 'CAR', startTime: '19:00', title: 'Transfer to Cusco Hotel', from: 'Poroy', to: 'Hotel Monasterio' },
+      { id: uuidv4(), type: 'NOTE', startTime: '20:00', title: 'Farewell', content: 'End of services. Safe travels!' }
     ]
 
     setCurrentTrip({

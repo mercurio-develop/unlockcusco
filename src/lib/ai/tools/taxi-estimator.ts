@@ -1,11 +1,11 @@
-import { defineTool as tool } from '@/lib/ai/tool-utils';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { calculateDistance } from '@/lib/utils/geo';
 import { prisma } from '@/lib/prisma';
 
 export const estimateTaxiFare = tool({
   description: 'Estimates the taxi fare and travel time from the user\'s current location to a destination business in the Sacred Valley. Use this when the user asks for a taxi, transport, or how to get there.',
-  inputSchema: z.object({
+  parameters: z.object({
     origin: z.string().optional().default("").describe('The user\'s current location (e.g. Urubamba, Cusco, Pisac, Ollantaytambo). If unknown, default to empty string.'),
     destinationId: z.string().optional().describe('The ID of the business the user wants to go to (if known).'),
     destinationName: z.string().optional().default("").describe('The exact name of the destination business or town.'),

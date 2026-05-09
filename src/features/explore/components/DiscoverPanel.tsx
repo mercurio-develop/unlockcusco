@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, LayoutGrid, List, ChevronDown, Check } from "lucide-react"
+import { Search, LayoutGrid, List, ChevronDown, Check, Loader2 } from "lucide-react"
+import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/business/components/business-card"
 import { useTrip } from "@/lib/store/trip-context"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -14,15 +15,26 @@ interface DiscoverPanelProps {
   selectedId?: string | null
   setSelectedId: (id: string) => void
   onReset: () => void
+  hasMore?: boolean
+  isLoadingMore?: boolean
+  onLoadMore?: () => void
 }
 
-export function DiscoverPanel({ businesses, selectedId, setSelectedId, onReset }: DiscoverPanelProps) {
+export function DiscoverPanel({ businesses, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore }: DiscoverPanelProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const searchParams = useSearchParams()
   const router = useRouter()
   const currentSort = searchParams.get("sort") || "recommended"
   const [isSortOpen, setIsSortOpen] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
+  
+  const { ref, inView } = useInView({ threshold: 0 })
+
+  useEffect(() => {
+    if (inView && hasMore && !isLoadingMore && onLoadMore) {
+      onLoadMore()
+    }
+  }, [inView, hasMore, isLoadingMore, onLoadMore])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -117,6 +129,11 @@ export function DiscoverPanel({ businesses, selectedId, setSelectedId, onReset }
                orientation={viewMode === "list" ? "horizontal" : "vertical"}
              />
            ))}
+           {hasMore && (
+             <div ref={ref} className="w-full py-8 flex justify-center items-center col-span-full">
+               {isLoadingMore && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
+             </div>
+           )}
         </div>
       )}
     </div>

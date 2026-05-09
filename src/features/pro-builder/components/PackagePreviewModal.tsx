@@ -14,7 +14,7 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
 
   useEffect(() => {
     if (!packageId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setPkg(null)
       return
     }
