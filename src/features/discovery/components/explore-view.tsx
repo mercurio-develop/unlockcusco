@@ -45,7 +45,7 @@ export function ExploreView({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, activeItinerary, macroTrip, selectedId, setSelectedId } = useTrip()
+  const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId } = useTrip()
   const { setIsChatOpen } = usePreferences()
   
   const isDrawerOpen = searchParams.get("filter") === "open"
@@ -97,7 +97,7 @@ export function ExploreView({
 
   useEffect(() => {
     setSelectedId(initialSelectedId ?? null)
-    setPanelMode("categories")
+    setPanelMode("discover")
     // Auto-open concierge to guide the user
     setIsChatOpen(true)
   }, [initialSelectedId, setSelectedId, setPanelMode, setIsChatOpen])
@@ -109,11 +109,11 @@ export function ExploreView({
       </div>
 
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
-        <button onClick={() => { setPanelMode("categories"); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "categories" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
-        <button onClick={() => setPanelMode("route")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "route" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> My Route</button>
+        <button onClick={() => { setPanelMode("discover"); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "discover" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
+        <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> My Route</button>
       </div>
 
-      <div className={panelMode === "categories" ? "block" : "hidden"}>
+      <div className={panelMode === "discover" ? "block" : "hidden"}>
         <ExploreSearch 
           initialQuery={initialQuery} 
           isDrawerOpen={isDrawerOpen}
@@ -126,7 +126,7 @@ export function ExploreView({
 
   const content = (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden text-slate-900">
-      {panelMode === "categories" ? (
+      {panelMode === "discover" ? (
         <DiscoverPanel 
           businesses={businesses} 
           selectedId={selectedId} 
@@ -136,7 +136,7 @@ export function ExploreView({
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
         />
-      ) : panelMode === "itinerary" || panelMode === "route" ? (
+      ) : panelMode === "itinerary" ? (
         <ItineraryPanel />
       ) : (
         <div className="p-8 text-center text-slate-500">Feature disabled</div>
@@ -149,7 +149,7 @@ export function ExploreView({
       sidebar={sidebar}
       content={content}
       map={<ExploreMap businesses={mapBusinesses} selectedId={selectedId} onSelectBusiness={setSelectedId} />}
-      showMap={panelMode !== 'macro'}
+      showMap={true}
     />
   )
 }

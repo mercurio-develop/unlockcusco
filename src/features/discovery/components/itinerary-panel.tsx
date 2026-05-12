@@ -26,7 +26,7 @@ export function ItineraryPanel() {
           Ask the Vallecito Concierge to "plan a full day itinerary" to see your route magically appear here.
         </p>
         <button
-          onClick={() => setPanelMode("categories")}
+          onClick={() => setPanelMode("discover")}
           className="w-full bg-slate-900 text-white px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
         >
           Go to Discover
@@ -48,7 +48,7 @@ export function ItineraryPanel() {
           </h2>
         </div>
         <button 
-          onClick={() => setPanelMode("categories")}
+          onClick={() => setPanelMode("discover")}
           className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200"
         >
           <X className="w-4 h-4" />

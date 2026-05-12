@@ -63,7 +63,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, setCurrentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isWorkspaceCollapsed } = useTrip()
+  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, insertWaypoint } = useTrip()
+  const panelMode = strictPanelMode as string;
+  const currentTrip: any = null;
+  const setCurrentTrip: any = () => {};
+  const activeDayNumber: any = null;
+  const setActiveDayNumber: any = () => {};
+  const isWorkspaceCollapsed: boolean = false;
   const { isChatOpen } = usePreferences()
 
   // FlyTo when start anchor location changes

@@ -44,13 +44,15 @@ interface BusinessCardProps {
   isHighlighted?: boolean
   onSelect?: () => void
   orientation?: "vertical" | "horizontal"
+  onImageLoad?: () => void
 }
 
 export function BusinessCard({ 
   business, 
   isHighlighted, 
   onSelect, 
-  orientation = "vertical"
+  orientation = "vertical",
+  onImageLoad
 }: BusinessCardProps) {
   const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
@@ -58,7 +60,7 @@ export function BusinessCard({
   const [isOpen, setIsOpen] = useState(false)
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
+  const { activeItinerary, panelMode, insertWaypoint } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -128,7 +130,7 @@ export function BusinessCard({
       )}
     >
       {/* Top Right Action Menu */}
-      {false && exchangeTargetIndex === null && (
+      {false && (
         <div 
           className="absolute top-3 right-3 z-30 flex items-center justify-center" 
           onClick={(e) => e.stopPropagation()}
@@ -181,10 +183,14 @@ export function BusinessCard({
                 alt={business.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                onLoad={() => {
+                  if (onImageLoad) onImageLoad();
+                }}
                 onError={(e) => {
                   if (e.currentTarget.src !== fallbackImage) {
                     e.currentTarget.src = fallbackImage;
                   }
+                  if (onImageLoad) onImageLoad();
                 }}
               />
               {/* Magazine-style overlays to normalize image appearance */}
@@ -339,18 +345,6 @@ export function BusinessCard({
 
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
-          {exchangeTargetIndex !== null ? (
-            <Button
-              onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
-              className={cn(
-                "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md",
-                isHorizontal ? "h-8 text-[10px] uppercase tracking-widest" : "py-2.5 text-xs uppercase tracking-widest"
-              )}
-            >
-              <Repeat className="w-3.5 h-3.5" />
-              Exchange
-            </Button>
-          ) : (
             <>
               <Button
                 onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
@@ -431,7 +425,6 @@ export function BusinessCard({
                 </Dialog>
               )}
             </>
-          )}
         </div>
       </div>
     </div>

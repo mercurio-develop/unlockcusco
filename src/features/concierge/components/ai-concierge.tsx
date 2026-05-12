@@ -21,13 +21,11 @@ import { usePreferences } from "@/lib/store/preferences-context"
 export function AiConcierge() {
   const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate } = usePreferences()
   const { 
-    isWorkspaceCollapsed, 
     panelMode, 
     aiPromptToTrigger, 
     setAiPromptToTrigger,
     activeItinerary,
     setActiveItinerary,
-    activeDayNumber,
     setStartAnchorLocation,
     setPanelMode
   } = useTrip()
@@ -38,8 +36,7 @@ export function AiConcierge() {
   const processedToolCalls = useRef<Set<string>>(new Set())
   const processedPromptsRef = useRef<Set<string>>(new Set())
 
-  const isBuilder = panelMode === 'builder'
-  const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
+  const sidebarOffset = "0px"
 
   const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
@@ -243,17 +240,44 @@ export function AiConcierge() {
     }
   }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode]);
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" })
-      }
-    }, 100);
-  }
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior, block: "end" });
+    }
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, isLoading])
+    if (!messagesEndRef.current) return;
+    
+    const scrollContainer = messagesEndRef.current.parentElement;
+    if (!scrollContainer) return;
+
+    let isScrolledToBottom = true;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      isScrolledToBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (isScrolledToBottom) {
+        scrollToBottom("auto");
+      }
+    });
+
+    resizeObserver.observe(scrollContainer);
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom("smooth");
+  }, [messages.length, isLoading])
 
   useEffect(() => {
     const aiPrompt = searchParams.get("ai_prompt");

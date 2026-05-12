@@ -20,7 +20,8 @@ export function ThreePaneLayout({
   showMap = true,
   className
 }: ThreePaneLayoutProps) {
-  const { leftWidth, setLeftWidth, panelMode, setPanelMode } = useTrip()
+  const { panelMode, setPanelMode } = useTrip()
+  const [leftWidth, setLeftWidth] = useState(40)
   const { isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
   const [snap, setSnap] = useState<number | string | null>(0.5)
@@ -138,11 +139,11 @@ export function ThreePaneLayout({
 
               {/* Bottom Tab Bar (Mobile) */}
               <div className="shrink-0 h-[72px] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-2">
-                 <button onClick={() => setPanelMode('categories')} className="flex flex-col items-center gap-1 w-20">
-                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'categories' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
+                 <button onClick={() => setPanelMode('discover')} className="flex flex-col items-center gap-1 w-20">
+                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'discover' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                    </div>
-                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'categories' ? "text-slate-900" : "text-slate-400")}>Discover</span>
+                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'discover' ? "text-slate-900" : "text-slate-400")}>Discover</span>
                  </button>
 
                  <button onClick={() => setIsChatOpen(!isChatOpen)} className="flex flex-col items-center gap-1 -mt-4 w-20">
@@ -157,11 +158,11 @@ export function ThreePaneLayout({
                    <span className={cn("text-[10px] font-black uppercase tracking-tighter transition-colors mt-1", isChatOpen ? "text-rose-600" : "text-slate-400")}>AI</span>
                  </button>
 
-                 <button onClick={() => setPanelMode('route')} className="flex flex-col items-center gap-1 w-20">
-                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'route' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
+                 <button onClick={() => setPanelMode('itinerary')} className="flex flex-col items-center gap-1 w-20">
+                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
                    </div>
-                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'route' ? "text-slate-900" : "text-slate-400")}>Route</span>
+                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'itinerary' ? "text-slate-900" : "text-slate-400")}>Route</span>
                  </button>
               </div>
             </Drawer.Content>
