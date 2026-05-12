@@ -16,8 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket } from "lucide-react"
-import { trackWhatsappClick } from "@/features/business/actions/track-click"
-import { trackBusinessView } from "@/features/business/actions/track-view"
+import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
+import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { useTrip } from "@/lib/store/trip-context"

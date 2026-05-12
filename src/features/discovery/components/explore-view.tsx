@@ -6,8 +6,8 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { LayoutGrid, Map as RouteMap, CalendarDays, Search } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { DiscoverPanel } from "./DiscoverPanel"
-import { BusinessCard } from "@/features/business/components/business-card"
-import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
+import { BusinessCard } from "@/features/discovery/components/business-card"
+import { fetchBusinesses } from "@/features/discovery/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
@@ -24,7 +24,7 @@ interface ExploreViewProps {
   initialSelectedId?: string | null
 }
 
-const ExploreMap = dynamic(() => import("@/features/explore/components/explore-map"), {
+const ExploreMap = dynamic(() => import("@/features/discovery/components/explore-map"), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-50 animate-pulse" />
 })

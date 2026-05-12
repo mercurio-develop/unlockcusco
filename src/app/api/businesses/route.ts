@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
+import { fetchBusinesses } from "@/features/discovery"
 
 export const dynamic = "force-dynamic"
 

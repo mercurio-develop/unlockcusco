@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react"
 import { Search, LayoutGrid, List, ChevronDown, Check, Loader2 } from "lucide-react"
 import { useInView } from "react-intersection-observer"
-import { BusinessCard } from "@/features/business/components/business-card"
+import { BusinessCard } from "@/features/discovery/components/business-card"
 import { useTrip } from "@/lib/store/trip-context"
 import { useRouter, useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
-import { SORT_OPTIONS } from "@/features/explore/constants"
+import { SORT_OPTIONS } from "@/features/discovery/constants"
 
 interface DiscoverPanelProps {
   businesses: Business[]

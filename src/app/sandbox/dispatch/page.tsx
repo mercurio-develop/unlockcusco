@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { SandboxDashboard } from "@/features/sandbox/components/SandboxDashboard"
+import { SandboxDashboard } from "@/features/sandbox"
 
 export const dynamic = "force-dynamic"
 

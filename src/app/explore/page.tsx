@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useEffect, useState, use } from "react"
-import { ExploreView } from "@/features/explore/components/explore-view"
+import { ExploreView } from "@/features/discovery"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"

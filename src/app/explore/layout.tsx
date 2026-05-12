@@ -1,5 +1,5 @@
 import { TripProvider } from "@/lib/store/trip-context";
-import { AiConcierge } from "@/features/concierge/components/ai-concierge";
+import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 

@@ -3,7 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { PreferencesProvider } from "@/lib/store/preferences-context";
-import { AiConcierge } from "@/features/concierge/components/ai-concierge";
+import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/posthog-pageview";

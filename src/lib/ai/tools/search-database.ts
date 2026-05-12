@@ -1,6 +1,6 @@
 import { tool, jsonSchema } from 'ai';
 import { z } from 'zod';
-import { universalSearch } from '@/features/business/queries/universal-search';
+import { universalSearch } from '@/features/discovery/queries/universal-search';
 import { Redis } from '@upstash/redis';
 import { calculateDistance } from '@/lib/utils/geo';
 

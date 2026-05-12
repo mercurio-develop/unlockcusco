@@ -1,5 +1,4 @@
-import { HeroSection } from "@/features/landing/components/hero-section"
-import { FeaturesSection } from "@/features/landing/components/features-section"
+import { HeroSection, FeaturesSection } from "@/features/landing"
 
 export default async function HomePage() {
   return (

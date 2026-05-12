@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { claimBusiness } from "@/features/business/actions/claim-business"
+import { claimBusiness } from "@/features/onboarding/actions/claim-business"
 
 type Business = {
   id: string

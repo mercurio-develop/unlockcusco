@@ -4,10 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { Star, MapPin, Zap, ArrowLeft, MessageCircle, Clock, ShieldCheck, Heart } from "lucide-react"
-import { AsociadoBadge } from "@/features/business/components/asociado-badge"
-import { GastronomicTemplate } from "@/features/business/components/templates/GastronomicTemplate"
-import { ExpeditionTemplate } from "@/features/business/components/templates/ExpeditionTemplate"
-import { SanctuaryTemplate } from "@/features/business/components/templates/SanctuaryTemplate"
+import { AsociadoBadge, GastronomicTemplate, ExpeditionTemplate, SanctuaryTemplate } from "@/features/discovery"
 import { siteConfig } from "@/lib/config/site"
 
 interface BusinessPageProps {
