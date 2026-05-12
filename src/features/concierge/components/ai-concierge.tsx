@@ -377,6 +377,7 @@ Please generate my macro trip plan.`;
                     <div key={`${msg.id}-${index}`} className="flex flex-col gap-2">
                       {content && (
                         <div 
+                          id={`msg-text-${msg.id}`}
                           className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                         >
                           <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-slate-100" : "bg-rose-100"}`}>
@@ -489,7 +490,7 @@ Please generate my macro trip plan.`;
                           );
                         }
                         if (toolName === 'searchDatabase') {
-                          return <SearchResultsCard key={key} businesses={output} />
+                          return <SearchResultsCard key={key} businesses={output} messageId={msg.id} />
                         }
                         if (toolName === 'askAvailability') {
                           return <PendingAvailability key={key} message={output?.message} />

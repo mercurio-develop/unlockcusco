@@ -9,7 +9,7 @@ import { BusinessCard } from "@/features/discovery/components/business-card";
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability";
 import { cn } from "@/lib/utils";
 
-export function SearchResultsCard({ businesses }: { businesses: Business[] }) {
+export function SearchResultsCard({ businesses, messageId }: { businesses: Business[], messageId?: string }) {
   const { setSelectedId } = useTrip();
   const router = useRouter();
   const [loadedImages, setLoadedImages] = useState(0);
@@ -43,7 +43,10 @@ export function SearchResultsCard({ businesses }: { businesses: Business[] }) {
   return (
     <>
       {!isLoaded && (
-        <PendingAvailability message="Loading images..." />
+        <>
+          <PendingAvailability message="Loading images..." />
+          {messageId && <style>{`#msg-text-${messageId} { display: none; }`}</style>}
+        </>
       )}
       <div className={cn("my-3 -mx-4 sm:mx-0 transition-opacity duration-300", isLoaded ? "opacity-100" : "opacity-0 absolute pointer-events-none")}>
         <div className="flex items-center justify-between mb-2 px-4 sm:px-0">
