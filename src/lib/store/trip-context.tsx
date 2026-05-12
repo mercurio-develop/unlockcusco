@@ -16,7 +16,7 @@ export interface RouteData {
 
 interface TripContextType {
   activeItinerary: OptimizedPlan | null;
-  setActiveItinerary: (i: OptimizedPlan | null) => void;
+  setActiveItinerary: React.Dispatch<React.SetStateAction<OptimizedPlan | null>>;
   panelMode: PanelMode;
   setPanelMode: (mode: PanelMode) => void;
   selectedId: string | null;
