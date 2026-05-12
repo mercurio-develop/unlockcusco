@@ -139,20 +139,23 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
 
       if (!prev) {
+        const DEFAULT_COORDS = { lat: -13.3047, lng: -72.1167 }; // Urubamba
         return {
           title: "Today's Plan",
           startAnchor: {
             title: 'Current Location', locationStr: 'Current Location',
             type: 'GENERIC_TOWN' as const,
+            lat: DEFAULT_COORDS.lat, lng: DEFAULT_COORDS.lng, time: '09:00'
           },
           endAnchor: {
             title: 'Destination', locationStr: 'Destination',
             type: 'GENERIC_TOWN' as const,
+            lat: DEFAULT_COORDS.lat, lng: DEFAULT_COORDS.lng, time: '18:00'
           },
           waypoints: [newWaypoint],
           transitEdges: [],
           needsAccommodationUpsell: false,
-          totalCost: 0,
+          totalCost: 0
         };
       }
 
