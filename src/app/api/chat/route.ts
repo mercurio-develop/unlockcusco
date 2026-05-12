@@ -25,7 +25,7 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle } = body;
+    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Invalid messages format." }), { status: 400 });
@@ -42,6 +42,10 @@ export async function POST(req: Request) {
       .replace('{gpsStatus}', gpsStatus);
 
     systemInstruction += `\n\n${CONVERSATION_FLOW_PROMPT}\n\n${PLANNING_PROMPT}\n\n${SUPPORT_PROMPT}\n\n${RESEARCH_PROMPT}`;
+
+    if (itineraryState) {
+      systemInstruction += `\n\n<CURRENT_ITINERARY>\n${itineraryState}\n</CURRENT_ITINERARY>`;
+    }
 
     if (archetype && intensity && PSYCHOGRAPHIC_MATRIX[archetype]?.[intensity]) {
       systemInstruction += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;

@@ -14,9 +14,9 @@ function lookupCoords(name: string): { lat: number; lng: number } | null {
 }
 
 export const mutateItinerary = tool({
-  description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add a specific place to their route or set a new start/end location. You must provide the businessId from a previous searchDatabase result. If setting a generic start/end location (e.g., "Urubamba", "Airport"), you MUST provide approximate coords.',
+  description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add a specific place, remove a stop, or set a new start/end location. You must provide the businessId from a previous searchDatabase result. If setting a generic start/end location (e.g., "Urubamba", "Airport"), you MUST provide approximate coords.',
   parameters: z.object({
-    action: z.enum(['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME', 'ADD_WAYPOINT']),
+    action: z.enum(['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME', 'ADD_WAYPOINT', 'REMOVE_WAYPOINT']),
     targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
     businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
     resolvedLocation: z.string().optional().describe('The name of a generic location if not a specific business'),

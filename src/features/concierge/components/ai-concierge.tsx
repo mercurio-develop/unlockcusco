@@ -61,7 +61,12 @@ export function AiConcierge() {
       localTime: new Date().toLocaleTimeString(),
       targetDate: targetDate?.toLocaleDateString() || 'today',
       archetype: travelVibe,
-      intensity: travelIntensity
+      intensity: travelIntensity,
+      itineraryState: activeItinerary ? JSON.stringify({
+        startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
+        endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
+        waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
+      }) : null
     }
   } as any);
 
@@ -83,6 +88,11 @@ export function AiConcierge() {
         intensity: travelIntensity,
         itineraryStartTitle: sTitle && !defaultTitles.includes(sTitle) ? sTitle : null,
         itineraryEndTitle: eTitle && !defaultTitles.includes(eTitle) ? eTitle : null,
+        itineraryState: activeItinerary ? JSON.stringify({
+          startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
+          endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
+          waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
+        }) : null
       }
     });
   }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
@@ -118,6 +128,11 @@ export function AiConcierge() {
               targetDate: targetDate?.toLocaleDateString() || 'today',
               archetype: travelVibe,
               intensity: travelIntensity,
+              itineraryState: activeItinerary ? JSON.stringify({
+                startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
+                endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
+                waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
+              }) : null
             }
           }
         );
@@ -246,6 +261,16 @@ export function AiConcierge() {
             };
           });
           setPanelMode('itinerary');
+        }
+
+        if (action === 'REMOVE_WAYPOINT' && targetId) {
+          setActiveItinerary(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              waypoints: prev.waypoints.filter((w: any) => w.id !== targetId)
+            };
+          });
         }
 
         if (action === 'UPDATE_TIME' && targetId && time) {

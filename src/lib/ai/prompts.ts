@@ -76,13 +76,15 @@ CRITICAL OVERRIDE: The concierge MUST NEVER add unrequested places or stops to a
   If missing Destination -> Suggest a starting point based on their request and ask "Where will your adventure end today so we can trace it on the map?"
 
 - ITINERARY MODIFICATION:
-  If adding/removing a stop, RE-CALL \`buildItinerary\` with previous origin/destination and the appended desires array. DO NOT output conversational filler. Invoke instantly.
+  Do NOT output conversational filler when updating itineraries. Invoke tools instantly.
 
 - GRANULAR ITINERARY MUTATION:
-  If the user wants to make a specific change to an EXISTING active itinerary, use \`mutateItinerary\`:
-  1. SWAP: "Change [Place A] for [Place B]" or "I don't like [Place A], show me alternatives" -> Call \`mutateItinerary\` with action='SWAP_STOP'.
-  2. ANCHORS: "I'm starting from [Hotel/Town]", "I am in [Town] right now", or "I'll end my day at [Restaurant]" -> Call \`mutateItinerary\` with action='SET_START' or 'SET_END'. If you asked the user where they are, and they reply with a location, IMMEDIATELY call \`mutateItinerary\` with action='SET_START' and \`locationStr\` set to their location.
-  3. TIME: "Make [Stop X] at 2pm" -> Call \`mutateItinerary\` with action='UPDATE_TIME'.
+  If the user wants to make a specific change to an EXISTING active itinerary, use \`mutateItinerary\`. Check the <CURRENT_ITINERARY> state first to understand what is currently planned.
+  1. ADD: "I'd like to go to [Place]" -> Call \`mutateItinerary\` with action='ADD_WAYPOINT'.
+  2. REMOVE: "Remove [Place]", "Delete that stop" -> Call \`mutateItinerary\` with action='REMOVE_WAYPOINT' and the targetId of the waypoint.
+  3. SWAP: "Change [Place A] for [Place B]" or "I don't like [Place A], show me alternatives" -> Call \`mutateItinerary\` with action='SWAP_STOP'.
+  4. ANCHORS: "I'm starting from [Hotel/Town]", "I am in [Town] right now", or "I'll end my day at [Restaurant]" -> Call \`mutateItinerary\` with action='SET_START' or 'SET_END'. If you asked the user where they are, and they reply with a location, IMMEDIATELY call \`mutateItinerary\` with action='SET_START' and \`locationStr\` set to their location. NEVER ask for a start or end location if it is already present in the <CURRENT_ITINERARY>.
+  5. TIME: "Make [Stop X] at 2pm" -> Call \`mutateItinerary\` with action='UPDATE_TIME'.
   DO NOT rebuild the whole itinerary for these specific requests. Use the surgical tool.
 </PLANNING_EXECUTION>
 
