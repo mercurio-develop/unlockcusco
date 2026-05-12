@@ -103,12 +103,12 @@ export function ItineraryPanel() {
           className={`flex gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${selectedId === 'itin-start' ? 'bg-white border-slate-900 shadow-md ring-1 ring-slate-900' : 'bg-white border-gray-200 hover:border-slate-300'}`}
         >
           <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
-            {activeItinerary.startAnchor.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
+            {activeItinerary.startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Start Point</p>
-            <p className="text-sm font-semibold text-slate-900">{activeItinerary.startAnchor.title}</p>
-            {activeItinerary.startAnchor.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.startAnchor.time}</p>}
+            <p className="text-sm font-semibold text-slate-900">{activeItinerary.startAnchor?.title || "Current Location"}</p>
+            {activeItinerary.startAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.startAnchor.time}</p>}
           </div>
         </div>
 
@@ -196,8 +196,8 @@ export function ItineraryPanel() {
             </div>
             <div>
               <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">End Point</p>
-              <p className="text-sm font-semibold text-slate-900">{activeItinerary.endAnchor.title}</p>
-              {activeItinerary.endAnchor.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p>}
+              <p className="text-sm font-semibold text-slate-900">{activeItinerary.endAnchor?.title || "Destination"}</p>
+              {activeItinerary.endAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p>}
             </div>
           </div>
         </div>
