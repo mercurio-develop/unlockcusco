@@ -578,7 +578,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               longitude={start.lng}
               latitude={start.lat}
               anchor="bottom"
-              draggable={!(start as any).service}
+              draggable={true}
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng)
@@ -593,7 +593,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               }}
             >
               <div
-                className={cn("group/start flex flex-col items-center", !(start as any).service ? "cursor-grab active:cursor-grabbing" : "cursor-pointer")}
+                className={cn("group/start flex flex-col items-center cursor-grab active:cursor-grabbing")}
                 title="Start location"
                 onClick={e => {
                   e.stopPropagation()

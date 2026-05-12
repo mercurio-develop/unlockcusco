@@ -99,16 +99,15 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
   const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location") => {
     setActiveItinerary(prev => {
-      if (!prev) return null;
+      const base = prev ?? {
+        title: "Today's Plan",
+        startAnchor: { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '09:00' },
+        endAnchor:   { title: 'Destination', locationStr: 'Destination', type: 'GENERIC_TOWN' as const, lat: -13.3047, lng: -72.1167, time: '18:00' },
+        waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
+      };
       return {
-        ...prev,
-        startAnchor: {
-          ...prev.startAnchor,
-          lat,
-          lng,
-          locationStr: title,
-          title: title
-        }
+        ...base,
+        startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title }
       };
     });
   }, []);
