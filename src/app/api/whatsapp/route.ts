@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidateTag } from 'next/cache';
+import { ghostPhoneFetch, GHOST_PHONE_SECRET } from '@/lib/config/services';
 
-const GHOST_PHONE_URL = process.env.GHOST_PHONE_URL || 'http://localhost:4000';
-const GHOST_PHONE_SECRET = process.env.GHOST_PHONE_SECRET || 'dev-secret';
 const TRIGGER_WORDS = ['VERIFICA', 'VERIFY', 'VALLECITO', 'VALLE', 'SI', 'SÍ', 'YES', 'OK', '1'];
 
 async function sendWA(phone: string, message: string) {
   try {
-    await fetch(`${GHOST_PHONE_URL}/api/message/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GHOST_PHONE_SECRET}` },
-      body: JSON.stringify({ phone, message })
-    });
+    await ghostPhoneFetch('/api/message/send', { phone, message });
   } catch (e) {
     console.error('[WA webhook] Failed to send reply:', e);
   }
@@ -70,7 +65,6 @@ export async function POST(req: NextRequest) {
       `✅ ¡Verificado, ${business.name}! Ahora los turistas pueden contactarte directamente por WhatsApp en Vallecito.\n\n👉 Ve tu negocio en el mapa:\n${exploreUrl}\n\n📍 ¿Quieres mejorar tu ubicación en el mapa? Comparte tu *ubicación de WhatsApp* respondiendo con tu pin GPS.\n\n---\nVerified! Tourists can now contact you directly. View your listing: ${exploreUrl}`
     );
 
-    console.log(`[WA webhook] ✅ Verified: ${business.name} (${phone})`);
     return NextResponse.json({ ok: true, verified: business.name });
 
   } catch (e) {

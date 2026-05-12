@@ -2,11 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import Stripe from "stripe"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
-  apiVersion: "2026-04-22.dahlia" as any,
-});
+import { stripe } from "@/lib/config/stripe"
 
 export async function simulateDriverAccept(rideId: string) {
   // Find a driver (or create a dummy one)

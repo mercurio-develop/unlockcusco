@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { ghostPhoneFetch } from "@/lib/config/services"
 
 export async function generateShadowLead(businessId: string, touristName: string, date: string) {
   if (!businessId || !touristName || !date) {
@@ -29,27 +30,8 @@ export async function generateShadowLead(businessId: string, touristName: string
 
   const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (VALLECITO) just ${contextNote} to ${touristName} for the date ${date}.\n\nSince your profile is still 'Unverified', the tourist couldn't message you directly. To receive the tourist's contact info and close this sale, click here to activate your free profile: ${baseUrl}/claim/${businessId}`
 
-  const ghostPhoneUrl = process.env.GHOST_PHONE_URL || "http://localhost:4000";
-  const webhookSecret = process.env.WEBHOOK_SECRET || "dev-secret";
-
   try {
-    const response = await fetch(`${ghostPhoneUrl}/api/message/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${webhookSecret}`
-      },
-      body: JSON.stringify({
-        phone: business.whatsapp,
-        message: rawText
-      })
-    });
-
-    if (!response.ok) {
-      console.warn("Ghost Phone webhook failed, falling back to client-side wa.me link", await response.text());
-      return { success: true, url: `https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(rawText)}` };
-    }
-
+    await ghostPhoneFetch('/api/message/send', { phone: business.whatsapp, message: rawText });
     return { success: true, delivered: true };
   } catch (error) {
     console.warn("Failed to reach Ghost Phone, falling back to client-side wa.me link", error);

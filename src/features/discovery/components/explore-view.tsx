@@ -127,11 +127,11 @@ export function ExploreView({
   const content = (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden text-slate-900">
       {panelMode === "discover" ? (
-        <DiscoverPanel 
-          businesses={businesses} 
-          selectedId={selectedId} 
-          setSelectedId={setSelectedId} 
-          onReset={() => router.push('/explore')}
+        <DiscoverPanel
+          businesses={businesses}
+          totalCount={mapBusinesses.length}
+          selectedId={selectedId}
+          setSelectedId={setSelectedId}          onReset={() => router.push('/explore')}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}

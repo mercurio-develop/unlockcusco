@@ -25,11 +25,13 @@ interface TripContextType {
   setSelectedId: (id: string | null) => void;
   exchangeTargetId: string | null;
   setExchangeTargetId: (id: string | null) => void;
+  isExchangingStart: boolean;
+  setIsExchangingStart: (v: boolean) => void;
   isExchangingEnd: boolean;
   setIsExchangingEnd: (v: boolean) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
-  setStartAnchorLocation: (lat: number, lng: number, title?: string) => void;
+  setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
   updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
   insertWaypoint: (service: Business) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
@@ -37,10 +39,11 @@ interface TripContextType {
   moveWaypoint: (id: string, direction: "up" | "down") => void;
   setWaypoints: (waypoints: any[]) => void;
   routeData: RouteData | null;
-  transportProfile: TransportProfile;
-  setTransportProfile: (profile: TransportProfile) => void;
+  transportProfiles: Record<number, TransportProfile>;
+  setLegTransportProfile: (index: number, profile: TransportProfile) => void;
   mapClickMode: 'end' | null;
   setMapClickMode: (mode: 'end' | null) => void;
+  clearStartAnchor: () => void;
   clearEndAnchor: () => void;
 }
 
@@ -52,11 +55,16 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [panelMode, setPanelMode] = useState<PanelMode>("discover");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [exchangeTargetId, setExchangeTargetId] = useState<string | null>(null);
+  const [isExchangingStart, setIsExchangingStart] = useState(false);
   const [isExchangingEnd, setIsExchangingEnd] = useState(false);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
-  const [transportProfile, setTransportProfile] = useState<TransportProfile>("driving");
+  const [transportProfiles, setTransportProfiles] = useState<Record<number, TransportProfile>>({});
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [mapClickMode, setMapClickMode] = useState<'end' | null>(null);
+
+  const setLegTransportProfile = useCallback((index: number, profile: TransportProfile) => {
+    setTransportProfiles(prev => ({ ...prev, [index]: profile }));
+  }, []);
 
   useEffect(() => {
     if (!activeItinerary) {
@@ -83,55 +91,102 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) return;
 
-    const coordsStr = pts.map(p => `${p[0]},${p[1]}`).join(';');
-    const url = `https://api.mapbox.com/directions/v5/mapbox/${transportProfile}/${coordsStr}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
+    const fetchLeg = async (p1: [number, number], p2: [number, number], profile: TransportProfile) => {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${p1[0]},${p1[1]};${p2[0]},${p2[1]}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.routes && data.routes[0]) {
+        return data.routes[0];
+      }
+      return null;
+    };
 
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        if (data.routes && data.routes[0]) {
-          const legGeometries = data.routes[0].legs.map((leg: any, index: number) => {
-            const coordinates: any[] = [];
-            if (leg.steps) {
-              leg.steps.forEach((step: any) => {
-                if (step.geometry && step.geometry.coordinates) {
-                  coordinates.push(...step.geometry.coordinates);
-                }
-              });
-            }
-            return {
-              type: 'Feature',
-              properties: { legIndex: index },
-              geometry: {
-                type: 'LineString',
-                coordinates
+    const legPromises = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const profile = transportProfiles[i] || "driving";
+      legPromises.push(fetchLeg(pts[i], pts[i + 1], profile));
+    }
+
+    Promise.all(legPromises)
+      .then(routeResults => {
+        let totalDuration = 0;
+        const allLegs: any[] = [];
+        const legGeometries: any[] = [];
+        const combinedCoordinates: any[] = [];
+
+        routeResults.forEach((route, index) => {
+          if (!route) return;
+          totalDuration += route.duration || 0;
+          
+          if (route.legs && route.legs.length > 0) {
+            allLegs.push(route.legs[0]);
+          }
+
+          const legCoords: any[] = [];
+          if (route.legs && route.legs[0].steps) {
+            route.legs[0].steps.forEach((step: any) => {
+              if (step.geometry && step.geometry.coordinates) {
+                legCoords.push(...step.geometry.coordinates);
+                combinedCoordinates.push(...step.geometry.coordinates);
               }
-            };
-          });
+            });
+          }
 
+          legGeometries.push({
+            type: 'Feature',
+            properties: { legIndex: index, profile: transportProfiles[index] || "driving" },
+            geometry: {
+              type: 'LineString',
+              coordinates: legCoords
+            }
+          });
+        });
+
+        if (allLegs.length > 0) {
           setRouteData({
-            geometry: data.routes[0].geometry,
-            legs: data.routes[0].legs,
+            geometry: {
+              type: 'LineString',
+              coordinates: combinedCoordinates
+            },
+            legs: allLegs,
             legGeometries,
-            profile: transportProfile,
-            duration: data.routes[0].duration
+            profile: "driving", // Not strictly used for single legs anymore
+            duration: totalDuration
           });
         }
       })
       .catch(err => console.error("Mapbox routing error:", err));
-  }, [activeItinerary, transportProfile]);
+  }, [activeItinerary, transportProfiles]);
 
-  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location") => {
+  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
         title: "Today's Plan",
-        startAnchor: { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '09:00' },
+        startAnchor: { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '09:00', service },
         endAnchor:   { title: 'Destination', locationStr: 'Destination', type: 'GENERIC_TOWN' as const, lat: -13.3047, lng: -72.1167, time: '18:00' },
         waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
       };
       return {
         ...base,
-        startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title }
+        startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title, service }
+      };
+    });
+  }, []);
+
+  const clearStartAnchor = useCallback(() => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        startAnchor: {
+          title: "Current Location",
+          locationStr: "Current Location",
+          type: 'GENERIC_TOWN' as const,
+          lat: undefined as any,
+          lng: undefined as any,
+          time: '09:00',
+          service: undefined
+        }
       };
     });
   }, []);
@@ -279,6 +334,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setSelectedId,
       exchangeTargetId,
       setExchangeTargetId,
+      isExchangingStart,
+      setIsExchangingStart,
       isExchangingEnd,
       setIsExchangingEnd,
       aiPromptToTrigger,
@@ -291,16 +348,17 @@ export function TripProvider({ children }: { children: ReactNode }) {
       moveWaypoint,
       setWaypoints,
       routeData,
-      transportProfile,
-      setTransportProfile,
+      transportProfiles,
+      setLegTransportProfile,
       mapClickMode,
       setMapClickMode,
+      clearStartAnchor,
       clearEndAnchor,
   }), [
-      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingEnd, aiPromptToTrigger,
+      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
-      removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile,
-      mapClickMode, clearEndAnchor,
+      removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfiles,
+      mapClickMode, clearStartAnchor, clearEndAnchor,
   ]);
 
   return (

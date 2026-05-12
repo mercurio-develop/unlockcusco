@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket, Bed } from "lucide-react"
+import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket, Bed, Navigation } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
@@ -46,24 +46,39 @@ interface BusinessCardProps {
   orientation?: "vertical" | "horizontal"
   onImageLoad?: () => void
   hideActions?: boolean
+  contactOnly?: boolean
 }
 
-export function BusinessCard({ 
-  business, 
-  isHighlighted, 
-  onSelect, 
+export function BusinessCard({
+  business,
+  isHighlighted,
+  onSelect,
   orientation = "vertical",
   onImageLoad,
-  hideActions = false
-}: BusinessCardProps) {
-  const [touristName, setTouristName] = useState("")
+  hideActions = false,
+  contactOnly = false
+}: BusinessCardProps) {  const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
-  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint, updateEndAnchorLocation, isExchangingEnd, setIsExchangingEnd } = useTrip()
+  const { 
+    activeItinerary, 
+    panelMode, 
+    setPanelMode, 
+    exchangeTargetId, 
+    setExchangeTargetId, 
+    swapWaypoint, 
+    insertWaypoint, 
+    setStartAnchorLocation,
+    updateEndAnchorLocation, 
+    isExchangingStart,
+    setIsExchangingStart,
+    isExchangingEnd, 
+    setIsExchangingEnd 
+  } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -356,8 +371,25 @@ export function BusinessCard({
         {/* Action Row */}
         {!hideActions && (
           <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
+            {!contactOnly && (
               <>
-                {isExchangingEnd && business.lat != null && business.lng != null ? (
+                {isExchangingStart && business.lat != null && business.lng != null ? (
+                  <Button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setStartAnchorLocation(business.lat!, business.lng!, business.name, business as any);
+                      setIsExchangingStart(false);
+                      setPanelMode('itinerary');
+                    }}
+                    className={cn(
+                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                    )}
+                  >
+                    <Navigation className="w-3 h-3" />
+                    Set as Start
+                  </Button>
+                ) : isExchangingEnd && business.lat != null && business.lng != null ? (
                   <Button
                     onClick={e => {
                       e.stopPropagation();
@@ -435,7 +467,9 @@ export function BusinessCard({
                     )}
                   </>
                 )}
-                {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
+              </>
+            )}
+            {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
                   <Button
                     onClick={handleBookNow}
                     className={cn(
@@ -503,7 +537,6 @@ export function BusinessCard({
                     </DialogContent>
                   </Dialog>
                 )}
-              </>
           </div>
         )}
       </div>

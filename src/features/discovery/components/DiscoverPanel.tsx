@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X } from "lucide-react"
+import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, Utensils, Landmark, Ticket, MapPin } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import { useTrip } from "@/lib/store/trip-context"
@@ -12,6 +12,7 @@ import { SORT_OPTIONS, CATEGORIES, LOCATIONS } from "@/features/discovery/consta
 
 interface DiscoverPanelProps {
   businesses: Business[]
+  totalCount: number
   selectedId?: string | null
   setSelectedId: (id: string) => void
   onReset: () => void
@@ -20,7 +21,7 @@ interface DiscoverPanelProps {
   onLoadMore?: () => void
 }
 
-export function DiscoverPanel({ businesses, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore }: DiscoverPanelProps) {
+export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore }: DiscoverPanelProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -81,72 +82,87 @@ export function DiscoverPanel({ businesses, selectedId, setSelectedId, onReset, 
   return (
     <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 relative">
       {businesses.length > 0 && (
-        <div className="flex items-start justify-between gap-4 z-10 mb-4">
-          <div className="flex items-center gap-2 flex-1 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {q && (
-              <button onClick={() => removeFilter("q")} className="shrink-0 flex items-center gap-1.5 bg-white border border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600 rounded-full px-3 py-1 shadow-sm hover:border-slate-300 hover:text-slate-900 transition-colors">
-                <span>"{q}"</span>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {loc && (
-              <button onClick={() => removeFilter("loc")} className="shrink-0 flex items-center gap-1.5 bg-white border border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600 rounded-full px-3 py-1 shadow-sm hover:border-slate-300 hover:text-slate-900 transition-colors">
-                <span>{LOCATIONS.find(l => l.value === loc)?.label || loc}</span>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {cats.map(c => (
-              <button key={c} onClick={() => removeFilter("cat", c)} className="shrink-0 flex items-center gap-1.5 bg-white border border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600 rounded-full px-3 py-1 shadow-sm hover:border-slate-300 hover:text-slate-900 transition-colors">
-                <span>{CATEGORIES.find(cat => cat.value === c)?.label || c}</span>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            ))}
-            {rad && (
-              <button onClick={() => removeFilter("rad")} className="shrink-0 flex items-center gap-1.5 bg-white border border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600 rounded-full px-3 py-1 shadow-sm hover:border-slate-300 hover:text-slate-900 transition-colors">
-                <span>{rad}km Radius</span>
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+        <div className="flex flex-col gap-3 w-full z-10 mb-4">
+          <div className="flex items-center justify-between w-full">
+            <div className="text-sm font-bold text-slate-800">{totalCount} Places</div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div ref={sortRef} className="relative z-20">
+                <button 
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg shadow-sm px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest"
+                >
+                  <span>Sort: {SORT_OPTIONS.find(o => o.value === currentSort)?.label || "Recommended"}</span>
+                  <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", isSortOpen && "rotate-180")} />
+                </button>
+                
+                {isSortOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-1 overflow-hidden">
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        className={cn(
+                          "w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between",
+                          currentSort === option.value ? "text-rose-600 bg-rose-50/50" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        )}
+                      >
+                        {option.label}
+                        {currentSort === option.value && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center bg-white border border-slate-200 rounded-lg shadow-sm p-1">
+                <button onClick={() => setViewMode("list")} className={cn("p-1.5 rounded-md transition-colors", viewMode === "list" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600")}>
+                  <List className="w-4 h-4" />
+                </button>
+                <button onClick={() => setViewMode("grid")} className={cn("p-1.5 rounded-md transition-colors", viewMode === "grid" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600")}>
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div ref={sortRef} className="relative">
-              <button 
-                onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg shadow-sm px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest"
-              >
-                <span>Sort: {SORT_OPTIONS.find(o => o.value === currentSort)?.label || "Recommended"}</span>
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", isSortOpen && "rotate-180")} />
-              </button>
-              
-              {isSortOpen && (
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-1 overflow-hidden">
-                  {SORT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleSortChange(option.value)}
-                      className={cn(
-                        "w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-between",
-                        currentSort === option.value ? "text-rose-600 bg-rose-50/50" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      )}
-                    >
-                      {option.label}
-                      {currentSort === option.value && <Check className="w-4 h-4" />}
-                    </button>
-                  ))}
-                </div>
+          {(q || loc || cats.length > 0 || rad) && (
+            <div className="flex flex-wrap items-center gap-2 w-full">
+              {q && (
+                <button onClick={() => removeFilter("q")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+                  <span>"{q}"</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
+              )}
+              {loc && (
+                <button onClick={() => removeFilter("loc")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-indigo-50 text-indigo-700 border-indigo-200/50 hover:bg-indigo-100">
+                  <MapPin className="w-2.5 h-2.5" />
+                  <span>{LOCATIONS.find(l => l.value === loc)?.label || loc}</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
+              )}
+              {cats.map(c => (
+                <button key={c} onClick={() => removeFilter("cat", c)} className={cn(
+                  "shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors",
+                  c.toUpperCase() === 'DINING' ? "bg-amber-50 text-amber-700 border-amber-200/50 hover:bg-amber-100" :
+                  c.toUpperCase() === 'CULTURE' ? "bg-purple-50 text-purple-700 border-purple-200/50 hover:bg-purple-100" :
+                  c.toUpperCase() === 'BOLETO' ? "bg-sky-50 text-sky-700 border-sky-200/50 hover:bg-sky-100" :
+                  "bg-rose-50 text-rose-600 border-rose-100/50 hover:bg-rose-100"
+                )}>
+                  {c.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+                  {c.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+                  {c.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
+                  <span>{CATEGORIES.find(cat => cat.value === c)?.label || c}</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
+              ))}
+              {rad && (
+                <button onClick={() => removeFilter("rad")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
+                  <span>{rad}km Radius</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
               )}
             </div>
-
-            <div className="flex items-center bg-white border border-slate-200 rounded-lg shadow-sm p-1">
-              <button onClick={() => setViewMode("list")} className={cn("p-1.5 rounded-md transition-colors", viewMode === "list" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600")}>
-                <List className="w-4 h-4" />
-              </button>
-              <button onClick={() => setViewMode("grid")} className={cn("p-1.5 rounded-md transition-colors", viewMode === "grid" ? "bg-slate-100 text-slate-900" : "text-slate-400 hover:text-slate-600")}>
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       )}
       {businesses.length === 0 ? (

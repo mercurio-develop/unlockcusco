@@ -177,27 +177,26 @@ export function ExploreSearch({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex flex-col gap-6 pt-2 pb-4 font-sans">
+            <div className="flex flex-col gap-5 pt-2 pb-4 font-sans">
               {/* Header with Clear All */}
-              <div className="flex items-center justify-between border-b border-slate-50 pb-3">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Active Filters</span>
-                {(currentLoc || currentCats.length > 0 || currentSort !== "recommended") && (
+              {(currentLoc || currentCats.length > 0 || currentSort !== "recommended") && (
+                <div className="flex items-center justify-end border-b border-slate-100 pb-2">
                   <button 
                     onClick={() => navigateFilters("", [], value.trim(), undefined, undefined, undefined, "recommended")}
                     className="text-[11px] text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider transition-colors"
                   >
                     Reset All
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Categories - Magazine / Airbnb Hybrid */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <button 
                   onClick={() => setShowCategories(!showCategories)}
                   className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-slate-600 transition-colors">Categories</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Categories</span>
                   <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showCategories ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
@@ -258,12 +257,12 @@ export function ExploreSearch({
               </div>
 
               {/* Location - Magazine / Airbnb Hybrid Pills */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <button 
                   onClick={() => setShowLocations(!showLocations)}
                   className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-slate-600 transition-colors">Town / Sector</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Town / Sector</span>
                   <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showLocations ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
@@ -307,10 +306,10 @@ export function ExploreSearch({
               </div>
 
               {/* Radius - Compact */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Radius Search</span>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em]">Radius Search</span>
                     <button
                       onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? undefined : localRad, currentLat, currentLng, currentSort)}
                       className={cn(
@@ -324,30 +323,40 @@ export function ExploreSearch({
                       )} />
                     </button>
                   </div>
-                  <button 
-                    onClick={handleUseMyLocation}
-                    disabled={isGettingLocation || !isRadEnabled}
-                    className="text-[10px] text-rose-500 hover:text-rose-600 font-black uppercase tracking-widest transition-colors disabled:opacity-30 flex items-center gap-1"
-                  >
-                    <Navigation className="w-2.5 h-2.5" />
-                    {isGettingLocation ? "Locating..." : (currentLat ? "Using GPS" : "My Location")}
-                  </button>
+                  {isRadEnabled && (
+                    <button 
+                      onClick={handleUseMyLocation}
+                      disabled={isGettingLocation}
+                      className="text-[10px] text-rose-500 hover:text-rose-600 font-black uppercase tracking-widest transition-colors disabled:opacity-30 flex items-center gap-1"
+                    >
+                      <Navigation className="w-2.5 h-2.5" />
+                      {isGettingLocation ? "Locating..." : (currentLat ? "Using GPS" : "My Location")}
+                    </button>
+                  )}
                 </div>
-                <div className={cn(
-                  "flex items-center gap-3 bg-slate-50 px-3 py-2 rounded-xl border border-transparent transition-all",
-                  !isRadEnabled && 'opacity-40 grayscale pointer-events-none'
-                )}>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max={RADIUS_MARKS.length - 1} 
-                    step="1"
-                    value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(2)}
-                    onChange={handleRadiusChange}
-                    className="flex-1 accent-rose-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <span className="text-[11px] font-black text-slate-900 w-8 text-right">{localRad}km</span>
-                </div>
+                <AnimatePresence>
+                  {isRadEnabled && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex items-center gap-3 bg-slate-50 px-3 py-2 rounded-xl border border-transparent transition-all">
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max={RADIUS_MARKS.length - 1} 
+                          step="1"
+                          value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(2)}
+                          onChange={handleRadiusChange}
+                          className="flex-1 accent-rose-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <span className="text-[11px] font-black text-slate-900 w-8 text-right">{localRad}km</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </motion.div>

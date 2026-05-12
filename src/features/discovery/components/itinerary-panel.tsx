@@ -6,7 +6,7 @@ import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/EndPointPicker";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
 import {
@@ -23,25 +23,31 @@ import { Button } from "@/components/ui/button";
 import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
 
 // Stable component outside ItineraryPanel so React fiber identity is preserved across re-renders
-function TransitEdge({ index, routeData, transportProfile, setTransportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (p: TransportProfile) => void }) {
+function TransitEdge({ index, routeData, transportProfile, setTransportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (index: number, p: TransportProfile) => void }) {
   const leg = routeData?.legs?.[index];
-  if (!leg) return <div className="absolute left-9 -top-8 w-[2px] h-8 bg-gray-200 pointer-events-none" />;
+  if (!leg) return (
+    <div className="relative h-12 w-full flex items-center">
+      <div className="absolute left-[35px] top-0 bottom-0 w-[2px] bg-slate-200" />
+    </div>
+  );
+  
   const durationMin = Math.round(leg.duration / 60);
   const distanceKm = +(leg.distance / 1000).toFixed(1);
   const isDrive = transportProfile === 'driving';
 
   return (
-    <div className="absolute left-9 -top-12 w-[2px] h-12 bg-slate-300 flex items-center justify-center z-10">
-      <div className="absolute w-[180px] bg-white border border-slate-200 shadow-sm rounded-xl p-1.5 flex flex-col gap-1.5 ml-[180px]">
+    <div className="relative py-2 w-full flex items-center">
+      <div className="absolute left-[35px] top-0 bottom-0 w-[2px] bg-slate-300" />
+      <div className="ml-[72px] w-[220px] bg-white border border-slate-200 shadow-sm rounded-xl p-1.5 flex flex-col gap-1.5 z-10 relative">
         <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg">
           <button 
-            onClick={() => setTransportProfile('driving')}
+            onClick={() => setTransportProfile(index, 'driving')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Car className="w-3 h-3" /> Drive
           </button>
           <button 
-            onClick={() => setTransportProfile('walking')}
+            onClick={() => setTransportProfile(index, 'walking')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${!isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
           >
             <Footprints className="w-3 h-3" /> Walk
@@ -49,8 +55,8 @@ function TransitEdge({ index, routeData, transportProfile, setTransportProfile }
         </div>
         <div className="flex justify-between items-center px-1">
           <span className="text-[10px] font-semibold text-slate-600 tracking-tight">{durationMin}m ({distanceKm}km)</span>
-          <span className="text-[10px] font-bold text-emerald-600">
-            {isDrive ? `~S/ ${Math.max(5, Math.round(distanceKm * 2.5))}` : 'Free'}
+          <span className="text-[10px] font-bold text-emerald-600 whitespace-nowrap text-right">
+            {isDrive ? `Taxi: ~S/ ${Math.max(5, Math.round(distanceKm * 2.5))} • Bus: ~S/ ${Math.max(2, Math.round(distanceKm * 0.4))}` : 'Free'}
           </span>
         </div>
       </div>
@@ -89,16 +95,20 @@ export function ItineraryPanel() {
     setPanelMode,
     selectedId,
     setSelectedId,
+    exchangeTargetId,
+    setExchangeTargetId,
     removeWaypoint,
     moveWaypoint,
     setWaypoints,
     routeData,
-    transportProfile,
-    setTransportProfile,
+    transportProfiles,
+    setLegTransportProfile,
     updateEndAnchorLocation,
     setMapClickMode,
     setAiPromptToTrigger,
+    clearStartAnchor,
     clearEndAnchor,
+    setIsExchangingStart,
     setIsExchangingEnd,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
@@ -173,20 +183,6 @@ export function ItineraryPanel() {
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex bg-slate-100 rounded-full p-1 mr-2">
-            <button
-              onClick={() => setTransportProfile('driving')}
-              className={`p-1.5 rounded-full transition-colors ${transportProfile === 'driving' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              <Car className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setTransportProfile('walking')}
-              className={`p-1.5 rounded-full transition-colors ${transportProfile === 'walking' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              <Footprints className="w-4 h-4" />
-            </button>
-          </div>
           <button 
             onClick={() => setPanelMode("discover")}
             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200"
@@ -201,26 +197,61 @@ export function ItineraryPanel() {
         {/* Start Anchor */}
         <div 
           onClick={() => setSelectedId('itin-start')}
-          className={`flex gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${selectedId === 'itin-start' ? 'bg-white border-slate-900 shadow-md ring-1 ring-slate-900' : 'bg-white border-gray-200 hover:border-slate-300'}`}
+          className={`flex flex-col rounded-2xl border-l-4 border border-l-slate-900 transition-all ${selectedId === 'itin-start' ? 'bg-white shadow-md ring-1 ring-slate-900' : 'bg-white border-gray-100 hover:border-gray-200'}`}
         >
-          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
-            {activeItinerary.startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
+          <div className="flex gap-4 p-4">
+            <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
+              {activeItinerary.startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">Start Point</p>
+              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                <p className="text-sm font-semibold text-slate-900 truncate flex-1">{activeItinerary.startAnchor?.title || "Current Location"}</p>
+                <button
+                  onClick={e => { e.stopPropagation(); setMapClickMode('start'); }}
+                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                  title="Adjust Start Point on Map"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); setIsExchangingStart(true); setPanelMode('discover'); }}
+                  title={activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? "Exchange start point — browse Discover" : "Add start point — browse Discover"}
+                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                >
+                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                </button>
+                {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); clearStartAnchor(); setIsExchangingStart(false); }}
+                    title="Remove start point"
+                    className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              {activeItinerary.startAnchor?.time && <p className="text-[10px] font-bold text-slate-500 mt-1">⏱ Departure {activeItinerary.startAnchor.time}</p>}
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Start Point</p>
-            <p className="text-sm font-semibold text-slate-900">{activeItinerary.startAnchor?.title || "Current Location"}</p>
-            {activeItinerary.startAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.startAnchor.time}</p>}
+          {/* Expandable detail — inside border container, mirrors waypoint card */}
+          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+            <div className="overflow-hidden">
+              {(activeItinerary.startAnchor as any)?.service && (
+                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" contactOnly />
+              )}
+            </div>
           </div>
         </div>
 
         {/* Waypoints */}
-        <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="space-y-12 relative w-full mt-12">
+        <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="relative w-full">
           {(activeItinerary.waypoints || []).map((waypoint, idx) => (
             <Reorder.Item key={waypoint.id} value={waypoint} id={waypoint.id} className="relative">
-              <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfile} setTransportProfile={setTransportProfile} />
+              <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfiles[idx] || 'driving'} setTransportProfile={setLegTransportProfile} />
               
               <div
-                className={`flex flex-col p-4 rounded-2xl border-l-4 border border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-md ring-1 ring-[var(--step-color)]' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                className={`flex flex-col p-4 rounded-2xl border-l-4 border mb-2 border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-md ring-1 ring-[var(--step-color)]' : 'bg-white border-gray-100 hover:border-gray-200'}`}
                 style={{ '--step-color': getCategoryColor(waypoint.category) } as React.CSSProperties}
               >
                 <div className="flex gap-3 items-start">
@@ -296,6 +327,13 @@ export function ItineraryPanel() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    <button
+                      onClick={e => { e.stopPropagation(); setExchangeTargetId?.(waypoint.id); setPanelMode('discover'); }}
+                      className="w-6 h-6 rounded bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-colors"
+                      title="Exchange this place"
+                    >
+                      <Repeat className="w-3 h-3" />
+                    </button>
                     {waypoint.lat != null && waypoint.lng != null && (
                       <button
                         onClick={e => {
@@ -324,7 +362,7 @@ export function ItineraryPanel() {
                 >
                   <div className="overflow-hidden">
                     {waypoint.service && (
-                      <BusinessCard business={waypoint.service} orientation="horizontal" />
+                      <BusinessCard business={waypoint.service} orientation="horizontal" contactOnly />
                     )}
                   </div>
                 </div>
@@ -334,8 +372,8 @@ export function ItineraryPanel() {
         </Reorder.Group>
 
         {/* End Anchor */}
-        <div className="relative mt-12">
-          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfile} setTransportProfile={setTransportProfile} />
+        <div className="relative">
+          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfiles[(activeItinerary.waypoints || []).length] || 'driving'} setTransportProfile={setLegTransportProfile} />
           <div
             onClick={() => setSelectedId('itin-arrival')}
             className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-100 hover:border-gray-200'}`}
@@ -353,13 +391,6 @@ export function ItineraryPanel() {
                   onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
-                  onClick={e => { e.stopPropagation(); const v = activeItinerary.endAnchor?.title || ''; if (v) { router.push(`/explore?q=${encodeURIComponent(v)}`); setPanelMode('discover'); } }}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
-                  title="Search in Discover"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                </button>
-                <button
                   onClick={e => { e.stopPropagation(); setMapClickMode('end'); }}
                   className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                   title="Click map to set end"
@@ -368,10 +399,10 @@ export function ItineraryPanel() {
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
-                  title="Exchange end point — browse Discover"
+                  title={activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? "Exchange end point — browse Discover" : "Add end point — browse Discover"}
                   className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
-                  <Repeat className="w-3.5 h-3.5" />
+                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                 </button>
                 {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
                   <button
@@ -409,7 +440,7 @@ export function ItineraryPanel() {
             <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
                 {(activeItinerary.endAnchor as any)?.service && (
-                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" hideActions />
+                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" contactOnly />
                 )}
               </div>
             </div>

@@ -14,6 +14,8 @@ import { BusinessCard } from "./business-card"
 
 import { getCategoryColor } from "@/lib/utils/category-style";
 
+const DAY_COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5856D6"];
+
 const getCategoryStyle = (category: string | undefined | null) => {
   const bg = getCategoryColor(category);
   if (!category) return { bg, icon: MapPin };
@@ -52,7 +54,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const router = useRouter()
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
-  const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
+  const [mapMode, setMapMode] = useState<"satellite" | "planning">("satellite")
   const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, insertWaypoint, routeData } = useTrip()
   const panelMode = strictPanelMode as string;
   const currentTrip: any = null;
@@ -605,7 +607,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 ["==", ["get", "legIndex"], activeLegIndex],
                 1.0,
                 0.0
-              ] : 1.0
+              ] : 0.0
             }} />
           </Source>
         )}
@@ -615,8 +617,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           const isAct = route.properties?.isActive;
           const isComp = route.properties?.isComplete;
           const dayNum = route.properties?.dayNumber as number;
-          const colors = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5AC8FA"];
-          const color = colors[(dayNum - 1) % colors.length];
+          const color = DAY_COLORS[(dayNum - 1) % DAY_COLORS.length];
           const opacity = isAct ? 1 : (isComp ? 0.7 : 0.3);
           
           return (
@@ -889,7 +890,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">Itinerary Trace</h4>
           <div className="space-y-2.5">
             {completedDays.map((day: any) => {
-              const DAY_COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5856D6"];
               const color = DAY_COLORS[(day.dayNumber - 1) % DAY_COLORS.length];
               return (
                 <button 
