@@ -386,7 +386,7 @@ export function ItineraryPanel() {
             <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
                 {(activeItinerary.endAnchor as any)?.service && (
-                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" />
+                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" hideActions />
                 )}
               </div>
             </div>
