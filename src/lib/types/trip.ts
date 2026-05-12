@@ -1,11 +1,6 @@
-import { Trip as PrismaTrip, TripDay as PrismaTripDay, Traveler as PrismaTraveler } from "@prisma/client"
+export type FullTrip = any;
 
-export type FullTrip = PrismaTrip & {
-  days: PrismaTripDay[];
-  travelers: PrismaTraveler[];
-}
-
-import { Business, TourPackage } from "@prisma/client"
+import { Business } from "@prisma/client"
 
 export type EntityType = 'BUSINESS' | 'TRANSPORT' | 'PACKAGE' | 'THERAPIST' | 'AGENCY';
 

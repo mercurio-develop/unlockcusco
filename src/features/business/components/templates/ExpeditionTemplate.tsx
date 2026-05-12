@@ -1,8 +1,8 @@
 import { Map, Calendar, Gauge, CheckCircle2 } from "lucide-react"
-import type { Business, TourPackage } from "@prisma/client"
+import type { Business } from "@prisma/client"
 
 interface ExpeditionTemplateProps {
-  business: Business & { tourPackages: TourPackage[] }
+  business: Business & { tourPackages?: any[] }
 }
 
 export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {

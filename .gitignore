@@ -63,3 +63,4 @@ scripts/temp-*.ts
 scripts/temp-*.js
 all_businesses.json
 output.txt
+build.log

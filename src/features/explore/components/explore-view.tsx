@@ -10,8 +10,6 @@ import { BusinessCard } from "@/features/business/components/business-card"
 import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
-import { ItineraryPanel } from "./itinerary-panel"
-import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
 import { PlanningDatePicker } from "@/components/layout/planning-date-picker"
 
@@ -139,7 +137,7 @@ export function ExploreView({
           onLoadMore={loadMore}
         />
       ) : (
-        <ItineraryPanel />
+        <div className="p-8 text-center text-slate-500">Itinerary feature disabled</div>
       )}
     </div>
   )

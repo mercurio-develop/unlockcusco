@@ -81,11 +81,7 @@ export async function POST(req: Request) {
       tools: {
         askAvailability: toolsRegistry.askAvailability,
         askUserLocation: toolsRegistry.askUserLocation,
-        buildItinerary: toolsRegistry.buildItinerary,
-        buildMacroTrip: toolsRegistry.buildMacroTrip,
-        mutateItinerary: toolsRegistry.mutateItinerary,
         searchDatabase: toolsRegistry.searchDatabase,
-        searchDayTours: toolsRegistry.searchDayTours,
         showBoletoInfo: toolsRegistry.showBoletoInfo,
         // estimateTaxiFare: toolsRegistry.estimateTaxiFare, // Disabled for this phase
         triggerSupportAlert: toolsRegistry.triggerSupportAlert,

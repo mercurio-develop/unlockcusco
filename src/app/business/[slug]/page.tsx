@@ -63,8 +63,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     where: { slug: slug },
     include: {
       reviews: true,
-      services: true,
-      tourPackages: true
+      services: true
     },
   })
 

@@ -56,8 +56,6 @@ model Business {
   leads        Lead[]
   reviews      Review[]
   services     BusinessService[]
-  tourPackages TourPackage[]
-  trips        Trip[]
 }
 
 model BusinessService {
@@ -89,99 +87,6 @@ model Review {
   author     String
   rating     Int
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-}
-
-model TourPackage {
-  id            String    @id @default(cuid())
-  businessId    String?
-  title         String
-  tagline       String    @default("")
-  sector        String
-  pace          String    @default("BALANCED")
-  description   String
-  basePriceUsd  Float
-  difficulty    String    @default("MODERATE")
-  maxAltitude   String    @default("")
-  durationDays  Int       @default(1)
-  durationStr   String    @default("")
-  elevation     String    @default("")
-  bestSeason    String    @default("")
-  packageType   String    @default("SINGLE_DAY")
-  tags          String    @default("")
-  included      String    @default("[]")
-  notIncluded   String    @default("[]")
-  highlights    String    @default("[]")
-  requirements  String    @default("[]")
-  itineraryJson String    @default("[]")
-  galleryJson   String    @default("[]")
-  heroImage     String?
-  business      Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  tripDays      TripDay[]
-}
-
-enum TravelerArchetype {
-  LIVING_CULTURE
-  GASTRONOMIC
-  LUXURY_WELLNESS
-  SPIRITUAL
-  MOUNTAIN_EXPLORER
-}
-
-model Trip {
-  id                 String             @id @default(cuid())
-  userId             String?
-  businessId         String?
-  tripTitle          String
-  startDate          DateTime
-  endDate            DateTime
-  paxCount           Int                @default(1)
-  baseCampStrategy   String
-  archetype          TravelerArchetype?
-  intensity          Int?
-  shareToken         String?            @unique
-  status             String             @default("DRAFT")
-  totalPriceUsd      Float              @default(0)
-  createdAt          DateTime   @default(now())
-  isVerifiedTemplate Boolean    @default(false)
-  templateVibeTags   String?
-  clonedFromId       String?
-  travelers          Traveler[]
-  business           Business?  @relation(fields: [businessId], references: [id], onDelete: SetNull)
-  days               TripDay[]
-}
-
-model Traveler {
-  id                  String   @id @default(cuid())
-  tripId              String
-  isLeadGuest         Boolean  @default(false)
-  firstName           String
-  lastName            String
-  passportNumber      String
-  nationality         String
-  dateOfBirth         DateTime
-  whatsappNumber      String?
-  dietaryRestrictions String?
-  medicalNotes        String?
-  createdAt           DateTime @default(now())
-  trip                Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-}
-
-model TripDay {
-  id             String       @id @default(cuid())
-  tripId         String
-  dayNumber      Int
-  date           DateTime
-  sleepTown      String
-  tourPackageId  String?
-  dayTheme       String
-  guideNotes     String?
-  startTime      String       @default("08:00 AM")
-  meetingPoint   String?
-  eventsJson     String       @default("[]")
-  isAgencyLocked Boolean      @default(true)
-  isCustomized   Boolean      @default(false)
-  tourPackage    TourPackage? @relation(fields: [tourPackageId], references: [id])
-  trip           Trip         @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
 
 enum RideStatus {

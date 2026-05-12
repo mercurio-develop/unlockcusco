@@ -13,7 +13,6 @@ import { DEFAULT_COORDS } from "@/lib/constants"
 import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
 import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
 import { SearchResultsCard } from "@/features/concierge/components/SearchResultsCard"
-import { MacroItineraryCard } from "@/features/concierge/components/MacroItineraryCard"
 import { BoletoInfoCard } from "./BoletoInfoCard"
 import { TaxiFareCard } from "./TaxiFareCard"
 import { useTrip } from "@/lib/store/trip-context"
@@ -424,7 +423,7 @@ Please generate my macro trip plan.`;
                           return <ItinerarySummaryCard key={key} itinerary={output} />
                         }
                         if (toolName === 'buildMacroTrip') {
-                          return <MacroItineraryCard key={key} itinerary={output} />
+                          return null;
                         }
                         if (toolName === 'searchDatabase') {
                           return <SearchResultsCard key={key} businesses={output} />
@@ -453,7 +452,7 @@ Please generate my macro trip plan.`;
                     </div>
                   )
                 })}
-                {isLoading && (messages[messages.length - 1] as any)?.role === "user" && (
+                {isLoading && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
                       <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-rose-100">

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('AI Concierge E2E', () => {
   test.setTimeout(60000); // Allow 60s for LLM to stream
 
-  test('should generate an itinerary and display it on the screen', async ({ page }) => {
+  test('should find nearby places and display them on the screen', async ({ page }) => {
     // Listen to console logs
     page.on('console', msg => console.log(`[Browser] ${msg.type()}: ${msg.text()}`));
 
@@ -14,15 +14,15 @@ test.describe('AI Concierge E2E', () => {
     const chatInput = page.getByPlaceholder(/Describe your ideal day/i).first();
     await expect(chatInput).toBeVisible({ timeout: 15000 });
 
-    // Type the prompt to trigger the buildItinerary tool
-    const prompt = "Can you build me a 1 day itinerary in Cusco starting with some coffee and a walk? My current location is Plaza de Armas, Cusco and my destination tonight is Cusco. Please build the itinerary now.";
+    // Type the prompt to trigger the searchDatabase tool
+    const prompt = "Can you recommend a good coffee shop in Urubamba? Please search the database and show me options.";
     await chatInput.fill(prompt);
     
     // Click the submit button
     const sendButton = page.locator('button[type="submit"]').first();
     await sendButton.click();
 
-    // Wait for the tool result component. ItinerarySummaryCard contains "Your Plan"
-    await expect(page.locator('text=Your Plan').first()).toBeVisible({ timeout: 30000 });
+    // Wait for the tool result component. SearchResultsCard contains "Top Recommendations" or "Nearby Alternatives"
+    await expect(page.locator('text=Recommendations').first().or(page.locator('text=Alternatives').first())).toBeVisible({ timeout: 30000 });
   });
 });
