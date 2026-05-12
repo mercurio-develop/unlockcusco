@@ -315,8 +315,9 @@ export function ItineraryPanel() {
           <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfile} />
           <div
             onClick={() => setSelectedId('itin-arrival')}
-            className={`flex gap-4 p-4 rounded-2xl border transition-all ${selectedId === 'itin-arrival' ? 'bg-white border-rose-500 shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-200 hover:border-slate-300'}`}
+            className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-100 hover:border-gray-200'}`}
           >
+            <div className="flex gap-4 p-4">
             <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
               <Bed className="w-4 h-4" />
             </div>
@@ -380,13 +381,14 @@ export function ItineraryPanel() {
                 return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
               })()}
             </div>
-          </div>
-          {/* Expandable detail — mirrors waypoint card pattern */}
-          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}`}>
-            <div className="overflow-hidden">
-              {(activeItinerary.endAnchor as any)?.service && (
-                <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" />
-              )}
+            </div>
+            {/* Expandable detail — inside border container, mirrors waypoint card */}
+            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+              <div className="overflow-hidden">
+                {(activeItinerary.endAnchor as any)?.service && (
+                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" />
+                )}
+              </div>
             </div>
           </div>
         </div>
