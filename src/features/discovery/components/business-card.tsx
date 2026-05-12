@@ -63,7 +63,7 @@ export function BusinessCard({
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
-  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint, updateEndAnchorLocation } = useTrip()
+  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint, updateEndAnchorLocation, isExchangingEnd, setIsExchangingEnd } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -357,7 +357,23 @@ export function BusinessCard({
         {!hideActions && (
           <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
               <>
-                {exchangeTargetId ? (
+                {isExchangingEnd && business.lat != null && business.lng != null ? (
+                  <Button
+                    onClick={e => {
+                      e.stopPropagation();
+                      updateEndAnchorLocation(business.lat!, business.lng!, business.name, business as any);
+                      setIsExchangingEnd(false);
+                      setPanelMode('itinerary');
+                    }}
+                    className={cn(
+                      "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                    )}
+                  >
+                    <Bed className="w-3 h-3" />
+                    Set as End
+                  </Button>
+                ) : exchangeTargetId ? (
                   exchangeTargetId === business.id ? (
                     <Button
                       disabled

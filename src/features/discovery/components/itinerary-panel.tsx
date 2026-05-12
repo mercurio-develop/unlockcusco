@@ -78,6 +78,7 @@ export function ItineraryPanel() {
     setMapClickMode,
     setAiPromptToTrigger,
     clearEndAnchor,
+    setIsExchangingEnd,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
 
@@ -344,15 +345,15 @@ export function ItineraryPanel() {
                   <MapPin className="w-3.5 h-3.5" />
                 </button>
                 <button
-                  onClick={e => { e.stopPropagation(); setAiPromptToTrigger("I want to change my end point"); setIsChatOpen(true); }}
-                  title="Exchange end point"
+                  onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
+                  title="Exchange end point — browse Discover"
                   className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
                   <Repeat className="w-3.5 h-3.5" />
                 </button>
                 {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
                   <button
-                    onClick={e => { e.stopPropagation(); clearEndAnchor(); }}
+                    onClick={e => { e.stopPropagation(); clearEndAnchor(); setIsExchangingEnd(false); }}
                     title="Remove end point"
                     className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >

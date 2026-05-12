@@ -24,6 +24,8 @@ interface TripContextType {
   setSelectedId: (id: string | null) => void;
   exchangeTargetId: string | null;
   setExchangeTargetId: (id: string | null) => void;
+  isExchangingEnd: boolean;
+  setIsExchangingEnd: (v: boolean) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string) => void;
@@ -49,6 +51,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [panelMode, setPanelMode] = useState<PanelMode>("discover");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [exchangeTargetId, setExchangeTargetId] = useState<string | null>(null);
+  const [isExchangingEnd, setIsExchangingEnd] = useState(false);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [transportProfile, setTransportProfile] = useState<TransportProfile>("driving");
   const [routeData, setRouteData] = useState<RouteData | null>(null);
@@ -234,6 +237,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           locationStr: 'Destination',
           lat: -13.3047,
           lng: -72.1167,
+          service: undefined,
         }
       };
     });
@@ -255,6 +259,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setSelectedId,
       exchangeTargetId,
       setExchangeTargetId,
+      isExchangingEnd,
+      setIsExchangingEnd,
       aiPromptToTrigger,
       setAiPromptToTrigger,
       setStartAnchorLocation,
@@ -271,7 +277,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setMapClickMode,
       clearEndAnchor,
   }), [
-      activeItinerary, panelMode, selectedId, exchangeTargetId, aiPromptToTrigger,
+      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingEnd, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile,
       mapClickMode, clearEndAnchor,
