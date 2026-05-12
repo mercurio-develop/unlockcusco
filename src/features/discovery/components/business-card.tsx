@@ -297,7 +297,7 @@ export function BusinessCard({
               }
             }}>
               <p className={cn(
-                "text-slate-500 text-[11px] italic leading-relaxed transition-all",
+                "text-slate-500 text-xs italic leading-relaxed",
                 !isExpanded && (isHorizontal ? "line-clamp-2" : "line-clamp-3")
               )}>
                 &ldquo;{business.description}&rdquo;

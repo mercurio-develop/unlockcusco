@@ -11,6 +11,7 @@ export type TransportProfile = "driving" | "walking";
 export interface RouteData {
   geometry: any;
   legs: any[];
+  legGeometries?: any[];
   profile: TransportProfile;
   duration?: number;
 }
@@ -83,15 +84,35 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!token) return;
 
     const coordsStr = pts.map(p => `${p[0]},${p[1]}`).join(';');
-    const url = `https://api.mapbox.com/directions/v5/mapbox/${transportProfile}/${coordsStr}?geometries=geojson&overview=full&access_token=${token}`;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${transportProfile}/${coordsStr}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
 
     fetch(url)
       .then(res => res.json())
       .then(data => {
         if (data.routes && data.routes[0]) {
+          const legGeometries = data.routes[0].legs.map((leg: any, index: number) => {
+            const coordinates: any[] = [];
+            if (leg.steps) {
+              leg.steps.forEach((step: any) => {
+                if (step.geometry && step.geometry.coordinates) {
+                  coordinates.push(...step.geometry.coordinates);
+                }
+              });
+            }
+            return {
+              type: 'Feature',
+              properties: { legIndex: index },
+              geometry: {
+                type: 'LineString',
+                coordinates
+              }
+            };
+          });
+
           setRouteData({
             geometry: data.routes[0].geometry,
             legs: data.routes[0].legs,
+            legGeometries,
             profile: transportProfile,
             duration: data.routes[0].duration
           });

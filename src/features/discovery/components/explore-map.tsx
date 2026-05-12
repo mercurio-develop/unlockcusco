@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
@@ -191,13 +191,34 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return pts;
   }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
 
+  const activeLegIndex = useMemo(() => {
+    if (panelMode !== 'itinerary' || !selectedId) return null;
+    if (selectedId === 'itin-start') return 0;
+    if (selectedId === 'itin-arrival') return activeItinerary?.waypoints?.length ?? 0;
+    
+    const wpIndex = activeItinerary?.waypoints?.findIndex((w: any) => w.id === selectedId);
+    if (wpIndex !== undefined && wpIndex >= 0) {
+      return wpIndex; 
+    }
+    return null;
+  }, [selectedId, activeItinerary, panelMode]);
+
   const itineraryRoute = useMemo(() => {
     if (!routeData?.geometry) return null;
+    if (routeData.legGeometries && routeData.legGeometries.length > 0) {
+      return {
+        type: 'FeatureCollection',
+        features: routeData.legGeometries
+      } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    }
     return {
-      type: 'Feature',
-      properties: {},
-      geometry: routeData.geometry
-    } as GeoJSON.Feature<GeoJSON.LineString>;
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: { legIndex: 0 },
+        geometry: routeData.geometry
+      }]
+    } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
   }, [routeData]);
 
   const directRoute = useMemo(() => {
@@ -214,7 +235,17 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     if (panelMode === "itinerary" && activeItinerary) {
       return (activeItinerary.waypoints || [])
         .filter((w: any) => w.lat != null && w.lng != null)
-        .map((w: any, idx: number) => ({ pick: w, idx }));
+        .map((w: any, idx: number) => {
+           const pick = {
+              id: w.id,
+              name: w.title || w.locationStr,
+              category: w.service?.category || w.category,
+              lat: w.lat,
+              lng: w.lng,
+              ...(w.service || {})
+           };
+           return { pick, idx };
+        });
     }
     
     if (panelMode === "builder" && currentTrip && activeDayNumber) {
@@ -290,6 +321,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         if (wp.id === selectedId && wp.lat !== undefined && wp.lng !== undefined) {
           targetLat = wp.lat;
           targetLng = wp.lng;
+          targetBusiness = wp.service ? { ...wp.service, lat: wp.lat, lng: wp.lng } : { id: wp.id, name: wp.title || wp.locationStr, lat: wp.lat, lng: wp.lng, category: wp.category };
           break;
         }
         if (wp.alternatives) {
@@ -297,6 +329,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           if (alt && alt.lat !== undefined && alt.lng !== undefined) {
             targetLat = alt.lat;
             targetLng = alt.lng;
+            targetBusiness = alt.service ? { ...alt.service, lat: alt.lat, lng: alt.lng } : { id: alt.id, name: alt.title || alt.locationStr, lat: alt.lat, lng: alt.lng, category: alt.category };
             break;
           }
         }
@@ -515,17 +548,64 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {itineraryRoute && panelMode === "itinerary" && (
           <Source id="itinerary-route" type="geojson" data={itineraryRoute}>
             <Layer id="route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.4, "line-blur": 6 }} />
+              paint={{ 
+                "line-color": "#ffffff", 
+                "line-width": 12, 
+                "line-opacity": activeLegIndex !== null ? [
+                  "case",
+                  ["==", ["get", "legIndex"], activeLegIndex],
+                  0.4,
+                  0.0
+                ] : 0.4, 
+                "line-blur": 6 
+              }} />
             <Layer id="route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "#007AFF", "line-width": 4, "line-opacity": 0.95 }} />
+              paint={{
+                "line-color": [
+                  "match",
+                  ["get", "legIndex"],
+                  0, "#007AFF", // Blue
+                  1, "#FF9500", // Orange
+                  2, "#34C759", // Green
+                  3, "#AF52DE", // Purple
+                  4, "#FF2D55", // Pink
+                  5, "#5AC8FA", // Light Blue
+                  "#007AFF" // Default back to Blue
+                ],
+                "line-width": 4, 
+                "line-opacity": activeLegIndex !== null ? [
+                  "case",
+                  ["==", ["get", "legIndex"], activeLegIndex],
+                  0.95,
+                  0.3
+                ] : 0.95 
+              }} />
             <Layer id="route-arrows" type="symbol" layout={{
               "symbol-placement": "line",
               "text-field": "▶",
-              "text-size": 14,
-              "symbol-spacing": 60,
+              "text-size": 32,
+              "symbol-spacing": 80,
               "text-keep-upright": false
             }} paint={{
-              "text-color": "#007AFF"
+              "text-color": [
+                "match",
+                ["get", "legIndex"],
+                0, "#007AFF",
+                1, "#FF9500",
+                2, "#34C759",
+                3, "#AF52DE",
+                4, "#FF2D55",
+                5, "#5AC8FA",
+                "#007AFF"
+              ],
+              "text-halo-color": "#ffffff",
+              "text-halo-width": 2,
+              "text-opacity": activeLegIndex !== null ? [
+                "case",
+                ["==", ["get", "legIndex"], activeLegIndex],
+                1.0,
+                0.0
+              ] : 1.0
             }} />
           </Source>
         )}
@@ -754,8 +834,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             closeButton={false} closeOnClick={false} className="z-50" offset={32}
           >
             {(popupBusiness as any).category === 'NOTE' ? (
-              <div className="w-48 p-4 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center gap-2 mb-2 text-slate-400">
+              <div className="w-48 p-4 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setPopupBusiness(null)} className="absolute top-2 right-2 text-slate-400 hover:text-white"><X className="w-4 h-4"/></button>
+                <div className="flex items-center gap-2 mb-2 pr-4 text-slate-400">
                   <MapPin className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Waypoint</span>
                 </div>
@@ -764,7 +845,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 </p>
               </div>
             ) : (
-              <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20" onClick={e => e.stopPropagation()}>
+              <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
                 <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} />
               </div>
             )}

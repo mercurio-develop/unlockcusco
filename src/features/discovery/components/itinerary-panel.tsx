@@ -23,16 +23,36 @@ import { Button } from "@/components/ui/button";
 import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
 
 // Stable component outside ItineraryPanel so React fiber identity is preserved across re-renders
-function TransitEdge({ index, routeData, transportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile }) {
+function TransitEdge({ index, routeData, transportProfile, setTransportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (p: TransportProfile) => void }) {
   const leg = routeData?.legs?.[index];
-  if (!leg) return <div className="absolute left-9 -top-4 w-[2px] h-4 bg-gray-200 pointer-events-none" />;
+  if (!leg) return <div className="absolute left-9 -top-8 w-[2px] h-8 bg-gray-200 pointer-events-none" />;
   const durationMin = Math.round(leg.duration / 60);
-  const distanceKm = (leg.distance / 1000).toFixed(1);
+  const distanceKm = +(leg.distance / 1000).toFixed(1);
+  const isDrive = transportProfile === 'driving';
+
   return (
-    <div className="absolute left-9 -top-6 w-[2px] h-6 bg-slate-300 pointer-events-none flex items-center justify-center z-10">
-      <div className="absolute w-[85px] bg-white border border-slate-200 shadow-sm rounded-full py-0.5 px-2 flex items-center gap-1.5 ml-28">
-        {transportProfile === 'driving' ? <Car className="w-3 h-3 text-slate-500" /> : <Footprints className="w-3 h-3 text-slate-500" />}
-        <span className="text-[9px] font-bold text-slate-600 tracking-tight whitespace-nowrap">{durationMin}m ({distanceKm}km)</span>
+    <div className="absolute left-9 -top-12 w-[2px] h-12 bg-slate-300 flex items-center justify-center z-10">
+      <div className="absolute w-[180px] bg-white border border-slate-200 shadow-sm rounded-xl p-1.5 flex flex-col gap-1.5 ml-[180px]">
+        <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg">
+          <button 
+            onClick={() => setTransportProfile('driving')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Car className="w-3 h-3" /> Drive
+          </button>
+          <button 
+            onClick={() => setTransportProfile('walking')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${!isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <Footprints className="w-3 h-3" /> Walk
+          </button>
+        </div>
+        <div className="flex justify-between items-center px-1">
+          <span className="text-[10px] font-semibold text-slate-600 tracking-tight">{durationMin}m ({distanceKm}km)</span>
+          <span className="text-[10px] font-bold text-emerald-600">
+            {isDrive ? `~S/ ${Math.max(5, Math.round(distanceKm * 2.5))}` : 'Free'}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -194,10 +214,10 @@ export function ItineraryPanel() {
         </div>
 
         {/* Waypoints */}
-        <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="space-y-6 relative w-full mt-6">
+        <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="space-y-12 relative w-full mt-12">
           {(activeItinerary.waypoints || []).map((waypoint, idx) => (
             <Reorder.Item key={waypoint.id} value={waypoint} id={waypoint.id} className="relative">
-              <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfile} />
+              <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfile} setTransportProfile={setTransportProfile} />
               
               <div
                 className={`flex flex-col p-4 rounded-2xl border-l-4 border border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-md ring-1 ring-[var(--step-color)]' : 'bg-white border-gray-100 hover:border-gray-200'}`}
@@ -314,8 +334,8 @@ export function ItineraryPanel() {
         </Reorder.Group>
 
         {/* End Anchor */}
-        <div className="relative mt-6">
-          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfile} />
+        <div className="relative mt-12">
+          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfile} setTransportProfile={setTransportProfile} />
           <div
             onClick={() => setSelectedId('itin-arrival')}
             className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-100 hover:border-gray-200'}`}
