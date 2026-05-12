@@ -11,7 +11,7 @@ import { fetchBusinesses } from "@/features/discovery/actions/fetch-businesses"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
-import { PlanningDatePicker } from "@/components/layout/planning-date-picker"
+import { ItineraryPanel } from "./itinerary-panel"
 
 import type { Business } from "@prisma/client"
 
@@ -136,8 +136,10 @@ export function ExploreView({
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
         />
+      ) : panelMode === "itinerary" || panelMode === "route" ? (
+        <ItineraryPanel />
       ) : (
-        <div className="p-8 text-center text-slate-500">Itinerary feature disabled</div>
+        <div className="p-8 text-center text-slate-500">Feature disabled</div>
       )}
     </div>
   )
