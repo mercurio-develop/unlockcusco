@@ -38,6 +38,7 @@ interface TripContextType {
   setTransportProfile: (profile: TransportProfile) => void;
   mapClickMode: 'end' | null;
   setMapClickMode: (mode: 'end' | null) => void;
+  clearEndAnchor: () => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -222,6 +223,22 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const clearEndAnchor = useCallback(() => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        endAnchor: {
+          ...prev.endAnchor,
+          title: 'Destination',
+          locationStr: 'Destination',
+          lat: -13.3047,
+          lng: -72.1167,
+        }
+      };
+    });
+  }, []);
+
   const setWaypoints = useCallback((waypoints: any[]) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
@@ -252,11 +269,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setTransportProfile,
       mapClickMode,
       setMapClickMode,
+      clearEndAnchor,
   }), [
       activeItinerary, panelMode, selectedId, exchangeTargetId, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile,
-      mapClickMode,
+      mapClickMode, clearEndAnchor,
   ]);
 
   return (

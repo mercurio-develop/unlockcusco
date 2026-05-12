@@ -5,7 +5,7 @@ import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { COORDS_MAP } from "@/lib/constants";
 import { getCategoryColor } from "@/lib/utils/category-style";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
 import {
@@ -77,6 +77,7 @@ export function ItineraryPanel() {
     updateEndAnchorLocation,
     setMapClickMode,
     setAiPromptToTrigger,
+    clearEndAnchor,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
 
@@ -256,7 +257,20 @@ export function ItineraryPanel() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                    <button 
+                    {waypoint.lat != null && waypoint.lng != null && (
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title);
+                          removeWaypoint(waypoint.id);
+                        }}
+                        title="Set as end of trip"
+                        className="w-6 h-6 rounded bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center transition-colors"
+                      >
+                        <Flag className="w-3 h-3" />
+                      </button>
+                    )}
+                    <button
                       onClick={(e) => { e.stopPropagation(); setSelectedId(selectedId === waypoint.id ? null : waypoint.id); }}
                       className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors ml-1"
                     >
@@ -317,6 +331,22 @@ export function ItineraryPanel() {
                 >
                   <MapPin className="w-3.5 h-3.5" />
                 </button>
+                <button
+                  onClick={e => { e.stopPropagation(); setAiPromptToTrigger("I want to change my end point"); setIsChatOpen(true); }}
+                  title="Exchange end point"
+                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                >
+                  <Repeat className="w-3.5 h-3.5" />
+                </button>
+                {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); clearEndAnchor(); setEndInput(''); }}
+                    title="Remove end point"
+                    className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
               {activeItinerary.endAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p>}
             </div>
