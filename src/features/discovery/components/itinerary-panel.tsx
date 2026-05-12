@@ -82,6 +82,30 @@ export function ItineraryPanel() {
   const { setIsChatOpen } = usePreferences();
 
   const [endInput, setEndInput] = useState('');
+
+  // Cascade stop times: startAnchor time + legs travel + waypoint durations
+  const stopTimes = (() => {
+    if (!activeItinerary) return [];
+    const parseTime = (t: string | undefined): number => {
+      if (!t) return 9 * 60; // default 09:00
+      const [h, m] = t.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+    const fmt = (mins: number): string => {
+      const h = Math.floor(mins / 60) % 24;
+      const m = mins % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+    let cur = parseTime(activeItinerary.startAnchor?.time);
+    return (activeItinerary.waypoints || []).map((wp: any, i: number) => {
+      const travelMins = routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration / 60) : 0;
+      cur += travelMins;
+      const arrival = fmt(cur);
+      cur += wp.durationMins || 60;
+      return arrival;
+    });
+  })();
+
   const resolveEndInput = () => {
     const val = endInput.trim();
     if (!val) return;
@@ -209,7 +233,18 @@ export function ItineraryPanel() {
                   >
                     <div className="flex justify-between items-start">
                       <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">{waypoint.category}</p>
-                      {waypoint.startTime && <p className="text-xs font-semibold text-slate-500">{waypoint.startTime}</p>}
+                      <div className="flex items-center gap-1.5">
+                        {stopTimes[idx] && (
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-full">
+                            ⏱ {stopTimes[idx]}
+                          </span>
+                        )}
+                        {waypoint.durationMins && (
+                          <span className="text-[10px] text-slate-400">
+                            {waypoint.durationMins}m
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-sm font-semibold text-slate-900 mt-0.5">{waypoint.title}</p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {waypoint.locationStr}</p>
@@ -348,7 +383,26 @@ export function ItineraryPanel() {
                   </button>
                 )}
               </div>
-              {activeItinerary.endAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p>}
+              {(() => {
+                // End arrival = last stop time + last stop duration + last leg travel
+                const waypoints = activeItinerary.waypoints || [];
+                if (stopTimes.length > 0 || routeData?.legs) {
+                  const lastStopMins = (() => {
+                    const parseTime = (t: string | undefined) => { if (!t) return 9*60; const [h,m]=t.split(':').map(Number); return (h||0)*60+(m||0); };
+                    let cur = parseTime(activeItinerary.startAnchor?.time);
+                    waypoints.forEach((wp: any, i: number) => {
+                      cur += routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration/60) : 0;
+                      cur += wp.durationMins || 60;
+                    });
+                    const lastLeg = routeData?.legs?.[waypoints.length];
+                    if (lastLeg) cur += Math.round(lastLeg.duration/60);
+                    const h = Math.floor(cur/60)%24; const m = cur%60;
+                    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                  })();
+                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ Arrives ~{lastStopMins}</p>;
+                }
+                return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
+              })()}
             </div>
           </div>
           {/* Expandable detail — mirrors waypoint card pattern */}
