@@ -1,7 +1,6 @@
 import { askAvailability } from './ask-availability';
 import { askUserLocation } from './ask-user-location';
 import { buildMacroTrip } from './build-macro-trip';
-import { findNearby } from './find-nearby';
 import { searchDatabase } from './search-database';
 import { showBoletoInfo } from './show-boleto-info';
 import { estimateTaxiFare } from './taxi-estimator';
@@ -13,7 +12,6 @@ export const toolsRegistry = {
   askAvailability,
   askUserLocation,
   buildMacroTrip,
-  findNearby,
   searchDatabase,
   showBoletoInfo,
   estimateTaxiFare,

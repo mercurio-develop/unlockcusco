@@ -1,11 +1,11 @@
 "use client";
 
-import { useItinerary } from "@/lib/store/itinerary-context";
+import { useTrip } from "@/lib/store/trip-context";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { ArrowRight, Navigation } from "lucide-react";
 
 export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }) {
-  const { setActiveItinerary, setPanelMode } = useItinerary();
+  const { setActiveItinerary, setPanelMode } = useTrip();
 
   const handleOpenPlanner = () => {
     setActiveItinerary(itinerary);

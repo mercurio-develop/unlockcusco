@@ -401,8 +401,17 @@ Please generate my macro trip plan.`;
                           return null;
                         }
 
-                        // Tool errors are handled by the AI internally — don't show raw errors to users
-                        if (output?.error) return null;
+                        // Render tool errors as inline cards instead of ignoring them
+                        if (output?.error) {
+                          return (
+                            <div key={key} className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
+                              <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                                <X className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <span className="text-xs font-medium text-red-800 leading-snug">I ran into a snag — try rephrasing?</span>
+                            </div>
+                          );
+                        }
 
                         if (toolName === 'askUserLocation') {
                           return (
@@ -423,7 +432,22 @@ Please generate my macro trip plan.`;
                           return <ItinerarySummaryCard key={key} itinerary={output} />
                         }
                         if (toolName === 'buildMacroTrip') {
-                          return null;
+                          return (
+                            <div key={key} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 w-full my-3">
+                              <div className="flex items-center gap-2.5 mb-2">
+                                <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
+                                  <Navigation className="w-4 h-4 text-purple-600" />
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-bold tracking-widest text-purple-500 uppercase">Macro Trip Plan</p>
+                                  <h3 className="text-sm font-semibold text-slate-900 leading-tight">{output?.title || 'Your Sacred Valley Journey'}</h3>
+                                </div>
+                              </div>
+                              <div className="text-xs text-slate-600 font-medium ml-10">
+                                {output?.days?.length || 0} Days planned
+                              </div>
+                            </div>
+                          );
                         }
                         if (toolName === 'searchDatabase') {
                           return <SearchResultsCard key={key} businesses={output} />
@@ -470,13 +494,30 @@ Please generate my macro trip plan.`;
               </div>
 
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
-                {[
-                  { label: "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
-                  { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
-                  { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
-                  { label: "Book Machu Picchu", icon: "⛰️", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
-                  { label: "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
-                ].map(suggestion => (
+                {(
+                  travelVibe === 'Explorer' ? [
+                    { label: "Best hikes near me", icon: "🥾", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: "Off-the-beaten-path ruins", icon: "🏺", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+                    { label: "Market day schedule", icon: "🧶", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: "I need a Taxi", icon: "🚕", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" }
+                  ] : travelVibe === 'Foodie' ? [
+                    { label: "Best local ceviche", icon: "🐟", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: "Farm-to-table dining", icon: "🌽", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: "Pisco tasting spots", icon: "🍸", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
+                    { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" }
+                  ] : travelVibe === 'Luxury' ? [
+                    { label: "Best spa in the valley", icon: "💆‍♀️", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
+                    { label: "Private transfer to Machu Picchu", icon: "🚂", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                    { label: "Fine dining with views", icon: "🥂", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: "Plan my full day", icon: "🌅", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" }
+                  ] : [
+                    { label: "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                    { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+                    { label: "Book Machu Picchu", icon: "⛰️", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
+                  ]
+                ).map(suggestion => (
                   <button
                     key={suggestion.label}
                     onClick={() => { 

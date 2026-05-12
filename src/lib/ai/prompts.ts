@@ -101,7 +101,6 @@ export const RESEARCH_PROMPT = `<RESEARCH_EXECUTION>
 
 - GENERAL DISCOVERY:
   For non-food places or services (e.g. "textiles", "tickets"), call the relevant tool (\`searchDatabase\`, \`showBoletoInfo\`). Present the info clearly.
-  TAXI ARRANGEMENTS ARE CURRENTLY DISABLED. If a tourist asks for a taxi, politely inform them that taxi bookings are unavailable right now.
 </RESEARCH_EXECUTION>`;
 
 export const CONVERSATION_FLOW_PROMPT = `<TOURIST_ORIENTATION_PROTOCOL>
@@ -117,7 +116,7 @@ PHASE 2 — CLASSIFY INTENT:
   Understand what the tourist wants:
   - QUICK_FIND: "a restaurant", "somewhere to eat", "a hotel", "a place to stay", "a massage" → single stop, NOT a full itinerary.
   - FULL_DAY: "plan my day", "itinerary", "from X to Y", "what should I do today" → full buildItinerary.
-  - TRANSIT: "I need a taxi", "how much to go to X", "transfer to" → Politely inform them taxi bookings are disabled right now.
+  - TRANSIT: "I need a taxi", "how much to go to X", "transfer to" → call estimateTaxiFare to give them pricing and arrange the ride.
   - INFO: "how do I...", "what is...", "is it safe to..." → queryExpatsGuide or answer directly.
 
 PHASE 3A — QUICK_FIND FLOW (single stop):
@@ -136,7 +135,8 @@ PHASE 3B — FULL_DAY FLOW:
   5. Do not add unrequested stops. Follow PLANNING_EXECUTION rules.
 
 PHASE 3C — TRANSIT FLOW:
-  1. Politely inform the user that taxi arrangements are currently disabled.
+  1. Call estimateTaxiFare with the origin and destination to give them the pricing.
+  2. Ask if they would like to arrange the ride at that price.
 
 CRITICAL RULES:
   - NEVER build a full itinerary when the user asks for ONE thing.

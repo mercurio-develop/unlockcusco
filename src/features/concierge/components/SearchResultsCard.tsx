@@ -2,12 +2,12 @@
 
 import { Business } from "@prisma/client";
 
-import { useItinerary } from "@/lib/store/itinerary-context";
+import { useTrip } from "@/lib/store/trip-context";
 import { useRouter } from "next/navigation";
 import { BusinessCard } from "@/features/business/components/business-card";
 
 export function SearchResultsCard({ businesses }: { businesses: Business[] }) {
-  const { setSelectedId } = useItinerary();
+  const { setSelectedId } = useTrip();
   const router = useRouter();
 
   const isFallback = !Array.isArray(businesses) && (businesses as any)?.alternatives;

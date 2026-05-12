@@ -7,7 +7,7 @@ import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles } from "lucide-react"
 import type { Business } from "@prisma/client"
-import { useItinerary } from "@/lib/store/itinerary-context"
+import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 
@@ -63,7 +63,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, setCurrentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isWorkspaceCollapsed } = useItinerary()
+  const { activeItinerary, panelMode, setStartAnchorLocation, currentTrip, setCurrentTrip, activeDayNumber, setActiveDayNumber, insertWaypoint, isWorkspaceCollapsed } = useTrip()
   const { isChatOpen } = usePreferences()
 
   // FlyTo when start anchor location changes

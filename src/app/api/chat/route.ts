@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         askUserLocation: toolsRegistry.askUserLocation,
         searchDatabase: toolsRegistry.searchDatabase,
         showBoletoInfo: toolsRegistry.showBoletoInfo,
-        // estimateTaxiFare: toolsRegistry.estimateTaxiFare, // Disabled for this phase
+        estimateTaxiFare: toolsRegistry.estimateTaxiFare,
         triggerSupportAlert: toolsRegistry.triggerSupportAlert,
         queryExpatsGuide: toolsRegistry.queryExpatsGuide
       },
