@@ -1,11 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import { usePreferences } from './preferences-context';
 
 export type PanelMode = "discover" | "itinerary";
+export type TransportProfile = "driving" | "walking";
+
+export interface RouteData {
+  geometry: any;
+  legs: any[];
+  profile: TransportProfile;
+}
 
 interface TripContextType {
   activeItinerary: OptimizedPlan | null;
@@ -22,6 +29,12 @@ interface TripContextType {
   updateEndAnchorLocation: (lat: number, lng: number, title?: string) => void;
   insertWaypoint: (service: Business) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
+  removeWaypoint: (id: string) => void;
+  moveWaypoint: (id: string, direction: "up" | "down") => void;
+  setWaypoints: (waypoints: any[]) => void;
+  routeData: RouteData | null;
+  transportProfile: TransportProfile;
+  setTransportProfile: (profile: TransportProfile) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -33,6 +46,50 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [exchangeTargetId, setExchangeTargetId] = useState<string | null>(null);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
+  const [transportProfile, setTransportProfile] = useState<TransportProfile>("driving");
+  const [routeData, setRouteData] = useState<RouteData | null>(null);
+
+  useEffect(() => {
+    if (!activeItinerary) {
+      setRouteData(null);
+      return;
+    }
+
+    const pts: [number, number][] = [];
+    const start = activeItinerary.startAnchor;
+    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
+    
+    for (const waypoint of activeItinerary.waypoints || []) {
+      if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
+    }
+    
+    const end = activeItinerary.endAnchor;
+    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+
+    if (pts.length < 2) {
+      setRouteData(null);
+      return;
+    }
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    if (!token) return;
+
+    const coordsStr = pts.map(p => `${p[0]},${p[1]}`).join(';');
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${transportProfile}/${coordsStr}?geometries=geojson&overview=full&access_token=${token}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.routes && data.routes[0]) {
+          setRouteData({
+            geometry: data.routes[0].geometry,
+            legs: data.routes[0].legs,
+            profile: transportProfile
+          });
+        }
+      })
+      .catch(err => console.error("Mapbox routing error:", err));
+  }, [activeItinerary, transportProfile]);
 
   const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location") => {
     setActiveItinerary(prev => {
@@ -132,6 +189,38 @@ export function TripProvider({ children }: { children: ReactNode }) {
     setPanelMode('itinerary');
   }, []);
 
+  const removeWaypoint = useCallback((id: string) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return { ...prev, waypoints: prev.waypoints.filter(w => w.id !== id) };
+    });
+  }, []);
+
+  const moveWaypoint = useCallback((id: string, direction: "up" | "down") => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const index = prev.waypoints.findIndex(w => w.id === id);
+      if (index < 0) return prev;
+      
+      const newWaypoints = [...prev.waypoints];
+      if (direction === "up" && index > 0) {
+        [newWaypoints[index - 1], newWaypoints[index]] = [newWaypoints[index], newWaypoints[index - 1]];
+      } else if (direction === "down" && index < newWaypoints.length - 1) {
+        [newWaypoints[index], newWaypoints[index + 1]] = [newWaypoints[index + 1], newWaypoints[index]];
+      } else {
+        return prev;
+      }
+      return { ...prev, waypoints: newWaypoints };
+    });
+  }, []);
+
+  const setWaypoints = useCallback((waypoints: any[]) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      return { ...prev, waypoints };
+    });
+  }, []);
+
   const value = React.useMemo(() => ({
       activeItinerary,
       setActiveItinerary,
@@ -147,9 +236,16 @@ export function TripProvider({ children }: { children: ReactNode }) {
       updateEndAnchorLocation,
       insertWaypoint,
       swapWaypoint,
+      removeWaypoint,
+      moveWaypoint,
+      setWaypoints,
+      routeData,
+      transportProfile,
+      setTransportProfile
   }), [
       activeItinerary, panelMode, selectedId, exchangeTargetId, aiPromptToTrigger,
-      setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint
+      setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
+      removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile
   ]);
 
   return (

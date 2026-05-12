@@ -45,6 +45,7 @@ interface BusinessCardProps {
   onSelect?: () => void
   orientation?: "vertical" | "horizontal"
   onImageLoad?: () => void
+  hideActions?: boolean
 }
 
 export function BusinessCard({ 
@@ -52,7 +53,8 @@ export function BusinessCard({
   isHighlighted, 
   onSelect, 
   orientation = "vertical",
-  onImageLoad
+  onImageLoad,
+  hideActions = false
 }: BusinessCardProps) {
   const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
@@ -352,125 +354,127 @@ export function BusinessCard({
         </div>
 
         {/* Action Row */}
-        <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
-            <>
-              {exchangeTargetId ? (
-                exchangeTargetId === business.id ? (
+        {!hideActions && (
+          <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
+              <>
+                {exchangeTargetId ? (
+                  exchangeTargetId === business.id ? (
+                    <Button
+                      disabled
+                      className={cn(
+                        "flex-1 bg-slate-100 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      )}
+                    >
+                      <Repeat className="w-3 h-3" />
+                      Selected
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
+                      className={cn(
+                        "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      )}
+                    >
+                      <Repeat className="w-3 h-3" />
+                      Swap
+                    </Button>
+                  )
+                ) : isAlreadyInItinerary ? (
                   <Button
-                    disabled
+                    onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
                     className={cn(
-                      "flex-1 bg-slate-100 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
                       isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
                     )}
                   >
                     <Repeat className="w-3 h-3" />
-                    Selected
+                    Exchange
                   </Button>
                 ) : (
                   <Button
-                    onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
+                    onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
                     className={cn(
-                      "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
                       isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
                     )}
                   >
-                    <Repeat className="w-3 h-3" />
-                    Swap
+                    <Plus className="w-3 h-3" />
+                    {isHorizontal ? "Add" : "Add to Day"}
                   </Button>
-                )
-              ) : isAlreadyInItinerary ? (
-                <Button
-                  onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
-                  className={cn(
-                    "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
-                  )}
-                >
-                  <Repeat className="w-3 h-3" />
-                  Exchange
-                </Button>
-              ) : (
-                <Button
-                  onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
-                  className={cn(
-                    "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
-                  )}
-                >
-                  <Plus className="w-3 h-3" />
-                  {isHorizontal ? "Add" : "Add to Day"}
-                </Button>
-              )}
-              {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
-                <Button
-                  onClick={handleBookNow}
-                  className={cn(
-                    "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
-                  )}
-                >
-                  Contact
-                </Button>
-              ) : (
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                  <DialogTrigger render={
-                    <Button 
-                      onClick={(e) => e.stopPropagation()} 
-                      className={cn(
-                        "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
-                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
-                      )}
-                    >
-                      Contact
-                    </Button>
-                  } />
-                  <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
-                    <DialogHeader className="mb-4">
-                      <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
-                      <DialogDescription className="text-sm text-slate-500 mt-1">
-                        Send an inquiry to {business.name} to check for availability and pricing.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-5 py-4">
-                      <div className="grid gap-2.5">
-                        <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
-                        <Input
-                          id="name"
-                          placeholder="e.g. Sarah Jenkins"
-                          value={touristName}
-                          onChange={(e) => setTouristName(e.target.value)}
-                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                        />
+                )}
+                {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
+                  <Button
+                    onClick={handleBookNow}
+                    className={cn(
+                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
+                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                    )}
+                  >
+                    Contact
+                  </Button>
+                ) : (
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger render={
+                      <Button 
+                        onClick={(e) => e.stopPropagation()} 
+                        className={cn(
+                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
+                          isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                        )}
+                      >
+                        Contact
+                      </Button>
+                    } />
+                    <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
+                      <DialogHeader className="mb-4">
+                        <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500 mt-1">
+                          Send an inquiry to {business.name} to check for availability and pricing.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-5 py-4">
+                        <div className="grid gap-2.5">
+                          <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
+                          <Input
+                            id="name"
+                            placeholder="e.g. Sarah Jenkins"
+                            value={touristName}
+                            onChange={(e) => setTouristName(e.target.value)}
+                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                          />
+                        </div>
+                        <div className="grid gap-2.5">
+                          <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
+                          <Input
+                            id="phone"
+                            placeholder="e.g. +51 987 654 321"
+                            value={touristPhone}
+                            onChange={(e) => setTouristPhone(e.target.value)}
+                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                          />
+                        </div>
+                        <div className="grid gap-2.5">
+                          <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
+                          />
+                        </div>
                       </div>
-                      <div className="grid gap-2.5">
-                        <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
-                        <Input
-                          id="phone"
-                          placeholder="e.g. +51 987 654 321"
-                          value={touristPhone}
-                          onChange={(e) => setTouristPhone(e.target.value)}
-                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                        />
-                      </div>
-                      <div className="grid gap-2.5">
-                        <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
-                        <Input
-                          id="date"
-                          type="date"
-                          value={date}
-                          onChange={(e) => setDate(e.target.value)}
-                          className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
-                        />
-                      </div>
-                    </div>
-                    <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
-                      Send Inquiry
-                    </Button>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </>
-        </div>
+                      <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                        Send Inquiry
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </>
+          </div>
+        )}
       </div>
     </div>
   )

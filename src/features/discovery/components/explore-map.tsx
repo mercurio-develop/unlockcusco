@@ -64,7 +64,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("planning")
-  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, insertWaypoint } = useTrip()
+  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, insertWaypoint, routeData } = useTrip()
   const panelMode = strictPanelMode as string;
   const currentTrip: any = null;
   const setCurrentTrip: any = () => {};
@@ -109,10 +109,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const mapStyle = mapMode === "satellite" 
     ? "mapbox://styles/mapbox/satellite-streets-v12"
     : "mapbox://styles/mapbox/light-v11"
-
-  // Build route GeoJSON from itinerary waypoints
-  const [itineraryRoute, setItineraryRoute] = useState<GeoJSON.Feature<GeoJSON.LineString> | null>(null);
-  const [directRoute, setDirectRoute] = useState<GeoJSON.Feature<GeoJSON.LineString> | null>(null);
 
   // Multi-day routes for Pro Builder
   const [multiDayRoutes, setMultiDayRoutes] = useState<{[dayNumber: number]: GeoJSON.Feature<GeoJSON.LineString>}>({});
@@ -206,27 +202,23 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return pts;
   }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
 
-  useEffect(() => {
-    if (waypoints.length < 2 || !mapboxToken) {
-      setItineraryRoute(null);
-      setDirectRoute(null);
-      return;
-    }
-
-    // Set initial straight-line fallback
-    setItineraryRoute({
+  const itineraryRoute = useMemo(() => {
+    if (!routeData?.geometry) return null;
+    return {
       type: 'Feature',
       properties: {},
-      geometry: { type: 'LineString', coordinates: waypoints },
-    } as GeoJSON.Feature<GeoJSON.LineString>);
-    
-    setDirectRoute({
+      geometry: routeData.geometry
+    } as GeoJSON.Feature<GeoJSON.LineString>;
+  }, [routeData]);
+
+  const directRoute = useMemo(() => {
+    if (directWaypoints.length < 2) return null;
+    return {
       type: 'Feature',
       properties: {},
-      geometry: { type: 'LineString', coordinates: directWaypoints },
-    } as GeoJSON.Feature<GeoJSON.LineString>);
-
-  }, [waypoints, directWaypoints, mapboxToken]);
+      geometry: { type: 'LineString', coordinates: directWaypoints }
+    } as GeoJSON.Feature<GeoJSON.LineString>;
+  }, [directWaypoints]);
 
   // Itinerary waypoint markers
   const itineraryMarkers = useMemo(() => {
@@ -525,19 +517,18 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {/* Direct baseline route line (Main Route) */}
         {directRoute && (panelMode === "itinerary" || panelMode === "route") && (
           <Source id="direct-route" type="geojson" data={directRoute}>
-            <Layer id="direct-route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.3, "line-blur": 6 }} />
             <Layer id="direct-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "#007AFF", "line-width": 4, "line-opacity": 0.95 }} />
+              paint={{ "line-color": "#8E8E93", "line-width": 2, "line-opacity": 0.5, "line-dasharray": [2, 2] }} />
           </Source>
         )}
 
         {/* Alternative Detour route line */}
         {itineraryRoute && (panelMode === "itinerary" || panelMode === "route") && (
           <Source id="itinerary-route" type="geojson" data={itineraryRoute}>
+            <Layer id="route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
+              paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.4, "line-blur": 6 }} />
             <Layer id="route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-              paint={{ "line-color": "#34C759", "line-width": 4, "line-opacity": 0.8,
-                "line-dasharray": [2, 2] }} />
+              paint={{ "line-color": "#007AFF", "line-width": 4, "line-opacity": 0.95 }} />
           </Source>
         )}
 
@@ -761,7 +752,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               </div>
             ) : (
               <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20" onClick={e => e.stopPropagation()}>
-                <BusinessCard business={popupBusiness as Business} orientation="vertical" />
+                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === 'itinerary' || panelMode === 'route'} />
               </div>
             )}
           </Popup>

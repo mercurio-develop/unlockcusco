@@ -208,10 +208,10 @@ export function AiConcierge() {
             ...itin,
             startAnchor: {
               ...itin.startAnchor,
-              title: resolvedLocation,
-              locationStr: resolvedLocation,
-              lat: coords?.lat,
-              lng: coords?.lng,
+              title: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.title,
+              locationStr: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.locationStr,
+              lat: coords?.lat || resolvedBusiness?.lat || itin.startAnchor.lat,
+              lng: coords?.lng || resolvedBusiness?.lng || itin.startAnchor.lng,
               service: resolvedBusiness,
             }
           });
@@ -224,10 +224,10 @@ export function AiConcierge() {
             ...itin,
             endAnchor: {
               ...itin.endAnchor,
-              title: resolvedLocation,
-              locationStr: resolvedLocation,
-              lat: coords?.lat,
-              lng: coords?.lng,
+              title: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.title,
+              locationStr: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.locationStr,
+              lat: coords?.lat || resolvedBusiness?.lat || itin.endAnchor.lat,
+              lng: coords?.lng || resolvedBusiness?.lng || itin.endAnchor.lng,
               service: resolvedBusiness,
             }
           });

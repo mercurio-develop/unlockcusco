@@ -1,22 +1,39 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
 
 export const mutateItinerary = tool({
-  description: 'Surgically edits the user\'s current day plan (activeItinerary) without rebuilding it from scratch. Use this when the user asks to swap a place, change a time, or set a new start/end location.',
+  description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add a specific place to their route or set a new start/end location. You must provide the businessId from a previous searchDatabase result.',
   parameters: z.object({
     action: z.enum(['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME', 'ADD_WAYPOINT']),
-    targetId: z.string().optional().describe('The ID of the waypoint or anchor to modify (e.g. itin-start, itin-arrival, or a business ID)'),
-    time: z.string().optional().describe('The new time (HH:MM)'),
-    resolvedBusiness: z.any().optional().describe('The business object to insert/swap (must include id, name, lat, lng, category)'),
-    resolvedLocation: z.string().optional().describe('The name of the new location'),
-    coords: z.object({ lat: z.number(), lng: z.number() }).optional().describe('Coordinates of the new location')
+    targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
+    businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
+    resolvedLocation: z.string().optional().describe('The name of a generic location if not a specific business'),
+    time: z.string().optional().describe('The new time (HH:MM)')
   }),
   // @ts-ignore
   execute: async (payload: any) => {
+    let resolvedBusiness = null;
+    
+    if (payload.businessId) {
+      resolvedBusiness = await prisma.business.findUnique({
+        where: { id: payload.businessId },
+        select: {
+          id: true,
+          name: true,
+          category: true,
+          lat: true,
+          lng: true,
+          rating: true,
+        }
+      });
+    }
+
     // The UI handles the actual state mutation in ai-concierge.tsx via this payload
     return {
       success: true,
-      ...payload
+      ...payload,
+      resolvedBusiness
     };
   }
 });
