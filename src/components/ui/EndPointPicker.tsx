@@ -24,11 +24,16 @@ interface EndPointPickerProps {
 function searchTowns(q: string, max = 5): PickResult[] {
   if (!q.trim()) return [];
   const lower = q.toLowerCase();
+  const seen = new Set<string>();
   return Object.entries(COORDS_MAP)
     .sort((a, b) => b[0].length - a[0].length)
     .filter(([k]) => k.replace(/-/g, ' ').includes(lower) || lower.includes(k.replace(/-/g, ' ')))
-    .slice(0, max)
-    .map(([k, c]) => ({ name: k.replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()), lat: c.lat, lng: c.lng }));
+    .reduce<PickResult[]>((acc, [k, c]) => {
+      const name = k.replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+      if (!seen.has(name)) { seen.add(name); acc.push({ name, lat: c.lat, lng: c.lng }); }
+      return acc;
+    }, [])
+    .slice(0, max);
 }
 
 export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerProps) {
