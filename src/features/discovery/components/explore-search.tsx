@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Search, X, SlidersHorizontal, Navigation, MapPin } from "lucide-react"
+import { Search, X, SlidersHorizontal, Navigation, MapPin, ChevronDown } from "lucide-react"
 import posthog from 'posthog-js'
 import { motion, AnimatePresence } from "framer-motion"
 import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS } from "../constants"
@@ -195,12 +195,10 @@ export function ExploreSearch({
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => setShowCategories(!showCategories)}
-                  className="flex items-center justify-between group"
+                  className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-slate-600 transition-colors">Categories</span>
-                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors">
-                    {showCategories ? 'Hide' : 'Show'}
-                  </span>
+                  <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showCategories ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
                   {showCategories && (
@@ -263,12 +261,10 @@ export function ExploreSearch({
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => setShowLocations(!showLocations)}
-                  className="flex items-center justify-between group"
+                  className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-slate-600 transition-colors">Town / Sector</span>
-                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors">
-                    {showLocations ? 'Hide' : 'Show'}
-                  </span>
+                  <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showLocations ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
                   {showLocations && (
