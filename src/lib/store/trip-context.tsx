@@ -153,7 +153,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
           endAnchor: {
             title: 'Destination', locationStr: 'Destination',
             type: 'GENERIC_TOWN' as const,
-            lat: DEFAULT_COORDS.lat, lng: DEFAULT_COORDS.lng, time: '18:00'
+            lat: undefined, lng: undefined, time: '18:00'
           },
           waypoints: [newWaypoint],
           transitEdges: [],

@@ -171,7 +171,7 @@ export function AiConcierge() {
           endAnchor: {
             title: 'Destination', locationStr: 'Destination',
             type: 'GENERIC_TOWN' as const,
-            lat: userCoords?.lat ?? DEFAULT_COORDS.lat, lng: userCoords?.lng ?? DEFAULT_COORDS.lng, time: '18:00',
+            lat: undefined, lng: undefined, time: '18:00',
           },
           waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
         });

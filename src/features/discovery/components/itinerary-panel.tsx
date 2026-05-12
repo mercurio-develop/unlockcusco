@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Component, type ReactNode } from "react";
 import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { COORDS_MAP } from "@/lib/constants";
 import { getCategoryColor } from "@/lib/utils/category-style";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
 import {
@@ -19,6 +19,48 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
+
+// Stable component outside ItineraryPanel so React fiber identity is preserved across re-renders
+function TransitEdge({ index, routeData, transportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile }) {
+  const leg = routeData?.legs?.[index];
+  if (!leg) return <div className="absolute left-9 -top-4 w-[2px] h-4 bg-gray-200 pointer-events-none" />;
+  const durationMin = Math.round(leg.duration / 60);
+  const distanceKm = (leg.distance / 1000).toFixed(1);
+  return (
+    <div className="absolute left-9 -top-6 w-[2px] h-6 bg-slate-300 pointer-events-none flex items-center justify-center z-10">
+      <div className="absolute w-[85px] bg-white border border-slate-200 shadow-sm rounded-full py-0.5 px-2 flex items-center gap-1.5 ml-28">
+        {transportProfile === 'driving' ? <Car className="w-3 h-3 text-slate-500" /> : <Footprints className="w-3 h-3 text-slate-500" />}
+        <span className="text-[9px] font-bold text-slate-600 tracking-tight whitespace-nowrap">{durationMin}m ({distanceKm}km)</span>
+      </div>
+    </div>
+  );
+}
+
+class ItineraryErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-4">
+          <AlertTriangle className="w-8 h-8 text-amber-500" />
+          <div>
+            <p className="text-sm font-semibold text-slate-900 mb-1">Route panel crashed</p>
+            <p className="text-xs text-slate-500 font-mono">{(this.state.error as Error).message}</p>
+          </div>
+          <button
+            onClick={() => this.setState({ error: null })}
+            className="text-xs font-bold text-rose-600 hover:text-rose-700 underline"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export function ItineraryPanel() {
   const {
@@ -39,7 +81,6 @@ export function ItineraryPanel() {
   const { setIsChatOpen } = usePreferences();
 
   const [endInput, setEndInput] = useState('');
-
   const resolveEndInput = () => {
     const val = endInput.trim();
     if (!val) return;
@@ -55,23 +96,6 @@ export function ItineraryPanel() {
       setIsChatOpen(true);
     }
     setEndInput('');
-  };
-
-  const TransitEdge = ({ index }: { index: number }) => {
-    const leg = routeData?.legs?.[index];
-    if (!leg) return <div className="absolute left-9 -top-4 w-[2px] h-4 bg-gray-200 pointer-events-none" />;
-
-    const durationMin = Math.round(leg.duration / 60);
-    const distanceKm = (leg.distance / 1000).toFixed(1);
-
-    return (
-      <div className="absolute left-9 -top-6 w-[2px] h-6 bg-slate-300 pointer-events-none flex items-center justify-center z-10">
-        <div className="absolute w-[85px] bg-white border border-slate-200 shadow-sm rounded-full py-0.5 px-2 flex items-center gap-1.5 ml-28">
-          {transportProfile === 'driving' ? <Car className="w-3 h-3 text-slate-500" /> : <Footprints className="w-3 h-3 text-slate-500" />}
-          <span className="text-[9px] font-bold text-slate-600 tracking-tight whitespace-nowrap">{durationMin}m ({distanceKm}km)</span>
-        </div>
-      </div>
-    );
   };
 
   if (!activeItinerary) {
@@ -98,6 +122,7 @@ export function ItineraryPanel() {
   }
 
   return (
+    <ItineraryErrorBoundary>
     <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
       <div className="px-6 pt-6 pb-4 bg-white border-b border-gray-200 shrink-0 flex justify-between items-center">
         <div>
@@ -163,7 +188,7 @@ export function ItineraryPanel() {
         <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="space-y-6 relative w-full mt-6">
           {(activeItinerary.waypoints || []).map((waypoint, idx) => (
             <Reorder.Item key={waypoint.id} value={waypoint} id={waypoint.id} className="relative">
-              <TransitEdge index={idx} />
+              <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfile} />
               
               <div
                 className={`flex flex-col p-4 rounded-2xl border-l-4 border border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-md ring-1 ring-[var(--step-color)]' : 'bg-white border-gray-100 hover:border-gray-200'}`}
@@ -257,7 +282,7 @@ export function ItineraryPanel() {
 
         {/* End Anchor */}
         <div className="relative mt-6">
-          <TransitEdge index={(activeItinerary.waypoints || []).length} />
+          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfile} />
           <div
             onClick={() => setSelectedId('itin-arrival')}
             className={`flex gap-4 p-4 rounded-2xl border transition-all ${selectedId === 'itin-arrival' ? 'bg-white border-rose-500 shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-200 hover:border-slate-300'}`}
@@ -300,5 +325,6 @@ export function ItineraryPanel() {
 
       </div>
     </div>
+    </ItineraryErrorBoundary>
   );
 }

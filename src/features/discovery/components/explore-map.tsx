@@ -518,6 +518,15 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.4, "line-blur": 6 }} />
             <Layer id="route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ "line-color": "#007AFF", "line-width": 4, "line-opacity": 0.95 }} />
+            <Layer id="route-arrows" type="symbol" layout={{
+              "symbol-placement": "line",
+              "text-field": "▶",
+              "text-size": 14,
+              "symbol-spacing": 60,
+              "text-keep-upright": false
+            }} paint={{
+              "text-color": "#007AFF"
+            }} />
           </Source>
         )}
 
@@ -539,6 +548,17 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               <Layer id={`route-line-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
                 paint={{ "line-color": color, "line-width": isAct ? 5 : 3, "line-opacity": opacity, "line-dasharray": isAct ? [1, 2] : [1] }}
               />
+              {/* Directional Arrows */}
+              <Layer id={`route-arrows-${dayNum}`} type="symbol" layout={{
+                "symbol-placement": "line",
+                "text-field": "▶",
+                "text-size": isAct ? 14 : 10,
+                "symbol-spacing": 60,
+                "text-keep-upright": false
+              }} paint={{
+                "text-color": color,
+                "text-opacity": opacity
+              }} />
             </Source>
           );
         })}
