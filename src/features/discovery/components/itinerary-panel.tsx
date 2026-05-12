@@ -3,8 +3,8 @@
 import { useState, Component, type ReactNode } from "react";
 import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
-import { COORDS_MAP } from "@/lib/constants";
 import { getCategoryColor } from "@/lib/utils/category-style";
+import { EndPointPicker } from "@/components/ui/EndPointPicker";
 import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
@@ -81,8 +81,6 @@ export function ItineraryPanel() {
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
 
-  const [endInput, setEndInput] = useState('');
-
   // Cascade stop times: startAnchor time + legs travel + waypoint durations
   const stopTimes = (() => {
     if (!activeItinerary) return [];
@@ -105,23 +103,6 @@ export function ItineraryPanel() {
       return arrival;
     });
   })();
-
-  const resolveEndInput = () => {
-    const val = endInput.trim();
-    if (!val) return;
-    const lower = val.toLowerCase();
-    const match = Object.entries(COORDS_MAP)
-      .sort((a, b) => b[0].length - a[0].length)
-      .find(([k]) => lower.includes(k.replace(/-/g, ' ')) || lower.includes(k));
-    if (match) {
-      updateEndAnchorLocation(match[1].lat, match[1].lng, val);
-    } else {
-      // Not a known town — ask the concierge to find and set it
-      setAiPromptToTrigger(`My travel ends at ${val}`);
-      setIsChatOpen(true);
-    }
-    setEndInput('');
-  };
 
   if (!activeItinerary) {
     return (
@@ -341,19 +322,14 @@ export function ItineraryPanel() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">End Point</p>
-              <div className="flex items-center gap-1.5">
-                <input
-                  value={endInput}
-                  placeholder={activeItinerary.endAnchor?.title || "Where does your day end?"}
-                  onChange={e => setEndInput(e.target.value)}
-                  onFocus={e => { e.stopPropagation(); setEndInput(activeItinerary.endAnchor?.title || ''); (e.target as HTMLInputElement).select(); }}
-                  onBlur={resolveEndInput}
-                  onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); e.stopPropagation(); }}
-                  onClick={e => e.stopPropagation()}
-                  className="flex-1 text-sm font-semibold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-slate-400 focus:outline-none truncate transition-colors min-w-0"
+              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                <EndPointPicker
+                  value={activeItinerary.endAnchor?.title}
+                  placeholder="Where does your day end?"
+                  onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
-                  onClick={e => { e.stopPropagation(); const v = endInput.trim() || activeItinerary.endAnchor?.title || ''; if (v) { setAiPromptToTrigger(`My travel ends at ${v}`); setIsChatOpen(true); setEndInput(''); } }}
+                  onClick={e => { e.stopPropagation(); const v = activeItinerary.endAnchor?.title || ''; if (v) { setAiPromptToTrigger(`My travel ends at ${v}`); setIsChatOpen(true); } }}
                   className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                   title="Ask concierge to find this place"
                 >
@@ -375,7 +351,7 @@ export function ItineraryPanel() {
                 </button>
                 {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
                   <button
-                    onClick={e => { e.stopPropagation(); clearEndAnchor(); setEndInput(''); }}
+                    onClick={e => { e.stopPropagation(); clearEndAnchor(); }}
                     title="Remove end point"
                     className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
