@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
@@ -149,11 +149,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   }, [completedDays, mapboxToken]);
 
   const waypoints = useMemo(() => {
-    if (panelMode !== "itinerary" && panelMode !== "route" && panelMode !== "builder") return [];
+    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
     
     const pts: [number, number][] = [];
     
-    if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
+    if (panelMode === "itinerary" && activeItinerary) {
       const start = activeItinerary.startAnchor;
       const end = activeItinerary.endAnchor;
       if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
@@ -182,10 +182,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
 
   const directWaypoints = useMemo(() => {
-    if (panelMode !== "itinerary" && panelMode !== "route" && panelMode !== "builder") return [];
+    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
     const pts: [number, number][] = [];
     
-    if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
+    if (panelMode === "itinerary" && activeItinerary) {
       const start = activeItinerary.startAnchor;
       const end = activeItinerary.endAnchor;
       if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
@@ -222,8 +222,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   // Itinerary waypoint markers
   const itineraryMarkers = useMemo(() => {
-    if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
-      return activeItinerary.waypoints
+    if (panelMode === "itinerary" && activeItinerary) {
+      return (activeItinerary.waypoints || [])
         .filter((w: any) => w.lat !== undefined && w.lng !== undefined)
         .map((w: any, idx: number) => ({ pick: w, idx }));
     }
@@ -262,7 +262,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     let startAnchor: any = null;
     let endAnchor: any = null;
     
-    if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
+    if (panelMode === "itinerary" && activeItinerary) {
       startAnchor = activeItinerary.startAnchor;
       endAnchor = activeItinerary.endAnchor;
     } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
@@ -515,7 +515,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}
 
         {/* Direct baseline route line (Main Route) */}
-        {directRoute && (panelMode === "itinerary" || panelMode === "route") && (
+        {directRoute && panelMode === "itinerary" && (
           <Source id="direct-route" type="geojson" data={directRoute}>
             <Layer id="direct-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ "line-color": "#8E8E93", "line-width": 2, "line-opacity": 0.5, "line-dasharray": [2, 2] }} />
@@ -523,7 +523,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         )}
 
         {/* Alternative Detour route line */}
-        {itineraryRoute && (panelMode === "itinerary" || panelMode === "route") && (
+        {itineraryRoute && panelMode === "itinerary" && (
           <Source id="itinerary-route" type="geojson" data={itineraryRoute}>
             <Layer id="route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ "line-color": "#ffffff", "line-width": 12, "line-opacity": 0.4, "line-blur": 6 }} />
@@ -557,7 +557,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {/* Start Marker */}
         {(() => {
           let start;
-          if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
+          if (panelMode === "itinerary" && activeItinerary) {
             start = activeItinerary.startAnchor;
           } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
             const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
@@ -612,7 +612,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {/* Arrival Marker */}
         {(() => {
           let end;
-          if ((panelMode === "itinerary" || panelMode === "route") && activeItinerary) {
+          if (panelMode === "itinerary" && activeItinerary) {
             end = activeItinerary.endAnchor;
           } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
             const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
@@ -697,7 +697,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           )
         })}
         {/* Regular business markers — hidden in itinerary mode */}
-        {(panelMode !== "itinerary" && panelMode !== "route") && validBusinesses.map((business, index) => {
+        {(panelMode !== "itinerary") && validBusinesses.map((business, index) => {
           const style = getCategoryStyle(business.category);
           const isSelected = selectedId === business.id;
           const Icon = style.icon;
@@ -752,7 +752,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               </div>
             ) : (
               <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20" onClick={e => e.stopPropagation()}>
-                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === 'itinerary' || panelMode === 'route'} />
+                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} />
               </div>
             )}
           </Popup>
@@ -771,6 +771,22 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           style={{ position: 'absolute', right: controlsRightOffset, bottom: '20px', transition: 'right 0.3s ease-in-out' }}
         />
       </Map>
+
+      {/* Drive Time Badge */}
+      {routeData && routeData.duration != null && (
+        <div className="absolute bottom-6 left-6 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 text-blue-500" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Drive Time</span>
+            <span className="text-sm font-bold text-slate-700">
+              {Math.floor(routeData.duration / 3600) > 0 ? `${Math.floor(routeData.duration / 3600)}h ` : ''}
+              {Math.floor((routeData.duration % 3600) / 60)}m
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Multi-Day Legend (Builder Mode) */}
       {panelMode === "builder" && completedDays.length > 0 && (

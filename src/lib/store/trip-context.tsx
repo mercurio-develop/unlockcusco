@@ -12,6 +12,7 @@ export interface RouteData {
   geometry: any;
   legs: any[];
   profile: TransportProfile;
+  duration?: number;
 }
 
 interface TripContextType {
@@ -84,7 +85,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
           setRouteData({
             geometry: data.routes[0].geometry,
             legs: data.routes[0].legs,
-            profile: transportProfile
+            profile: transportProfile,
+            duration: data.routes[0].duration
           });
         }
       })
