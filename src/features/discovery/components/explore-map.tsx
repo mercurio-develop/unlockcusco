@@ -12,40 +12,29 @@ import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import { BusinessCard } from "./business-card"
 
+import { getCategoryColor } from "@/lib/utils/category-style";
+
 const getCategoryStyle = (category: string | undefined | null) => {
-  if (!category) return { bg: "#8E8E93", icon: MapPin };
-  
+  const bg = getCategoryColor(category);
+  if (!category) return { bg, icon: MapPin };
   const cat = category.toUpperCase();
   switch (cat) {
     case 'DINING':
-    case 'MEAL':
-      return { bg: "#FF9500", icon: Utensils }; // Apple Orange
-    case 'WELLNESS':
-      return { bg: "#34C759", icon: Sprout };   // Apple Green
-    case 'ADVENTURE':
-      return { bg: "#5856D6", icon: MountainIcon }; // Apple Indigo
+    case 'MEAL':      return { bg, icon: Utensils };
+    case 'WELLNESS':  return { bg, icon: Sprout };
+    case 'ADVENTURE': return { bg, icon: MountainIcon };
     case 'STAYS':
-    case 'STAY':
-      return { bg: "#007AFF", icon: Bed };      // Apple Blue
-    case 'CULTURE':
-      return { bg: "#AF52DE", icon: Landmark }; // Apple Purple
-    case 'SPIRITUAL':
-      return { bg: "#BF5AF2", icon: Sparkles }; // Apple Purple/Pinkish
-    case 'BOLETO':
-      return { bg: "#FF2D55", icon: Ticket };   // Apple Red
-    case 'TRANSPORT':
-      return { bg: "#5AC8FA", icon: Car };      // Apple Light Blue
+    case 'STAY':      return { bg, icon: Bed };
+    case 'CULTURE':   return { bg, icon: Landmark };
+    case 'SPIRITUAL': return { bg, icon: Sparkles };
+    case 'BOLETO':    return { bg, icon: Ticket };
+    case 'TRANSPORT': return { bg, icon: Car };
     case 'AGENCY':
-    case 'EXPERIENCE':
-      return { bg: "#FFCC00", icon: Star };     // Apple Yellow
-    case 'TEXTILES':
-      return { bg: "#E91E63", icon: Scissors }; // Pink
-    case 'GUIDE':
-      return { bg: "#FF5722", icon: User };     // Deep Orange
-    case 'NOTE':
-      return { bg: "#8E8E93", icon: Clipboard }; // Apple Gray
-    default:
-      return { bg: "#8E8E93", icon: MapPin };
+    case 'EXPERIENCE':return { bg, icon: Star };
+    case 'TEXTILES':  return { bg, icon: Scissors };
+    case 'GUIDE':     return { bg, icon: User };
+    case 'NOTE':      return { bg, icon: Clipboard };
+    default:          return { bg, icon: MapPin };
   }
 }
 
@@ -224,7 +213,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const itineraryMarkers = useMemo(() => {
     if (panelMode === "itinerary" && activeItinerary) {
       return (activeItinerary.waypoints || [])
-        .filter((w: any) => w.lat !== undefined && w.lng !== undefined)
+        .filter((w: any) => w.lat != null && w.lng != null)
         .map((w: any, idx: number) => ({ pick: w, idx }));
     }
     
@@ -297,7 +286,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     
     // 2. Active Itinerary (Micro-Day) Match
     if (!targetLat && activeItinerary) {
-      for (const wp of activeItinerary.waypoints) {
+      for (const wp of activeItinerary.waypoints ?? []) {
         if (wp.id === selectedId && wp.lat !== undefined && wp.lng !== undefined) {
           targetLat = wp.lat;
           targetLng = wp.lng;

@@ -1,14 +1,26 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { COORDS_MAP } from '@/lib/constants';
+
+function lookupCoords(name: string): { lat: number; lng: number } | null {
+  if (!name) return null;
+  const lower = name.toLowerCase();
+  const entries = Object.entries(COORDS_MAP).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, coords] of entries) {
+    if (lower.includes(key.replace(/-/g, ' ')) || lower.includes(key)) return coords;
+  }
+  return null;
+}
 
 export const mutateItinerary = tool({
-  description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add a specific place to their route or set a new start/end location. You must provide the businessId from a previous searchDatabase result.',
+  description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add a specific place to their route or set a new start/end location. You must provide the businessId from a previous searchDatabase result. If setting a generic start/end location (e.g., "Urubamba", "Airport"), you MUST provide approximate coords.',
   parameters: z.object({
     action: z.enum(['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME', 'ADD_WAYPOINT']),
     targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
     businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
     resolvedLocation: z.string().optional().describe('The name of a generic location if not a specific business'),
+    coords: z.object({ lat: z.number(), lng: z.number() }).optional().describe('Coordinates for the generic location'),
     time: z.string().optional().describe('The new time (HH:MM)')
   }),
   // @ts-ignore
@@ -29,10 +41,16 @@ export const mutateItinerary = tool({
       });
     }
 
-    // The UI handles the actual state mutation in ai-concierge.tsx via this payload
+    // Auto-resolve coords from COORDS_MAP when Gemini omits them for generic towns
+    let resolvedCoords = payload.coords;
+    if (!resolvedCoords && payload.resolvedLocation) {
+      resolvedCoords = lookupCoords(payload.resolvedLocation) ?? undefined;
+    }
+
     return {
       success: true,
       ...payload,
+      coords: resolvedCoords,
       resolvedBusiness
     };
   }

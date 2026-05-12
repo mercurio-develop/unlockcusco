@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { Business } from "@prisma/client";
 
 import { useTrip } from "@/lib/store/trip-context";
 import { useRouter } from "next/navigation";
 import { BusinessCard } from "@/features/discovery/components/business-card";
-import { PendingAvailability } from "@/features/concierge/components/PendingAvailability";
-import { cn } from "@/lib/utils";
 
-export function SearchResultsCard({ businesses, messageId }: { businesses: Business[], messageId?: string }) {
+export function SearchResultsCard({ businesses, messageId, input }: { businesses: Business[], messageId?: string, input?: any }) {
   const { setSelectedId } = useTrip();
   const router = useRouter();
-  const [loadedImages, setLoadedImages] = useState(0);
 
   const isFallback = !Array.isArray(businesses) && (businesses as any)?.alternatives;
   const list = Array.isArray(businesses) ? businesses : ((businesses as any)?.alternatives || []);
   const requestedLocation = !Array.isArray(businesses) ? (businesses as any)?.requestedLocation : null;
+
+  let dynamicTitle = "Top Recommendations";
+  if (input) {
+    const noun = input.category || input.query || "Recommendations";
+    const loc = input.location ? ` in ${input.location}` : "";
+    dynamicTitle = `Top ${noun}${loc}`;
+  }
 
   if (!list || !Array.isArray(list) || list.length === 0) {
     return (
@@ -38,44 +41,33 @@ export function SearchResultsCard({ businesses, messageId }: { businesses: Busin
     }
   };
 
-  const isLoaded = loadedImages >= list.length;
-
   return (
-    <>
-      {!isLoaded && (
-        <>
-          <PendingAvailability message="Loading images..." />
-          {messageId && <style>{`#msg-text-${messageId} { display: none; }`}</style>}
-        </>
-      )}
-      <div className={cn("my-3 -mx-4 sm:mx-0 transition-opacity duration-300", isLoaded ? "opacity-100" : "opacity-0 absolute pointer-events-none")}>
-        <div className="flex items-center justify-between mb-2 px-4 sm:px-0">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
-              {isFallback ? "Nearby Alternatives" : "Top Recommendations"}
+    <div className="my-3 -mx-4 sm:mx-0">
+      <div className="flex items-center justify-between mb-2 px-4 sm:px-0">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+            {isFallback ? "Nearby Alternatives" : dynamicTitle}
+          </span>
+          {isFallback && requestedLocation && (
+            <span className="text-[9px] text-rose-500 font-bold uppercase mt-0.5">
+              None found in {requestedLocation}
             </span>
-            {isFallback && requestedLocation && (
-              <span className="text-[9px] text-rose-500 font-bold uppercase mt-0.5">
-                None found in {requestedLocation}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] text-slate-400 mr-2 sm:mr-0">{list.length} found</span>
+          )}
         </div>
-        
-        <div className="flex overflow-x-auto gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
-          {list.map((business: Business, idx: number) => (
-            <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
-               <BusinessCard 
-                 business={business} 
-                 orientation="vertical" 
-                 onSelect={() => handleSelect(business)} 
-                 onImageLoad={() => setLoadedImages(prev => prev + 1)}
-               />
-            </div>
-          ))}
-        </div>
+        <span className="text-[10px] text-slate-400 mr-2 sm:mr-0">{list.length} found</span>
       </div>
-    </>
+
+      <div className="flex overflow-x-auto gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
+        {list.map((business: Business, idx: number) => (
+          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
+            <BusinessCard
+              business={business}
+              orientation="vertical"
+              onSelect={() => handleSelect(business)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -36,6 +36,8 @@ interface TripContextType {
   routeData: RouteData | null;
   transportProfile: TransportProfile;
   setTransportProfile: (profile: TransportProfile) => void;
+  mapClickMode: 'end' | null;
+  setMapClickMode: (mode: 'end' | null) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -49,6 +51,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [transportProfile, setTransportProfile] = useState<TransportProfile>("driving");
   const [routeData, setRouteData] = useState<RouteData | null>(null);
+  const [mapClickMode, setMapClickMode] = useState<'end' | null>(null);
 
   useEffect(() => {
     if (!activeItinerary) {
@@ -58,14 +61,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     const pts: [number, number][] = [];
     const start = activeItinerary.startAnchor;
-    if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
-    
+    if (start?.lat != null && start?.lng != null) pts.push([start.lng, start.lat]);
+
     for (const waypoint of activeItinerary.waypoints || []) {
-      if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
+      if (waypoint.lat != null && waypoint.lng != null) pts.push([waypoint.lng, waypoint.lat]);
     }
-    
+
     const end = activeItinerary.endAnchor;
-    if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
+    if (end?.lat != null && end?.lng != null) pts.push([end.lng, end.lat]);
 
     if (pts.length < 2) {
       setRouteData(null);
@@ -246,11 +249,14 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setWaypoints,
       routeData,
       transportProfile,
-      setTransportProfile
+      setTransportProfile,
+      mapClickMode,
+      setMapClickMode,
   }), [
       activeItinerary, panelMode, selectedId, exchangeTargetId, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
-      removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile
+      removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfile,
+      mapClickMode,
   ]);
 
   return (

@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket } from "lucide-react"
+import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket, Bed } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { submitLead } from "@/features/leads/actions/submit-lead"
@@ -63,7 +63,7 @@ export function BusinessCard({
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
-  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint } = useTrip()
+  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint, updateEndAnchorLocation } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -393,16 +393,31 @@ export function BusinessCard({
                     Exchange
                   </Button>
                 ) : (
-                  <Button
-                    onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
-                    className={cn(
-                      "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                  <>
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+                      className={cn(
+                        "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
+                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      )}
+                    >
+                      <Plus className="w-3 h-3" />
+                      {isHorizontal ? "Add" : "Add to Day"}
+                    </Button>
+                    {activeItinerary && business.lat != null && business.lng != null && (
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); updateEndAnchorLocation(business.lat!, business.lng!, business.name); }}
+                        className={cn(
+                          "bg-rose-50 text-rose-600 border border-rose-100 hover:border-rose-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1",
+                          isHorizontal ? "h-8 px-2 text-[10px] uppercase tracking-tighter" : "px-3 py-2.5 text-xs uppercase tracking-tighter"
+                        )}
+                        title="Set as end of day"
+                      >
+                        <Bed className="w-3 h-3" />
+                        {isHorizontal ? "" : "End"}
+                      </Button>
                     )}
-                  >
-                    <Plus className="w-3 h-3" />
-                    {isHorizontal ? "Add" : "Add to Day"}
-                  </Button>
+                  </>
                 )}
                 {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
                   <Button

@@ -5,8 +5,8 @@ export const microDaySchema = z.object({
   totalCost: z.number().optional(),
   constraints: z.string().optional(),
   startAnchor: z.object({
-    title: z.string(),
-    locationStr: z.string(),
+    title: z.string().min(1).describe('The real location name, e.g. "Urubamba" or "Cusco Airport". Never empty.'),
+    locationStr: z.string().min(1),
     time: z.string().optional(),
     type: z.enum(['AIRPORT', 'HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
@@ -14,8 +14,8 @@ export const microDaySchema = z.object({
     service: z.any().optional(),
   }),
   endAnchor: z.object({
-    title: z.string(),
-    locationStr: z.string(),
+    title: z.string().min(1).describe('The real location name, e.g. "Ollantaytambo" or "Pisac". Never empty.'),
+    locationStr: z.string().min(1),
     time: z.string().optional(),
     type: z.enum(['HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),

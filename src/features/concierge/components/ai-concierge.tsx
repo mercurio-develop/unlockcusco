@@ -70,6 +70,9 @@ export function AiConcierge() {
   const isLoading = status === 'submitted' || status === 'streaming';
 
   const sendMessage = useMemo(() => (msg: { text: string }) => {
+    const defaultTitles = ['Current Location', 'Destination'];
+    const sTitle = activeItinerary?.startAnchor?.title;
+    const eTitle = activeItinerary?.endAnchor?.title;
     (chat as any).sendMessage({ text: msg.text }, {
       body: {
         userLat: userCoords?.lat,
@@ -78,9 +81,11 @@ export function AiConcierge() {
         targetDate: targetDate?.toLocaleDateString() || 'today',
         archetype: travelVibe,
         intensity: travelIntensity,
+        itineraryStartTitle: sTitle && !defaultTitles.includes(sTitle) ? sTitle : null,
+        itineraryEndTitle: eTitle && !defaultTitles.includes(eTitle) ? eTitle : null,
       }
     });
-  }, [chat, userCoords, travelVibe, travelIntensity, targetDate]);
+  }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +145,7 @@ export function AiConcierge() {
         if (!p || p?.state !== 'output-available') return;
         if (processedToolCalls.current.has(p.toolCallId)) return;
 
-        const toolName = p.type?.replace(/^tool-/, '');
+        const toolName = p.toolName || p.type?.replace(/^tool-/, '');
         const output = p.output;
 
         // Auto-activate full itinerary from buildItinerary
@@ -171,10 +176,29 @@ export function AiConcierge() {
           waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
         });
 
-        if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
-          const updatedWaypoints = activeItinerary.waypoints.map((w: any) =>
-            w.id === targetId ? {
-              ...w,
+        if (action === 'SWAP_STOP' && targetId && resolvedBusiness) {
+          setActiveItinerary(prev => {
+            if (!prev) return prev;
+            const updatedWaypoints = prev.waypoints.map((w: any) =>
+              w.id === targetId ? {
+                ...w,
+                id: resolvedBusiness.id,
+                category: resolvedBusiness.category,
+                title: resolvedBusiness.name,
+                locationStr: resolvedBusiness.name,
+                lat: resolvedBusiness.lat,
+                lng: resolvedBusiness.lng,
+                service: resolvedBusiness
+              } : w
+            );
+            return { ...prev, waypoints: updatedWaypoints };
+          });
+        }
+
+        if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
+          setActiveItinerary(prev => {
+            const itin = prev ?? minimalItinerary();
+            const newWaypoint = {
               id: resolvedBusiness.id,
               category: resolvedBusiness.category,
               title: resolvedBusiness.name,
@@ -182,69 +206,62 @@ export function AiConcierge() {
               lat: resolvedBusiness.lat,
               lng: resolvedBusiness.lng,
               service: resolvedBusiness
-            } : w
-          );
-          setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
-        }
-
-        if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
-          const itin = activeItinerary ?? minimalItinerary();
-          const newWaypoint = {
-            id: resolvedBusiness.id,
-            category: resolvedBusiness.category,
-            title: resolvedBusiness.name,
-            locationStr: resolvedBusiness.name,
-            lat: resolvedBusiness.lat,
-            lng: resolvedBusiness.lng,
-            service: resolvedBusiness
-          };
-          setActiveItinerary({ ...itin, waypoints: [...itin.waypoints, newWaypoint] });
+            };
+            return { ...itin, waypoints: [...itin.waypoints, newWaypoint] };
+          });
           setPanelMode('itinerary');
         }
 
         if (action === 'SET_START') {
-          const itin = activeItinerary ?? minimalItinerary();
-          setActiveItinerary({
-            ...itin,
-            startAnchor: {
-              ...itin.startAnchor,
-              title: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.title,
-              locationStr: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.locationStr,
-              lat: coords?.lat || resolvedBusiness?.lat || itin.startAnchor.lat,
-              lng: coords?.lng || resolvedBusiness?.lng || itin.startAnchor.lng,
-              service: resolvedBusiness,
-            }
+          setActiveItinerary(prev => {
+            const itin = prev ?? minimalItinerary();
+            return {
+              ...itin,
+              startAnchor: {
+                ...itin.startAnchor,
+                title: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.title,
+                locationStr: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.locationStr,
+                lat: coords?.lat || resolvedBusiness?.lat || itin.startAnchor.lat,
+                lng: coords?.lng || resolvedBusiness?.lng || itin.startAnchor.lng,
+                service: resolvedBusiness,
+              }
+            };
           });
           setPanelMode('itinerary');
         }
 
         if (action === 'SET_END') {
-          const itin = activeItinerary ?? minimalItinerary();
-          setActiveItinerary({
-            ...itin,
-            endAnchor: {
-              ...itin.endAnchor,
-              title: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.title,
-              locationStr: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.locationStr,
-              lat: coords?.lat || resolvedBusiness?.lat || itin.endAnchor.lat,
-              lng: coords?.lng || resolvedBusiness?.lng || itin.endAnchor.lng,
-              service: resolvedBusiness,
-            }
+          setActiveItinerary(prev => {
+            const itin = prev ?? minimalItinerary();
+            return {
+              ...itin,
+              endAnchor: {
+                ...itin.endAnchor,
+                title: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.title,
+                locationStr: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.locationStr,
+                lat: coords?.lat || resolvedBusiness?.lat || itin.endAnchor.lat,
+                lng: coords?.lng || resolvedBusiness?.lng || itin.endAnchor.lng,
+                service: resolvedBusiness,
+              }
+            };
           });
           setPanelMode('itinerary');
         }
 
-        if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
-          if (targetId === 'itin-start') {
-            setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time } });
-          } else if (targetId === 'itin-arrival') {
-            setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time } });
-          } else {
-            const updatedWaypoints = activeItinerary.waypoints.map((w: any) =>
-              w.id === targetId ? { ...w, startTime: time } : w
-            );
-            setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
-          }
+        if (action === 'UPDATE_TIME' && targetId && time) {
+          setActiveItinerary(prev => {
+            if (!prev) return prev;
+            if (targetId === 'itin-start') {
+              return { ...prev, startAnchor: { ...prev.startAnchor, time } };
+            } else if (targetId === 'itin-arrival') {
+              return { ...prev, endAnchor: { ...prev.endAnchor, time } };
+            } else {
+              const updatedWaypoints = prev.waypoints.map((w: any) =>
+                w.id === targetId ? { ...w, startTime: time } : w
+              );
+              return { ...prev, waypoints: updatedWaypoints };
+            }
+          });
         }
 
         processedToolCalls.current.add(p.toolCallId);
@@ -409,12 +426,14 @@ Please generate my macro trip plan.`;
                       
                       {/* Tool parts (AI SDK v6: msg.parts, state=output-available) */}
                       {(msg as any).parts?.map((part: any, idx: number) => {
-                        if (!part || !part.type?.startsWith('tool-')) return null;
-                        const key = part.toolCallId || idx;
-                        const toolName = part.type.replace(/^tool-/, '');
-                        const isDone = part?.state === 'output-available';
-                        const output = part.output;
-                        const input = part.input;
+                        const isToolPart = part?.type?.startsWith('tool-') || part?.type === 'dynamic-tool';
+                        if (!part || !isToolPart) return null;
+                        const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
+                        const toolInvocation = part.toolInvocation || part;
+                        const toolName = part.toolName || toolInvocation.toolName || part.type.replace(/^tool-/, '');
+                        const isDone = part?.state === 'output-available' || toolInvocation.state === 'result';
+                        const output = toolInvocation.result || part.output;
+                        const input = toolInvocation.args || part.input;
 
                         if (!isDone) {
                           if (toolName === 'askAvailability') {
@@ -495,7 +514,7 @@ Please generate my macro trip plan.`;
                           );
                         }
                         if (toolName === 'searchDatabase') {
-                          return <SearchResultsCard key={key} businesses={output} messageId={msg.id} />
+                          return <SearchResultsCard key={key} businesses={output} messageId={msg.id} input={input} />
                         }
                         if (toolName === 'askAvailability') {
                           return <PendingAvailability key={key} message={output?.message} />
@@ -552,14 +571,14 @@ Please generate my macro trip plan.`;
                     { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" }
                   ] : travelVibe === 'Luxury' ? [
                     { label: "Best spa in the valley", icon: "💆‍♀️", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
-                    { label: "Private transfer to Machu Picchu", icon: "🚂", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                    { label: "Hire a private driver", icon: "🚙", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
                     { label: "Fine dining with views", icon: "🥂", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
                     { label: "Plan my full day", icon: "🌅", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" }
                   ] : [
                     { label: "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
                     { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
                     { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
-                    { label: "Book Machu Picchu", icon: "⛰️", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: "Local Travel Tips", icon: "💡", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
                     { label: "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
                   ]
                 ).map(suggestion => (

@@ -25,7 +25,7 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity } = body;
+    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Invalid messages format." }), { status: 400 });
@@ -56,11 +56,23 @@ export async function POST(req: Request) {
       if (msg.role === 'user' && msg.parts) {
         const textPart = msg.parts.find((p: any) => p.type === 'text');
         if (textPart?.text?.startsWith('I just added') && textPart.text.includes('to my itinerary.')) {
+          const hasStart = !!itineraryStartTitle;
+          const hasEnd = !!itineraryEndTitle;
+          let instruction: string;
+          if (hasStart && hasEnd) {
+            instruction = `[System Instruction: Acknowledge this addition warmly. The itinerary already has start="${itineraryStartTitle}" and end="${itineraryEndTitle}" set. Do NOT ask again — just say something like "Great addition! Your route goes from ${itineraryStartTitle} to ${itineraryEndTitle}. Want to swap the start or end, or shall we keep going?"]`;
+          } else if (hasStart) {
+            instruction = `[System Instruction: Acknowledge this addition. Start is already set to "${itineraryStartTitle}". Only ask where they want to end their day — do not ask about the start again.]`;
+          } else if (hasEnd) {
+            instruction = `[System Instruction: Acknowledge this addition. End is already set to "${itineraryEndTitle}". Only ask where they are starting from — do not ask about the end again.]`;
+          } else {
+            instruction = `[System Instruction: Acknowledge this addition and ask: "Do you want to set the start where you are? And do you have an idea where you will end this itinerary?"]`;
+          }
           return {
             ...msg,
             parts: msg.parts.map((p: any) =>
               p.type === 'text'
-                ? { ...p, text: p.text + '\n\n[System Instruction: Acknowledge this addition and specifically ask the user: "I saw you added an experience to your Day itinerary. Do you want to set the start where you are? And do you have an idea where you will end this itinerary?"]' }
+                ? { ...p, text: p.text + '\n\n' + instruction }
                 : p
             )
           };

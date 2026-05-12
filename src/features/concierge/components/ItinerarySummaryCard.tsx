@@ -1,15 +1,18 @@
 "use client";
 
 import { useTrip } from "@/lib/store/trip-context";
+import { usePreferences } from "@/lib/store/preferences-context";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { ArrowRight, Navigation } from "lucide-react";
 
 export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }) {
   const { setActiveItinerary, setPanelMode } = useTrip();
+  const { setIsChatOpen } = usePreferences();
 
   const handleOpenPlanner = () => {
     setActiveItinerary(itinerary);
     setPanelMode("itinerary");
+    setIsChatOpen(false);
   };
 
   const totalCost = itinerary.totalCost ?? 0;
@@ -23,13 +26,13 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
         </div>
         <div>
           <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">Your Plan</p>
-          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{itinerary.title ?? `${itinerary.startAnchor.title} → ${itinerary.endAnchor.title}`}</h3>
+          <h3 className="text-sm font-semibold text-slate-900 leading-tight">{itinerary.title ?? `${itinerary.startAnchor?.title || 'Start'} → ${itinerary.endAnchor?.title || 'End'}`}</h3>
         </div>
       </div>
 
       {/* Steps */}
       <div className="space-y-1.5 mb-3">
-        {itinerary.waypoints.slice(0, 3).map((waypoint, idx) => {
+        {(itinerary.waypoints || []).slice(0, 3).map((waypoint, idx) => {
           return (
             <div key={idx} className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
               <span className="text-base shrink-0">📍</span>
@@ -43,9 +46,9 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
             </div>
           );
         })}
-        {itinerary.waypoints.length > 3 && (
+        {(itinerary.waypoints || []).length > 3 && (
           <div className="text-center text-xs text-slate-400 py-1">
-            + {itinerary.waypoints.length - 3} more stops
+            + {(itinerary.waypoints || []).length - 3} more stops
           </div>
         )}
       </div>
@@ -60,7 +63,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
           onClick={handleOpenPlanner}
           className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors"
         >
-          View in Day View <ArrowRight className="w-3.5 h-3.5" />
+          View in My Route <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 

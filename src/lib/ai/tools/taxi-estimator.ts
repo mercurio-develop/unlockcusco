@@ -2,37 +2,27 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { calculateDistance } from '@/lib/utils/geo';
 import { prisma } from '@/lib/prisma';
+import { COORDS_MAP } from '@/lib/constants';
 
 export const estimateTaxiFare = tool({
-  description: 'Estimates the taxi fare and travel time from the user\'s current location to a destination business in the Sacred Valley. Use this when the user asks for a taxi, transport, or how to get there.',
+  description: 'Estimates the taxi fare and travel time from the user\'s current location to a destination business OR a general town in the Sacred Valley. Use this when the user asks for a taxi, transport, or how to get there.',
   parameters: z.object({
     origin: z.string().optional().default("").describe('The user\'s current location (e.g. Urubamba, Cusco, Pisac, Ollantaytambo). If unknown, default to empty string.'),
     destinationId: z.string().optional().describe('The ID of the business the user wants to go to (if known).'),
-    destinationName: z.string().optional().default("").describe('The exact name of the destination business or town.'),
+    destinationName: z.string().optional().default("").describe('The exact name of the destination business, OR the name of the town (e.g. Calca, Urubamba).'),
   }),
   // @ts-ignore
   execute: async ({ origin, destinationId, destinationName }) => {
      let dest;
      const dName = destinationName || "";
-     
-     const coordsMap: Record<string, { lat: number, lng: number }> = {
-       "urubamba": { lat: -13.3047, lng: -72.1167 },
-       "huaycho": { lat: -13.3100, lng: -72.0900 },
-       "cusco": { lat: -13.5226, lng: -71.9673 },
-       "airport": { lat: -13.5353, lng: -71.9388 }, // Alejandro Velasco Astete Airport
-       "aeropuerto": { lat: -13.5353, lng: -71.9388 },
-       "pisac": { lat: -13.4225, lng: -71.8488 },
-       "ollantaytambo": { lat: -13.2588, lng: -72.2633 },
-       "maras": { lat: -13.3323, lng: -72.1554 },
-       "chinchero": { lat: -13.3908, lng: -72.0494 },
-       "calca": { lat: -13.3333, lng: -71.9667 },
-       "taray": { lat: -13.4300, lng: -71.8600 },
-     };
 
      // Check if dName matches a known town first — avoids a DB business with the same
      // word in its name but wrong/null coordinates overriding the town coords.
      const dNameLower = dName.toLowerCase();
-     const townMatch = Object.entries(coordsMap).find(([k]) => dNameLower.includes(k));
+     // Sort longest key first so "ollantaytambo" matches before "anta" etc.
+     const townMatch = Object.entries(COORDS_MAP)
+       .sort((a, b) => b[0].length - a[0].length)
+       .find(([k]) => dNameLower.includes(k.replace(/-/g, ' ')) || dNameLower.includes(k));
 
      if (destinationId) {
        dest = await prisma.business.findUnique({ where: { id: destinationId } });
@@ -62,8 +52,12 @@ export const estimateTaxiFare = tool({
      let oLat = -13.3047; // default to Urubamba
      let oLng = -72.1167;
      const originLower = (origin || "").toLowerCase();
-     for (const [key, coords] of Object.entries(coordsMap)) {
-       if (originLower.includes(key)) {
+     
+     // Fuzzy match for origin: check if any key in COORDS_MAP is contained in the string
+     for (const [key, coords] of Object.entries(COORDS_MAP)) {
+       // We normalize the key to check for both "san-salvador" and "san salvador" styles
+       const cleanKey = key.replace(/-/g, ' ');
+       if (originLower.includes(key) || originLower.includes(cleanKey)) {
          oLat = coords.lat;
          oLng = coords.lng;
          originMatched = true;
@@ -71,6 +65,8 @@ export const estimateTaxiFare = tool({
        }
      }
      
+     // Fallback: if user provided no origin or we couldn't match, we assume current hub
+     // but we mark it clearly so the UI can explain it.
      const dist = calculateDistance(oLat, oLng, dLat, dLng);
      const cost = Math.max(5, Math.round(dist * 1.5));
      const timeMins = Math.max(5, Math.round(dist * 1.2));
