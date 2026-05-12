@@ -436,7 +436,12 @@ Please generate my macro trip plan.`;
                             )
                           }
                           if (toolName === 'searchDatabase') {
-                            return <PendingAvailability key={key} message="Searching Vallecito library..." />
+                            return (
+                              <div key={key}>
+                                <PendingAvailability message="Searching Vallecito library..." />
+                                <style>{`#msg-text-${msg.id} { display: none; }`}</style>
+                              </div>
+                            )
                           }
                           return null;
                         }
