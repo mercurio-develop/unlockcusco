@@ -27,7 +27,7 @@ interface TripContextType {
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string) => void;
-  updateEndAnchorLocation: (lat: number, lng: number, title?: string) => void;
+  updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
   insertWaypoint: (service: Business) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
   removeWaypoint: (id: string) => void;
@@ -113,7 +113,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location") => {
+  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
       return {
@@ -123,7 +123,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
           lat,
           lng,
           locationStr: title,
-          title: title
+          title: title,
+          ...(service !== undefined ? { service } : {}),
         }
       };
     });

@@ -649,8 +649,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 className={cn("group/end flex flex-col items-center", !(end as any).service ? "cursor-grab active:cursor-grabbing" : "cursor-pointer")}
                 title="End location"
                 onClick={e => {
-                  e.stopPropagation()
-                  mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true })
+                  e.stopPropagation();
+                  mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
+                  if ((end as any).service) {
+                    setPopupBusiness((end as any).service);
+                    onSelectBusiness((end as any).service.id);
+                  }
                 }}
               >
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />

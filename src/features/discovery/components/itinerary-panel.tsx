@@ -261,7 +261,7 @@ export function ItineraryPanel() {
                       <button
                         onClick={e => {
                           e.stopPropagation();
-                          updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title);
+                          updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title, waypoint.service);
                           removeWaypoint(waypoint.id);
                         }}
                         title="Set as end of trip"
@@ -349,6 +349,14 @@ export function ItineraryPanel() {
                 )}
               </div>
               {activeItinerary.endAnchor?.time && <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p>}
+            </div>
+          </div>
+          {/* Expandable detail — mirrors waypoint card pattern */}
+          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}`}>
+            <div className="overflow-hidden">
+              {(activeItinerary.endAnchor as any)?.service && (
+                <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" />
+              )}
             </div>
           </div>
         </div>
