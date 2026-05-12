@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useTrip } from "@/lib/store/trip-context"
-import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search, Check, ChevronDown, Navigation, Repeat, Landmark, Ticket, Star } from "lucide-react"
+import { MapPin, Plus, Trash2, ArrowUp, ArrowDown, Utensils, AlignLeft, Car, Moon, Sparkles, X, Search, Check, ChevronDown, Repeat, Landmark, Ticket, Star } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSearchParams, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -23,14 +23,27 @@ function getEventIcon(type: EventType) {
   }
 }
 
-export function BuilderWorkspace({ 
-  selectedId, 
+interface LibraryBusiness {
+  name: string;
+  lat: number;
+  lng: number;
+  id: string;
+  category?: string;
+  service?: any;
+}
+
+export function BuilderWorkspace({
+  selectedId,
   onSelectEvent,
-  variant = 'pro'
-}: { 
-  selectedId?: string | null, 
+  variant = 'pro',
+  onPinOnMap,
+  libraryBusinesses = [],
+}: {
+  selectedId?: string | null,
   onSelectEvent?: (id: string) => void,
-  variant?: 'live' | 'pro'
+  variant?: 'live' | 'pro',
+  onPinOnMap?: (target: 'start' | 'end') => void,
+  libraryBusinesses?: LibraryBusiness[],
 }) {
   const { currentTrip, setCurrentTrip, activeDayNumber, addEvent, removeEvent, updateEvent, setViewState, setPanelMode, setExchangeTargetIndex } = useTrip()
   const [viewingPackage, setViewingPackage] = useState<string | null>(null)
@@ -66,29 +79,6 @@ export function BuilderWorkspace({
 
   const activeDay = currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)
 
-  const handleUseCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser")
-      return
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords
-        updateDay(activeDay?.dayNumber || 1, { 
-          startAnchor: { 
-            ...activeDay?.startAnchor, 
-            title: "Current Location", 
-            lat: latitude, 
-            lng: longitude 
-          } 
-        })
-      },
-      () => {
-        alert("Unable to retrieve your location")
-      }
-    )
-  }
-
   if (!activeDay) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 h-full">
@@ -119,10 +109,10 @@ export function BuilderWorkspace({
         newEvent = { id, type, startTime: defaultStartTime, title: 'Private Transfer', method: 'CAR', from: '', to: '', priceUsd: 50, details: 'Standard SUV or similar' };
         break;
       case 'MEAL':
-        newEvent = { id, type, startTime: defaultStartTime, title: 'Lunch Reservation', priceUsd: 40, notes: 'Dietary restrictions noted.', service: { id: "m-mock", name: "Local Restaurant", category: "DINING", description: "A highly-rated local dining spot.", imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500&q=80" } as any };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Lunch Reservation', priceUsd: 40, notes: '' } as any;
         break;
       case 'STAY':
-        newEvent = { id, type, startTime: defaultStartTime, title: 'Hotel Check-in', priceUsd: 250, checkIn: '15:00', service: { id: "h-mock", name: "Boutique Hotel", category: "STAY", description: "Comfortable stay with excellent amenities.", imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80" } as any };
+        newEvent = { id, type, startTime: defaultStartTime, title: 'Hotel Stay', priceUsd: 250, checkIn: '15:00' } as any;
         break;
       case 'NOTE':
         newEvent = { id, type, startTime: defaultStartTime, title: 'Note', content: 'Remember to confirm with the local guide.' };
@@ -144,7 +134,7 @@ export function BuilderWorkspace({
   }
 
   const handleAddLibraryItemDrop = (data: any) => {
-    const id = uuidv4()
+    const id = data.id || uuidv4()
     let defaultStartTime = "10:00"
     if (activeDay && activeDay.events.length > 0) {
       const lastEvent = activeDay.events[activeDay.events.length - 1]
@@ -269,17 +259,21 @@ export function BuilderWorkspace({
                 )}
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    {variant === 'pro' ? (
-                      <LocationAutocomplete 
-                        placeholder="e.g. Hotel Monasterio, Cusco"
+                    <div className="flex flex-col gap-1 w-full">
+                      <LocationPicker
+                        placeholder={variant === 'pro' ? "e.g. Hotel Monasterio, Cusco" : "Establish your starting point"}
                         value={activeDay.startAnchor?.title || ""}
-                        onChange={(val, lat, lng) => updateDay(activeDay.dayNumber, { startAnchor: { ...activeDay.startAnchor, title: val, lat, lng }})}
+                        onChange={(val, lat, lng, service) => {
+                          const updates: any = { title: val };
+                          if (lat !== undefined) updates.lat = lat;
+                          if (lng !== undefined) updates.lng = lng;
+                          if (service !== undefined) updates.service = service;
+                          updateDay(activeDay.dayNumber, { startAnchor: { ...activeDay.startAnchor, ...updates } });
+                        }}
                         className="w-full p-2 bg-transparent border-b border-slate-200 text-base outline-none focus:border-slate-900 font-semibold text-slate-900 transition-colors"
+                        extraLocations={libraryBusinesses}
                       />
-                    ) : (
-                      <div className="flex flex-col gap-1 w-full px-2">
-                        <h4 className="text-lg font-serif font-bold text-slate-900">{activeDay.startAnchor?.title || "Establish your starting point"}</h4>
-                        {(activeDay.startAnchor as any)?.service && (
+                      {(activeDay.startAnchor as any)?.service && (
                           <>
                             <div className="flex items-center gap-2 mb-1 mt-1">
                               <span className={cn(
@@ -304,31 +298,43 @@ export function BuilderWorkspace({
                               )}
                             </div>
                             {(activeDay.startAnchor as any).service?.description && (
-                              <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">"{(activeDay.startAnchor as any).service.description}"</p>
+                              <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">&ldquo;{(activeDay.startAnchor as any).service.description}&rdquo;</p>
                             )}
                           </>
                         )}
                       </div>
-                    )}
+                    </div>
                   </div>
-                </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
                   <div className="flex items-center gap-3">
                     <button onClick={() => handleExchange(-1, "START_ANCHOR", (activeDay.startAnchor as any)?.service?.category)} className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors">
                       <Repeat className="w-3.5 h-3.5" /> Exchange
                     </button>
-                    {variant === 'live' && (
-                      <button 
-                        onClick={handleUseCurrentLocation}
-                        className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors"
+                    {variant === 'pro' && onPinOnMap && (
+                      <button
+                        onClick={(e) => {
+                          if ((activeDay.startAnchor as any)?.service) {
+                            e.preventDefault();
+                            return;
+                          }
+                          onPinOnMap('start');
+                        }}
+                        disabled={!!(activeDay.startAnchor as any)?.service}
+                        className={cn(
+                          "flex items-center gap-1.5 text-xs font-bold transition-colors",
+                          (activeDay.startAnchor as any)?.service 
+                            ? "text-slate-300 cursor-not-allowed" 
+                            : "text-sky-600 hover:text-sky-700"
+                        )}
+                        title={(activeDay.startAnchor as any)?.service ? "Location is fixed to the attached experience" : "Pin location on map"}
                       >
-                        <Navigation className="w-3.5 h-3.5" /> Use My Position
+                        <MapPin className="w-3.5 h-3.5" /> Pin on Map
                       </button>
                     )}
                   </div>
                   {(activeDay.startAnchor as any)?.service && (
-                    <button 
-                      onClick={() => setViewingPackage((activeDay.startAnchor as any).service.id)} 
+                    <button
+                      onClick={() => setViewingPackage((activeDay.startAnchor as any).service.id)}
                       className="text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-xl transition-colors"
                     >
                       View Details
@@ -679,7 +685,13 @@ export function BuilderWorkspace({
                         </div>
                       ) : (
                         <div className="flex flex-col gap-3">
-                          <div 
+                          <div>
+                            <h4 className="font-serif font-bold text-slate-900 text-base leading-tight">{evt.title}</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600/70 flex items-center gap-1 mt-0.5">
+                              <Utensils className="w-3 h-3" /> No restaurant linked
+                            </p>
+                          </div>
+                          <div
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => {
                               e.preventDefault();
@@ -691,22 +703,23 @@ export function BuilderWorkspace({
                                   return;
                                 }
                                 if (data && data.id) {
-                                  updateEvent(activeDay.dayNumber, evt.id, { 
-                                    title: data.name, 
+                                  updateEvent(activeDay.dayNumber, evt.id, {
+                                    title: data.name,
                                     businessId: data.id,
                                     packageId: data.isPackage ? data.id : undefined,
                                     service: data,
-                                    locationLat: data.lat, 
-                                    locationLng: data.lng 
+                                    locationLat: data.lat,
+                                    locationLng: data.lng
                                   } as any);
                                 }
                               } catch (err) {}
                             }}
-                            className="flex flex-col items-center justify-center gap-1.5 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 hover:bg-slate-50 hover:border-amber-200 transition-colors cursor-pointer"
-                            onClick={() => handleExchange(index, evt.type, (evt as any).service?.category || (evt as any).category)}
+                            className="flex flex-col items-center justify-center gap-1 p-5 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 hover:bg-slate-50 hover:border-amber-200 transition-colors cursor-pointer"
+                            onClick={() => handleExchange(index, evt.type, 'Dining')}
                           >
-                            <Repeat className="w-5 h-5 text-slate-400" />
-                            <span className="text-xs font-bold text-slate-500">Exchange</span>
+                            <Plus className="w-4 h-4 text-slate-400" />
+                            <span className="text-xs font-bold text-slate-600">Add Restaurant</span>
+                            <span className="text-[10px] text-slate-400">from library or drag &amp; drop</span>
                             {dropError && dropError.id === evt.id && (
                               <span className="text-[10px] font-bold text-rose-500 text-center mt-1 animate-in slide-in-from-top-1 fade-in">{dropError.message}</span>
                             )}
@@ -770,7 +783,13 @@ export function BuilderWorkspace({
                         </div>
                       ) : (
                         <div className="flex flex-col gap-3">
-                          <div 
+                          <div>
+                            <h4 className="font-serif font-bold text-slate-900 text-base leading-tight">{evt.title}</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600/70 flex items-center gap-1 mt-0.5">
+                              <Moon className="w-3 h-3" /> No accommodation linked
+                            </p>
+                          </div>
+                          <div
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => {
                               e.preventDefault();
@@ -782,22 +801,23 @@ export function BuilderWorkspace({
                                   return;
                                 }
                                 if (data && data.id) {
-                                  updateEvent(activeDay.dayNumber, evt.id, { 
-                                    title: data.name, 
+                                  updateEvent(activeDay.dayNumber, evt.id, {
+                                    title: data.name,
                                     businessId: data.id,
                                     packageId: data.isPackage ? data.id : undefined,
                                     service: data,
-                                    lat: data.lat, 
-                                    lng: data.lng 
+                                    lat: data.lat,
+                                    lng: data.lng
                                   } as any);
                                 }
                               } catch (err) {}
                             }}
-                            className="flex flex-col items-center justify-center gap-1.5 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 hover:bg-slate-50 hover:border-purple-200 transition-colors cursor-pointer"
-                            onClick={() => handleExchange(index, evt.type, (evt as any).service?.category || (evt as any).category)}
+                            className="flex flex-col items-center justify-center gap-1 p-5 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 hover:bg-slate-50 hover:border-purple-200 transition-colors cursor-pointer"
+                            onClick={() => handleExchange(index, evt.type, 'Stays')}
                           >
-                            <Repeat className="w-5 h-5 text-slate-400" />
-                            <span className="text-xs font-bold text-slate-500">Exchange</span>
+                            <Plus className="w-4 h-4 text-slate-400" />
+                            <span className="text-xs font-bold text-slate-600">Add Accommodation</span>
+                            <span className="text-[10px] text-slate-400">from library or drag &amp; drop</span>
                             {dropError && dropError.id === evt.id && (
                               <span className="text-[10px] font-bold text-rose-500 text-center mt-1 animate-in slide-in-from-top-1 fade-in">{dropError.message}</span>
                             )}
@@ -907,56 +927,82 @@ export function BuilderWorkspace({
                   )}
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      {variant === 'pro' ? (
-                        <LocationPicker 
-                          placeholder="e.g. Hotel Monasterio, Cusco"
+                      <div className="flex flex-col gap-1 w-full">
+                        <LocationPicker
+                          placeholder="Where will your journey end?"
                           value={activeDay.endAnchor?.title || ""}
-                          onChange={(val, lat, lng) => updateDay(activeDay.dayNumber, { endAnchor: { ...activeDay.endAnchor, title: val, lat, lng }})}
+                          onChange={(val, lat, lng, service) => {
+                            const updates: any = { title: val };
+                            if (lat !== undefined) updates.lat = lat;
+                            if (lng !== undefined) updates.lng = lng;
+                            if (service !== undefined) updates.service = service;
+                            updateDay(activeDay.dayNumber, { endAnchor: { ...activeDay.endAnchor, ...updates } });
+                          }}
                           className="w-full p-2 bg-transparent border-b border-slate-200 text-base outline-none focus:border-slate-900 font-semibold text-slate-900 transition-colors"
+                          extraLocations={libraryBusinesses}
                         />
-                      ) : (
-                        <div className="flex flex-col gap-1 w-full px-2">
-                          <h4 className="text-lg font-serif font-bold text-slate-900">{activeDay.endAnchor?.title || "Where will your journey end?"}</h4>
-                          {(activeDay.endAnchor as any)?.service && (
-                            <>
-                              <div className="flex items-center gap-2 mb-1 mt-1">
-                                <span className={cn(
-                                  "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 w-fit",
-                                  (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'DINING'
-                                    ? "bg-amber-50 text-amber-700 border-amber-200/50"
-                                    : (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'CULTURE'
-                                    ? "bg-purple-50 text-purple-700 border-purple-200/50"
-                                    : (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'BOLETO'
-                                    ? "bg-sky-50 text-sky-700 border-sky-200/50"
-                                    : "bg-rose-50 text-rose-600 border-rose-100/50"
-                                )}>
-                                  {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
-                                  {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
-                                  {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
-                                  {(activeDay.endAnchor as any).service?.category || 'LOCATION'}
-                                </span>
-                                {(activeDay.endAnchor as any).service?.rating && (
-                                  <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
-                                    <Star className="w-3 h-3 fill-current" /> {(activeDay.endAnchor as any).service.rating}
-                                  </div>
-                                )}
-                              </div>
-                              {(activeDay.endAnchor as any).service?.description && (
-                                <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">"{(activeDay.endAnchor as any).service.description}"</p>
+                        {(activeDay.endAnchor as any)?.service && (
+                          <>
+                            <div className="flex items-center gap-2 mb-1 mt-1">
+                              <span className={cn(
+                                "text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 w-fit",
+                                (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'DINING'
+                                  ? "bg-amber-50 text-amber-700 border-amber-200/50"
+                                  : (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'CULTURE'
+                                  ? "bg-purple-50 text-purple-700 border-purple-200/50"
+                                  : (activeDay.endAnchor as any).service?.category?.toUpperCase() === 'BOLETO'
+                                  ? "bg-sky-50 text-sky-700 border-sky-200/50"
+                                  : "bg-rose-50 text-rose-600 border-rose-100/50"
+                              )}>
+                                {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
+                                {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
+                                {(activeDay.endAnchor as any).service?.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
+                                {(activeDay.endAnchor as any).service?.category || 'LOCATION'}
+                              </span>
+                              {(activeDay.endAnchor as any).service?.rating && (
+                                <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold">
+                                  <Star className="w-3 h-3 fill-current" /> {(activeDay.endAnchor as any).service.rating}
+                                </div>
                               )}
-                            </>
-                          )}
-                        </div>
-                      )}
+                            </div>
+                            {(activeDay.endAnchor as any).service?.description && (
+                              <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed italic font-serif mt-1">&ldquo;{(activeDay.endAnchor as any).service.description}&rdquo;</p>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                    <button onClick={() => handleExchange(-2, "END_ANCHOR", (activeDay.endAnchor as any)?.service?.category)} className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors">
-                      <Repeat className="w-3.5 h-3.5" /> Exchange
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleExchange(-2, "END_ANCHOR", (activeDay.endAnchor as any)?.service?.category)} className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors">
+                        <Repeat className="w-3.5 h-3.5" /> Exchange
+                      </button>
+                      {variant === 'pro' && onPinOnMap && (
+                        <button
+                          onClick={(e) => {
+                            if ((activeDay.endAnchor as any)?.service) {
+                              e.preventDefault();
+                              return;
+                            }
+                            onPinOnMap('end');
+                          }}
+                          disabled={!!(activeDay.endAnchor as any)?.service}
+                          className={cn(
+                            "flex items-center gap-1.5 text-xs font-bold transition-colors",
+                            (activeDay.endAnchor as any)?.service 
+                              ? "text-slate-300 cursor-not-allowed" 
+                              : "text-sky-600 hover:text-sky-700"
+                          )}
+                          title={(activeDay.endAnchor as any)?.service ? "Location is fixed to the attached experience" : "Pin location on map"}
+                        >
+                          <MapPin className="w-3.5 h-3.5" /> Pin on Map
+                        </button>
+                      )}
+                    </div>
                     {(activeDay.endAnchor as any)?.service && (
-                      <button 
-                        onClick={() => setViewingPackage((activeDay.endAnchor as any).service.id)} 
+                      <button
+                        onClick={() => setViewingPackage((activeDay.endAnchor as any).service.id)}
                         className="text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-xl transition-colors"
                       >
                         View Details
@@ -967,26 +1013,11 @@ export function BuilderWorkspace({
               </div>
             </div>
 
-            {/* DAY COMPLETE TOGGLE */}
-            <div className="pt-8 mb-8 border-t border-slate-200/60 flex flex-col items-center">
-              <button 
-                onClick={() => updateDay(activeDay.dayNumber, { isComplete: !activeDay.isComplete })}
-                className={`w-full max-w-sm py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${activeDay.isComplete ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : 'bg-slate-900 text-white border border-slate-900 hover:bg-slate-800'}`}
-              >
-                {activeDay.isComplete ? <><Check className="w-5 h-5" /> Day Completed</> : 'Mark Day Complete'}
-              </button>
-              {activeDay.isComplete && (
-                <p className="text-xs text-slate-500 text-center mt-3 max-w-sm">
-                  Route calculated. View the map to see the union of all completed days.
-                </p>
-              )}
-            </div>
-
           </div>
         </motion.div>
       </AnimatePresence>
 
-      <PackagePreviewModal 
+      <PackagePreviewModal
         packageId={viewingPackage}
         onClose={() => setViewingPackage(null)}
       />

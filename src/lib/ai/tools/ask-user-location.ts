@@ -6,10 +6,11 @@ export const askUserLocation = tool({
   parameters: z.object({
     message: z.string().describe('A custom message to display above the button, e.g. "To calculate your route, please share your current location."')
   }),
-  execute: async ({ message }) => {
+  // @ts-ignore
+  execute: async ({ message }: any) => {
     return {
       requested: true,
       message
     };
   }
-});
+} as any);

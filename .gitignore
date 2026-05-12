@@ -55,3 +55,11 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Testing scripts
+test-*.ts
+test-*.js
+scripts/temp-*.ts
+scripts/temp-*.js
+all_businesses.json
+output.txt

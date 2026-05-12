@@ -12,8 +12,10 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
 });
 
+const MIN_REVIEWS = 5;
+
 async function main() {
-  console.log('Fetching businesses with reviews...');
+  console.log(`Fetching businesses with ${MIN_REVIEWS}+ reviews...`);
   const businesses = await prisma.business.findMany({
     where: {
       reviews: {
@@ -25,10 +27,11 @@ async function main() {
     }
   });
 
-  console.log(`Found ${businesses.length} businesses with reviews.`);
+  const filtered = businesses.filter(b => b.reviews.length >= MIN_REVIEWS);
+  console.log(`Found ${businesses.length} with any reviews. Processing ${filtered.length} with ${MIN_REVIEWS}+.`);
   let updatedCount = 0;
 
-  for (const b of businesses) {
+  for (const b of filtered) {
     if (!b.reviews || b.reviews.length === 0) continue;
 
     console.log(`\nProcessing: ${b.name} (${b.reviews.length} reviews)`);

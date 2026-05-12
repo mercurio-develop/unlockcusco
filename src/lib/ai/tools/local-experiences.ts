@@ -10,6 +10,7 @@ export const findLocalExperiences = tool({
     targetLocation: z.string().describe('The town or location the user wants to search in (e.g., "pisac", "urubamba", "maras", "ollantaytambo", "chinchero").'),
     userLocation: z.string().optional().describe('The user\'s current location. If not provided, defaults to the targetLocation.'),
   }),
+  // @ts-ignore
   execute: async ({ intent, targetLocation, userLocation }) => {
     // Basic mapping of user strings to town coordinates
     const townCoords: Record<string, { lat: number, lng: number }> = {

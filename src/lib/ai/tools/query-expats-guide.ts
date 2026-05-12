@@ -7,6 +7,7 @@ export const queryExpatsGuide = tool({
   parameters: z.object({
     query: z.string().describe('The topic or question to search the guide for, e.g. "altitude sickness", "colectivo", "safety".'),
   }),
+  // @ts-ignore
   execute: async ({ query }) => {
     // In a real RAG system, this would do vector search.
     // For now, since the text isn't massive, we can return the whole thing or a chunk

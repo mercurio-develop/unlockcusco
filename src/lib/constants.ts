@@ -19,4 +19,9 @@ export const COORDS_MAP: Record<string, { lat: number; lng: number }> = {
   chinchero:     { lat: -13.3833, lng: -72.0500 },
   maras:         { lat: -13.3400, lng: -72.1500 },
   poroy:         { lat: -13.4900, lng: -72.0400 },
+  // Aguas Calientes town center — where all businesses/hotels/restaurants are
+  // (ruins are at -13.1631, -72.5450 but no tourist services there)
+  "machu-picchu":  { lat: -13.1547, lng: -72.5252 },
+  "aguas-calientes":{ lat: -13.1547, lng: -72.5252 },
+  yucay:           { lat: -13.3183, lng: -72.0833 },
 };

@@ -92,14 +92,18 @@ export function HeroSection() {
             <button
               type="submit"
               disabled={isSearching}
-              className="bg-rose-600 text-white font-semibold rounded-full px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px] justify-center"
+              className="bg-rose-600 text-white font-semibold rounded-full px-4 md:px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed md:min-w-[140px] justify-center"
             >
               {isSearching ? (
                 <span className="flex items-center gap-2 text-sm">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Working...
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="hidden md:inline">Working...</span>
                 </span>
               ) : (
-                <ArrowRight className="w-4 h-4" />
+                <span className="flex items-center gap-2 text-sm">
+                  <span className="hidden md:inline">Search</span>
+                  <ArrowRight className="w-4 h-4" />
+                </span>
               )}
             </button>
           </form>
@@ -132,17 +136,12 @@ export function HeroSection() {
         {/* Quick search pills */}
         <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl">
           {[
-            { emoji: "🚕", text: "I need a taxi from Urubamba to Pisac" },
-            { emoji: "🦙", text: "Plan a 2-day cultural tour in Chinchero" },
-            { emoji: "🌿", text: "Recovery massage after the Inca Trail" },
-            { emoji: "🍽️", text: "Find the best authentic local Picantería" },
-            { emoji: "🛵", text: "Plan a hidden ATV route in Maras" },
-            { emoji: "⛰️", text: "Show me availability for Machu Picchu" },
-            { emoji: "🎒", text: "Suggest an adventurous hike near Ollantaytambo" },
-            { emoji: "🧘", text: "I want a relaxing wellness weekend" },
-            { emoji: "🏺", text: "Where can I buy authentic ceramics?" },
-            { emoji: "☕", text: "Best coffee shops with Wi-Fi in Pisac" },
-            { emoji: "👨‍👩‍👧‍👦", text: "Build a 3-day family itinerary" },
+            { emoji: "🍽️", text: "Authentic local dining" },
+            { emoji: "🛏️", text: "Boutique stays & hotels" },
+            { emoji: "🧘", text: "Wellness & Spa retreats" },
+            { emoji: "✨", text: "Spiritual ceremonies" },
+            { emoji: "🏺", text: "Local artisans & crafts" },
+            { emoji: "⛰️", text: "Cultural tours & guides" },
           ].map(({ emoji, text }) => (
             <button
               key={text}

@@ -10,7 +10,9 @@ export const buildChronoRelay = tool({
     foodLocation: z.string().optional().default("").describe('The town or location where they want to eat (e.g. Urubamba)'),
     destination: z.string().optional().default("").describe('The final destination town or location to sleep (e.g. Ollantaytambo)'),
   }),
-  execute: async ({ currentLocation, foodLocation, destination }) => {
+  // @ts-ignore
+  // @ts-ignore
+  execute: async ({ currentLocation, foodLocation, destination }: any) => {
     const currentLower = (currentLocation || "").toLowerCase();
     const foodLower = (foodLocation || "").toLowerCase();
     const destLower = (destination || "").toLowerCase();

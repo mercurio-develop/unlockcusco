@@ -30,6 +30,15 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 
+const CATEGORY_IMAGE_FALLBACKS: Record<string, string> = {
+  'DINING': "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format&fit=crop",
+  'STAYS': "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
+  'WELLNESS': "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop",
+  'CULTURE': "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop",
+  'BOLETO': "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop",
+  'DEFAULT': "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop"
+};
+
 interface BusinessCardProps {
   business: Business
   isHighlighted?: boolean
@@ -47,6 +56,8 @@ export function BusinessCard({
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
   const [isOpen, setIsOpen] = useState(false)
+  const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const { activeItinerary, panelMode, exchangeTargetIndex, insertWaypoint } = useTrip()
   const router = useRouter()
   
@@ -58,8 +69,14 @@ export function BusinessCard({
     e.stopPropagation()
     if (!business.whatsapp) return
     await trackWhatsappClick(business.id)
+    
+    let contextNote = "inquire about your services";
+    if (business.category === 'DINING') contextNote = "ask about your menu or a meal";
+    else if (business.category === 'STAYS' || business.category === 'STAY') contextNote = "inquire about a room";
+    else if (business.category === 'WELLNESS') contextNote = "ask about a session";
+
     const msg = encodeURIComponent(
-      `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to make a reservation. When do you have availability?`
+      `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to ${contextNote}. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp.replace(/\\D/g, '')}?text=${msg}`, "_blank")
   }
@@ -78,7 +95,11 @@ export function BusinessCard({
         date: new Date(date),
       })
       if (res.success) {
-        window.open(res.url, "_blank")
+        if (res.url) {
+          window.open(res.url, "_blank")
+        } else if (res.delivered) {
+          alert(`Inquiry sent to ${business.name}! They will contact you shortly.`)
+        }
         setIsOpen(false)
       }
     } catch (error) {
@@ -149,27 +170,29 @@ export function BusinessCard({
         isHorizontal ? "w-20 sm:w-24 aspect-[4/3] shrink-0" : "w-full aspect-[4/3] sm:aspect-[4/3]",
         isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
       )}>
-        {business.imageUrl ? (
-          <>
-            <img
-              src={business.imageUrl}
-              alt={business.name}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-              onError={(e) => {
-                e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
-                e.currentTarget.onerror = null;
-              }}
-            />
-            {/* Magazine-style overlays to normalize image appearance */}
-            <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:bg-black/0" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300">
-             {business.category === 'TRANSPORT' ? <Users className="w-10 h-10" /> : <Briefcase className="w-10 h-10" />}
-          </div>
-        )}
+        {(() => {
+          const fallbackImage = CATEGORY_IMAGE_FALLBACKS[business.category?.toUpperCase() || ''] || CATEGORY_IMAGE_FALLBACKS['DEFAULT'];
+          const displayImage = business.imageUrl || fallbackImage;
+          
+          return (
+            <>
+              <img
+                src={displayImage}
+                alt={business.name}
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                onError={(e) => {
+                  if (e.currentTarget.src !== fallbackImage) {
+                    e.currentTarget.src = fallbackImage;
+                  }
+                }}
+              />
+              {/* Magazine-style overlays to normalize image appearance */}
+              <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:bg-black/0" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+            </>
+          );
+        })()}
         
         {/* Top Badges */}
         <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pointer-events-none">
@@ -251,12 +274,66 @@ export function BusinessCard({
           
           {/* Zagat Description */}
           {business.description && (
-            <p className={cn(
-              "text-slate-500 text-[11px] italic leading-relaxed mt-1",
-              isHorizontal ? "line-clamp-1" : "line-clamp-3"
-            )}>
-              &ldquo;{business.description}&rdquo;
-            </p>
+            <div className="mt-1" onClick={(e) => {
+              if (business.description && business.description.length > 100) {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }
+            }}>
+              <p className={cn(
+                "text-slate-500 text-[11px] italic leading-relaxed transition-all",
+                !isExpanded && (isHorizontal ? "line-clamp-1" : "line-clamp-3")
+              )}>
+                &ldquo;{business.description}&rdquo;
+              </p>
+              {business.description.length > 100 && (
+                <button 
+                  type="button" 
+                  className="text-[10px] text-rose-600 font-semibold mt-0.5 hover:text-rose-700 transition-colors"
+                >
+                  {isExpanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Boleto Badge */}
+          {business.category?.toUpperCase() === 'BOLETO' && (
+            <div className="mt-1.5 flex" onClick={e => e.stopPropagation()}>
+              <button 
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsBoletoModalOpen(true); }}
+                className="flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200/50 px-2 py-1 rounded-md transition-colors"
+              >
+                🎟️ Requires Boleto Turístico
+              </button>
+              <Dialog open={isBoletoModalOpen} onOpenChange={setIsBoletoModalOpen}>
+                <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
+                  <DialogHeader className="mb-2">
+                    <DialogTitle className="text-xl font-serif tracking-tight text-slate-900 flex items-center gap-2">
+                      🎟️ Cusco Tourist Ticket (BTC)
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="text-sm text-slate-600 space-y-4">
+                    <p>
+                      This site requires the <strong>Boleto Turístico del Cusco (BTC)</strong>. It is a unified ticket managed by the government that grants access to up to 16 major archaeological sites and museums in Cusco and the Sacred Valley.
+                    </p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <h4 className="font-bold text-slate-900 mb-2">Options:</h4>
+                      <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">
+                        <li><strong>Full Ticket (130 Soles):</strong> Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley.</li>
+                        <li><strong>Partial Ticket (70 Soles):</strong> Valid for 1-2 days for a specific circuit (e.g., just Sacred Valley ruins).</li>
+                      </ul>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      <em>Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit.</em>
+                    </p>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={() => setIsBoletoModalOpen(false)} className="bg-slate-900 text-white rounded-xl px-6">Got it</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
 

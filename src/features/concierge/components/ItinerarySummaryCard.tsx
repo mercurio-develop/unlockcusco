@@ -1,18 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useItinerary } from "@/lib/store/itinerary-context";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
-import { MapPin, ArrowRight, Navigation } from "lucide-react";
+import { ArrowRight, Navigation } from "lucide-react";
 
 export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }) {
   const { setActiveItinerary, setPanelMode } = useItinerary();
-
-  // Auto-open planner when AI generates a new itinerary
-  useEffect(() => {
-    setActiveItinerary(itinerary);
-    setPanelMode("itinerary");
-  }, [itinerary, setActiveItinerary, setPanelMode]);
 
   const handleOpenPlanner = () => {
     setActiveItinerary(itinerary);
@@ -67,7 +60,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
           onClick={handleOpenPlanner}
           className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors"
         >
-          Open Planner <ArrowRight className="w-3.5 h-3.5" />
+          View in Day View <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 

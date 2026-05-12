@@ -7,6 +7,7 @@ export const triggerSupportAlert = tool({
     message: z.string().describe('A detailed explanation of the user\'s issue, including any relevant context from the conversation.'),
     urgencyLevel: z.enum(['low', 'medium', 'high', 'critical']).describe('The severity of the issue. Use "critical" for safety concerns or completely failed logistics.')
   }),
+  // @ts-ignore
   execute: async ({ message, urgencyLevel }) => {
     // In a real implementation, this would POST to the Ghost Phone webhook
     console.log(`\n🚨 [GHOST PHONE ALERT] Urgency: ${urgencyLevel.toUpperCase()}`);

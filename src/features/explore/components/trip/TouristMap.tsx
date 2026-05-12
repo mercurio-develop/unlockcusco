@@ -213,8 +213,30 @@ export default function TouristMap({ trip, activeDayNum, selectedEventId, onEven
     const marker = markers.find(m => m.id === selectedEventId)
     if (marker) {
       mapRef.current.flyTo({ center: marker.coords, zoom: 15, pitch: mapMode === "satellite" ? 60 : 0, duration: 1500 })
+    } else {
+      const evt = events.find((e: any) => e.id === selectedEventId);
+      if (evt && evt.type === 'TRANSPORT') {
+        const startLng = (evt as any).fromLng;
+        const startLat = (evt as any).fromLat;
+        const endLng = (evt as any).toLng;
+        const endLat = (evt as any).toLat;
+        if (startLng && startLat && endLng && endLat) {
+          const minLng = Math.min(startLng, endLng);
+          const maxLng = Math.max(startLng, endLng);
+          const minLat = Math.min(startLat, endLat);
+          const maxLat = Math.max(startLat, endLat);
+          
+          const lngPad = Math.abs(maxLng - minLng) * 0.2 || 0.05;
+          const latPad = Math.abs(maxLat - minLat) * 0.2 || 0.05;
+
+          mapRef.current.fitBounds(
+            [[minLng - lngPad, minLat - latPad], [maxLng + lngPad, maxLat + latPad]],
+            { padding: 80, duration: 1200 }
+          );
+        }
+      }
     }
-  }, [selectedEventId, markers, startCoords, sleepCoords, mapMode])
+  }, [selectedEventId, markers, events, startCoords, sleepCoords, mapMode])
 
   if (!mapboxToken) {
     return (

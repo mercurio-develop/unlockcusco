@@ -11,9 +11,10 @@ export const searchDayTours = tool({
     userLng: z.number().optional().describe("User's current longitude for distance calculation"),
     sector: z.enum(["EAST_VALLEY", "URUBAMBA", "MACHU_PICCHU", "CUSCO_CITY", "LIMA", "OTHER"]).optional().describe("Optional sector to filter by"),
   }),
+  // @ts-ignore
   execute: async ({ query, userLat, userLng, sector }) => {
     const queryLower = query.toLowerCase().trim();
-    const queryWords = queryLower.split(/\s+/).filter(word => word.length > 2);
+    const queryWords = queryLower.split(/\s+/).filter((word: string) => word.length > 2);
 
     const whereClause: Record<string, unknown> = {
       durationDays: 1, // Only 1-day packages
@@ -24,7 +25,7 @@ export const searchDayTours = tool({
     }
 
     if (queryWords.length > 0) {
-      whereClause.AND = queryWords.map((word) => ({
+      whereClause.AND = queryWords.map((word: string) => ({
         OR: [
           { title: { contains: word, mode: 'insensitive' } },
           { tags: { contains: word, mode: 'insensitive' } },

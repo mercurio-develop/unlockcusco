@@ -1,9 +1,11 @@
-import { Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors } from "lucide-react"
+import { Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, Library, Sparkles } from "lucide-react"
 
 export const CATEGORIES = [
+  { label: "Templates", value: "Template", icon: Library },
   { label: "Tourist Ticket", value: "Boleto", icon: Ticket },
   { label: "Adventure", value: "Adventure", icon: MountainIcon },
   { label: "Wellness", value: "Wellness", icon: Sprout },
+  { label: "Spiritual", value: "Spiritual", icon: Sparkles },
   { label: "Dining", value: "Dining", icon: Utensils },
   { label: "Culture", value: "Culture", icon: Landmark },
   { label: "Textiles", value: "Textiles", icon: Scissors },
@@ -20,6 +22,7 @@ export const LOCATIONS = [
   { label: "Calca", value: "calca" },
   { label: "Yucay", value: "yucay" },
   { label: "Cusco", value: "cusco" },
+  { label: "Machu Picchu", value: "machu-picchu" },
 ]
 
 export const SORT_OPTIONS = [

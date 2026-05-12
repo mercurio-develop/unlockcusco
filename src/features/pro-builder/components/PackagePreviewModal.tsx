@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { X, MapPin, Clock, Mountain, Activity, Loader2, Users } from "lucide-react"
 
 interface PackagePreviewModalProps {
@@ -11,6 +12,11 @@ interface PackagePreviewModalProps {
 export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalProps) {
   const [pkg, setPkg] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!packageId) {
@@ -33,10 +39,10 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
       .finally(() => setLoading(false))
   }, [packageId])
 
-  if (!packageId) return null
+  if (!packageId || !mounted) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-8">
         
         {/* Header */}
@@ -133,6 +139,7 @@ export function PackagePreviewModal({ packageId, onClose }: PackagePreviewModalP
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

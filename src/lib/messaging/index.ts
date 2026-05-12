@@ -64,7 +64,7 @@ export class MessagingService {
   }
 
   private async sendToGhostPhone(endpoint: string, data: any) {
-    const url = process.env.GHOST_PHONE_URL || 'http://localhost:4000';
+    const url = process.env.GHOST_PHONE_URL ?? '';
     const secret = process.env.WEBHOOK_SECRET || 'dev-secret';
 
     console.log(`[Messaging] Sending to Local Ghost Phone: ${url}${endpoint}`);

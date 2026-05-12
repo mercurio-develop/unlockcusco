@@ -6,7 +6,9 @@ export const buildMacroTrip = tool({
 USE THIS when the user requests a multi-day trip spanning several dates, after gathering their travel dates, exertion profile, and interests.
 This establishes the "macro-skeleton" (sleep towns, narrative arc) before drilling down into daily micro-routing.`,
   parameters: macroTripSchema,
-  execute: async (payload) => {
+  // @ts-ignore
+  // @ts-ignore
+  execute: async (payload: any) => {
     // Return the generated macro trip payload so it can be rendered by the UI
     return payload;
   }

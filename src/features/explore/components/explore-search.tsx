@@ -13,13 +13,15 @@ interface ExploreSearchProps {
   isDrawerOpen: boolean // Re-using this prop name for internal consistency in ExploreView
   setIsDrawerOpen: (v: boolean) => void
   categoryCounts?: Record<string, number>
+  isProBuilder?: boolean
 }
 
 export function ExploreSearch({ 
   initialQuery,
   isDrawerOpen: showFilters,
   setIsDrawerOpen: setShowFilters,
-  categoryCounts = {}
+  categoryCounts = {},
+  isProBuilder = false
 }: ExploreSearchProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -134,34 +136,34 @@ export function ExploreSearch({
       {/* Search and Toggle Row */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-slate-900 transition-colors z-10" />
           <input 
             type="text" 
             placeholder="Search Sacred Valley..." 
             value={value}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-slate-50/50 border-b border-slate-100 text-slate-900 text-sm font-medium pl-10 pr-10 py-3 focus:outline-none focus:border-slate-900 focus:bg-white transition-all placeholder:text-slate-300 placeholder:font-normal"
+            className="w-full bg-slate-100/80 border border-slate-200 text-slate-900 text-sm font-semibold pl-10 pr-10 py-3.5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent focus:bg-white transition-all placeholder:text-slate-500 placeholder:font-medium shadow-sm"
           />
           {value && (
             <button 
               onClick={() => handleSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-300 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 bg-slate-200 hover:bg-slate-300 rounded-full text-slate-600 transition-colors z-10"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
-            "shrink-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] px-2 py-3 border-b transition-all",
+            "shrink-0 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider px-4 py-3.5 rounded-2xl border transition-all",
             showFilters 
-              ? "text-rose-600 border-rose-600" 
-              : "text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-100"
+              ? "bg-slate-900 text-white border-slate-900 shadow-md" 
+              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm"
           )}
         >
-          <SlidersHorizontal className="w-3 h-3" />
-          <span>Refine</span>
+          <SlidersHorizontal className="w-4 h-4" />
+          <span className="hidden sm:inline">Refine</span>
         </button>
       </div>
 
@@ -203,7 +205,7 @@ export function ExploreSearch({
                     <MapPin className={cn("w-3.5 h-3.5", currentCats.length === 0 ? "text-rose-400" : "text-slate-400")} />
                     <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
                   </button>
-                  {CATEGORIES.map((cat) => {
+                  {CATEGORIES.filter(cat => isProBuilder || cat.value !== "Template").map((cat) => {
                     const Icon = cat.icon
                     const isActive = currentCats.includes(cat.value)
                     const count = categoryCounts[cat.value.toUpperCase()] || 0

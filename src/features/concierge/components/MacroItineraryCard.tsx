@@ -78,17 +78,17 @@ export function MacroItineraryCard({ itinerary, isExploreView = false }: { itine
                   const prompt = `Day ${day.dayNumber} Plan: I'm in ${day.sleepTown}, focusing on ${day.documentaryChapterTitle}. Build my micro-itinerary following the 1-2-1 rhythm.`
                   
                   if (isExploreView) {
-                    // Clear state to avoid overlap and update active day
-                    if (setActiveDayNumber) setActiveDayNumber(day.dayNumber);
-                    if (setActiveItinerary) setActiveItinerary(null);
-                    
-                    setPanelMode("itinerary")
-                    const params = new URLSearchParams(searchParams.toString())
-                    params.set("ai_prompt", prompt)
-                    params.set("day", day.dayNumber.toString())
-                    router.push(`/explore?${params.toString()}`)
+                    setActiveDayNumber(day.dayNumber);
+                    setActiveItinerary(null);
+                    setPanelMode("itinerary");
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set("ai_prompt", prompt);
+                    params.set("day", day.dayNumber.toString());
+                    router.push(`/explore?${params.toString()}`);
                   } else {
-                    window.location.href = `/explore?ai_prompt=${encodeURIComponent(prompt)}`;
+                    const params = new URLSearchParams();
+                    params.set("ai_prompt", prompt);
+                    router.push(`/explore?${params.toString()}`);
                   }
                 }}
               >

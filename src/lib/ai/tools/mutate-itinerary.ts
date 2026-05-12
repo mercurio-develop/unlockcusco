@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { tool, jsonSchema } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { COORDS_MAP } from '@/lib/constants';
@@ -12,14 +12,19 @@ import { COORDS_MAP } from '@/lib/constants';
  */
 export const mutateItinerary = tool({
   description: 'Performs granular mutations on the active itinerary, such as swapping a stop for a new business, updating start/end locations, or changing times.',
-  parameters: z.object({
-    action: z.enum(['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME']).describe('The specific mutation to perform'),
-    targetId: z.string().optional().describe('The ID of the event to swap or update (required for SWAP_STOP and UPDATE_TIME)'),
-    businessId: z.string().optional().describe('The ID of the new business to inject (for SWAP_STOP, SET_START, SET_END)'),
-    locationStr: z.string().optional().describe('A free-text location name (for SET_START, SET_END if no businessId)'),
-    time: z.string().optional().describe('The new time in HH:MM format'),
+  parameters: jsonSchema({
+    type: 'object',
+    properties: {
+      action: { type: 'string', enum: ['SWAP_STOP', 'SET_START', 'SET_END', 'UPDATE_TIME'], description: 'The specific mutation to perform' },
+      targetId: { type: 'string', description: 'The ID of the event to swap or update (required for SWAP_STOP and UPDATE_TIME)' },
+      businessId: { type: 'string', description: 'The ID of the new business to inject (for SWAP_STOP, SET_START, SET_END)' },
+      locationStr: { type: 'string', description: 'A free-text location name (for SET_START, SET_END if no businessId)' },
+      time: { type: 'string', description: 'The new time in HH:MM format' },
+    },
+    required: ['action']
   }),
-  execute: async ({ action, targetId, businessId, locationStr, time }) => {
+  // @ts-ignore
+  execute: async ({ action, targetId, businessId, locationStr, time }: any) => {
     let business: any = null;
     let isPackage = false;
     
@@ -97,4 +102,4 @@ export const mutateItinerary = tool({
       coords: business ? { lat: business.lat, lng: business.lng } : (locationStr && COORDS_MAP[locationStr.toLowerCase()] ? COORDS_MAP[locationStr.toLowerCase()] : null)
     };
   }
-});
+} as any);

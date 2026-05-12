@@ -42,7 +42,7 @@ export function FeaturesSection() {
                 <MapPin className="w-6 h-6 text-slate-400 shrink-0 mt-1" />
                 <div>
                   <h4 className="font-bold text-slate-900 text-lg">Curated Categories</h4>
-                  <p className="text-base text-slate-600 mt-2 leading-relaxed">Easily filter between transport hubs, trusted agencies, local dining, and wellness retreats using intuitive map markers.</p>
+                  <p className="text-base text-slate-600 mt-2 leading-relaxed">Easily filter between boutique stays, trusted guides, local dining, and wellness retreats using intuitive map markers.</p>
                 </div>
               </div>
             </div>
@@ -54,17 +54,17 @@ export function FeaturesSection() {
               <div className="rounded-full bg-slate-800 p-4 border border-slate-700">
                 <Bot className="w-6 h-6 text-rose-400" />
               </div>
-              <h3 className="text-2xl font-serif font-bold text-white">AI Concierge</h3>
+              <h3 className="text-2xl font-serif font-bold text-white">AI Concierge (Beta)</h3>
             </div>
             <p className="text-slate-300 mb-10 leading-relaxed text-lg">
-              Your personal guide to the Andes. Our intelligent assistant helps you generate custom multi-stop itineraries based on your exact location and preferences.
+              Your personal guide to the Andes. Our intelligent assistant helps you discover the perfect experiences based on your exact location and preferences.
             </p>
             <div className="space-y-8">
               <div className="flex gap-4">
                 <Waypoints className="w-6 h-6 text-slate-400 shrink-0 mt-1" />
                 <div>
-                  <h4 className="font-bold text-white text-lg">Smart Routing</h4>
-                  <p className="text-base text-slate-400 mt-2 leading-relaxed">Automatically calculates distances and travel times to suggest logically ordered stops for your day trips.</p>
+                  <h4 className="font-bold text-white text-lg">Visual Route Building</h4>
+                  <p className="text-base text-slate-400 mt-2 leading-relaxed">Add experiences block-by-block to visually see your route mapped out for the day.</p>
                 </div>
               </div>
               <div className="flex gap-4">

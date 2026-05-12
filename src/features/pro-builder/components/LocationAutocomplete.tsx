@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { MapPin } from "lucide-react"
+import { MapPin, Zap } from "lucide-react"
 
 export const MOCK_LOCATIONS = [
   { name: "Hotel Monasterio, Cusco", lat: -13.5152, lng: -71.9774 },
@@ -19,20 +19,27 @@ export const MOCK_LOCATIONS = [
   { name: "Explora Sacred Valley", lat: -13.3250, lng: -72.0800 },
 ]
 
-interface LocationAutocompleteProps {
-  value: string;
-  onChange: (val: string, lat?: number, lng?: number) => void;
-  placeholder?: string;
-  className?: string;
+interface ExtraLocation {
+  name: string;
+  lat: number;
+  lng: number;
+  service?: any;
 }
 
-export function LocationAutocomplete({ value, onChange, placeholder, className }: LocationAutocompleteProps) {
+interface LocationAutocompleteProps {
+  value: string;
+  onChange: (val: string, lat?: number, lng?: number, service?: any) => void;
+  placeholder?: string;
+  className?: string;
+  extraLocations?: ExtraLocation[];
+}
+
+export function LocationAutocomplete({ value, onChange, placeholder, className, extraLocations = [] }: LocationAutocompleteProps) {
   const [query, setQuery] = useState(value || "")
   const [isOpen, setIsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-     
     setQuery(value || "")
   }, [value])
 
@@ -46,12 +53,15 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const filtered = MOCK_LOCATIONS.filter(l => l.name.toLowerCase().includes(query.toLowerCase()))
+  const q = query.toLowerCase()
+  const filteredMock = MOCK_LOCATIONS.filter(l => l.name.toLowerCase().includes(q))
+  const filteredExtra = extraLocations.filter(l => l.name.toLowerCase().includes(q) && !filteredMock.some(m => m.name === l.name))
+  const hasResults = (filteredMock.length > 0 || filteredExtra.length > 0) && query !== ""
 
   return (
     <div ref={wrapperRef} className="relative w-full">
-      <input 
-        type="text" 
+      <input
+        type="text"
         placeholder={placeholder}
         value={query}
         onChange={e => {
@@ -68,9 +78,9 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
         onFocus={() => setIsOpen(true)}
         className={className}
       />
-      {isOpen && filtered.length > 0 && query !== "" && (
+      {isOpen && hasResults && (
         <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto py-1">
-          {filtered.map(loc => (
+          {filteredMock.map(loc => (
             <button
               key={loc.name}
               onMouseDown={(e) => {
@@ -82,6 +92,24 @@ export function LocationAutocomplete({ value, onChange, placeholder, className }
               className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 text-sm text-slate-700 transition-colors"
             >
               <MapPin className="w-4 h-4 text-rose-400 shrink-0" />
+              <span className="truncate">{loc.name}</span>
+            </button>
+          ))}
+          {filteredExtra.length > 0 && filteredMock.length > 0 && (
+            <div className="px-4 py-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">Library</div>
+          )}
+          {filteredExtra.map(loc => (
+            <button
+              key={loc.name}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setQuery(loc.name)
+                onChange(loc.name, loc.lat, loc.lng, loc.service)
+                setIsOpen(false)
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 text-sm text-slate-700 transition-colors"
+            >
+              <Zap className="w-4 h-4 text-emerald-500 shrink-0" />
               <span className="truncate">{loc.name}</span>
             </button>
           ))}

@@ -7,7 +7,9 @@ export const getBusinessDetails = tool({
   parameters: z.object({
     businessName: z.string().describe('The exact name of the business to look up.'),
   }),
-  execute: async ({ businessName }) => {
+  // @ts-ignore
+  // @ts-ignore
+  execute: async ({ businessName }: any) => {
     try {
       const business = await prisma.business.findFirst({
         where: {

@@ -37,46 +37,54 @@ export function AiConcierge() {
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const processedToolCalls = useRef<Set<string>>(new Set())
+  const processedPromptsRef = useRef<Set<string>>(new Set())
 
   const isBuilder = panelMode === 'builder'
   const sidebarOffset = (isBuilder && !isWorkspaceCollapsed) ? "500px" : "0px"
 
+  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
       role: "assistant",
-      content: "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?"
+      content: welcomeText,
+      parts: [{ type: 'text', text: welcomeText }],
     }
   ], []);
 
   const [input, setInput] = useState("");
+  // null = tourist has not shared location; avoids sending Urubamba default as if it were real GPS
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const chat = useChat({
     api: '/api/chat',
-    initialMessages,
+    messages: initialMessages,
     body: {
-      userLat: DEFAULT_COORDS.lat,
-      userLng: DEFAULT_COORDS.lng,
+      userLat: userCoords?.lat,
+      userLng: userCoords?.lng,
       localTime: new Date().toLocaleTimeString(),
       targetDate: targetDate?.toLocaleDateString() || 'today',
       archetype: travelVibe,
       intensity: travelIntensity
     }
-  } as any) as any;
+  } as any);
 
   const messages = chat.messages || [];
-  const append = chat.append;
-  const isLoading = chat.status === 'submitted' || chat.status === 'streaming' || chat.isLoading;
+  const status = (chat as any).status || 'ready';
+  const isLoading = status === 'submitted' || status === 'streaming';
 
-  useEffect(() => {
-    console.log("Chat Messages:", messages);
-  }, [messages]);
-
-  const sendMessage = useMemo(() => (msg: { text: string }, options?: any) => {
-    if (append) {
-      append({ role: 'user', content: msg.text } as any, options);
-    }
-  }, [append]);
+  const sendMessage = useMemo(() => (msg: { text: string }) => {
+    (chat as any).sendMessage({ text: msg.text }, {
+      body: {
+        userLat: userCoords?.lat,
+        userLng: userCoords?.lng,
+        localTime: new Date().toLocaleTimeString(),
+        targetDate: targetDate?.toLocaleDateString() || 'today',
+        archetype: travelVibe,
+        intensity: travelIntensity,
+      }
+    });
+  }, [chat, userCoords, travelVibe, travelIntensity, targetDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,17 +98,28 @@ export function AiConcierge() {
       alert("Geolocation is not supported by your browser");
       return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        setUserCoords({ lat: latitude, lng: longitude });
         setStartAnchorLocation(latitude, longitude);
         setPanelMode('itinerary');
-        
-        // Notify AI that location was shared
-        sendMessage({
-          text: `[INTERNAL] User shared GPS coordinates: ${latitude}, ${longitude}. Starting point set to 'Current Location'. Acknowledge and proceed.`
-        });
+
+        // Bypass memoized sendMessage (stale closure bug) — pass fresh coords directly in body
+        (chat as any).sendMessage(
+          { text: `I just shared my GPS location. I am at coordinates ${latitude.toFixed(5)}, ${longitude.toFixed(5)}. What can you recommend nearby?` },
+          {
+            body: {
+              userLat: latitude,
+              userLng: longitude,
+              localTime: new Date().toLocaleTimeString(),
+              targetDate: targetDate?.toLocaleDateString() || 'today',
+              archetype: travelVibe,
+              intensity: travelIntensity,
+            }
+          }
+        );
       },
       () => {
         alert("Unable to retrieve your location. Please check permissions.");
@@ -111,92 +130,119 @@ export function AiConcierge() {
   useEffect(() => {
     if (aiPromptToTrigger) {
       setIsChatOpen(true);
-      sendMessage(
-        { text: aiPromptToTrigger },
-        {
-          body: {
-            userLat: DEFAULT_COORDS.lat,
-            userLng: DEFAULT_COORDS.lng,
-            localTime: new Date().toLocaleTimeString(),
-            targetDate: targetDate.toLocaleDateString(),
-            archetype: travelVibe,
-            intensity: travelIntensity
-          }
-        }
-      );
+      sendMessage({ text: aiPromptToTrigger });
       setAiPromptToTrigger(null);
     }
-  }, [aiPromptToTrigger, travelVibe, travelIntensity, targetDate, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
+  }, [aiPromptToTrigger, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
 
-  // Sync background state with tool results
+  // Sync tool results → activeItinerary + day view (v6: msg.parts, state=output-available)
   useEffect(() => {
+    try {
     messages.forEach((msg: any) => {
-      if (msg.role === 'assistant' && msg.toolInvocations) {
-        msg.toolInvocations.forEach((p: any) => {
-          if (p?.state === 'result' && p?.result?.success && !processedToolCalls.current.has(p.toolCallId)) {
-            const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = p.result;
-            
-            if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
-              const updatedWaypoints = activeItinerary.waypoints.map((w: any) => 
-                w.id === targetId ? {
-                  ...w,
-                  id: resolvedBusiness.id,
-                  category: resolvedBusiness.category,
-                  title: resolvedBusiness.name,
-                  locationStr: resolvedBusiness.name,
-                  lat: resolvedBusiness.lat,
-                  lng: resolvedBusiness.lng,
-                  service: resolvedBusiness
-                } : w
-              );
-              setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
-            }
+      if (!msg || msg.role !== 'assistant' || !Array.isArray(msg.parts)) return;
+      msg.parts.forEach((p: any) => {
+        if (!p || p?.state !== 'output-available') return;
+        if (processedToolCalls.current.has(p.toolCallId)) return;
 
-            if (action === 'SET_START' && activeItinerary) {
-              setActiveItinerary({
-                ...activeItinerary,
-                startAnchor: {
-                  ...activeItinerary.startAnchor,
-                  title: resolvedLocation,
-                  locationStr: resolvedLocation,
-                  lat: coords?.lat,
-                  lng: coords?.lng,
-                  service: resolvedBusiness
-                }
-              });
-            }
+        const toolName = p.type?.replace(/^tool-/, '');
+        const output = p.output;
 
-            if (action === 'SET_END' && activeItinerary) {
-              setActiveItinerary({
-                ...activeItinerary,
-                endAnchor: {
-                  ...activeItinerary.endAnchor,
-                  title: resolvedLocation,
-                  locationStr: resolvedLocation,
-                  lat: coords?.lat,
-                  lng: coords?.lng,
-                  service: resolvedBusiness
-                }
-              });
-            }
+        // Auto-activate full itinerary from buildItinerary
+        if (toolName === 'buildItinerary' && output && !output.error) {
+          setActiveItinerary(output);
+          setPanelMode('itinerary');
+          processedToolCalls.current.add(p.toolCallId);
+          return;
+        }
 
-            if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
-              if (targetId === 'itin-start') {
-                setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time }});
-              } else if (targetId === 'itin-arrival') {
-                setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time }});
-              } else {
-                const updatedWaypoints = activeItinerary.waypoints.map((w: any) => w.id === targetId ? { ...w, startTime: time } : w);
-                setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
-              }
-            }
-            
-            processedToolCalls.current.add(p.toolCallId);
-          }
+        // mutateItinerary syncs
+        if (toolName !== 'mutateItinerary' || !output?.success) return;
+
+        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = output;
+
+        const minimalItinerary = () => ({
+          title: "Today's Plan",
+          startAnchor: {
+            title: 'Current Location', locationStr: 'Current Location',
+            type: 'GENERIC_TOWN' as const,
+            lat: userCoords?.lat ?? DEFAULT_COORDS.lat, lng: userCoords?.lng ?? DEFAULT_COORDS.lng, time: '09:00',
+          },
+          endAnchor: {
+            title: 'Destination', locationStr: 'Destination',
+            type: 'GENERIC_TOWN' as const,
+            lat: userCoords?.lat ?? DEFAULT_COORDS.lat, lng: userCoords?.lng ?? DEFAULT_COORDS.lng, time: '18:00',
+          },
+          waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
         });
-      }
+
+        if (action === 'SWAP_STOP' && targetId && resolvedBusiness && activeItinerary) {
+          const updatedWaypoints = activeItinerary.waypoints.map((w: any) =>
+            w.id === targetId ? {
+              ...w,
+              id: resolvedBusiness.id,
+              category: resolvedBusiness.category,
+              title: resolvedBusiness.name,
+              locationStr: resolvedBusiness.name,
+              lat: resolvedBusiness.lat,
+              lng: resolvedBusiness.lng,
+              service: resolvedBusiness
+            } : w
+          );
+          setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+        }
+
+        if (action === 'SET_START') {
+          const itin = activeItinerary ?? minimalItinerary();
+          setActiveItinerary({
+            ...itin,
+            startAnchor: {
+              ...itin.startAnchor,
+              title: resolvedLocation,
+              locationStr: resolvedLocation,
+              lat: coords?.lat,
+              lng: coords?.lng,
+              service: resolvedBusiness,
+            }
+          });
+          setPanelMode('itinerary');
+        }
+
+        if (action === 'SET_END') {
+          const itin = activeItinerary ?? minimalItinerary();
+          setActiveItinerary({
+            ...itin,
+            endAnchor: {
+              ...itin.endAnchor,
+              title: resolvedLocation,
+              locationStr: resolvedLocation,
+              lat: coords?.lat,
+              lng: coords?.lng,
+              service: resolvedBusiness,
+            }
+          });
+          setPanelMode('itinerary');
+        }
+
+        if (action === 'UPDATE_TIME' && targetId && time && activeItinerary) {
+          if (targetId === 'itin-start') {
+            setActiveItinerary({ ...activeItinerary, startAnchor: { ...activeItinerary.startAnchor, time } });
+          } else if (targetId === 'itin-arrival') {
+            setActiveItinerary({ ...activeItinerary, endAnchor: { ...activeItinerary.endAnchor, time } });
+          } else {
+            const updatedWaypoints = activeItinerary.waypoints.map((w: any) =>
+              w.id === targetId ? { ...w, startTime: time } : w
+            );
+            setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
+          }
+        }
+
+        processedToolCalls.current.add(p.toolCallId);
+      });
     });
-  }, [messages, activeItinerary, setActiveItinerary]);
+    } catch (e) {
+      console.error("Tool sync error:", e);
+    }
+  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -214,7 +260,8 @@ export function AiConcierge() {
     const aiPrompt = searchParams.get("ai_prompt");
     const data = searchParams.get("data");
 
-    if (aiPrompt) {
+    if (aiPrompt && !processedPromptsRef.current.has(aiPrompt + (data || ""))) {
+      processedPromptsRef.current.add(aiPrompt + (data || ""));
       setIsChatOpen(true);
 
       let promptText = aiPrompt;
@@ -235,19 +282,7 @@ Please generate my macro trip plan.`;
       }
 
       setTimeout(() => {
-        sendMessage(
-          { text: promptText },
-          {
-        body: {
-          userLat: DEFAULT_COORDS.lat,
-          userLng: DEFAULT_COORDS.lng,
-          localTime: new Date().toLocaleTimeString(),
-          targetDate: targetDate.toLocaleDateString(),
-          archetype: travelVibe,
-          intensity: travelIntensity
-        }
-          }
-        );
+        sendMessage({ text: promptText });
       }, 300);
 
       const params = new URLSearchParams(searchParams.toString());
@@ -259,7 +294,7 @@ Please generate my macro trip plan.`;
     }
   }, [searchParams, travelVibe, travelIntensity, pathname, router, targetDate, sendMessage, setIsChatOpen]);
 
-  if (pathname !== "/explore" || pathname?.startsWith('/pro')) {
+  if (pathname !== "/explore" && !pathname?.startsWith('/pro')) {
     return null;
   }
 
@@ -333,56 +368,26 @@ Please generate my macro trip plan.`;
                         </div>
                       )}
                       
-                      {/* Tool Invocations & Results */}
-                      {(msg as any).toolInvocations?.map((toolInvocation: any, idx: number) => {
-                        const key = toolInvocation.toolCallId || idx;
-                        const toolName = toolInvocation.toolName;
-                        const state = toolInvocation.state;
-                        const result = toolInvocation.result;
-                        const args = toolInvocation.args;
-                        
-                        if (state !== 'result') {
-                           if (toolName === 'askAvailability') {
-                              return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
-                           }
-                           if (toolName === 'askUserLocation') {
-                              return (
-                                <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
-                                  <p className="text-sm text-rose-900 font-medium leading-relaxed">
-                                    {args?.message || "Please share your location"}
-                                  </p>
-                                  <button 
-                                    onClick={handleShareLocation}
-                                    className="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-rose-500 transition-all flex items-center justify-center gap-2"
-                                  >
-                                    <Navigation className="w-4 h-4" /> Share My GPS Position
-                                  </button>
-                                </div>
-                              )
-                           }
-                           if (toolName === 'searchDatabase') {
-                              return <PendingAvailability key={key} message="Searching Vallecito library..." />
-                           }
-                           return null;
-                        }
+                      {/* Tool parts (AI SDK v6: msg.parts, state=output-available) */}
+                      {(msg as any).parts?.map((part: any, idx: number) => {
+                        if (!part || !part.type?.startsWith('tool-')) return null;
+                        const key = part.toolCallId || idx;
+                        const toolName = part.type.replace(/^tool-/, '');
+                        const isDone = part?.state === 'output-available';
+                        const output = part.output;
+                        const input = part.input;
 
-                        if (state === 'result' && result) {
-                          if (result.error) {
-                            return (
-                              <div key={key} className="p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1 ml-11 mt-2 font-mono text-xs">
-                                <span className="font-bold text-red-800">Dev Log: Tool Error ({toolName})</span>
-                                <span className="text-red-600 break-words">{result.error}</span>
-                              </div>
-                            )
+                        if (!isDone) {
+                          if (toolName === 'askAvailability') {
+                            return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
                           }
-                          
                           if (toolName === 'askUserLocation') {
                             return (
                               <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
                                 <p className="text-sm text-rose-900 font-medium leading-relaxed">
-                                  {result?.message || args?.message || "Please share your location"}
+                                  {input?.message || "Please share your location"}
                                 </p>
-                                <button 
+                                <button
                                   onClick={handleShareLocation}
                                   className="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-rose-500 transition-all flex items-center justify-center gap-2"
                                 >
@@ -391,41 +396,64 @@ Please generate my macro trip plan.`;
                               </div>
                             )
                           }
-                          if (toolName === 'buildItinerary') {
-                            return <ItinerarySummaryCard key={key} itinerary={result} />
-                          }
-                          if (toolName === 'buildMacroTrip') {
-                            return <MacroItineraryCard key={key} itinerary={result} />
-                          }
                           if (toolName === 'searchDatabase') {
-                            return <SearchResultsCard key={key} businesses={result} />
+                            return <PendingAvailability key={key} message="Searching Vallecito library..." />
                           }
-                          if (toolName === 'askAvailability') {
-                            return <PendingAvailability key={key} message={result.message} />
-                          }
-                          if (toolName === 'showBoletoInfo') {
-                            return <BoletoInfoCard key={key} data={result.data} message={result.message} />
-                          }
-                          if (toolName === 'estimateTaxiFare') {
-                            return <TaxiFareCard key={key} data={result} />
-                          }
-                          if (toolName === 'mutateItinerary') {
-                            return (
-                              <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
-                                 <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-                                    <Check className="w-3.5 h-3.5 text-white" />
-                                 </div>
-                                 <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">Itinerary Updated</span>
+                          return null;
+                        }
+
+                        // Tool errors are handled by the AI internally — don't show raw errors to users
+                        if (output?.error) return null;
+
+                        if (toolName === 'askUserLocation') {
+                          return (
+                            <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
+                              <p className="text-sm text-rose-900 font-medium leading-relaxed">
+                                {output?.message || input?.message || "Please share your location"}
+                              </p>
+                              <button
+                                onClick={handleShareLocation}
+                                className="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm shadow-md hover:bg-rose-500 transition-all flex items-center justify-center gap-2"
+                              >
+                                <Navigation className="w-4 h-4" /> Share My GPS Position
+                              </button>
+                            </div>
+                          )
+                        }
+                        if (toolName === 'buildItinerary') {
+                          return <ItinerarySummaryCard key={key} itinerary={output} />
+                        }
+                        if (toolName === 'buildMacroTrip') {
+                          return <MacroItineraryCard key={key} itinerary={output} />
+                        }
+                        if (toolName === 'searchDatabase') {
+                          return <SearchResultsCard key={key} businesses={output} />
+                        }
+                        if (toolName === 'askAvailability') {
+                          return <PendingAvailability key={key} message={output?.message} />
+                        }
+                        if (toolName === 'showBoletoInfo') {
+                          return <BoletoInfoCard key={key} data={output?.data} message={output?.message} />
+                        }
+                        if (toolName === 'estimateTaxiFare') {
+                          return <TaxiFareCard key={key} data={output} />
+                        }
+                        if (toolName === 'mutateItinerary') {
+                          return (
+                            <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
+                              <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                <Check className="w-3.5 h-3.5 text-white" />
                               </div>
-                            )
-                          }
+                              <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">Itinerary Updated</span>
+                            </div>
+                          )
                         }
                         return null;
                       })}
                     </div>
                   )
                 })}
-                {isLoading && (messages[messages.length - 1] as any)?.role === "assistant" && !(messages[messages.length - 1] as any)?.content && (!(messages[messages.length - 1] as any)?.toolInvocations || (messages[messages.length - 1] as any)?.toolInvocations?.length === 0) && (
+                {isLoading && (messages[messages.length - 1] as any)?.role === "user" && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
                       <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-rose-100">
@@ -444,11 +472,11 @@ Please generate my macro trip plan.`;
 
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
                 {[
-                  { label: "Plan my day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                  { label: "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
                   { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
                   { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
                   { label: "Book Machu Picchu", icon: "⛰️", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
-                  { label: "Spiritual retreats", icon: "🧿", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
+                  { label: "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
                 ].map(suggestion => (
                   <button
                     key={suggestion.label}

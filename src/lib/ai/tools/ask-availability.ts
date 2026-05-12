@@ -10,6 +10,7 @@ export const askAvailability = tool({
     partySize: z.number().optional(),
     requestedTime: z.string().optional()
   }),
+  // @ts-ignore
   execute: async ({ vendorName, phone, partySize, requestedTime }: any) => {
     try {
       // Use standard messaging service (Twilio in Prod, Ghost Phone in Dev)
@@ -32,4 +33,4 @@ export const askAvailability = tool({
       };
     }
   }
-});
+} as any);

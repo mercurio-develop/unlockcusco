@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma"
 import { Business, TourPackage } from "@prisma/client"
 import { COORDS_MAP } from "@/lib/constants"
 import { unstable_cache } from "next/cache"
+import { revalidateTag } from "next/cache"
+
+export async function revalidateBusinesses() {
+  // Call with type assertion to handle version variance in Next.js types
+  ;(revalidateTag as (tag: string) => void)('businesses')
+}
 
 // Helper to interleave categories while maintaining relative rating sort
 function interleaveCategories(sortedBusinesses: any[]) {
@@ -42,6 +48,7 @@ export interface FetchBusinessesParams {
   page?: number
   limit: number
   includePackages?: boolean
+  includeTemplates?: boolean
 }
 
 // Helper for mapping price tier
@@ -65,7 +72,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * c;
 }
 
-async function fetchBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20, includePackages = false }: FetchBusinessesParams) {
+async function fetchBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20, includePackages = false, includeTemplates = false }: FetchBusinessesParams) {
   let targetCategory = category
   const q = query.trim()
   let isHeuristicMatch = false
@@ -74,7 +81,10 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   if (q && !targetCategory) {
     // Fallback heuristics to extract a category from the text query
     const qLower = q.toLowerCase();
-    if (qLower.includes("massage") || qLower.includes("spa") || qLower.includes("wellness") || qLower.includes("recovery") || qLower.includes("retreat") || qLower.includes("yoga")) { 
+    if (qLower.includes("ayahuasca") || qLower.includes("retreat") || qLower.includes("ashram") || qLower.includes("spiritual") || qLower.includes("san pedro") || qLower.includes("shaman")) {
+      targetCategory = "Spiritual"; isHeuristicMatch = true;
+    }
+    else if (qLower.includes("massage") || qLower.includes("spa") || qLower.includes("wellness") || qLower.includes("recovery") || qLower.includes("yoga")) { 
       targetCategory = "Wellness"; isHeuristicMatch = true; 
     }
     else if (qLower.includes("tour") || qLower.includes("trekking") || qLower.includes("expedition") || qLower.includes("travel") || qLower.includes("agency") || qLower.includes("agencia")) { 
@@ -115,7 +125,13 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
         expandedCategories.add(cat.toUpperCase());
         expandedCategories.add(cat.toLowerCase());
         expandedCategories.add(cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase());
-        if (cat.toUpperCase() === 'EXPERIENCE' || cat.toUpperCase() === 'ADVENTURE' || cat.toUpperCase() === 'CULTURE') {
+        // Boleto filter also captures "Tourist Ticket" DB category variant
+        if (cat.toUpperCase() === 'BOLETO') {
+          expandedCategories.add('Tourist Ticket');
+          expandedCategories.add('TOURIST TICKET');
+          expandedCategories.add('tourist ticket');
+        }
+        if (cat.toUpperCase() === 'EXPERIENCE' || cat.toUpperCase() === 'ADVENTURE' || cat.toUpperCase() === 'CULTURE' || cat.toUpperCase() === 'SPIRITUAL' || cat.toUpperCase() === 'TEMPLATE') {
            fetchPackages = true;
         }
       }
@@ -229,6 +245,55 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
      
      businesses = [...businesses, ...mappedPackages];
   }
+  
+  if (includeTemplates) {
+    // Also fetch Trip Templates
+    const templateTrips = await prisma.trip.findMany({
+      where: { isVerifiedTemplate: true },
+      include: { days: true }
+    });
+
+    const mappedTemplates = templateTrips.map(trip => ({
+        id: trip.id,
+        slug: `template-${trip.id}`,
+        name: trip.tripTitle,
+        category: "TEMPLATE",
+        lat: null, // Global or no specific coords
+        lng: null,
+        rating: 5.0,
+        reviewsCount: 0,
+        imageUrl: "https://images.unsplash.com/photo-1596422846543-75c6fc197f0a?q=80&w=600",
+        heroImages: "[]",
+        isClaimed: true,
+        isAsociado: true,
+        isFeatured: false,
+        locationSlug: "",
+        tagline: `${trip.days.length} Days Itinerary`,
+        description: trip.templateVibeTags || "Curated Multi-Day Itinerary Template",
+        priceTier: "$$",
+        marginTier: "STANDARD",
+        commissionRate: 0.05,
+        viewsCount: 0,
+        whatsappClicksCount: 0,
+        aiRecommendationsCount: 0,
+        vehicleType: null,
+        capacity: null,
+        serviceZones: "[]",
+        guideName: null,
+        seoMetaTitle: null,
+        seoMetaDesc: null,
+        specialties: "[]",
+        themeConfig: "{}",
+        featuresJson: "[]",
+        qrCodeUrl: null,
+        isPackage: false,
+        isTripTemplate: true,
+        tags: trip.templateVibeTags,
+        daysData: trip.days
+    }));
+
+    businesses = [...businesses, ...mappedTemplates];
+  }
 
   // Distance Filter
   if (radiusKm !== undefined) {
@@ -310,6 +375,13 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
      });
      categoryCounts['EXPERIENCE'] = (categoryCounts['EXPERIENCE'] || 0) + pkgCount;
   }
+  
+  if (includeTemplates) {
+     const templateCount = await prisma.trip.count({
+       where: { isVerifiedTemplate: true }
+     });
+     categoryCounts['TEMPLATE'] = (categoryCounts['TEMPLATE'] || 0) + templateCount;
+  }
 
   return {
     businesses: paginatedBusinesses,
@@ -331,14 +403,15 @@ export async function fetchBusinesses(params: FetchBusinessesParams) {
     params.sort || 'recommended',
     params.page?.toString() || '0',
     params.limit.toString(),
-    params.includePackages?.toString() || 'false'
+    params.includePackages?.toString() || 'false',
+    params.includeTemplates?.toString() || 'false'
   ]
 
   const fetcher = unstable_cache(
     async () => fetchBusinessesInternal(params),
     cacheKey,
     {
-      revalidate: 3600, // 1 hour cache
+      revalidate: 60, // 1 minute — keeps fresh when new businesses are added
       tags: ['businesses']
     }
   )

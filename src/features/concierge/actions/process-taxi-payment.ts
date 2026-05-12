@@ -4,8 +4,12 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock", {
-  apiVersion: "2026-04-22.dahlia" as any,
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY env var is not set");
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16" as any,
 });
 
 const CreateIntentSchema = z.object({
@@ -27,13 +31,17 @@ export async function createTaxiPaymentIntent(data: z.infer<typeof CreateIntentS
   try {
     // 1. Create the Stripe PaymentIntent with a manual capture hold
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: estimatedCostUSD * 100, // Stripe expects cents
+      amount: estimatedCostUSD * 100,
       currency: "usd",
-      capture_method: "manual", // <--- THE MAGIC LINE for holds
+      capture_method: "manual",
       metadata: {
         origin,
         destinationName,
+        touristName: touristName || "Guest",
+        touristPhone: touristPhone || "",
       },
+    }, {
+      idempotencyKey: `taxi-${origin}-${destinationName}-${estimatedCostUSD}`,
     });
 
     // 2. Save the RideBooking to the database in PENDING state (before UI confirms it)
@@ -62,7 +70,7 @@ export async function notifyGhostPhone(paymentIntentId: string) {
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       
       // It should be requires_capture because we used manual capture
-      if (paymentIntent.status !== "requires_capture" && paymentIntent.status !== "succeeded") {
+      if (paymentIntent.status !== "requires_capture") {
           return { error: "Payment hold not successful." };
       }
 
@@ -75,7 +83,11 @@ export async function notifyGhostPhone(paymentIntentId: string) {
       const { origin, destinationName } = paymentIntent.metadata;
 
       // Mock webhook call to Ghost Phone microservice
-      const webhookUrl = process.env.GHOST_PHONE_WEBHOOK_URL || "http://localhost:3001/webhook";
+      const webhookUrl = process.env.GHOST_PHONE_WEBHOOK_URL;
+      if (!webhookUrl) {
+        console.warn("GHOST_PHONE_WEBHOOK_URL not set — skipping driver dispatch");
+        return { success: true };
+      }
       
       const response = await fetch(webhookUrl, {
           method: "POST",

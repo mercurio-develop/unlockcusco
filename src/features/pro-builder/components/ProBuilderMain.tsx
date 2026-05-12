@@ -7,9 +7,9 @@ import { usePreferences } from "@/lib/store/preferences-context"
 import { BuilderWizard } from "./BuilderWizard"
 import { BuilderWorkspace } from "./BuilderWorkspace"
 import { CheckoutDetailsForm } from "./CheckoutDetailsForm"
+import { saveTripAsTemplate } from "@/features/pro-builder/actions/template-actions"
 import { DiscoverPanel } from "@/features/explore/components/DiscoverPanel"
 import { ExploreSearch } from "@/features/explore/components/explore-search"
-import { fetchBusinesses } from "@/features/business/actions/fetch-businesses"
 import { MapPin, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ListCollapse, Utensils, Car, Moon, AlignLeft, Receipt, UserCircle2, ChevronDown, ChevronUp, X, Search, Plus } from "lucide-react"
 import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
@@ -20,16 +20,48 @@ const ExploreMap = dynamic(() => import("@/features/explore/components/explore-m
   loading: () => <div className="h-full w-full bg-slate-50 animate-pulse" />
 })
 
-export function ProBuilderMain() {
-  const { viewState, currentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, setSelectedId, selectedId, createDay } = useTrip()
+export function ProBuilderMain({ initialLibrary = [] }: { initialLibrary?: any[] }) {
+  const { viewState, currentTrip, setCurrentTrip, panelMode, setPanelMode, activeDayNumber, setActiveDayNumber, setViewState, isWorkspaceCollapsed, setIsWorkspaceCollapsed, setSelectedId, selectedId, createDay } = useTrip()
   const { isChatOpen } = usePreferences()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [leftTab, setLeftTab] = useState<'discover' | 'itinerary'>('itinerary')
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false)
   
   const [workspaceWidth, setWorkspaceWidth] = useState(500)
   const [isResizing, setIsResizing] = useState(false)
+
+  const handleSaveTemplate = async () => {
+    if (!currentTrip || currentTrip.days.length === 0) return;
+    const title = window.prompt("Enter a name for this template:", currentTrip.title || "Custom Itinerary");
+    if (!title) return;
+    
+    const tags = window.prompt("Enter tags (comma separated, e.g. 'Adventure, Family'):", "Custom");
+    
+    setIsSavingTemplate(true);
+    try {
+      const res = await saveTripAsTemplate(currentTrip as any, title, tags || "");
+      if (res.success) {
+        alert("Template saved successfully! It will appear in your Library under Templates.");
+      } else {
+        alert("Failed to save template: " + res.error);
+      }
+    } catch (e) {
+      alert("Error saving template.");
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }
+
+  const [mapClickTarget, setMapClickTarget] = useState<'start' | 'end' | null>(null)
+
+  useEffect(() => {
+    if (!mapClickTarget) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMapClickTarget(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mapClickTarget])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -59,9 +91,6 @@ export function ProBuilderMain() {
     router.push(`?${params.toString()}`, { scroll: false })
   }
   
-  const [businesses, setBusinesses] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-
   const q = searchParams.get("q") || ""
   const loc = searchParams.get("loc") || ""
   const cat = searchParams.get("cat") || ""
@@ -70,28 +99,47 @@ export function ProBuilderMain() {
   const lng = searchParams.get("lng") || undefined
   const sort = searchParams.get("sort") || "recommended"
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true)
-      try {
-        const result = await fetchBusinesses({ 
-          query: q, 
-          loc, 
-          category: cat, 
-          radiusKm: rad,
-          userLat: lat ? Number(lat) : undefined,
-          userLng: lng ? Number(lng) : undefined,
-          sort,
-          limit: 100,
-          includePackages: true
-        })
-        setBusinesses(result.allBusinesses)
-      } finally {
-        setLoading(false)
-      }
+  // Client-side filtering and sorting instead of making network requests
+  const businesses = useMemo(() => {
+    let filtered = [...initialLibrary];
+
+    // 1. Search Query Filter
+    if (q) {
+      const queryLower = q.toLowerCase();
+      filtered = filtered.filter(b => 
+        (b.name && b.name.toLowerCase().includes(queryLower)) || 
+        (b.description && b.description.toLowerCase().includes(queryLower)) ||
+        (b.category && b.category.toLowerCase().includes(queryLower)) ||
+        (b.tags && b.tags.toLowerCase().includes(queryLower))
+      );
     }
-    load()
-  }, [q, loc, cat, rad, lat, lng, sort])
+
+    // 2. Category Filter
+    if (cat) {
+      const cats = cat.split(',').map(c => c.trim().toLowerCase());
+      filtered = filtered.filter(b => b.category && cats.includes(b.category.toLowerCase()));
+    }
+
+    // 3. Location Filter (Simplified)
+    if (loc && !rad) {
+      filtered = filtered.filter(b => 
+        (b.locationSlug && b.locationSlug.toLowerCase() === loc.toLowerCase()) ||
+        (b.sector && b.sector.toLowerCase() === loc.toLowerCase())
+      );
+    }
+
+    // 4. Sort
+    filtered.sort((a, b) => {
+      if (sort === "rating_desc") {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      return (b.rating || 0) - (a.rating || 0);
+    });
+
+    return filtered;
+  }, [initialLibrary, q, cat, loc, rad, lat, lng, sort]);
+
+  const loading = false; // Network loading is now instant
 
   useEffect(() => {
     if (panelMode === 'categories') {
@@ -106,6 +154,50 @@ export function ProBuilderMain() {
       setPanelMode('builder')
     }
   }, [leftTab, setPanelMode])
+
+  const handleLibrarySelect = (id: string | null) => {
+    if (!id) {
+      setSelectedId(null);
+      return;
+    }
+    const item = initialLibrary?.find(b => b.id === id);
+    if (item?.isTripTemplate) {
+      if (window.confirm("Loading this template will replace your current itinerary. Continue?")) {
+        const newDays = item.daysData.map((d: any) => {
+          let parsedEvents = [];
+          let parsedStart = undefined;
+          let parsedEnd = undefined;
+          let parsedComplete = false;
+          try {
+            const parsed = JSON.parse(d.eventsJson);
+            parsedEvents = parsed.events || [];
+            parsedStart = parsed.startAnchor;
+            parsedEnd = parsed.endAnchor;
+            parsedComplete = parsed.isComplete;
+          } catch (e) {}
+
+          return {
+            dayNumber: d.dayNumber,
+            date: new Date(d.date),
+            sleepTown: d.sleepTown,
+            title: d.dayTheme,
+            isComplete: parsedComplete,
+            startAnchor: parsedStart,
+            endAnchor: parsedEnd,
+            events: parsedEvents,
+          }
+        });
+        setCurrentTrip({ 
+          ...currentTrip, 
+          title: currentTrip?.title || item.name || "Template Trip",
+          days: newDays 
+        } as any);
+        setLeftTab('itinerary');
+      }
+    } else {
+      setSelectedId(id);
+    }
+  }
 
   // Fix white gap: Trigger Mapbox resize when sidebars toggle
   useEffect(() => {
@@ -124,12 +216,12 @@ export function ProBuilderMain() {
         if (d.events.length > 0 || d.dayNumber === activeDayNumber) {
           if (d.startAnchor?.lat && d.startAnchor?.lng) {
             const id = `startAnchor-${d.dayNumber}`;
-            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR', isItineraryItem: true });
+            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.startAnchor.title, lat: d.startAnchor.lat, lng: d.startAnchor.lng, type: 'ANCHOR', service: d.startAnchor.service, isItineraryItem: true });
           }
-          d.events.filter((e: any) => e.type !== 'NOTE').forEach((e: any) => entities.push({ ...e, isItineraryItem: true }));
+          d.events.filter((e: any) => e.type !== 'NOTE' && e.type !== 'TRANSPORT').forEach((e: any) => entities.push({ ...e, isItineraryItem: true }));
           if (d.endAnchor?.lat && d.endAnchor?.lng) {
             const id = `endAnchor-${d.dayNumber}`;
-            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR', isItineraryItem: true });
+            if (!entities.find((e: any) => e.id === id)) entities.push({ id, title: d.endAnchor.title, lat: d.endAnchor.lat, lng: d.endAnchor.lng, type: 'ANCHOR', service: d.endAnchor.service, isItineraryItem: true });
           }
         }
       });
@@ -159,12 +251,19 @@ export function ProBuilderMain() {
       }
 
       return {
+        ...(e.service || {}),
         ...e,
         id: e.id,
-        name: e.name || e.title,
+        name: e.name || e.title || e.service?.name,
         lat: evtLat,
         lng: evtLng,
-        category: e.type === 'ANCHOR' ? 'STAY' : (e.category || e.type)
+        category: e.type === 'ANCHOR' ? 'STAY' : (e.category || e.service?.category || e.type),
+        imageUrl: e.imageUrl || e.service?.imageUrl,
+        description: e.description || e.notes || e.content || e.service?.description,
+        rating: e.rating || e.service?.rating,
+        priceTier: e.priceTier || e.service?.priceTier,
+        isClaimed: e.isClaimed || e.service?.isClaimed,
+        menuUrl: e.menuUrl || e.service?.menuUrl,
       };
     }).filter(e => e.lat != null && e.lng != null);
   }, [leftTab, businesses, currentTrip, activeDayNumber]);
@@ -211,15 +310,6 @@ export function ProBuilderMain() {
           <div className="px-6 pt-2 pb-2 shrink-0">
              <div className="bg-slate-100 p-1 rounded-2xl flex w-full">
                 <button 
-                  onClick={() => setLeftTab('discover')} 
-                  className={cn(
-                    "flex-1 flex justify-center items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest rounded-xl transition-all",
-                    leftTab === 'discover' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                  )}
-                >
-                  <Search className="w-3.5 h-3.5" /> Library
-                </button>
-                <button 
                   onClick={() => setLeftTab('itinerary')} 
                   className={cn(
                     "flex-1 flex justify-center items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest rounded-xl transition-all",
@@ -227,6 +317,15 @@ export function ProBuilderMain() {
                   )}
                 >
                   <ListCollapse className="w-3.5 h-3.5" /> Days
+                </button>
+                <button 
+                  onClick={() => setLeftTab('discover')} 
+                  className={cn(
+                    "flex-1 flex justify-center items-center gap-2 py-2 px-4 text-xs font-black uppercase tracking-widest rounded-xl transition-all",
+                    leftTab === 'discover' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  <Search className="w-3.5 h-3.5" /> Library
                 </button>
              </div>
           </div>
@@ -240,6 +339,7 @@ export function ProBuilderMain() {
                     isDrawerOpen={isDrawerOpen}
                     setIsDrawerOpen={setIsDrawerOpen}
                     categoryCounts={{}}
+                    isProBuilder={true}
                   />
                 </div>
 
@@ -255,7 +355,7 @@ export function ProBuilderMain() {
                   <DiscoverPanel 
                     businesses={businesses} 
                     selectedId={selectedId} 
-                    setSelectedId={setSelectedId} 
+                    setSelectedId={handleLibrarySelect} 
                     onReset={() => setLeftTab('itinerary')}
                   />
                 </div>
@@ -286,8 +386,8 @@ export function ProBuilderMain() {
                         </div>
                         {(!isActive) && day.events.length > 0 && (
                           <div className="flex flex-wrap justify-end gap-1 max-w-[120px]">
-                            {day.events.slice(0, 4).map((e: any) => (
-                              <div key={e.id} className="w-6 h-6 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center" title={e.title}>
+                            {day.events.slice(0, 4).map((e: any, idx: number) => (
+                              <div key={`${e.id}-${idx}`} className="w-6 h-6 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center" title={e.title}>
                                 {getSmallIcon(e.type)}
                               </div>
                             ))}
@@ -307,7 +407,7 @@ export function ProBuilderMain() {
                             <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:left-3 before:h-full before:w-px before:bg-gradient-to-b before:from-slate-200 before:via-slate-200 before:to-transparent pt-2">
                               {timelineItems.map((e: any, i: number) => (
                                 <div 
-                                  key={e.id} 
+                                  key={`${e.id}-${i}`} 
                                   className="relative flex items-center justify-between group pl-8 cursor-pointer hover:bg-slate-50 py-1 -ml-2 pl-10 rounded-r-xl transition-colors"
                                   onClick={(ev) => { 
                                     ev.stopPropagation(); 
@@ -341,7 +441,14 @@ export function ProBuilderMain() {
             )}
           </div>
           
-          <div className="p-8 bg-transparent border-t border-slate-100 shrink-0">
+          <div className="p-6 bg-transparent border-t border-slate-100 shrink-0 flex flex-col gap-3">
+            <button
+              onClick={handleSaveTemplate}
+              disabled={isSavingTemplate}
+              className="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-6 py-3 rounded-2xl font-bold text-sm transition-all disabled:opacity-50"
+            >
+              {isSavingTemplate ? "Saving..." : "Save as Template"}
+            </button>
             <button
               onClick={() => setViewState('checkout')}
               className="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-2xl font-bold text-base transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
@@ -354,7 +461,25 @@ export function ProBuilderMain() {
 
       {/* Center Panel - Map (Always working) */}
       <div className="flex-1 relative z-10 bg-slate-100 overflow-hidden flex flex-col">
-        <ExploreMap businesses={mapEntities as any} selectedId={selectedId} onSelectBusiness={setSelectedId} />
+        <ExploreMap
+          businesses={mapEntities as any}
+          selectedId={selectedId}
+          onSelectBusiness={setSelectedId}
+          mapClickMode={mapClickTarget}
+          onMapAnchorPick={(lat, lng) => {
+            if (!mapClickTarget || !currentTrip || !activeDayNumber) return
+            const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber)
+            if (!activeDay) return
+            const key = mapClickTarget === 'start' ? 'startAnchor' : 'endAnchor'
+            const newDays = currentTrip.days.map((d: any) =>
+              d.dayNumber === activeDayNumber
+                ? { ...d, [key]: { ...activeDay[key], title: 'Custom Location', lat, lng } }
+                : d
+            )
+            setCurrentTrip({ ...currentTrip, days: newDays })
+            setMapClickTarget(null)
+          }}
+        />
       </div>
 
       {/* Right Panel - Builder Workspace (Day details) */}
@@ -383,7 +508,20 @@ export function ProBuilderMain() {
         </div>
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isWorkspaceCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <BuilderWorkspace variant="pro" selectedId={selectedId} onSelectEvent={setSelectedId} />
+          <BuilderWorkspace
+            variant="pro"
+            selectedId={selectedId}
+            onSelectEvent={setSelectedId}
+            onPinOnMap={(target) => setMapClickTarget(target)}
+            libraryBusinesses={businesses.filter((b: any) => b.lat && b.lng).map((b: any) => ({
+              name: b.name,
+              lat: b.lat,
+              lng: b.lng,
+              id: b.id,
+              category: b.category,
+              service: b,
+            }))}
+          />
         </div>
       </div>
     </div>

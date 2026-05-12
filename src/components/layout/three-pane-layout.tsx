@@ -23,6 +23,7 @@ export function ThreePaneLayout({
   const { leftWidth, setLeftWidth, panelMode, setPanelMode } = useTrip()
   const { isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
+  const [snap, setSnap] = useState<number | string | null>(0.5)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -118,11 +119,11 @@ export function ThreePaneLayout({
 
       {/* Mobile Drawer */}
       <div className="md:hidden">
-        <Drawer.Root dismissible={false} open={true} modal={false}>
+        <Drawer.Root dismissible={false} open={true} modal={false} snapPoints={[0.15, 0.5, 0.9]} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
           <Drawer.Portal>
             <Drawer.Content 
-              className="md:hidden bg-white flex flex-col rounded-t-[32px] h-[92%] fixed bottom-0 left-0 right-0 z-40 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
-              style={{ pointerEvents: 'auto' }}
+              className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 z-40 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
+              style={{ pointerEvents: 'auto', height: '90vh' }}
             >
               <Drawer.Title className="sr-only">Menu</Drawer.Title>
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-200 mt-4 mb-2" />
@@ -137,14 +138,14 @@ export function ThreePaneLayout({
 
               {/* Bottom Tab Bar (Mobile) */}
               <div className="shrink-0 h-[72px] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-2">
-                 <button onClick={() => setPanelMode('categories')} className="flex flex-col items-center gap-1">
+                 <button onClick={() => setPanelMode('categories')} className="flex flex-col items-center gap-1 w-20">
                    <div className={cn("p-2 rounded-xl transition-all", panelMode === 'categories' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                    </div>
                    <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'categories' ? "text-slate-900" : "text-slate-400")}>Discover</span>
                  </button>
 
-                 <button onClick={() => setIsChatOpen(!isChatOpen)} className="flex flex-col items-center gap-1 -mt-4">
+                 <button onClick={() => setIsChatOpen(!isChatOpen)} className="flex flex-col items-center gap-1 -mt-4 w-20">
                    <div className={cn(
                      "p-3.5 rounded-2xl transition-all shadow-xl border-2 border-white",
                      isChatOpen 
@@ -153,14 +154,14 @@ export function ThreePaneLayout({
                    )}>
                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg>
                    </div>
-                   <span className={cn("text-[10px] font-black uppercase tracking-tighter transition-colors mt-1", isChatOpen ? "text-rose-600" : "text-slate-400")}>AI Assistant</span>
+                   <span className={cn("text-[10px] font-black uppercase tracking-tighter transition-colors mt-1", isChatOpen ? "text-rose-600" : "text-slate-400")}>AI</span>
                  </button>
 
-                 <button onClick={() => setPanelMode('itinerary')} className="flex flex-col items-center gap-1">
-                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
-                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                 <button onClick={() => setPanelMode('route')} className="flex flex-col items-center gap-1 w-20">
+                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'route' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
+                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
                    </div>
-                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'itinerary' ? "text-slate-900" : "text-slate-400")}>Timeline</span>
+                   <span className={cn("text-[10px] font-bold uppercase tracking-widest transition-colors", panelMode === 'route' ? "text-slate-900" : "text-slate-400")}>Route</span>
                  </button>
               </div>
             </Drawer.Content>

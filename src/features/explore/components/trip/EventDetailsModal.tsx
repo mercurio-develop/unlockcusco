@@ -1,6 +1,7 @@
 import { TripDay, Traveler } from "@prisma/client";
 import { TimelineEvent, FullTrip } from "@/lib/types/trip";
 import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { motion } from "framer-motion"
 import { Loader2, X } from "lucide-react"
 import { EditorialModal } from "@/components/ui/EditorialModal"
@@ -8,6 +9,11 @@ import { EditorialModal } from "@/components/ui/EditorialModal"
 export function EventDetailsModal({ event, onClose }: { event: TimelineEvent, onClose: () => void }) {
   const [details, setDetails] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!event) return
@@ -33,7 +39,9 @@ export function EventDetailsModal({ event, onClose }: { event: TimelineEvent, on
     }
   }, [event])
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}>
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
@@ -55,6 +63,7 @@ export function EventDetailsModal({ event, onClose }: { event: TimelineEvent, on
           <EditorialModal item={details} onClose={onClose} />
         ) : null}
       </motion.div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -61,7 +61,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   const business = await prisma.business.findUnique({
     where: { slug: slug },
-    include: { 
+    include: {
       reviews: true,
       services: true,
       tourPackages: true
@@ -70,12 +70,26 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   if (!business) return notFound()
 
+  // Nearby businesses in same location + category (for SEO + UX)
+  const nearby = await prisma.business.findMany({
+    where: {
+      locationSlug: business.locationSlug,
+      category: business.category,
+      slug: { not: slug },
+      rating: { not: null },
+    },
+    orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
+    take: 4,
+    select: { id: true, name: true, slug: true, category: true, rating: true, tagline: true, imageUrl: true, locationSlug: true }
+  })
+
   // Format WhatsApp message
   const whatsappMsg = encodeURIComponent(
     `Hello ${business.name}! 👋 I saw your profile on Vallecito and I'd like to make a reservation. When do you have availability?`
   )
 
   const isAsociado = business.isAsociado || false
+  const isVerified = business.isClaimed || isAsociado
 
   // JSON-LD Structured Data
   const jsonLd = {
@@ -263,15 +277,15 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                    </div>
                 </div>
 
-                {isAsociado && business.whatsapp ? (
+                {isVerified && business.whatsapp ? (
                   <a
                     href={`https://wa.me/51${business.whatsapp}?text=${whatsappMsg}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"
                   >
-                    <Zap className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" /> 
-                    Book via WhatsApp
+                    <Zap className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
+                    {isAsociado ? 'Book via WhatsApp' : 'Contact via WhatsApp'}
                   </a>
                 ) : (
                   <div className="space-y-4">
@@ -300,6 +314,36 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         </div>
 
       </div>
+
+      {/* Nearby section */}
+      {nearby.length > 0 && (
+        <div className="max-w-5xl mx-auto px-4 pb-16 mt-12">
+          <h2 className="text-lg font-bold text-white/70 uppercase tracking-widest mb-5">
+            More in {business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : 'the Area'}
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {nearby.map(b => (
+              <Link
+                key={b.id}
+                href={`/business/${b.slug}`}
+                className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 transition-all"
+              >
+                {b.imageUrl && (
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-3">
+                    <Image src={b.imageUrl} alt={b.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                )}
+                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-1">{b.category}</p>
+                <p className="text-sm font-semibold text-white leading-tight line-clamp-2">{b.name}</p>
+                {b.rating && (
+                  <p className="text-xs text-white/40 mt-1">★ {b.rating.toFixed(1)}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

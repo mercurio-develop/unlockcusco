@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { MapPin, Navigation } from "lucide-react"
+import { MapPin, Navigation, Zap } from "lucide-react"
 
 export const MOCK_LOCATIONS = [
   { name: "Hotel Monasterio, Cusco", lat: -13.5152, lng: -71.9774 },
@@ -23,15 +23,23 @@ export const QUICK_HUBS = [
   { name: "Ollantaytambo", lat: -13.2625, lng: -72.2662 },
 ]
 
+interface ExtraLocation {
+  name: string;
+  lat: number;
+  lng: number;
+  service?: any;
+}
+
 interface LocationPickerProps {
   value: string;
-  onChange: (val: string, lat?: number, lng?: number) => void;
+  onChange: (val: string, lat?: number, lng?: number, service?: any) => void;
   placeholder?: string;
   className?: string;
   hideQuickActions?: boolean;
+  extraLocations?: ExtraLocation[];
 }
 
-export function LocationPicker({ value, onChange, placeholder, className, hideQuickActions }: LocationPickerProps) {
+export function LocationPicker({ value, onChange, placeholder, className, hideQuickActions, extraLocations = [] }: LocationPickerProps) {
   const [query, setQuery] = useState(value || "")
   const [isOpen, setIsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -70,13 +78,18 @@ export function LocationPicker({ value, onChange, placeholder, className, hideQu
     }
   }
 
-  const filtered = MOCK_LOCATIONS.filter(l => l.name.toLowerCase().includes(query.toLowerCase()))
+  const q = query.toLowerCase()
+  const filteredMock = MOCK_LOCATIONS.filter(l => l.name.toLowerCase().includes(q))
+  const filteredExtra = extraLocations.filter(l =>
+    l.name.toLowerCase().includes(q) && !filteredMock.some(m => m.name === l.name)
+  )
+  const hasResults = query !== "" && (filteredMock.length > 0 || filteredExtra.length > 0)
 
   return (
     <div ref={wrapperRef} className="relative w-full flex flex-col gap-2">
       <div className="relative">
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder={placeholder}
           value={query}
           onChange={e => {
@@ -93,9 +106,9 @@ export function LocationPicker({ value, onChange, placeholder, className, hideQu
           onFocus={() => setIsOpen(true)}
           className={className}
         />
-        {isOpen && filtered.length > 0 && query !== "" && (
+        {isOpen && hasResults && (
           <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto py-1">
-            {filtered.map(loc => (
+            {filteredMock.map(loc => (
               <button
                 key={loc.name}
                 onMouseDown={(e) => {
@@ -110,6 +123,24 @@ export function LocationPicker({ value, onChange, placeholder, className, hideQu
                 <span className="truncate">{loc.name}</span>
               </button>
             ))}
+            {filteredExtra.length > 0 && filteredMock.length > 0 && (
+              <div className="px-4 py-1 text-[9px] font-bold uppercase tracking-widest text-slate-400 border-t border-slate-50 mt-1 pt-2">Library</div>
+            )}
+            {filteredExtra.map(loc => (
+              <button
+                key={loc.name}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  setQuery(loc.name)
+                  onChange(loc.name, loc.lat, loc.lng, loc.service)
+                  setIsOpen(false)
+                }}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2 text-sm text-slate-700 transition-colors"
+              >
+                <Zap className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="truncate">{loc.name}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -117,16 +148,19 @@ export function LocationPicker({ value, onChange, placeholder, className, hideQu
       {!hideQuickActions && (
         <div className="flex flex-wrap gap-2 items-center">
           <button
-            onClick={handleUseCurrentLocation}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              handleUseCurrentLocation(e)
+            }}
             className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-white bg-slate-900 hover:bg-slate-800 px-2 py-1 rounded-md transition-colors"
           >
             <Navigation className="w-3 h-3" /> Current Location
           </button>
-          
+
           {QUICK_HUBS.map(hub => (
             <button
               key={hub.name}
-              onClick={(e) => {
+              onMouseDown={(e) => {
                 e.preventDefault()
                 setQuery(hub.name)
                 onChange(hub.name, hub.lat, hub.lng)

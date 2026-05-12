@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const lng = searchParams.get("lng") || undefined
   const sort = searchParams.get("sort") || undefined
   const page = searchParams.get("page") || "0"
-  const limit = searchParams.get("limit") || "30"
+  const limit = searchParams.get("limit") || "60"
 
   try {
     const result = await fetchBusinesses({

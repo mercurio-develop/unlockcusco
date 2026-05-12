@@ -17,6 +17,8 @@ const FALLBACK_IMAGES: Record<string, string> = {
   Adventure: 'https://images.unsplash.com/photo-1522345678432-8dfc0a273dd9?q=80&w=1000&auto=format&fit=crop',
   Stays: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop',
   Culture: 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop',
+  "Tourist Ticket": 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop',
+  Textiles: 'https://images.unsplash.com/photo-1606132717013-09436324a350?q=80&w=1000&auto=format&fit=crop',
 };
 
 function mapCategory(googleCategory: string): string {
@@ -26,9 +28,10 @@ function mapCategory(googleCategory: string): string {
   if (c.match(/tour|travel|agency|agencia|turismo|operator/)) return "Agency";
   if (c.match(/hiking|atv|rafting|zipline|adventure|trekking|aventura|cuatrimotos|caminata|paragliding/)) return "Adventure";
   if (c.match(/taxi|transport|shuttle|transfer|colectivo|terminal|omnibus|airport|conductor|driver/)) return "Transport";
-  if (c.match(/hotel|hostel|lodge|inn|camping|alojamiento|airbnb|resort|hospedaje/))        return "Stays";
+  if (c.match(/hotel|hostel|lodge|inn|camping|alojamiento|airbnb|resort|hospedaje|stay|boutique/))        return "Stays";
   if (c.match(/textile|tejido|weaving|artesanía|artisan|tejedoras|tejidos/)) return "Textiles";
-  if (c.match(/textile|artisan|artesanía|market|clothing|souvenir|textil|tejido|mercado|artesano/)) return "Culture";
+  if (c.match(/ruin|archaeological|arqueológico|museum|museo|monument|site|landmark|historical|histórico/)) return "Tourist Ticket";
+  if (c.match(/artesanía|market|clothing|souvenir|textil|tejido|mercado|artesano|culture|cultura/)) return "Culture";
   return "Culture";
 }
 
@@ -43,85 +46,87 @@ function extractWhatsApp(phone: string | undefined): string | null {
 
 function enhanceImageUrl(url: string | undefined): string | null {
   if (!url) return null;
-  // Replace typical Google Maps size parameters (e.g. =w400-h300-k-no) with high-res equivalents
   if (url.includes('=w')) {
     return url.replace(/=w\d+-h\d+-k-no/g, '=s1600');
   }
   return url;
 }
 
-const SEARCHES = [
-  // --- TEXTILES & ARTISANS (English & Spanish) ---
-  // Pisac
-  "Textiles authentic market Pisac, Cusco, Peru",
-  "Mercado de artesania Pisac, Cusco, Peru",
-  "Centro de textiles tradicionales Pisac, Cusco, Peru",
-  "Tejidos artesanales Pisac, Cusco, Peru",
-  // Urubamba
-  "Alpaca textiles Urubamba, Cusco, Peru",
-  "Taller de tejido Urubamba, Cusco, Peru",
-  "Artesania local Urubamba, Cusco, Peru",
-  "Ceramica y textiles Urubamba, Cusco, Peru",
-  // Calca
-  "Mercado de artesania Calca, Cusco, Peru",
-  "Tejidos tradicionales Calca, Cusco, Peru",
-  "Asociacion de artesanos Calca, Cusco, Peru",
-  // Ollantaytambo
-  "Weaving cooperative Ollantaytambo, Cusco, Peru",
-  "Textiles tradicionales Ollantaytambo, Cusco, Peru",
-  "Mercado artesanal Ollantaytambo, Cusco, Peru",
-  "Taller de artesania Ollantaytambo, Cusco, Peru",
-  // Chinchero
-  "Centro de textiles Chinchero, Cusco, Peru",
-  "Tejedoras tradicionales Chinchero, Cusco, Peru",
-  "Mercado de artesania Chinchero, Cusco, Peru",
-  "Taller de tejido andino Chinchero, Cusco, Peru",
+function getLocationSlug(searchQuery: string): string {
+  const q = searchQuery.toLowerCase();
+  if (q.includes("machu picchu") || q.includes("aguas calientes")) return "machu-picchu";
+  if (q.includes("pisac")) return "pisac";
+  if (q.includes("urubamba")) return "urubamba";
+  if (q.includes("calca")) return "calca";
+  if (q.includes("ollantaytambo")) return "ollantaytambo";
+  if (q.includes("chinchero")) return "chinchero";
+  if (q.includes("cusco")) return "cusco";
+  return "sacred-valley";
+}
 
-  // --- RESTAURANTS & DINING (English & Spanish) ---
-  // Pisac
-  "Best restaurant Pisac, Cusco, Peru",
-  "Restaurante local Pisac, Cusco, Peru",
-  "Picanteria tradicional Pisac, Cusco, Peru",
-  "Comida tipica Pisac, Cusco, Peru",
-  "Cafeteria especialidad Pisac, Cusco, Peru",
-  "Restaurante vegetariano Pisac, Cusco, Peru",
-  // Urubamba
-  "Restaurante campestre Urubamba, Cusco, Peru",
-  "Picanteria local Urubamba, Cusco, Peru",
-  "Comida tradicional Urubamba, Cusco, Peru",
-  "Cafe specialty coffee Urubamba, Cusco, Peru",
-  "Restaurante organico Urubamba, Cusco, Peru",
-  // Calca
-  "Restaurante Calca, Cusco, Peru",
-  "Picanteria Calca, Cusco, Peru",
-  "Comida local Calca, Cusco, Peru",
-  "Cafeteria Calca, Cusco, Peru",
-  "Caldo de gallina Calca, Cusco, Peru", // Very local search term
-  // Ollantaytambo
-  "Restaurant near ruins Ollantaytambo, Cusco, Peru",
-  "Restaurante tipico Ollantaytambo, Cusco, Peru",
-  "Comida local Ollantaytambo, Cusco, Peru",
-  "Cafeteria estacion de tren Ollantaytambo, Cusco, Peru",
-  "Cerveceria artesanal Ollantaytambo, Cusco, Peru",
-  // Chinchero
-  "Restaurante turistico Chinchero, Cusco, Peru",
-  "Comida tipica Chinchero, Cusco, Peru",
-  "Picanteria Chinchero, Cusco, Peru",
-  "Restaurante campestre Chinchero, Cusco, Peru"
+const LOCATIONS = [
+  "Cusco, Peru",
+  "Machu Picchu, Aguas Calientes, Peru",
+  "Pisac, Cusco, Peru",
+  "Urubamba, Cusco, Peru",
+  "Calca, Cusco, Peru",
+  "Ollantaytambo, Cusco, Peru",
+  "Chinchero, Cusco, Peru"
 ];
+
+const SEARCHES: string[] = [];
+
+LOCATIONS.forEach(loc => {
+  // Stays
+  SEARCHES.push(`Boutique hotel ${loc}`);
+  SEARCHES.push(`Best hostel ${loc}`);
+  SEARCHES.push(`Eco lodge ${loc}`);
+  
+  // Dining
+  SEARCHES.push(`Best restaurant ${loc}`);
+  SEARCHES.push(`Picanteria tradicional ${loc}`);
+  SEARCHES.push(`Specialty coffee cafe ${loc}`);
+  SEARCHES.push(`Comida tipica ${loc}`);
+  
+  // Culture
+  SEARCHES.push(`Museum museo ${loc}`);
+  SEARCHES.push(`Art gallery galeria de arte ${loc}`);
+  SEARCHES.push(`Centro cultural ${loc}`);
+  
+  // Tourist Ticket
+  SEARCHES.push(`Archaeological site ruinas ${loc}`);
+  SEARCHES.push(`Boleto turistico attractions ${loc}`);
+  
+  // Wellness
+  SEARCHES.push(`Yoga studio ${loc}`);
+  SEARCHES.push(`Spa massage masajes ${loc}`);
+  SEARCHES.push(`Wellness retreat center ${loc}`);
+  
+  // Textiles
+  SEARCHES.push(`Textile artisan market mercado artesanal ${loc}`);
+  SEARCHES.push(`Tejedoras tradicionales textiles ${loc}`);
+  
+  // Adventure
+  SEARCHES.push(`Trekking hiking trails ${loc}`);
+  SEARCHES.push(`ATV cuatrimotos tour ${loc}`);
+  SEARCHES.push(`Adventure sports rafting zipline ${loc}`);
+});
 
 async function main() {
   let added = 0;
   let skipped = 0;
 
+  console.log(`Starting scraper with ${SEARCHES.length} total search queries across ${LOCATIONS.length} locations...\n`);
+
   for (const search of SEARCHES) {
     console.log(`\n🔍 Scraping: "${search}"`);
+    const locationSlug = getLocationSlug(search);
 
     try {
       const run = await apifyClient.actor("compass/google-maps-extractor").call({
         searchStringsArray: [search],
-        maxCrawledPlacesPerSearch: 20, // Increased to capture more local places
-        language: "es", // Set to Spanish to get the most authentic local results
+        maxCrawledPlacesPerSearch: 15,
+        language: "es",
         maxImages: 4,
         maxReviews: 5,
         reviewsSort: "newest",
@@ -153,50 +158,45 @@ async function main() {
 
           const category = mapCategory((item.categoryName as string) || '');
           const imageUrls = item.imageUrls as string[] | undefined;
-          let imageUrl = enhanceImageUrl(imageUrls?.[0]) ?? FALLBACK_IMAGES[category];
-          const rating = (item.totalScore as number) ?? null
+          let imageUrl = enhanceImageUrl(imageUrls?.[0]) ?? FALLBACK_IMAGES[category] ?? FALLBACK_IMAGES['Culture'];
+          
+          const rawImages = (imageUrls || []).slice(0, 5).map(enhanceImageUrl).filter(Boolean) as string[];
+          const heroImages = JSON.stringify(rawImages);
+
+          const rating = (item.totalScore as number) ?? null;
           
           if (rating !== null && rating < 4.5) {
-            console.log(`   ⏭  Skipped (rating ${rating} < 4.5): ${name}`)
-            continue
+            console.log(`   ⏭  Skipped (rating ${rating} < 4.5): ${name}`);
+            continue;
           }
 
           const websiteUrl = (item.website as string) || null;
-          let igHandle = null;
-          let igFollowers = 0;
+          const mapsUrl = (item.url as string) || null;
           
-          // Try Instagram extraction for high-quality authenticated photos and social handle
-          try {
-            console.log(`   📸 Searching Instagram for: ${name}`);
-            const igRun = await apifyClient.actor("apify/instagram-scraper").call({
-              search: `${name} peru`,
-              searchType: "hashtag",
-              searchLimit: 1,
-              resultsType: "posts",
-              resultsLimit: 1,
-            });
-            const { items: igItems } = await apifyClient.dataset(igRun.defaultDatasetId).listItems();
-            if (igItems.length > 0 && (igItems[0] as Record<string, unknown>).displayUrl) {
-              const igData = igItems[0] as Record<string, any>;
-              imageUrl = igData.displayUrl as string;
-              if (igData.ownerUsername) {
-                igHandle = igData.ownerUsername;
-              }
-              console.log(`   ✨ Found authentic Instagram image! Handle: ${igHandle || 'unknown'}`);
-            } else {
-              console.log(`   ⚠️ No IG image, using enhanced Google Maps photo.`);
-            }
-          } catch {
-            console.log(`   ⚠️ IG scraper failed, using enhanced Google Maps photo.`);
-          }
-
           const whatsapp = extractWhatsApp(item.phoneUnformatted as string | undefined);
           
-          // Construct social links
           const socialLinks: any = {};
           if (websiteUrl) socialLinks.website = websiteUrl;
-          if (igHandle) socialLinks.instagram = `https://instagram.com/${igHandle}`;
+          if (mapsUrl) socialLinks.googleMaps = mapsUrl;
           const socialLinksJson = JSON.stringify(socialLinks);
+
+          // Extract amenities from additionalInfo
+          const features: string[] = [];
+          if (item.additionalInfo) {
+            const info = item.additionalInfo as Record<string, any[]>;
+            for (const key in info) {
+              if (Array.isArray(info[key])) {
+                info[key].forEach(feature => {
+                  // Only add boolean "true" features (e.g. { "Outdoor seating": true })
+                  if (Object.values(feature)[0] === true) {
+                    const featureName = Object.keys(feature)[0];
+                    if (featureName) features.push(featureName);
+                  }
+                });
+              }
+            }
+          }
+          const featuresJson = JSON.stringify(features);
 
           const originalReviews = ((item.reviews as Record<string, unknown>[]) || [])
             .filter((r) => r.textTranslated || r.text)
@@ -204,21 +204,31 @@ async function main() {
             
           let finalName = name;
           let finalReviews = originalReviews.map(r => String(r.textTranslated || r.text));
+          let finalTagline = "";
+          let finalDescription = "";
+          let finalPriceTier = "$$";
 
           try {
-            console.log(`   🗣 Translating to English with Gemini...`);
-            const { object: translatedData } = await generateObject({
+            console.log(`   🗣 Generating business profile with Gemini...`);
+            const { object: profileData } = await generateObject({
               model: google('gemini-2.5-flash'),
               schema: z.object({
                 name: z.string().describe("The business name translated to English. Keep brand names intact. Only translate descriptive nouns (e.g. 'Mercado de Artesania' -> 'Artisan Market')."),
+                tagline: z.string().describe("A short, catchy, 3-5 word tagline for the business. E.g., 'Authentic Andean Textiles', 'Boutique Sacred Valley Retreat'"),
+                description: z.string().describe("A short, engaging 1-2 sentence description summarizing what makes this place special based on the reviews and category."),
+                priceTier: z.enum(["$", "$$", "$$$"]).describe("Estimated price tier based on the business type and reviews. Default to $$ if unsure."),
                 reviews: z.array(z.string()).describe("The translated reviews in perfect natural English.")
               }),
-              prompt: `Translate this Peruvian business data into English for an American/European tourist audience. Keep brand names intact.\n\nJSON Data to translate:\n${JSON.stringify({ name, reviews: finalReviews })}`
+              prompt: `Translate and analyze this Peruvian business data for an American/European tourist audience. Generate an engaging profile based on the name, category (${category}), and reviews.\n\nJSON Data:\n${JSON.stringify({ name, reviews: finalReviews })}`
             });
-            finalName = translatedData.name;
-            finalReviews = translatedData.reviews;
-          } catch (translationErr) {
-            console.warn(`   ⚠️ Translation failed, using original text.`);
+            finalName = profileData.name;
+            finalReviews = profileData.reviews;
+            finalTagline = profileData.tagline;
+            finalDescription = profileData.description;
+            finalPriceTier = profileData.priceTier;
+          } catch (generationErr) {
+            console.warn(`   ⚠️ Profile generation failed, using fallbacks.`);
+            finalTagline = `${category} in ${locationSlug}`;
           }
 
           const reviewsData = originalReviews.map((r, index) => ({
@@ -239,17 +249,21 @@ async function main() {
               rating,
               reviewsCount: (item.reviewsCount as number) ?? 0,
               imageUrl,
+              heroImages,
               whatsapp,
               socialLinks: socialLinksJson,
-              instagramHandle: igHandle,
-              instagramFollowers: igFollowers,
               isClaimed: false,
+              locationSlug,
+              tagline: finalTagline,
+              description: finalDescription,
+              priceTier: finalPriceTier,
+              featuresJson,
               ...(reviewsData.length > 0 && { reviews: { create: reviewsData } }),
             },
           });
 
           added++;
-          console.log(`   ✅ ${name} (${category})${whatsapp ? ' 📱' : ''}`);
+          console.log(`   ✅ ${finalName} (${category}) | Tier: ${finalPriceTier} | Loc: ${locationSlug}`);
         } catch (err) {
           console.error(`   ❌ Error:`, (err as Error).message);
         }

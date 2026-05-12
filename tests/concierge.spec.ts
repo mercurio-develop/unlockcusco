@@ -18,8 +18,9 @@ test.describe('AI Concierge E2E', () => {
     const prompt = "Can you build me a 1 day itinerary in Cusco starting with some coffee and a walk? My current location is Plaza de Armas, Cusco and my destination tonight is Cusco. Please build the itinerary now.";
     await chatInput.fill(prompt);
     
-    // Press Enter to send
-    await chatInput.press('Enter');
+    // Click the submit button
+    const sendButton = page.locator('button[type="submit"]').first();
+    await sendButton.click();
 
     // Wait for the tool result component. ItinerarySummaryCard contains "Your Plan"
     await expect(page.locator('text=Your Plan').first()).toBeVisible({ timeout: 30000 });

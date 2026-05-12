@@ -9,7 +9,7 @@ import { usePreferences } from './preferences-context';
 
 import { COORDS_MAP, DEFAULT_COORDS } from "@/lib/constants";
 
-type PanelMode = "categories" | "itinerary" | "macro" | "builder";
+type PanelMode = "categories" | "itinerary" | "macro" | "builder" | "route";
 type ViewState = "wizard" | "workspace" | "checkout";
 
 interface TripContextType {
@@ -92,35 +92,50 @@ export function TripProvider({ children }: { children: ReactNode }) {
   }, [activeItinerary, hasRequestedFeedback]);
 
   useEffect(() => {
-    if (activeItinerary && !currentTrip) {
-      setTimeout(() => {
-        const mappedTrip: UniversalTrip = {
-            title: activeItinerary.title || "AI Planned Trip",
-            startDate: new Date(),
-            endDate: new Date(),
-            paxCount: 1,
-            status: 'DRAFT',
-            days: [{
-                dayNumber: 1,
-                date: new Date(),
-                events: activeItinerary.waypoints.map(w => ({
-                    id: w.id,
-                    type: w.category === 'Stays' ? 'STAY' : 'EXPERIENCE',
-                    startTime: "10:00",
-                    title: w.title,
-                    lat: w.lat,
-                    lng: w.lng,
-                    priceUsd: w.priceUsd
-                }))
-            }]
-        };
-        setCurrentTrip(mappedTrip);
-        if (activeDayNumber === null) {
-            setActiveDayNumber(1);
-        }
-      }, 0);
+    if (!activeItinerary) return;
+    const dayNum = activeDayNumber || 1;
+
+    const mappedEvents = activeItinerary.waypoints.map(w => ({
+      id: w.id,
+      type: (w.category?.toUpperCase() === 'STAY' || w.category?.toUpperCase() === 'STAYS')
+        ? 'STAY' as const
+        : w.category?.toUpperCase() === 'DINING'
+          ? 'MEAL' as const
+          : 'EXPERIENCE' as const,
+      startTime: (w as any).startTime || '10:00',
+      title: w.title,
+      lat: w.lat,
+      lng: w.lng,
+      priceUsd: w.priceUsd,
+    }));
+
+    // Never call setState inside a functional updater — move it out
+    if (activeDayNumber === null) {
+      setActiveDayNumber(dayNum);
     }
-  }, [activeItinerary, currentTrip, activeDayNumber]);
+
+    setCurrentTrip(prev => {
+      if (!prev) {
+        return {
+          title: activeItinerary.title || 'AI Planned Trip',
+          startDate: new Date(),
+          endDate: new Date(),
+          paxCount: 1,
+          status: 'DRAFT',
+          days: [{ dayNumber: dayNum, date: new Date(), events: mappedEvents }],
+        };
+      }
+      const hasDay = prev.days.some(d => d.dayNumber === dayNum);
+      return {
+        ...prev,
+        days: hasDay
+          ? prev.days.map(d =>
+              d.dayNumber === dayNum ? { ...d, events: mappedEvents } : d
+            )
+          : [...prev.days, { dayNumber: dayNum, date: new Date(), events: mappedEvents }],
+      };
+    });
+  }, [activeItinerary, activeDayNumber]);
 
   const addEvent = useCallback((dayNumber: number, event: TimelineEvent) => {
     setCurrentTrip(prev => {
@@ -383,42 +398,62 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const isMeal = service.category?.toUpperCase() === 'DINING';
 
     if (exchangeTargetIndex !== null) {
-      if (exchangeTargetIndex === -1 && activeItinerary) {
-        const startLocName = service.locationSlug 
-            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+      if (exchangeTargetIndex === -1) {
+        if (activeItinerary) {
+          const startLocName = service.locationSlug
+            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
             : service.name;
-        setActiveItinerary({
-          ...activeItinerary,
-          startAnchor: {
-            ...activeItinerary.startAnchor,
-            title: service.name,
-            locationStr: startLocName,
-            lat: service.lat || undefined,
-            lng: service.lng || undefined,
-            service: service
-          }
-        });
+          setActiveItinerary({
+            ...activeItinerary,
+            startAnchor: {
+              ...activeItinerary.startAnchor,
+              title: service.name,
+              locationStr: startLocName,
+              lat: service.lat || undefined,
+              lng: service.lng || undefined,
+              service: service,
+            },
+          });
+        }
+        if (currentTrip) {
+          const newDays = currentTrip.days.map((d: any) =>
+            d.dayNumber === dayNum
+              ? { ...d, startAnchor: { ...d.startAnchor, title: service.name, lat: service.lat || undefined, lng: service.lng || undefined, service } }
+              : d
+          );
+          setCurrentTrip({ ...currentTrip, days: newDays });
+        }
         setExchangeTargetIndex(null);
-        setPanelMode(panelMode === 'categories' ? 'itinerary' : panelMode);
+        setPanelMode(currentTrip && !activeItinerary ? 'builder' : (panelMode === 'categories' ? 'itinerary' : panelMode));
         return false;
       }
-      if (exchangeTargetIndex === -2 && activeItinerary) {
-        const endLocName = service.locationSlug 
-            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') 
+      if (exchangeTargetIndex === -2) {
+        if (activeItinerary) {
+          const endLocName = service.locationSlug
+            ? service.locationSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
             : service.name;
-        setActiveItinerary({
-          ...activeItinerary,
-          endAnchor: {
-            ...activeItinerary.endAnchor,
-            title: service.name,
-            locationStr: endLocName,
-            lat: service.lat || undefined,
-            lng: service.lng || undefined,
-            service: service
-          }
-        });
+          setActiveItinerary({
+            ...activeItinerary,
+            endAnchor: {
+              ...activeItinerary.endAnchor,
+              title: service.name,
+              locationStr: endLocName,
+              lat: service.lat || undefined,
+              lng: service.lng || undefined,
+              service: service,
+            },
+          });
+        }
+        if (currentTrip) {
+          const newDays = currentTrip.days.map((d: any) =>
+            d.dayNumber === dayNum
+              ? { ...d, endAnchor: { ...d.endAnchor, title: service.name, lat: service.lat || undefined, lng: service.lng || undefined, service } }
+              : d
+          );
+          setCurrentTrip({ ...currentTrip, days: newDays });
+        }
         setExchangeTargetIndex(null);
-        setPanelMode(panelMode === 'categories' ? 'itinerary' : panelMode);
+        setPanelMode(currentTrip && !activeItinerary ? 'builder' : (panelMode === 'categories' ? 'itinerary' : panelMode));
         return false;
       }
 
@@ -500,7 +535,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     if (isTransport) {
       newEvent = {
-        id: crypto.randomUUID(),
+        id: service.id,
         type: 'TRANSPORT',
         method: 'CAR', // Default
         from: 'Current Location', 
@@ -511,7 +546,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     } else if (isStay) {
       newEvent = {
-        id: crypto.randomUUID(),
+        id: service.id,
         type: 'STAY',
         startTime: calculatedStartTime,
         title: service.name,
@@ -521,7 +556,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     } else if (isMeal) {
       newEvent = {
-        id: crypto.randomUUID(),
+        id: service.id,
         type: 'MEAL',
         startTime: calculatedStartTime,
         title: service.name,
@@ -531,7 +566,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     } else {
       newEvent = {
-        id: crypto.randomUUID(),
+        id: service.id,
         type: 'EXPERIENCE',
         startTime: calculatedStartTime,
         title: service.name,
@@ -543,7 +578,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     if (activeItinerary) {
         const newWp = {
-            id: newEvent.id,
+            id: service.id,
             category: service.category,
             title: service.name,
             locationStr: service.name,
@@ -551,7 +586,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
             priceUsd: 0,
             lat: service.lat || undefined,
             lng: service.lng || undefined,
-            rating: service.rating || undefined
+            rating: service.rating || undefined,
+            service: service
         };
 
         const updatedWaypoints = [...activeItinerary.waypoints, newWp];

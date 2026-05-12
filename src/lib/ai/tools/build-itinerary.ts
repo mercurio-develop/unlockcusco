@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { tool, jsonSchema } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { calculateDistance } from '@/lib/utils/geo';
@@ -25,14 +25,18 @@ const DESIRE_MAP: Record<string, { category: string; icon: string; cost: number;
   lunch:      { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['lunch', 'almuerzo', 'restaurant', 'food'] },
   dinner:     { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['dinner', 'cena', 'restaurant', 'food'] },
   food:       { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['food', 'comida', 'restaurant'] },
+  dining:     { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['dining', 'restaurant', 'food'] },
+  eats:       { category: 'Dining',   icon: '🍽️', cost: 20, keywords: ['eats', 'food'] },
   restaurant: { category: 'Dining',   icon: '🍽️', cost: 25, keywords: ['restaurant', 'comida', 'food'] },
   market:     { category: 'Culture',  icon: '🛍️', cost: 0,  keywords: ['market', 'mercado', 'artisan', 'craft'] },
   textiles:   { category: 'Culture',  icon: '🧶', cost: 0,  keywords: ['textiles', 'weaving', 'weaver', 'tejido', 'artisan'] },
   ruins:      { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['ruins', 'ruinas', 'archeological', 'site', 'fortress'] },
   culture:    { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['culture', 'cultura', 'tradition', 'village', 'native'] },
+  history:    { category: 'Culture',  icon: '🏺', cost: 10, keywords: ['history', 'historical', 'museum'] },
   hike:       { category: 'Adventure', icon: '🥾', cost: 15, keywords: ['hike', 'trek', 'walk', 'mountain', 'trail'] },
   atv:        { category: 'Adventure', icon: '🏍️', cost: 40, keywords: ['atv', 'quad', 'motorcycle'] },
   adventure:  { category: 'Adventure', icon: '🥾', cost: 20, keywords: ['adventure', 'aventura', 'trek', 'climb'] },
+  active:     { category: 'Adventure', icon: '🥾', cost: 20, keywords: ['active', 'sports', 'outdoors'] },
   massage:    { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['massage', 'masaje', 'spa', 'therapy', 'bodywork'] },
   spa:        { category: 'Wellness',  icon: '🧘', cost: 35, keywords: ['spa', 'wellness', 'relaxation', 'massage'] },
   relax:      { category: 'Wellness',  icon: '🌿', cost: 20, keywords: ['relax', 'peaceful', 'wellness', 'sanctuary', 'view'] },
@@ -46,7 +50,7 @@ function resolveDesire(desire: string) {
   }
   
   // Smarter fallback: if the desire sounds like food, use Dining. Otherwise use Culture/Generic.
-  const foodKeywords = ['eat', 'drink', 'pizza', 'vegan', 'bar', 'beer', 'wine', 'snack', 'restaurant', 'food', 'cafeteria', 'coffee'];
+  const foodKeywords = ['eat', 'drink', 'pizza', 'vegan', 'bar', 'beer', 'wine', 'snack', 'restaurant', 'food', 'cafeteria', 'coffee', 'dining', 'meal', 'supper', 'bistro'];
   if (foodKeywords.some(fk => key.includes(fk))) {
     return { category: 'Dining', icon: '🍽️', cost: 20, keywords: [key] };
   }
@@ -61,7 +65,7 @@ USE THIS for any request involving: travel between towns, coffee/food/activities
 CALL IT as soon as you have origin + destination. Ask for missing info conversationally first if needed.`,
 
   parameters: z.object({
-    originLocation: z.string().describe('Tourist\'s current location, e.g. "Pisac" or a specific hotel/business name'),
+    originLocation: z.string().describe('Tourist current location, e.g. "Pisac" or a specific hotel/business name'),
     destination:    z.string().describe('Final destination for the night, e.g. "Ollantaytambo" or a specific restaurant/business'),
     desires:        z.array(z.string()).describe('Stops the tourist wants, e.g. ["coffee", "market"]'),
     constraints:    z.string().optional().describe('Any constraints: "train at 6am", "vegetarian", "budget"'),
@@ -69,10 +73,18 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     userLng:        z.number().optional().describe('User\'s current longitude'),
   }),
 
-  execute: async ({ originLocation, destination, desires, constraints, userLat, userLng }) => {
-    console.log("=== EXECUTING buildItinerary ===", { originLocation, destination, desires });
+  // @ts-ignore
+  execute: async ({ originLocation, destination, desires, constraints, userLat, userLng }: any) => {
     // RESOLVE ANCHORS TO BUSINESSES IF POSSIBLE
     const resolveAnchor = async (locStr: string) => {
+       // If the string matches a known town directly, use the map coords — don't let a DB
+       // business whose name happens to contain the town name override the anchor coords.
+       const knownTownCoords = getCoords(locStr);
+       const isKnownTown = Object.keys(COORDS_MAP).some(k => locStr.toLowerCase().includes(k));
+       if (isKnownTown) {
+         return { title: locStr, lat: knownTownCoords.lat, lng: knownTownCoords.lng };
+       }
+
        const business = await prisma.business.findFirst({
          where: {
            OR: [
@@ -118,8 +130,10 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
        return { title: locStr, lat: coords.lat, lng: coords.lng };
     };
 
-    const startAnchor = await resolveAnchor(originLocation);
-    const endAnchor   = await resolveAnchor(destination);
+    const [startAnchor, endAnchor] = await Promise.all([
+      resolveAnchor(originLocation),
+      resolveAnchor(destination),
+    ]);
 
     const originCoords = { lat: startAnchor.lat || COORDS_MAP.urubamba.lat, lng: startAnchor.lng || COORDS_MAP.urubamba.lng };
     const destCoords   = { lat: endAnchor.lat || COORDS_MAP.urubamba.lat, lng: endAnchor.lng || COORDS_MAP.urubamba.lng };
@@ -158,7 +172,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     if (plateauCorridor) corridor.push(...plateauCorridor);
 
     // Add any explicitly requested towns from desires
-    const requestedTowns = ALL_TOWNS.filter(town => desires.some(d => d.toLowerCase().includes(town)));
+    const requestedTowns = ALL_TOWNS.filter(town => desires.some((d: string) => d.toLowerCase().includes(town)));
     corridor.push(...requestedTowns);
     corridor.push(originLocation.toLowerCase(), destination.toLowerCase());
 
@@ -169,45 +183,41 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
     const recommendedIds = new Set<string>();
     const usedLocationSlugs = new Set<string>();
     const usedBusinessIds = new Set<string>();
-    
+
     const baseTripDist = calculateDistance(originCoords.lat, originCoords.lng, destCoords.lat, destCoords.lng);
 
-    // --- Activity steps (Nodes) ---
-    for (const desire of desires) {
-      const { category, cost, keywords } = resolveDesire(desire);
-
-      // Extract town from desire if mentioned
+    // --- Fetch all desire candidates + taxi rows in parallel ---
+    type DesireMeta = { desire: string; category: string; icon: string; cost: number; keywords: string[]; searchCorridor: string[] };
+    const desireMetas: DesireMeta[] = desires.map((desire: string) => {
       const desireLower = desire.toLowerCase();
       const specificTown = ALL_TOWNS.find(t => desireLower.includes(t));
-      const searchCorridor = specificTown ? [specificTown] : corridor;
+      return { desire, ...resolveDesire(desire), searchCorridor: specificTown ? [specificTown] : corridor };
+    });
 
-      const candidates = await prisma.business.findMany({
-        where: {
-          locationSlug: { in: searchCorridor },
-          id: { notIn: Array.from(usedBusinessIds) },
-          AND: [
-             { category: { equals: category } },
-             {
-               OR: [
-                 { category: { in: keywords } },
-                 { name: { contains: desire } },
-                 ...keywords.map(kw => ({ name: { contains: kw } })),
-                 ...keywords.map(kw => ({ category: { contains: kw } })),
-               ]
-             }
-          ]
-        },
-        orderBy: { rating: 'desc' },
-        take: 50,
-      });
-
-      // Fallback if strict AND category match failed
-      let finalCandidates = candidates;
-      if (candidates.length === 0) {
-        finalCandidates = await prisma.business.findMany({
+    const [allDesireCandidates, allTaxiRows] = await Promise.all([
+      // Fetch candidates for all desires in parallel
+      Promise.all(desireMetas.map(async ({ desire, category, keywords, searchCorridor }) => {
+        const primary = await prisma.business.findMany({
           where: {
             locationSlug: { in: searchCorridor },
-            id: { notIn: Array.from(usedBusinessIds) },
+            AND: [
+              { category: { equals: category } },
+              { OR: [
+                { category: { in: keywords } },
+                { name: { contains: desire } },
+                ...keywords.map(kw => ({ name: { contains: kw } })),
+                ...keywords.map(kw => ({ category: { contains: kw } })),
+              ]}
+            ]
+          },
+          orderBy: { rating: 'desc' },
+          take: 50,
+        });
+        if (primary.length > 0) return primary;
+        // Fallback: broader match
+        return prisma.business.findMany({
+          where: {
+            locationSlug: { in: searchCorridor },
             OR: [
               { category: { equals: category } },
               { category: { in: keywords } },
@@ -219,7 +229,17 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
           orderBy: { rating: 'desc' },
           take: 50,
         });
-      }
+      })),
+      // Fetch all taxis once (hoisted out of transit-edge loop)
+      prisma.business.findMany({ where: { category: 'TRANSPORT' } }),
+    ]);
+
+    // --- Activity steps (Nodes) — selection is sequential for dedup ---
+    for (let di = 0; di < desires.length; di++) {
+      const { desire, cost } = desireMetas[di];
+      const finalCandidates = allDesireCandidates[di].filter(
+        b => !usedBusinessIds.has(b.id)
+      );
 
       const alts = finalCandidates
         .filter(b => b.lat !== null && b.lng !== null && b.rating !== null)
@@ -308,11 +328,7 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       const transitKm = calculateDistance(fromNode.coords.lat, fromNode.coords.lng, toNode.coords.lat, toNode.coords.lng);
       const transitCost = Math.max(15, Math.round(transitKm * 1.8));
 
-      const taxiRows = await prisma.business.findMany({
-        where: {
-          category: 'TRANSPORT',
-        }
-      });
+      const taxiRows = allTaxiRows;
 
       const oLower = fromNode.locationStr.toLowerCase();
       const dLower = toNode.locationStr.toLowerCase();
@@ -481,4 +497,4 @@ CALL IT as soon as you have origin + destination. Ask for missing info conversat
       totalCost: waypoints.reduce((sum, w) => sum + (w.priceUsd ?? 0), 0) + transitEdges.reduce((sum, e) => sum + (e.defaultDriver.priceUsd ?? 0), 0)
     };
   },
-});
+} as any);
