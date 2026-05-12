@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Component, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { getCategoryColor } from "@/lib/utils/category-style";
@@ -81,6 +82,7 @@ export function ItineraryPanel() {
     setIsExchangingEnd,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
+  const router = useRouter();
 
   // Cascade stop times: startAnchor time + legs travel + waypoint durations
   const stopTimes = (() => {
@@ -331,9 +333,9 @@ export function ItineraryPanel() {
                   onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
-                  onClick={e => { e.stopPropagation(); const v = activeItinerary.endAnchor?.title || ''; if (v) { setAiPromptToTrigger(`My travel ends at ${v}`); setIsChatOpen(true); } }}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                  title="Ask concierge to find this place"
+                  onClick={e => { e.stopPropagation(); const v = activeItinerary.endAnchor?.title || ''; if (v) { router.push(`/explore?q=${encodeURIComponent(v)}`); setPanelMode('discover'); } }}
+                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                  title="Search in Discover"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                 </button>

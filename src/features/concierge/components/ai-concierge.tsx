@@ -130,11 +130,11 @@ export function AiConcierge() {
 
   useEffect(() => {
     if (aiPromptToTrigger) {
-      setIsChatOpen(true);
+      // Send context silently — does NOT open the chat. User opens chat themselves via FAB.
       sendMessage({ text: aiPromptToTrigger });
       setAiPromptToTrigger(null);
     }
-  }, [aiPromptToTrigger, sendMessage, setIsChatOpen, setAiPromptToTrigger]);
+  }, [aiPromptToTrigger, sendMessage, setAiPromptToTrigger]);
 
   // Sync tool results → activeItinerary + day view (v6: msg.parts, state=output-available)
   useEffect(() => {

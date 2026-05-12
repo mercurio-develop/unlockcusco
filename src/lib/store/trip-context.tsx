@@ -174,10 +174,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     const bName = service.name || "this location";
     setAiPromptToTrigger(`I just added ${bName} to my itinerary.`);
-    setIsChatOpen(true);
     setPanelMode('itinerary');
     return true;
-  }, [setIsChatOpen]);
+  }, []);
 
   const swapWaypoint = useCallback((targetId: string, newService: Business) => {
     setActiveItinerary(prev => {
