@@ -6,6 +6,8 @@ import { showBoletoInfo } from './show-boleto-info';
 import { estimateTaxiFare } from './taxi-estimator';
 import { triggerSupportAlert } from './trigger-support';
 import { queryExpatsGuide } from './query-expats-guide';
+import { buildItinerary } from './build-itinerary';
+import { mutateItinerary } from './mutate-itinerary';
 
 // Export the native Vercel AI SDK tools
 export const toolsRegistry = {
@@ -16,5 +18,7 @@ export const toolsRegistry = {
   showBoletoInfo,
   estimateTaxiFare,
   triggerSupportAlert,
-  queryExpatsGuide
+  queryExpatsGuide,
+  buildItinerary,
+  mutateItinerary
 };

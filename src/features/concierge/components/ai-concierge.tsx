@@ -187,6 +187,21 @@ export function AiConcierge() {
           setActiveItinerary({ ...activeItinerary, waypoints: updatedWaypoints });
         }
 
+        if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
+          const itin = activeItinerary ?? minimalItinerary();
+          const newWaypoint = {
+            id: resolvedBusiness.id,
+            category: resolvedBusiness.category,
+            title: resolvedBusiness.name,
+            locationStr: resolvedBusiness.name,
+            lat: resolvedBusiness.lat,
+            lng: resolvedBusiness.lng,
+            service: resolvedBusiness
+          };
+          setActiveItinerary({ ...itin, waypoints: [...itin.waypoints, newWaypoint] });
+          setPanelMode('itinerary');
+        }
+
         if (action === 'SET_START') {
           const itin = activeItinerary ?? minimalItinerary();
           setActiveItinerary({

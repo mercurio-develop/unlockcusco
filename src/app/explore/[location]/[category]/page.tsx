@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
+import { siteConfig } from '@/lib/config/site'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -51,13 +52,17 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: {
+      canonical: `${siteConfig.url}/explore/${location}/${category}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${siteConfig.url}/explore/${location}/${category}`,
       type: "website",
       images: [
         {
-          url: "/images/og-default.jpg",
+          url: `/api/og?title=${encodeURIComponent(cat.label + ' in ' + loc)}&description=${encodeURIComponent('Discover verified local businesses in ' + loc)}`,
           width: 1200,
           height: 630,
           alt: title,
@@ -68,7 +73,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/images/og-default.jpg"],
+      images: [`/api/og?title=${encodeURIComponent(cat.label + ' in ' + loc)}&description=${encodeURIComponent('Discover verified local businesses in ' + loc)}`],
     },
   }
 }

@@ -18,6 +18,7 @@ async function main() {
   console.log(`Fetching businesses with ${MIN_REVIEWS}+ reviews...`);
   const businesses = await prisma.business.findMany({
     where: {
+      description: "",
       reviews: {
         some: {}
       }

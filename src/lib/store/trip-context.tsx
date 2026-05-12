@@ -14,11 +14,14 @@ interface TripContextType {
   setPanelMode: (mode: PanelMode) => void;
   selectedId: string | null;
   setSelectedId: (id: string | null) => void;
+  exchangeTargetId: string | null;
+  setExchangeTargetId: (id: string | null) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string) => void;
   updateEndAnchorLocation: (lat: number, lng: number, title?: string) => void;
   insertWaypoint: (service: Business) => boolean;
+  swapWaypoint: (targetId: string, newService: Business) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -28,6 +31,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [activeItinerary, setActiveItinerary] = useState<OptimizedPlan | null>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>("discover");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [exchangeTargetId, setExchangeTargetId] = useState<string | null>(null);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
 
   const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location") => {
@@ -63,13 +67,70 @@ export function TripProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const insertWaypoint = useCallback((service: Business): boolean => {
-    // Triggers the AI to add the stop
+    setActiveItinerary(prev => {
+      const newWaypoint = {
+        id: service.id,
+        category: service.category || 'General',
+        title: service.name,
+        locationStr: service.name,
+        lat: service.lat || undefined,
+        lng: service.lng || undefined,
+        rating: service.rating || undefined,
+        service: service
+      };
+
+      if (!prev) {
+        return {
+          title: "Today's Plan",
+          startAnchor: {
+            title: 'Current Location', locationStr: 'Current Location',
+            type: 'GENERIC_TOWN' as const,
+          },
+          endAnchor: {
+            title: 'Destination', locationStr: 'Destination',
+            type: 'GENERIC_TOWN' as const,
+          },
+          waypoints: [newWaypoint],
+          transitEdges: [],
+          needsAccommodationUpsell: false,
+          totalCost: 0,
+        };
+      }
+
+      return {
+        ...prev,
+        waypoints: [...prev.waypoints, newWaypoint]
+      };
+    });
+
     const bName = service.name || "this location";
-    setAiPromptToTrigger(`[INTERNAL] User added ${bName} to their day. Acknowledge this and ask if they need help adjusting their transport stops.`);
+    setAiPromptToTrigger(`I just added ${bName} to my itinerary.`);
     setIsChatOpen(true);
     setPanelMode('itinerary');
-    return false;
+    return true;
   }, [setIsChatOpen]);
+
+  const swapWaypoint = useCallback((targetId: string, newService: Business) => {
+    setActiveItinerary(prev => {
+      if (!prev) return null;
+      const updatedWaypoints = prev.waypoints.map(w => 
+        w.id === targetId ? {
+          ...w,
+          id: newService.id,
+          category: newService.category || 'General',
+          title: newService.name,
+          locationStr: newService.name,
+          lat: newService.lat || undefined,
+          lng: newService.lng || undefined,
+          rating: newService.rating || undefined,
+          service: newService
+        } : w
+      );
+      return { ...prev, waypoints: updatedWaypoints };
+    });
+    setExchangeTargetId(null);
+    setPanelMode('itinerary');
+  }, []);
 
   const value = React.useMemo(() => ({
       activeItinerary,
@@ -78,14 +139,17 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setPanelMode,
       selectedId,
       setSelectedId,
+      exchangeTargetId,
+      setExchangeTargetId,
       aiPromptToTrigger,
       setAiPromptToTrigger,
       setStartAnchorLocation,
       updateEndAnchorLocation,
       insertWaypoint,
+      swapWaypoint,
   }), [
-      activeItinerary, panelMode, selectedId, aiPromptToTrigger,
-      setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint
+      activeItinerary, panelMode, selectedId, exchangeTargetId, aiPromptToTrigger,
+      setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint
   ]);
 
   return (

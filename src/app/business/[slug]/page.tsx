@@ -11,6 +11,8 @@ interface BusinessPageProps {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 86400; // Cache for 1 day
+
 export async function generateMetadata({ params }: BusinessPageProps): Promise<Metadata> {
   const { slug } = await params
   const business = await prisma.business.findUnique({
@@ -29,14 +31,17 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   return {
     title,
     description,
+    alternates: {
+      canonical: `${siteConfig.url}/business/${business.slug}`,
+    },
     openGraph: {
       title,
       description,
-      url: `/business/${business.id}`,
+      url: `${siteConfig.url}/business/${business.slug}`,
       siteName: "Vallecito",
       images: [
         {
-          url: business.imageUrl || "/images/og-default.jpg",
+          url: `/api/og?title=${encodeURIComponent(business.name)}&description=${encodeURIComponent(categoryName + ' in ' + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`,
           width: 1200,
           height: 630,
           alt: `${business.name} - ${categoryName}`,
@@ -48,7 +53,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
       card: "summary_large_image",
       title,
       description,
-      images: [business.imageUrl || "/images/og-default.jpg"],
+      images: [`/api/og?title=${encodeURIComponent(business.name)}&description=${encodeURIComponent(categoryName + ' in ' + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`],
     },
   }
 }
@@ -88,7 +93,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   const isVerified = business.isClaimed || isAsociado
 
   // JSON-LD Structured Data
-  const jsonLd = {
+  const jsonLd: any = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": business.name,
@@ -112,6 +117,22 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       "ratingValue": business.rating,
       "reviewCount": business.reviewsCount
     } : undefined
+  };
+
+  if (business.reviews && business.reviews.length > 0) {
+    jsonLd.review = business.reviews.slice(0, 5).map(review => ({
+      "@type": "Review",
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating || 5
+      },
+      "author": {
+        "@type": "Person",
+        "name": review.author || "Vallecito User"
+      },
+      "reviewBody": review.text,
+      "datePublished": new Date().toISOString().split('T')[0]
+    }));
   }
 
   return (

@@ -99,7 +99,7 @@ export function ItineraryPanel() {
               {/* Optional: Render full business card if it's a resolved service */}
               {waypoint.service && selectedId === waypoint.id && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <BusinessCard business={waypoint.service} />
+                  <BusinessCard business={waypoint.service} orientation="horizontal" />
                 </div>
               )}
             </div>

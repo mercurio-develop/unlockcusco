@@ -10,6 +10,7 @@ import type { Business } from "@prisma/client"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
+import { BusinessCard } from "./business-card"
 
 const getCategoryStyle = (category: string | undefined | null) => {
   if (!category) return { bg: "#8E8E93", icon: MapPin };
@@ -759,70 +760,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 </p>
               </div>
             ) : (
-              <div className="w-64 rounded-2xl bg-white/95 overflow-hidden border border-white/20 text-slate-900 shadow-[0_15px_40px_rgba(0,0,0,0.15)] backdrop-blur-md" onClick={e => e.stopPropagation()}>
-                {(popupBusiness as any).imageUrl && (
-                  <div className="w-full h-24 bg-slate-100 relative">
-                    <img 
-                      src={(popupBusiness as any).imageUrl} 
-                      alt={(popupBusiness as any).name} 
-                      referrerPolicy="no-referrer" 
-                      className="w-full h-full object-cover" 
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
-                        e.currentTarget.onerror = null;
-                      }}
-                    />
-                  </div>
-                )}
-                <div className="p-3">
-                  <div className="flex items-center justify-between gap-3 mb-1">
-                    <h3 className="font-bold text-[14px] leading-tight tracking-tight truncate">{(popupBusiness as any).name || (popupBusiness as any).title}</h3>
-                    {(popupBusiness as any).isClaimed && <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-500 fill-emerald-500" />}
-                  </div>
-                  <div className="flex items-center justify-between text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">
-                    <span>{(popupBusiness as any).category}</span>
-                    <span className="text-emerald-500 font-mono font-bold">{(popupBusiness as any).priceTier || '$$'}</span>
-                  </div>
-                  
-                  {((popupBusiness as any).rating || (popupBusiness as any).rating) && (
-                    <div className="flex flex-col gap-1 mb-3">
-                      <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        {(popupBusiness as any).rating || (popupBusiness as any).rating}
-                      </div>
-                      {(popupBusiness as any).description && (
-                        <p className="text-xs text-slate-600 italic leading-snug">
-                          {(popupBusiness as any).description}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="mt-2">
-                    {panelMode === "builder" ? (
-                      <button onClick={() => {
-                        setPopupBusiness(null)
-                      }} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                        Close
-                      </button>
-                    ) : (popupBusiness as any).menuUrl ? (
-                      <a href={(popupBusiness as any).menuUrl} target="_blank" rel="noreferrer" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                        View Menu ↗
-                      </a>
-                    ) : (
-                      <button onClick={() => {
-                        const isNewTrip = insertWaypoint(popupBusiness as any)
-                        if (isNewTrip) {
-                          const bName = encodeURIComponent((popupBusiness as any).name || (popupBusiness as any).title);
-                          router.push(`?ai_prompt=I'd like to add ${bName} to my itinerary.`)
-                        }
-                        setPopupBusiness(null)
-                      }} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1.5">
-                        + Add to Day
-                      </button>
-                    )}
-                  </div>
-                </div>
+              <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20" onClick={e => e.stopPropagation()}>
+                <BusinessCard business={popupBusiness as Business} orientation="vertical" />
               </div>
             )}
           </Popup>

@@ -85,7 +85,9 @@ export async function POST(req: Request) {
         showBoletoInfo: toolsRegistry.showBoletoInfo,
         estimateTaxiFare: toolsRegistry.estimateTaxiFare,
         triggerSupportAlert: toolsRegistry.triggerSupportAlert,
-        queryExpatsGuide: toolsRegistry.queryExpatsGuide
+        queryExpatsGuide: toolsRegistry.queryExpatsGuide,
+        buildItinerary: toolsRegistry.buildItinerary,
+        mutateItinerary: toolsRegistry.mutateItinerary
       },
       stopWhen: stepCountIs(8),
     });

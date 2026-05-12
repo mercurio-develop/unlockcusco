@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star, ShieldCheck } from "lucide-react"
+import { siteConfig } from "@/lib/config/site"
 
 interface ClaimPageProps {
   params: Promise<{ businessId: string }>
 }
+
+export const revalidate = 86400; // Cache for 1 day
 
 export async function generateMetadata({ params }: ClaimPageProps): Promise<Metadata> {
   const { businessId } = await params
@@ -29,9 +32,13 @@ export async function generateMetadata({ params }: ClaimPageProps): Promise<Meta
   return {
     title,
     description,
+    alternates: {
+      canonical: `${siteConfig.url}/claim/${businessId}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${siteConfig.url}/claim/${businessId}`,
       images: [
         {
           url: business.imageUrl || "/images/og-default.jpg",

@@ -60,12 +60,14 @@ export function BusinessCard({
   const [isOpen, setIsOpen] = useState(false)
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const { activeItinerary, panelMode, insertWaypoint } = useTrip()
+  const [hasReportedLoad, setHasReportedLoad] = useState(false)
+  const { activeItinerary, panelMode, setPanelMode, exchangeTargetId, setExchangeTargetId, swapWaypoint, insertWaypoint } = useTrip()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
   const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
+  const isAlreadyInItinerary = activeItinerary?.waypoints?.some(w => w.id === business.id) || false;
 
   const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -168,8 +170,8 @@ export function BusinessCard({
 
       {/* Image Container */}
       <div className={cn(
-        "relative overflow-hidden rounded-2xl transition-all duration-300 bg-slate-100",
-        isHorizontal ? "w-20 sm:w-24 aspect-[4/3] shrink-0" : "w-full aspect-[4/3] sm:aspect-[4/3]",
+        "relative overflow-hidden transition-all duration-300 bg-slate-100",
+        isHorizontal ? "w-16 sm:w-20 aspect-square shrink-0 rounded-xl" : "w-full aspect-[4/3] sm:aspect-[4/3] rounded-2xl",
         isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
       )}>
         {(() => {
@@ -184,13 +186,19 @@ export function BusinessCard({
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 onLoad={() => {
-                  if (onImageLoad) onImageLoad();
+                  if (onImageLoad && !hasReportedLoad) {
+                    setHasReportedLoad(true);
+                    onImageLoad();
+                  }
                 }}
                 onError={(e) => {
                   if (e.currentTarget.src !== fallbackImage) {
                     e.currentTarget.src = fallbackImage;
                   }
-                  if (onImageLoad) onImageLoad();
+                  if (onImageLoad && !hasReportedLoad) {
+                    setHasReportedLoad(true);
+                    onImageLoad();
+                  }
                 }}
               />
               {/* Magazine-style overlays to normalize image appearance */}
@@ -288,7 +296,7 @@ export function BusinessCard({
             }}>
               <p className={cn(
                 "text-slate-500 text-[11px] italic leading-relaxed transition-all",
-                !isExpanded && (isHorizontal ? "line-clamp-1" : "line-clamp-3")
+                !isExpanded && (isHorizontal ? "line-clamp-2" : "line-clamp-3")
               )}>
                 &ldquo;{business.description}&rdquo;
               </p>
@@ -346,16 +354,53 @@ export function BusinessCard({
         {/* Action Row */}
         <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
             <>
-              <Button
-                onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
-                className={cn(
-                  "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
-                )}
-              >
-                <Plus className="w-3 h-3" />
-                {isHorizontal ? "Add" : "Add to Day"}
-              </Button>
+              {exchangeTargetId ? (
+                exchangeTargetId === business.id ? (
+                  <Button
+                    disabled
+                    className={cn(
+                      "flex-1 bg-slate-100 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                    )}
+                  >
+                    <Repeat className="w-3 h-3" />
+                    Selected
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
+                    className={cn(
+                      "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                    )}
+                  >
+                    <Repeat className="w-3 h-3" />
+                    Swap
+                  </Button>
+                )
+              ) : isAlreadyInItinerary ? (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
+                  className={cn(
+                    "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
+                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                  )}
+                >
+                  <Repeat className="w-3 h-3" />
+                  Exchange
+                </Button>
+              ) : (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+                  className={cn(
+                    "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
+                    isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                  )}
+                >
+                  <Plus className="w-3 h-3" />
+                  {isHorizontal ? "Add" : "Add to Day"}
+                </Button>
+              )}
               {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
                 <Button
                   onClick={handleBookNow}
