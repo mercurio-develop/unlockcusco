@@ -40,6 +40,7 @@ export function ExploreSearch({
   
   const [localRad, setLocalRad] = useState(currentRad)
   const [showCategories, setShowCategories] = useState(false)
+  const [showLocations, setShowLocations] = useState(false)
 
   const currentCats = useMemo(() => {
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
@@ -260,34 +261,53 @@ export function ExploreSearch({
 
               {/* Location - Magazine / Airbnb Hybrid Pills */}
               <div className="flex flex-col gap-3">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Town / Sector</span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
-                    className={cn(
-                      "px-3.5 py-2 rounded-full border transition-all",
-                      currentLoc === "" 
-                        ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
-                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
-                    )}
-                  >
-                    Anywhere
-                  </button>
-                  {LOCATIONS.map((loc) => (
-                    <button
-                      key={loc.value}
-                      onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
-                      className={cn(
-                        "px-3.5 py-2 rounded-full border transition-all",
-                        currentLoc === loc.value 
-                          ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
-                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
-                      )}
+                <button 
+                  onClick={() => setShowLocations(!showLocations)}
+                  className="flex items-center justify-between group"
+                >
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] group-hover:text-slate-600 transition-colors">Town / Sector</span>
+                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors">
+                    {showLocations ? 'Hide' : 'Show'}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {showLocations && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
                     >
-                      {loc.label}
-                    </button>
-                  ))}
-                </div>
+                      <div className="flex flex-wrap gap-2 pb-1">
+                        <button
+                          onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                          className={cn(
+                            "px-3.5 py-2 rounded-full border transition-all",
+                            currentLoc === "" 
+                              ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
+                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
+                          )}
+                        >
+                          Anywhere
+                        </button>
+                        {LOCATIONS.map((loc) => (
+                          <button
+                            key={loc.value}
+                            onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                            className={cn(
+                              "px-3.5 py-2 rounded-full border transition-all",
+                              currentLoc === loc.value 
+                                ? "bg-slate-900 text-white border-slate-900 font-extrabold uppercase tracking-wider shadow-sm text-[11px]" 
+                                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
+                            )}
+                          >
+                            {loc.label}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Radius - Compact */}
