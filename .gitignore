@@ -86,3 +86,20 @@ tmp/
 
 # Build & Logs
 *.log
+
+# Deep Cleanup (Clutter removal from public repo)
+CAPACITOR_DEV_GUIDE.md
+CLAUDE.md
+GEMINI.md
+AUDIT_REPORT.md
+ROADMAP.md
+SPRINT_BOARD.md
+UNIFICATION_GUIDE.md
+android/
+ios/
+capacitor.config.*
+skills/
+agents/
+pipelines/
+mcp-configs/
+playwright.config.ts
