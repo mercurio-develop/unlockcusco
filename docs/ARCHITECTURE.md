@@ -47,6 +47,7 @@ GET  /api/businesses        Business search (delegates to fetchBusinesses)
 POST /api/whatsapp          Incoming WA verification webhook
 POST /api/experiences/[id]  Experience booking
 GET  /api/machu-picchu/scrape  Machu Picchu data scraper
+GET  /api/cron/*            Automated background tasks (see docs/CRON_JOBS.md)
 ```
 
 ---

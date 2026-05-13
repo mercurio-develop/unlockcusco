@@ -8,6 +8,10 @@ const RATE_LIMIT_MAX_REQUESTS = 3; // 3 requests
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // per minute
 
 export async function GET(req: Request) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const ip = req.headers.get('x-forwarded-for') || 'unknown-ip';
   const now = Date.now();
   const record = rateLimit.get(ip);

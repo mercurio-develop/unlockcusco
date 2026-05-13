@@ -27,7 +27,15 @@ export function AiConcierge() {
     activeItinerary,
     setActiveItinerary,
     setStartAnchorLocation,
-    setPanelMode
+    updateEndAnchorLocation,
+    setPanelMode,
+    moveWaypoint,
+    clearStartAnchor,
+    clearEndAnchor,
+    setLegTransportProfile,
+    removeWaypoint,
+    swapWaypoint,
+    insertWaypoint
   } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -38,7 +46,7 @@ export function AiConcierge() {
 
   const sidebarOffset = "0px"
 
-  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day, from finding hidden gems to booking a taxi. Here's how to navigate:\n\n🔍 **Discover**: Browse local experiences using the filters above.\n\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
+  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
@@ -155,8 +163,20 @@ export function AiConcierge() {
   useEffect(() => {
     try {
     messages.forEach((msg: any) => {
-      if (!msg || msg.role !== 'assistant' || !Array.isArray(msg.parts)) return;
-      msg.parts.forEach((p: any) => {
+      if (!msg || msg.role !== 'assistant') return;
+      
+      const toolParts = msg.parts?.filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool') 
+                        || msg.toolInvocations?.map((ti: any) => ({ 
+                             type: 'tool-invocation', 
+                             toolInvocation: ti, 
+                             state: ti.state === 'result' ? 'output-available' : undefined, 
+                             output: ti.result, 
+                             toolCallId: ti.toolCallId, 
+                             toolName: ti.toolName 
+                           }))
+                        || [];
+
+      toolParts.forEach((p: any) => {
         if (!p || p?.state !== 'output-available') return;
         if (processedToolCalls.current.has(p.toolCallId)) return;
 
@@ -174,103 +194,54 @@ export function AiConcierge() {
         // mutateItinerary syncs
         if (toolName !== 'mutateItinerary' || !output?.success) return;
 
-        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time } = output;
-
-        const minimalItinerary = () => ({
-          title: "Today's Plan",
-          startAnchor: {
-            title: 'Current Location', locationStr: 'Current Location',
-            type: 'GENERIC_TOWN' as const,
-            lat: userCoords?.lat ?? DEFAULT_COORDS.lat, lng: userCoords?.lng ?? DEFAULT_COORDS.lng, time: '09:00',
-          },
-          endAnchor: {
-            title: 'Destination', locationStr: 'Destination',
-            type: 'GENERIC_TOWN' as const,
-            lat: undefined, lng: undefined, time: '18:00',
-          },
-          waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
-        });
+        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time, direction, transportProfile, legIndex } = output;
 
         if (action === 'SWAP_STOP' && targetId && resolvedBusiness) {
-          setActiveItinerary(prev => {
-            if (!prev) return prev;
-            const updatedWaypoints = prev.waypoints.map((w: any) =>
-              w.id === targetId ? {
-                ...w,
-                id: resolvedBusiness.id,
-                category: resolvedBusiness.category,
-                title: resolvedBusiness.name,
-                locationStr: resolvedBusiness.name,
-                lat: resolvedBusiness.lat,
-                lng: resolvedBusiness.lng,
-                service: resolvedBusiness
-              } : w
-            );
-            return { ...prev, waypoints: updatedWaypoints };
-          });
+          swapWaypoint(targetId, resolvedBusiness as any);
         }
 
         if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
-          setActiveItinerary(prev => {
-            const itin = prev ?? minimalItinerary();
-            const newWaypoint = {
-              id: resolvedBusiness.id,
-              category: resolvedBusiness.category,
-              title: resolvedBusiness.name,
-              locationStr: resolvedBusiness.name,
-              lat: resolvedBusiness.lat,
-              lng: resolvedBusiness.lng,
-              service: resolvedBusiness
-            };
-            return { ...itin, waypoints: [...itin.waypoints, newWaypoint] };
-          });
-          setPanelMode('itinerary');
+          insertWaypoint(resolvedBusiness as any);
         }
 
         if (action === 'SET_START') {
-          setActiveItinerary(prev => {
-            const itin = prev ?? minimalItinerary();
-            return {
-              ...itin,
-              startAnchor: {
-                ...itin.startAnchor,
-                title: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.title,
-                locationStr: resolvedLocation || resolvedBusiness?.name || itin.startAnchor.locationStr,
-                lat: coords?.lat || resolvedBusiness?.lat || itin.startAnchor.lat,
-                lng: coords?.lng || resolvedBusiness?.lng || itin.startAnchor.lng,
-                service: resolvedBusiness,
-              }
-            };
-          });
+          setStartAnchorLocation(
+            coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
+            coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
+            resolvedLocation || resolvedBusiness?.name || 'Current Location',
+            resolvedBusiness as any
+          );
           setPanelMode('itinerary');
         }
 
         if (action === 'SET_END') {
-          setActiveItinerary(prev => {
-            const itin = prev ?? minimalItinerary();
-            return {
-              ...itin,
-              endAnchor: {
-                ...itin.endAnchor,
-                title: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.title,
-                locationStr: resolvedLocation || resolvedBusiness?.name || itin.endAnchor.locationStr,
-                lat: coords?.lat || resolvedBusiness?.lat || itin.endAnchor.lat,
-                lng: coords?.lng || resolvedBusiness?.lng || itin.endAnchor.lng,
-                service: resolvedBusiness,
-              }
-            };
-          });
+          updateEndAnchorLocation(
+            coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
+            coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
+            resolvedLocation || resolvedBusiness?.name || 'Destination',
+            resolvedBusiness as any
+          );
           setPanelMode('itinerary');
         }
 
         if (action === 'REMOVE_WAYPOINT' && targetId) {
-          setActiveItinerary(prev => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              waypoints: prev.waypoints.filter((w: any) => w.id !== targetId)
-            };
-          });
+          removeWaypoint(targetId);
+        }
+
+        if (action === 'MOVE_WAYPOINT' && targetId && direction) {
+          moveWaypoint(targetId, direction);
+        }
+
+        if (action === 'CLEAR_START') {
+          clearStartAnchor();
+        }
+
+        if (action === 'CLEAR_END') {
+          clearEndAnchor();
+        }
+
+        if (action === 'SET_TRANSPORT_PROFILE' && legIndex !== undefined && transportProfile) {
+          setLegTransportProfile(legIndex, transportProfile);
         }
 
         if (action === 'UPDATE_TIME' && targetId && time) {
@@ -295,7 +266,7 @@ export function AiConcierge() {
     } catch (e) {
       console.error("Tool sync error:", e);
     }
-  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode]);
+  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
@@ -449,8 +420,21 @@ Please generate my macro trip plan.`;
                         </div>
                       )}
                       
-                      {/* Tool parts (AI SDK v6: msg.parts, state=output-available) */}
-                      {(msg as any).parts?.map((part: any, idx: number) => {
+                      {/* Tool parts (AI SDK v6: msg.parts, state=output-available or older v3 msg.toolInvocations) */}
+                      {(() => {
+                        const partsTools = ((msg as any).parts || []).filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool');
+                        const invocationsTools = ((msg as any).toolInvocations || []).map((ti: any) => ({
+                          type: 'tool-invocation',
+                          toolInvocation: ti,
+                          state: ti.state === 'result' ? 'output-available' : undefined,
+                          output: ti.result,
+                          input: ti.args,
+                          toolCallId: ti.toolCallId,
+                          toolName: ti.toolName
+                        }));
+                        // Prefer parts tools if they exist, otherwise fallback to invocations mapped
+                        return partsTools.length > 0 ? partsTools : invocationsTools;
+                      })().map((part: any, idx: number) => {
                         const isToolPart = part?.type?.startsWith('tool-') || part?.type === 'dynamic-tool';
                         if (!part || !isToolPart) return null;
                         const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
@@ -550,6 +534,24 @@ Please generate my macro trip plan.`;
                         if (toolName === 'estimateTaxiFare') {
                           return <TaxiFareCard key={key} data={output} />
                         }
+                        if (toolName === 'generateSaveLink' && output?.url) {
+                          return (
+                            <div key={key} className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
+                              <p className="text-sm text-emerald-900 font-medium leading-relaxed">
+                                I have saved your itinerary! You can bookmark this link or share it with others.
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Input readOnly value={output.url} className="bg-white border-emerald-200 text-xs text-slate-600 h-9" />
+                                <button
+                                  onClick={() => { navigator.clipboard.writeText(output.url); alert("Copied!"); }}
+                                  className="h-9 px-3 bg-emerald-600 text-white rounded-lg font-bold text-xs shadow-sm hover:bg-emerald-500 transition-colors shrink-0"
+                                >
+                                  Copy
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        }
                         if (toolName === 'mutateItinerary') {
                           return (
                             <div key={key} className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
@@ -626,6 +628,7 @@ Please generate my macro trip plan.`;
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
+                    data-vaul-no-drag
                     className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-12 px-5 shadow-inner"
                   />
                   <Button 

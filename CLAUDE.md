@@ -1,3 +1,7 @@
-Need read permission for the original AGENTS.md. The compressed output references `@./skills/caveman/SKILL.md` etc., but the task says code blocks not preserved exactly. Without reading the original, I can't verify what the correct code block content should be.
+> **CRITICAL CONTEXT**: All instructions and state are in `docs/` and `agents/`. ALWAYS read `docs/mempalace.md` first.
 
-Can you grant read access to `/home/tushita/.gemini/extensions/caveman/AGENTS.md` so I can compare the original?
+<!-- Imported from: agents/AGENTS.md -->
+
+# MAS/RTK Mandate
+1. Use `rtk` prefix for all shell commands.
+2. Follow pipeline-based stage management in `pipelines/`.

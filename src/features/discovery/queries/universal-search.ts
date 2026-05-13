@@ -43,12 +43,12 @@ export async function universalSearch({
             { serviceZones: { contains: locLower, mode: 'insensitive' as const } },
           ]
         } : {},
-        category ? { category: { equals: category } } : {}
+        category ? { category: { equals: category, mode: 'insensitive' as const } } : {}
       ]
     },
     orderBy: [
       { isAsociado: 'desc' },
-      { rating: 'desc' }
+      { rating: { sort: 'desc', nulls: 'last' } }
     ],
     take: limit
   });

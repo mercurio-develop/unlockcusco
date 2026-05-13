@@ -3,59 +3,54 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Business {
-  id       String @id @default(cuid())
-  slug     String @unique
-  name     String
-  category String @default("DINING")
-
-  lat          Float?
-  lng          Float?
-  rating       Float?
-  reviewsCount Int     @default(0)
-  imageUrl     String  @default("")
-  heroImages   String  @default("[]")
-  whatsapp     String?
-  isClaimed    Boolean @default(false)
-  isAsociado   Boolean @default(false)
-  isFeatured   Boolean @default(false)
-  locationSlug String  @default("")
-
-  tagline            String  @default("")
-  description        String  @default("")
-  contactEmail       String  @default("")
-  socialLinks        String  @default("{}")
-  instagramHandle    String?
-  instagramFollowers Int     @default(0)
-
-  priceTier              String @default("$$")
-  marginTier             String @default("STANDARD")
-  commissionRate         Float  @default(0.05)
-  viewsCount             Int    @default(0)
-  whatsappClicksCount    Int    @default(0)
-  aiRecommendationsCount Int    @default(0)
-
-  vehicleType  String?
-  capacity     Int?
-  serviceZones String  @default("[]")
-
-  guideName    String?
-  seoMetaTitle String?
-  seoMetaDesc  String?
-
-  specialties  String @default("[]")
-  themeConfig  String @default("{}")
-  featuresJson String @default("[]")
-  qrCodeUrl    String?
-
-  leads        Lead[]
-  reviews      Review[]
-  services     BusinessService[]
+  id                     String                  @id @default(cuid())
+  slug                   String                  @unique
+  name                   String
+  category               String                  @default("DINING")
+  lat                    Float?
+  lng                    Float?
+  rating                 Float?
+  reviewsCount           Int                     @default(0)
+  imageUrl               String                  @default("")
+  heroImages             String                  @default("[]")
+  whatsapp               String?
+  isClaimed              Boolean                 @default(false)
+  isAsociado             Boolean                 @default(false)
+  isFeatured             Boolean                 @default(false)
+  locationSlug           String                  @default("")
+  tagline                String                  @default("")
+  description            String                  @default("")
+  contactEmail           String                  @default("")
+  socialLinks            String                  @default("{}")
+  instagramHandle        String?
+  instagramFollowers     Int                     @default(0)
+  priceTier              String                  @default("$$")
+  marginTier             String                  @default("STANDARD")
+  commissionRate         Float                   @default(0.05)
+  viewsCount             Int                     @default(0)
+  whatsappClicksCount    Int                     @default(0)
+  aiRecommendationsCount Int                     @default(0)
+  vehicleType            String?
+  capacity               Int?
+  serviceZones           String                  @default("[]")
+  guideName              String?
+  seoMetaTitle           String?
+  seoMetaDesc            String?
+  specialties            String                  @default("[]")
+  themeConfig            String                  @default("{}")
+  featuresJson           String                  @default("[]")
+  qrCodeUrl              String?
+  premiumProfile         BusinessPremiumProfile?
+  services               BusinessService[]
+  leads                  Lead[]
+  reviews                Review[]
+  tourPackages           TourPackage[]
 }
 
 model BusinessService {
@@ -89,6 +84,83 @@ model Review {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }
 
+model Driver {
+  id             String        @id @default(cuid())
+  name           String
+  whatsappNumber String
+  carModel       String
+  licensePlate   String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  rides          RideBooking[]
+}
+
+model RideBooking {
+  id              String        @id @default(cuid())
+  touristName     String?
+  touristPhone    String?
+  pickupLocation  String
+  dropoffLocation String
+  priceUsd        Float
+  stripeIntentId  String?       @unique
+  status          RideStatus    @default(HOLD_SECURED)
+  scheduledFor    DateTime?
+  etaMinutes      Int?
+  driverId        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  driver          Driver?       @relation(fields: [driverId], references: [id])
+  messages        RideMessage[]
+}
+
+model RideMessage {
+  id        String        @id @default(cuid())
+  rideId    String
+  sender    MessageSender
+  text      String
+  createdAt DateTime      @default(now())
+  ride      RideBooking   @relation(fields: [rideId], references: [id], onDelete: Cascade)
+}
+
+model BusinessPremiumProfile {
+  id              String           @id @default(cuid())
+  businessId      String           @unique
+  logoUrl         String?
+  coverPhotoUrl   String?
+  primaryColor    String?
+  accentColor     String?
+  fonts           String?
+  visionStatement String?
+  pillars         BusinessPillar[]
+  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model BusinessPillar {
+  id               String                 @id @default(cuid())
+  premiumProfileId String
+  title            String
+  description      String
+  icon             String?
+  premiumProfile   BusinessPremiumProfile @relation(fields: [premiumProfileId], references: [id], onDelete: Cascade)
+}
+
+model TourPackage {
+  id           String   @id @default(cuid())
+  businessId   String
+  title        String
+  tagline      String?
+  description  String
+  durationDays Int?
+  difficulty   String?
+  pace         String?
+  basePriceUsd Float
+  included     String   @default("[]")
+  highlights   String   @default("[]")
+  itinerary    String   @default("[]")
+  gallery      String   @default("[]")
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
 enum RideStatus {
   HOLD_SECURED
   DRIVER_ASSIGNED
@@ -103,40 +175,10 @@ enum MessageSender {
   SYSTEM
 }
 
-model Driver {
-  id             String        @id @default(cuid())
-  name           String
-  whatsappNumber String
-  carModel       String
-  licensePlate   String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  rides          RideBooking[]
+model SavedItinerary {
+  id        String   @id @default(cuid())
+  shortId   String   @unique
+  state     Json
+  createdAt DateTime @default(now())
 }
 
-model RideBooking {
-  id               String        @id @default(cuid())
-  touristName      String?
-  touristPhone     String?
-  pickupLocation   String
-  dropoffLocation  String
-  priceUsd         Float
-  stripeIntentId   String?       @unique
-  status           RideStatus    @default(HOLD_SECURED)
-  scheduledFor     DateTime?
-  etaMinutes       Int?
-  driverId         String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  driver           Driver?       @relation(fields: [driverId], references: [id], onDelete: SetNull)
-  messages         RideMessage[]
-}
-
-model RideMessage {
-  id        String        @id @default(cuid())
-  rideId    String
-  sender    MessageSender
-  text      String
-  createdAt DateTime      @default(now())
-  ride      RideBooking   @relation(fields: [rideId], references: [id], onDelete: Cascade)
-}

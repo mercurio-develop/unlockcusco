@@ -41,10 +41,11 @@ interface TripContextType {
   routeData: RouteData | null;
   transportProfiles: Record<number, TransportProfile>;
   setLegTransportProfile: (index: number, profile: TransportProfile) => void;
-  mapClickMode: 'end' | null;
-  setMapClickMode: (mode: 'end' | null) => void;
+  mapClickMode: 'start' | 'end' | null;
+  setMapClickMode: (mode: 'start' | 'end' | null) => void;
   clearStartAnchor: () => void;
   clearEndAnchor: () => void;
+  saveItinerary: () => Promise<string | null>;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -60,11 +61,49 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [transportProfiles, setTransportProfiles] = useState<Record<number, TransportProfile>>({});
   const [routeData, setRouteData] = useState<RouteData | null>(null);
-  const [mapClickMode, setMapClickMode] = useState<'end' | null>(null);
+  const [mapClickMode, setMapClickMode] = useState<'start' | 'end' | null>(null);
 
   const setLegTransportProfile = useCallback((index: number, profile: TransportProfile) => {
     setTransportProfiles(prev => ({ ...prev, [index]: profile }));
   }, []);
+
+  // Load itinerary from URL parameter on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('trip');
+    if (tripId && !activeItinerary) {
+      fetch(`/api/itineraries/${tripId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.state) {
+            setActiveItinerary(data.state);
+            setPanelMode("itinerary");
+          }
+        })
+        .catch(err => console.error("Failed to load itinerary", err));
+    }
+  }, []);
+
+  const saveItinerary = useCallback(async () => {
+    if (!activeItinerary) return null;
+    try {
+      const res = await fetch('/api/itineraries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: activeItinerary })
+      });
+      const data = await res.json();
+      if (data.success && data.shortId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('trip', data.shortId);
+        window.history.replaceState({}, '', url.toString());
+        return url.toString();
+      }
+    } catch (e) {
+      console.error("Failed to save itinerary:", e);
+    }
+    return null;
+  }, [activeItinerary]);
 
   useEffect(() => {
     if (!activeItinerary) {
@@ -249,7 +288,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
 
     const bName = service.name || "this location";
-    setAiPromptToTrigger(`I just added ${bName} to my itinerary.`);
+    setAiPromptToTrigger(`[INTERNAL] I just added ${bName} to my itinerary.`);
     setPanelMode('itinerary');
     return true;
   }, []);
@@ -354,11 +393,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setMapClickMode,
       clearStartAnchor,
       clearEndAnchor,
+      saveItinerary,
   }), [
       activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfiles,
-      mapClickMode, clearStartAnchor, clearEndAnchor,
+      mapClickMode, clearStartAnchor, clearEndAnchor, saveItinerary,
   ]);
 
   return (

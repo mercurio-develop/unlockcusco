@@ -45,7 +45,7 @@ export function ExploreView({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation } = useTrip()
+  const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation } = useTrip()
   const { setIsChatOpen } = usePreferences()
   
   const isDrawerOpen = searchParams.get("filter") === "open"
@@ -148,7 +148,17 @@ export function ExploreView({
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={mapBusinesses} selectedId={selectedId} onSelectBusiness={setSelectedId} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { updateEndAnchorLocation(lat, lng, 'Custom End'); setMapClickMode(null); }} />}
+      map={<ExploreMap businesses={mapBusinesses} selectedId={selectedId} onSelectBusiness={(id) => {
+        setSelectedId(id);
+        window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+      }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 
+        if (mapClickMode === 'start') {
+          setStartAnchorLocation(lat, lng, 'Custom Start');
+        } else if (mapClickMode === 'end') {
+          updateEndAnchorLocation(lat, lng, 'Custom End');
+        }
+        setMapClickMode(null); 
+      }} />}
       showMap={true}
     />
   )

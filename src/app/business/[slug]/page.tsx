@@ -65,7 +65,13 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     where: { slug: slug },
     include: {
       reviews: true,
-      services: true
+      services: true,
+      premiumProfile: {
+        include: {
+          pillars: true
+        }
+      },
+      tourPackages: true
     },
   })
 
@@ -135,8 +141,24 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     }));
   }
 
+  if (business.tourPackages && business.tourPackages.length > 0) {
+    jsonLd.offers = business.tourPackages.map(pkg => ({
+      "@type": "Offer",
+      "name": pkg.title,
+      "description": pkg.description,
+      "price": pkg.basePriceUsd,
+      "priceCurrency": "USD"
+    }));
+  }
+
+  const primaryColor = business.premiumProfile?.primaryColor || "#09090B";
+  const accentColor = business.premiumProfile?.accentColor || "#D4AF37";
+
   return (
-    <div className="min-h-screen bg-[#09090B] font-sans pb-24">
+    <div 
+      className="min-h-screen font-sans pb-24" 
+      style={{ backgroundColor: primaryColor, '--accent': accentColor } as React.CSSProperties}
+    >
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -145,14 +167,17 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       {/* Hero Image Header */}
       <div className="relative h-[50vh] md:h-[60vh] w-full border-b border-white/10">
         <Image
-          src={business.imageUrl}
+          src={business.premiumProfile?.coverPhotoUrl || business.imageUrl}
           alt={business.name}
           fill
           priority
           unoptimized
           className="object-cover opacity-60 mix-blend-overlay"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-[#09090B]/40 to-transparent" />
+        <div 
+          className="absolute inset-0 to-transparent" 
+          style={{ background: `linear-gradient(to top, ${primaryColor}, ${primaryColor}66, transparent)` }} 
+        />
         
         {/* Top Navigation */}
         <div className="absolute top-0 left-0 right-0 p-6 z-20 max-w-6xl mx-auto flex justify-between items-center">
@@ -221,9 +246,22 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           {/* About Section */}
           <section>
             <h2 className="text-2xl font-serif text-white mb-6">About {business.name}</h2>
+            {business.premiumProfile?.visionStatement && (
+              <p className="text-xl italic text-white/90 mb-8 border-l-2 border-[#D4AF37] pl-4" style={{ borderColor: accentColor }}>&quot;{business.premiumProfile.visionStatement}&quot;</p>
+            )}
             <p className="text-white/70 leading-relaxed text-lg font-light">
                {business.description || "Discover an authentic experience in the heart of the Sacred Valley. Every detail is designed to offer you the best of our local culture and hospitality."}
             </p>
+            {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                {business.premiumProfile.pillars.map((pillar) => (
+                  <div key={pillar.id} className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h3 className="font-bold mb-2" style={{ color: accentColor }}>{pillar.title}</h3>
+                    <p className="text-white/60 text-sm">{pillar.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
           
           {/* Reviews Section */}

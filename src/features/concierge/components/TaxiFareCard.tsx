@@ -111,18 +111,18 @@ export function TaxiFareCard({ data }: TaxiFareCardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 my-6">
-          <div className="bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
+        <div className="flex flex-wrap sm:grid sm:grid-cols-3 gap-3 my-6">
+          <div className="flex-1 min-w-[30%] bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
             <Navigation className="w-4 h-4 text-slate-400 mb-1.5" />
-            <span className="text-xs font-bold text-slate-700">{data.distanceKm} km</span>
+            <span className="text-xs font-bold text-slate-700 whitespace-nowrap">{data.distanceKm} km</span>
           </div>
-          <div className="bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
+          <div className="flex-1 min-w-[30%] bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
             <Clock className="w-4 h-4 text-slate-400 mb-1.5" />
-            <span className="text-xs font-bold text-slate-700">~{data.estimatedTimeMinutes} min</span>
+            <span className="text-xs font-bold text-slate-700 whitespace-nowrap">~{data.estimatedTimeMinutes} min</span>
           </div>
-          <div className="bg-rose-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-rose-100">
+          <div className="flex-1 min-w-[30%] bg-rose-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-rose-100">
             <DollarSign className="w-4 h-4 text-rose-500 mb-1.5" />
-            <span className="text-sm font-bold text-rose-700">${data.estimatedCostUSD}</span>
+            <span className="text-sm font-bold text-rose-700 whitespace-nowrap">${data.estimatedCostUSD}</span>
           </div>
         </div>
 

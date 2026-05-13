@@ -41,34 +41,23 @@ function enhanceImageUrl(url: string | undefined): string | null {
 }
 
 const SEARCHES = [
-  "Restaurant Cusco, Peru",
-  "Cafe Cusco, Peru",
-  "Picanteria Cusco, Peru",
-  "Hotel Cusco, Peru",
-  "Hostel Cusco, Peru",
-  "Boutique Hotel Cusco, Peru",
-  "Spa Cusco, Peru",
-  "Massage Cusco, Peru",
+  // Maras Gaps
+  "Restaurant Maras, Cusco, Peru",
+  "Cafe Maras, Cusco, Peru",
+  "Hotel Maras, Cusco, Peru",
+  "Spa and wellness Maras, Cusco, Peru",
   
-  "Restaurant Urubamba, Cusco, Peru",
-  "Cafe Urubamba, Cusco, Peru",
-  "Hotel Urubamba, Cusco, Peru",
-  "Boutique Hotel Urubamba, Cusco, Peru",
-  "Spa and wellness Urubamba, Cusco, Peru",
-
-  "Restaurant Pisac, Cusco, Peru",
-  "Cafe Pisac, Cusco, Peru",
-  "Hotel Pisac, Cusco, Peru",
-  "Yoga and spiritual retreat Pisac, Cusco, Peru",
-  
-  "Restaurant Ollantaytambo, Cusco, Peru",
-  "Cafe Ollantaytambo, Cusco, Peru",
-  "Hotel Ollantaytambo, Cusco, Peru",
-  
+  // Chinchero Gaps
   "Restaurant Chinchero, Cusco, Peru",
-  "Restaurant Calca, Cusco, Peru",
-  "Restaurant Aguas Calientes Machu Picchu, Peru",
-  "Hotel Aguas Calientes Machu Picchu, Peru"
+  "Cafe Chinchero, Cusco, Peru",
+  "Hotel Chinchero, Cusco, Peru",
+  "Spa and wellness Chinchero, Cusco, Peru",
+  
+  // Calca Gaps
+  "Hotel Calca, Cusco, Peru",
+  "Lodge Calca, Cusco, Peru",
+  "Adventure tours Calca, Cusco, Peru",
+  "Spa and wellness Calca, Cusco, Peru"
 ];
 
 async function main() {
@@ -81,7 +70,7 @@ async function main() {
     try {
       const run = await apifyClient.actor("compass/google-maps-extractor").call({
         searchStringsArray: [search],
-        maxCrawledPlacesPerSearch: 15,
+        maxCrawledPlacesPerSearch: 20,
         language: "en",
         maxImages: 3,
         maxReviews: 5,

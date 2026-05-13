@@ -21,6 +21,9 @@
 /build
 
 # misc
+ai-context/
+ai-tests/
+ai-scripts/
 .DS_Store
 *.pem
 .idea/
@@ -61,8 +64,25 @@ node_modules/
 # Testing scripts
 test-*.ts
 test-*.js
-scripts/temp-*.ts
-scripts/temp-*.js
 all_businesses.json
 output.txt
 build.log
+
+# Agent Scratchpad
+.agent/
+
+# IDE & Editor files
+.claude/
+.cursor/
+.vscode/
+
+# Temp scripts & files
+temp-*
+*.ts.bak
+*.js.bak
+*.tmp
+tmp/
+*.sql
+
+# Build & Logs
+*.log

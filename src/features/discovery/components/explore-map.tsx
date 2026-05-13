@@ -55,7 +55,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const pathname = usePathname()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("satellite")
-  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, insertWaypoint, routeData } = useTrip()
+  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode } = useTrip()
   const panelMode = strictPanelMode as string;
   const currentTrip: any = null;
   const setCurrentTrip: any = () => {};
@@ -659,7 +659,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               longitude={start.lng}
               latitude={start.lat}
               anchor="bottom"
-              draggable={true}
+              draggable={mapClickMode === 'start'}
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng)
@@ -671,10 +671,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   )
                   setCurrentTrip({ ...currentTrip, days: newDays })
                 }
+                setMapClickMode?.(null)
               }}
             >
               <div
-                className={cn("group/start flex flex-col items-center cursor-grab active:cursor-grabbing")}
+                className={cn("group/start flex flex-col items-center", mapClickMode === 'start' ? "cursor-grab active:cursor-grabbing" : "cursor-pointer")}
                 title="Start location"
                 onClick={e => {
                   e.stopPropagation()
@@ -714,9 +715,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               longitude={end.lng}
               latitude={end.lat}
               anchor="bottom"
-              draggable={!(end as any).service}
+              draggable={mapClickMode === 'end' && !(end as any).service}
               onDragEnd={(e) => {
-                if (currentTrip && activeDayNumber) {
+                if (panelMode === 'itinerary') {
+                  updateEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, end.title, (end as any).service)
+                } else if (currentTrip && activeDayNumber) {
                   const newDays = currentTrip.days.map((d: any) =>
                     d.dayNumber === activeDayNumber
                       ? { ...d, endAnchor: { ...d.endAnchor, lat: e.lngLat.lat, lng: e.lngLat.lng } }
@@ -724,10 +727,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   )
                   setCurrentTrip({ ...currentTrip, days: newDays })
                 }
+                setMapClickMode?.(null)
               }}
             >
               <div
-                className={cn("group/end flex flex-col items-center", !(end as any).service ? "cursor-grab active:cursor-grabbing" : "cursor-pointer")}
+                className={cn("group/end flex flex-col items-center", (mapClickMode === 'end' && !(end as any).service) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer")}
                 title="End location"
                 onClick={e => {
                   e.stopPropagation();

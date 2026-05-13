@@ -103,7 +103,8 @@ export async function POST(req: Request) {
         triggerSupportAlert: toolsRegistry.triggerSupportAlert,
         queryExpatsGuide: toolsRegistry.queryExpatsGuide,
         buildItinerary: toolsRegistry.buildItinerary,
-        mutateItinerary: toolsRegistry.mutateItinerary
+        mutateItinerary: toolsRegistry.mutateItinerary,
+        generateSaveLink: toolsRegistry.generateSaveLink
       },
       stopWhen: stepCountIs(8),
     });

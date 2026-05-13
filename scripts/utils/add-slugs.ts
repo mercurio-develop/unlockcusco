@@ -12,6 +12,7 @@ const TOWNS = [
   { slug: 'yucay',         lat: -13.3120, lng: -72.0930 },
   { slug: 'calca',         lat: -13.3342, lng: -71.9539 },
   { slug: 'cusco',         lat: -13.5317, lng: -71.9675 },
+  { slug: 'aguas-calientes', lat: -13.1547, lng: -72.5253 },
 ]
 
 function locationSlug(lat: number, lng: number): string {

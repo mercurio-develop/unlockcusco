@@ -6,7 +6,7 @@ import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/EndPointPicker";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
 
 // Stable component outside ItineraryPanel so React fiber identity is preserved across re-renders
@@ -90,6 +91,9 @@ class ItineraryErrorBoundary extends Component<{ children: ReactNode }, { error:
 }
 
 export function ItineraryPanel() {
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saveUrl, setSaveUrl] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
   const {
     activeItinerary,
     setPanelMode,
@@ -104,12 +108,14 @@ export function ItineraryPanel() {
     transportProfiles,
     setLegTransportProfile,
     updateEndAnchorLocation,
+    mapClickMode,
     setMapClickMode,
     setAiPromptToTrigger,
     clearStartAnchor,
     clearEndAnchor,
     setIsExchangingStart,
     setIsExchangingEnd,
+    saveItinerary,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
   const router = useRouter();
@@ -183,6 +189,18 @@ export function ItineraryPanel() {
           </h2>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const url = await saveItinerary();
+              if (url) {
+                setSaveUrl(url);
+                setIsSaveModalOpen(true);
+              }
+            }}
+            className="h-8 px-3 rounded-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-slate-800 transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" /> Save
+          </button>
           <button 
             onClick={() => setPanelMode("discover")}
             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200"
@@ -208,26 +226,26 @@ export function ItineraryPanel() {
               <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                 <p className="text-sm font-semibold text-slate-900 truncate flex-1">{activeItinerary.startAnchor?.title || "Current Location"}</p>
                 <button
-                  onClick={e => { e.stopPropagation(); setMapClickMode('start'); }}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
-                  title="Adjust Start Point on Map"
+                  onClick={e => { e.stopPropagation(); setMapClickMode(mapClickMode === 'start' ? null : 'start'); }}
+                  className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                  title={mapClickMode === 'start' ? "Cancel Adjust Map" : "Adjust Start Point on Map"}
                 >
-                  <MapPin className="w-3.5 h-3.5" />
+                  <MapPin className="w-4 h-4" />
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingStart(true); setPanelMode('discover'); }}
                   title={activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? "Exchange start point — browse Discover" : "Add start point — browse Discover"}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
-                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </button>
                 {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' && (
                   <button
                     onClick={e => { e.stopPropagation(); clearStartAnchor(); setIsExchangingStart(false); }}
                     title="Remove start point"
-                    className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -285,29 +303,36 @@ export function ItineraryPanel() {
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {waypoint.locationStr}</p>
                   </div>
 
-                  {/* Always-Visible Actions Row */}
-                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                  {/* Top-Right Actions: Up/Down Group */}
+                  <div className="flex flex-col gap-1 shrink-0 ml-1">
                     <button 
                       disabled={idx === 0}
                       onClick={(e) => { e.stopPropagation(); moveWaypoint(waypoint.id, "up"); }}
-                      className="w-6 h-6 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      <ArrowUp className="w-3 h-3" />
+                      <ArrowUp className="w-4 h-4" />
                     </button>
                     <button 
                       disabled={idx === (activeItinerary.waypoints || []).length - 1}
                       onClick={(e) => { e.stopPropagation(); moveWaypoint(waypoint.id, "down"); }}
-                      className="w-6 h-6 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-8 h-8 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      <ArrowDown className="w-3 h-3" />
+                      <ArrowDown className="w-4 h-4" />
                     </button>
+                  </div>
+                </div>
+
+                {/* Action Footer: Delete, Swap, End Point */}
+                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <Dialog>
                       <DialogTrigger render={
                         <button 
                           onClick={(e) => { e.stopPropagation(); }}
-                          className="w-6 h-6 rounded bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
                         </button>
                       } />
                       <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
@@ -327,13 +352,16 @@ export function ItineraryPanel() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    
                     <button
                       onClick={e => { e.stopPropagation(); setExchangeTargetId?.(waypoint.id); setPanelMode('discover'); }}
-                      className="w-6 h-6 rounded bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
                       title="Exchange this place"
                     >
-                      <Repeat className="w-3 h-3" />
+                      <Repeat className="w-3.5 h-3.5" />
+                      Swap
                     </button>
+
                     {waypoint.lat != null && waypoint.lng != null && (
                       <button
                         onClick={e => {
@@ -342,20 +370,22 @@ export function ItineraryPanel() {
                           removeWaypoint(waypoint.id);
                         }}
                         title="Set as end of trip"
-                        className="w-6 h-6 rounded bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
                       >
-                        <Flag className="w-3 h-3" />
+                        <Flag className="w-3.5 h-3.5" />
+                        End Here
                       </button>
                     )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setSelectedId(selectedId === waypoint.id ? null : waypoint.id); }}
-                      className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors ml-1"
-                    >
-                      <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${selectedId === waypoint.id ? 'rotate-180' : ''}`} />
-                    </button>
                   </div>
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedId(selectedId === waypoint.id ? null : waypoint.id); }}
+                    className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors ml-1 rounded-full hover:bg-slate-50"
+                  >
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${selectedId === waypoint.id ? 'rotate-180' : ''}`} />
+                  </button>
                 </div>
-                
+
                 {/* Expandable Section with CSS Grid Transition */}
                 <div 
                   className={`grid transition-all duration-300 ease-in-out ${selectedId === waypoint.id ? "grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}
@@ -391,26 +421,26 @@ export function ItineraryPanel() {
                   onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
-                  onClick={e => { e.stopPropagation(); setMapClickMode('end'); }}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                  title="Click map to set end"
+                  onClick={e => { e.stopPropagation(); setMapClickMode(mapClickMode === 'end' ? null : 'end'); }}
+                  className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600'}`}
+                  title={mapClickMode === 'end' ? "Cancel Adjust Map" : "Click map to set end"}
                 >
-                  <MapPin className="w-3.5 h-3.5" />
+                  <MapPin className="w-4 h-4" />
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
                   title={activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? "Exchange end point — browse Discover" : "Add end point — browse Discover"}
-                  className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
-                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </button>
                 {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
                   <button
                     onClick={e => { e.stopPropagation(); clearEndAnchor(); setIsExchangingEnd(false); }}
                     title="Remove end point"
-                    className="shrink-0 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -449,6 +479,60 @@ export function ItineraryPanel() {
 
       </div>
     </div>
+
+      <Dialog open={isSaveModalOpen} onOpenChange={setIsSaveModalOpen}>
+        <DialogContent className="sm:max-w-md border-0 shadow-2xl rounded-2xl p-0 overflow-hidden">
+          <div className="bg-slate-900 text-white p-6 pb-8 relative overflow-hidden">
+            {/* Decorative background element */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+            <DialogHeader className="relative z-10 space-y-2">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/20 shadow-inner">
+                <Share2 className="w-6 h-6 text-emerald-400" />
+              </div>
+              <DialogTitle className="text-2xl font-serif tracking-tight text-white">Route Saved! 🎉</DialogTitle>
+              <DialogDescription className="text-slate-300 text-sm leading-relaxed">
+                Your Vallecito journey is safely stored. Anyone with this magic link can view your route on any device.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-6 bg-white space-y-4">
+            <div className="flex items-center gap-2 relative">
+              <Input
+                readOnly
+                value={saveUrl}
+                className="pr-24 bg-slate-50 border-slate-200 text-slate-700 h-12 font-mono text-xs focus-visible:ring-emerald-500 shadow-inner rounded-xl"
+              />
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(saveUrl);
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2000);
+                }}
+                className={`absolute right-1.5 top-1.5 bottom-1.5 h-9 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 px-3 ${
+                  isCopied
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                    : "bg-slate-900 text-white hover:bg-slate-800"
+                }`}
+              >
+                {isCopied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" /> Copy
+                  </>
+                )}
+              </Button>
+            </div>
+            <DialogFooter className="sm:justify-start">
+              <Button onClick={() => setIsSaveModalOpen(false)} variant="ghost" className="text-slate-500 hover:text-slate-900 text-sm font-medium w-full sm:w-auto h-11 rounded-xl">
+                Close
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ItineraryErrorBoundary>
   );
 }

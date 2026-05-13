@@ -8,6 +8,7 @@ import { triggerSupportAlert } from './trigger-support';
 import { queryExpatsGuide } from './query-expats-guide';
 import { buildItinerary } from './build-itinerary';
 import { mutateItinerary } from './mutate-itinerary';
+import { generateSaveLink } from './save-itinerary';
 
 // Export the native Vercel AI SDK tools
 export const toolsRegistry = {
@@ -20,5 +21,6 @@ export const toolsRegistry = {
   triggerSupportAlert,
   queryExpatsGuide,
   buildItinerary,
-  mutateItinerary
+  mutateItinerary,
+  generateSaveLink
 };

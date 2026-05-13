@@ -66,6 +66,13 @@ export function ThreePaneLayout({
     return () => clearTimeout(timer)
   }, [showMap, leftWidth])
 
+  // Snap mobile drawer to half when a marker is clicked
+  useEffect(() => {
+    const handleSnap = () => setSnap(0.5)
+    window.addEventListener('drawer-snap-half', handleSnap)
+    return () => window.removeEventListener('drawer-snap-half', handleSnap)
+  }, [])
+
   return (
     <div ref={containerRef} className={cn("h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
       {/* Desktop Left / Main Content Panel */}
@@ -124,11 +131,11 @@ export function ThreePaneLayout({
           <Drawer.Portal>
             <Drawer.Content 
               className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 z-40 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
-              style={{ pointerEvents: 'auto', height: '90vh' }}
+              style={{ pointerEvents: 'auto', height: '90dvh' }}
             >
               <Drawer.Title className="sr-only">Menu</Drawer.Title>
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-200 mt-4 mb-2" />
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-hidden flex flex-col pb-12">
                 <div className="shrink-0 overflow-x-hidden">
                   {sidebar}
                 </div>
