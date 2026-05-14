@@ -113,6 +113,7 @@ export function ItineraryPanel() {
     setAiPromptToTrigger,
     clearStartAnchor,
     clearEndAnchor,
+    setStartAnchorLocation,
     setIsExchangingStart,
     setIsExchangingEnd,
     saveItinerary,
@@ -210,7 +211,7 @@ export function ItineraryPanel() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50/30 p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto bg-gray-50/30 p-6 space-y-4 touch-pan-y overscroll-contain" data-vaul-no-drag>
         
         {/* Start Anchor */}
         <div 
@@ -225,6 +226,24 @@ export function ItineraryPanel() {
               <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">Start Point</p>
               <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                 <p className="text-sm font-semibold text-slate-900 truncate flex-1">{activeItinerary.startAnchor?.title || "Current Location"}</p>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition((pos) => {
+                        setStartAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
+                      }, (err) => {
+                        alert("Could not access your location. Please check browser permissions.");
+                      });
+                    } else {
+                      alert("Geolocation is not supported by your browser.");
+                    }
+                  }}
+                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  title="Use My GPS Location"
+                >
+                  <Navigation className="w-4 h-4" />
+                </button>
                 <button
                   onClick={e => { e.stopPropagation(); setMapClickMode(mapClickMode === 'start' ? null : 'start'); }}
                   className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}

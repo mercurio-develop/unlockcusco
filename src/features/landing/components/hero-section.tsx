@@ -65,19 +65,19 @@ export function HeroSection() {
           Sacred Valley, Peru
         </p>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-6 max-w-4xl">
+        <h1 className="text-4xl md:text-6xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-6 max-w-4xl px-2">
           Beyond the Map.
         </h1>
 
-        <p className="text-lg md:text-xl text-slate-500 font-light max-w-2xl leading-relaxed mx-auto mb-12">
+        <p className="text-base md:text-xl text-slate-500 font-light max-w-2xl leading-relaxed mx-auto mb-12 px-4">
           Don&apos;t spend your vacation stressing over logistics or piecing together plans on the fly. We build a rock-solid, fully organized itinerary filled with unique, unlisted experiences—so everything is perfectly ready before you even pack your bags.
         </p>
 
         {/* Airbnb-style white search bar */}
-        <div className="w-full max-w-2xl relative">
+        <div className="w-full max-w-2xl relative px-4 md:px-0">
           <form
             onSubmit={handleSearch}
-            className="w-full bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.12)] flex items-center gap-2 p-2 border border-gray-100 relative z-20"
+            className="w-full bg-white rounded-2xl md:rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.12)] flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2 border border-gray-100 relative z-20"
           >
             <input
               ref={inputRef}
@@ -86,13 +86,13 @@ export function HeroSection() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
-              placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo right now'"
-              className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-base placeholder:text-gray-400"
+              placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo'"
+              className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-sm md:text-base placeholder:text-gray-400"
             />
             <button
               type="submit"
               disabled={isSearching}
-              className="bg-rose-600 text-white font-semibold rounded-full px-4 md:px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed md:min-w-[140px] justify-center"
+              className="bg-rose-600 text-white font-semibold rounded-xl md:rounded-full px-4 md:px-6 py-3 flex items-center gap-2 hover:bg-rose-700 transition-colors shrink-0 disabled:opacity-70 disabled:cursor-not-allowed w-full md:w-auto md:min-w-[140px] justify-center"
             >
               {isSearching ? (
                 <span className="flex items-center gap-2 text-sm">

@@ -126,12 +126,12 @@ export function ThreePaneLayout({
       )}
 
       {/* Mobile Drawer */}
-      <div className="md:hidden">
+      <div className="md:hidden pointer-events-none absolute inset-0 z-40">
         <Drawer.Root dismissible={false} open={true} modal={false} snapPoints={[0.15, 0.5, 0.9]} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
           <Drawer.Portal>
             <Drawer.Content 
-              className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 z-40 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
-              style={{ pointerEvents: 'auto', height: '90dvh' }}
+              className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
+              style={{ pointerEvents: 'auto', height: '90dvh', zIndex: 50 }}
             >
               <Drawer.Title className="sr-only">Menu</Drawer.Title>
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-200 mt-4 mb-2" />

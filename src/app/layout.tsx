@@ -7,6 +7,9 @@ import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/posthog-pageview";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 import { siteConfig } from "@/lib/config/site";
 
@@ -71,6 +74,11 @@ export default function RootLayout({
             </main>
           </PreferencesProvider>
         </PostHogProvider>
+        <Analytics />
+        <SpeedInsights />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </body>
     </html>
   );

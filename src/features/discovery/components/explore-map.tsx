@@ -535,6 +535,15 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           }
         }}
       >
+        <div className="absolute top-28 right-4 flex flex-col gap-2 z-10 md:top-4">
+          <NavigationControl position="bottom-right" showCompass={false} />
+          <GeolocateControl 
+            position="bottom-right" 
+            trackUserLocation={true} 
+            showUserLocation={true}
+            positionOptions={{ enableHighAccuracy: true }}
+          />
+        </div>
         <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}
 
@@ -574,12 +583,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   5, "#5AC8FA", // Light Blue
                   "#007AFF" // Default back to Blue
                 ],
-                "line-width": 4, 
+                "line-width": 5, 
                 "line-opacity": activeLegIndex !== null ? [
                   "case",
                   ["==", ["get", "legIndex"], activeLegIndex],
                   0.95,
-                  0.3
+                  0.6
                 ] : 0.95 
               }} />
             <Layer id="route-arrows" type="symbol" layout={{
