@@ -186,7 +186,7 @@ export function ItineraryPanel() {
             )}
           </div>
           <h2 className="text-xl font-serif font-semibold text-slate-900 truncate">
-            {activeItinerary.title || "My Route"}
+            {activeItinerary.title || "Itinerary"}
           </h2>
         </div>
         <div className="flex items-center gap-2">

@@ -474,8 +474,8 @@ export function BusinessCard({
                 href={`/explore?loc=${business.locationSlug}&id=${business.id}&lat=${business.lat}&lng=${business.lng}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-semibold rounded-full transition-all gap-1.5",
-                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
+                  isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                 )}
               >
                 Map
@@ -487,8 +487,8 @@ export function BusinessCard({
                 href={`/business/${business.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-semibold rounded-full transition-all gap-1.5",
-                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
+                  isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                 )}
               >
                 Details
@@ -499,8 +499,8 @@ export function BusinessCard({
                   <Button
                     onClick={handleBookNow}
                     className={cn(
-                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all",
-                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
+                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                     )}
                   >
                     Contact
@@ -511,8 +511,8 @@ export function BusinessCard({
                       <Button 
                         onClick={(e) => e.stopPropagation()} 
                         className={cn(
-                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all",
-                          isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
+                          isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                         )}
                       >
                         Contact

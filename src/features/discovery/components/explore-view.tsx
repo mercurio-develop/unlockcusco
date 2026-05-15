@@ -110,7 +110,7 @@ export function ExploreView({
 
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
         <button onClick={() => { setPanelMode("discover"); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "discover" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
-        <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> My Route</button>
+        <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><CalendarDays className="w-4 h-4" /> Itinerary</button>
         <button onClick={() => setIsChatOpen(!isChatOpen)} className={`md:hidden flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${isChatOpen ? "bg-white text-rose-600 shadow-sm ring-1 ring-rose-200" : "text-slate-500 hover:text-slate-700"}`}><Sparkles className={`w-4 h-4 ${isChatOpen ? 'text-rose-600' : 'text-slate-400'}`} /> Concierge</button>
       </div>
 

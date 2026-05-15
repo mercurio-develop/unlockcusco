@@ -451,15 +451,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     }
   }, [selectedId, businesses, activeItinerary, mapMode, panelMode]);
 
-  if (!mapboxToken) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full w-full bg-[#0F172A] text-white/40 p-6 text-center">
-        <p className="font-medium">Map token missing.</p>
-        <p className="text-sm mt-1">Set NEXT_PUBLIC_MAPBOX_TOKEN in .env</p>
-      </div>
-    );
-  }
-
   const validBusinesses = useMemo(() => {
     return businesses
       .filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng))
