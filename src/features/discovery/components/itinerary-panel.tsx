@@ -256,7 +256,7 @@ export function ItineraryPanel() {
                   title={activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? "Exchange start point — browse Discover" : "Add start point — browse Discover"}
                   className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
-                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" strokeWidth={1.5} />}
                 </button>
                 {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' && (
                   <button
@@ -282,9 +282,9 @@ export function ItineraryPanel() {
         </div>
 
         {/* Waypoints */}
-        <Reorder.Group axis="y" values={activeItinerary.waypoints || []} onReorder={setWaypoints} className="relative w-full">
+        <div className="relative w-full">
           {(activeItinerary.waypoints || []).map((waypoint, idx) => (
-            <Reorder.Item key={waypoint.id} value={waypoint} id={waypoint.id} className="relative">
+            <div key={`${waypoint.id}-${idx}`} id={`${waypoint.id}-${idx}`} className="relative">
               <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfiles[idx] || 'driving'} setTransportProfile={setLegTransportProfile} />
               
               <div
@@ -293,7 +293,7 @@ export function ItineraryPanel() {
               >
                 <div className="flex gap-3 items-start">
                   <div
-                    className="w-10 h-10 rounded-full text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md cursor-grab active:cursor-grabbing"
+                    className="w-10 h-10 rounded-full text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md"
                     style={{ backgroundColor: getCategoryColor(waypoint.category) }}
                   >
                     {idx + 1}
@@ -416,9 +416,9 @@ export function ItineraryPanel() {
                   </div>
                 </div>
               </div>
-            </Reorder.Item>
+            </div>
           ))}
-        </Reorder.Group>
+        </div>
 
         {/* End Anchor */}
         <div className="relative">
@@ -451,7 +451,7 @@ export function ItineraryPanel() {
                   title={activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? "Exchange end point — browse Discover" : "Add end point — browse Discover"}
                   className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
                 >
-                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" strokeWidth={1.5} />}
                 </button>
                 {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
                   <button

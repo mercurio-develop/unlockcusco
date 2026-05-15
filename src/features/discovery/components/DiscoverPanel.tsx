@@ -193,6 +193,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
                isHighlighted={selectedId === e.id} 
                onSelect={() => setSelectedId(e.id)} 
                orientation={viewMode === "list" ? "horizontal" : "vertical"}
+               hideMapButton={true}
              />
            ))}
            {hasMore && (

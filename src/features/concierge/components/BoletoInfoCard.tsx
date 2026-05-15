@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Info, Map, Clock, DollarSign } from "lucide-react";
+import { SafeImageWrapper } from "@/components/ui/safe-image";
 
 interface BoletoData {
   title: string;
@@ -40,14 +41,12 @@ export function BoletoInfoCard({ data, message }: { data: BoletoData, message: s
       
       {data.mapUrl && (
         <div className="relative h-40 w-full bg-slate-100 border-y border-slate-100">
-          <img 
-            src={data.mapUrl} 
-            alt={data.title + " Map"} 
-            className="w-full h-full object-cover object-top"
-            onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
-              e.currentTarget.onerror = null;
-            }}
+          <SafeImageWrapper
+            src={data.mapUrl}
+            fallbackSrc="https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop"
+            alt={data.title + " Map"}
+            wrapperClassName="w-full h-full"
+            imgClassName="w-full h-full object-cover object-top"
           />
         </div>
       )}

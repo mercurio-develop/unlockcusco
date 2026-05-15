@@ -129,6 +129,22 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
           expandedCategories.add('TOURIST TICKET');
           expandedCategories.add('tourist ticket');
         }
+        // Custom mappings for UI to DB
+        if (cat.toUpperCase() === 'DINING') {
+          expandedCategories.add('Meal');
+          expandedCategories.add('MEAL');
+          expandedCategories.add('meal');
+        }
+        if (cat.toUpperCase() === 'STAYS') {
+          expandedCategories.add('Stay');
+          expandedCategories.add('STAY');
+          expandedCategories.add('stay');
+        }
+        if (cat.toUpperCase() === 'ADVENTURE' || cat.toUpperCase() === 'AGENCY') {
+          expandedCategories.add('Experience');
+          expandedCategories.add('EXPERIENCE');
+          expandedCategories.add('experience');
+        }
       }
       if (expandedCategories.size > 0) {
         whereClause.category = { in: Array.from(expandedCategories), notIn: ['AGENCY', 'Agency', 'agency'] };
@@ -137,7 +153,10 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   }
 
   if (loc && radiusKm === undefined) {
-    whereClause.locationSlug = loc
+    const locs = loc.split(',').map(l => l.trim()).filter(Boolean)
+    if (locs.length > 0) {
+      whereClause.locationSlug = { in: locs }
+    }
   }
 
   // Combine OR queries

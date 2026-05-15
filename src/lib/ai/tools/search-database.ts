@@ -9,7 +9,7 @@ import Fuse from 'fuse.js';
 const DB_CATEGORY_MAP: Array<[string[], string]> = [
   [['dining','restaurant','food','eat','lunch','dinner','breakfast','coffee','cafe','ceviche','pizza','vegan','vegetarian','bar','drink','menu','gastro','comida','almuerzo','cena','eats','meal','supper','bistro'],
    'dining'],
-  [['hotel','stay','hostel','lodge','accommodation','sleep','airbnb','lodging','room','alojamiento','boutique','resort','inn'],
+  [['hotel','stay','stays','hostel','lodge','accommodation','sleep','airbnb','lodging','room','alojamiento','boutique','resort','inn'],
    'stays'],
   [['massage','spa','wellness','therapy','healer','healing','retreat','yoga','meditation'],
    'wellness'],
@@ -43,7 +43,7 @@ export const searchDatabase = tool({
     required: []
   }),
   // @ts-ignore
-  execute: async ({ searchKeywords, category, location, userLat, userLng }: any) => {
+  execute: async ({ query, searchKeywords, category, location, userLat, userLng }: any) => {
     let dbCategory: string | undefined = undefined;
     
     // Normalize location using the fuzzy matcher
@@ -55,19 +55,22 @@ export const searchDatabase = tool({
 
     // Attempt to map category or first keyword to DB category
     const searchString = [category, ...(searchKeywords || [])].join(" ");
+    const dbCategories = new Set<string>();
     for (const [keywords, cat] of DB_CATEGORY_MAP) {
       for (const kw of keywords) {
         const regex = new RegExp(`\\b${kw}\\b`, 'i');
         if (regex.test(searchString)) {
-          dbCategory = cat;
+          dbCategories.add(cat);
           break;
         }
       }
-      if (dbCategory) break;
+    }
+    if (dbCategories.size > 0) {
+      dbCategory = Array.from(dbCategories).join(',');
     }
 
     // Cache key based on basic parameters (we don't cache fuzzy keyword expansions to allow for varied results)
-    const cacheKey = `vallecito:search:v7:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
+    const cacheKey = `vallecito:search:v8:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
     
     const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
       ? Redis.fromEnv()
@@ -87,7 +90,7 @@ export const searchDatabase = tool({
     if (!results) {
       try {
         results = (await universalSearch({ 
-          query: "", // Broad fetch
+          query: query || "", // Broad fetch or specific name
           category: dbCategory,
           location: searchLocation || undefined, 
           limit: 100 // Fetch a larger pool for in-memory fuzzy matching
@@ -157,6 +160,8 @@ export const searchDatabase = tool({
         name: b.name,
         category: b.category,
         rating: b.rating,
+        lat: b.lat,
+        lng: b.lng,
         isAsociado: b.isAsociado,
         priceTier: b.priceTier,
         distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
@@ -174,6 +179,8 @@ export const searchDatabase = tool({
       name: b.name,
       category: b.category,
       rating: b.rating,
+      lat: b.lat,
+      lng: b.lng,
       isAsociado: b.isAsociado,
       priceTier: b.priceTier,
       whatsapp: b.whatsapp,

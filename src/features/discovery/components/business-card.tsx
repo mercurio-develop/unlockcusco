@@ -18,6 +18,7 @@ import {
 import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket, Bed, Navigation } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
+import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { submitLead } from "@/features/leads/actions/submit-lead"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { useTrip } from "@/lib/store/trip-context"
@@ -46,7 +47,10 @@ interface BusinessCardProps {
   orientation?: "vertical" | "horizontal"
   onImageLoad?: () => void
   hideActions?: boolean
+  hideEndButton?: boolean
   contactOnly?: boolean
+  hideDetails?: boolean
+  hideMapButton?: boolean
 }
 
 export function BusinessCard({
@@ -56,7 +60,10 @@ export function BusinessCard({
   orientation = "vertical",
   onImageLoad,
   hideActions = false,
-  contactOnly = false
+  hideEndButton = false,
+  contactOnly = false,
+  hideDetails = false,
+  hideMapButton = false
 }: BusinessCardProps) {  const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
@@ -197,21 +204,13 @@ export function BusinessCard({
           
           return (
             <>
-              <img
+              <SafeImageWrapper
                 src={displayImage}
+                fallbackSrc={fallbackImage}
                 alt={business.name}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                wrapperClassName="w-full h-full"
                 onLoad={() => {
-                  if (onImageLoad && !hasReportedLoad) {
-                    setHasReportedLoad(true);
-                    onImageLoad();
-                  }
-                }}
-                onError={(e) => {
-                  if (e.currentTarget.src !== fallbackImage) {
-                    e.currentTarget.src = fallbackImage;
-                  }
                   if (onImageLoad && !hasReportedLoad) {
                     setHasReportedLoad(true);
                     onImageLoad();
@@ -445,35 +444,62 @@ export function BusinessCard({
                     <Button
                       onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
                       className={cn(
-                        "flex-1 bg-white text-slate-900 border border-slate-200 hover:border-slate-900 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                        "flex-1 bg-transparent text-slate-700 border border-slate-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold rounded-full transition-all flex items-center justify-center gap-1.5",
+                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
                       )}
                     >
-                      <Plus className="w-3 h-3" />
+                      <Plus className="w-[14px] h-[14px]" strokeWidth={1} />
                       {isHorizontal ? "Add" : "Add to Day"}
                     </Button>
-                    {activeItinerary && business.lat != null && business.lng != null && (
+                    {!hideEndButton && activeItinerary && business.lat != null && business.lng != null && (
                       <Button
                         onClick={(e) => { e.stopPropagation(); updateEndAnchorLocation(business.lat!, business.lng!, business.name); }}
                         className={cn(
-                          "bg-rose-50 text-rose-600 border border-rose-100 hover:border-rose-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1",
-                          isHorizontal ? "h-8 px-2 text-[10px] uppercase tracking-tighter" : "px-3 py-2.5 text-xs uppercase tracking-tighter"
+                          "bg-transparent text-rose-600 border border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
+                          isHorizontal ? "h-8 px-2 text-[10px] uppercase tracking-widest" : "px-3 py-2.5 text-[11px] uppercase tracking-widest"
                         )}
                         title="Set as end of day"
                       >
-                        <Bed className="w-3 h-3" />
-                        {isHorizontal ? "" : "End"}
+                        <Bed className="w-[14px] h-[14px]" strokeWidth={1} />
+                        {isHorizontal ? "" : "Set as end of day"}
                       </Button>
                     )}
                   </>
                 )}
               </>
             )}
+
+            {!hideMapButton && business.lat != null && business.lng != null && (
+              <Link
+                href={`/explore?loc=${business.locationSlug}&id=${business.id}&lat=${business.lat}&lng=${business.lng}`}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-semibold rounded-full transition-all gap-1.5",
+                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                )}
+              >
+                Map
+              </Link>
+            )}
+            
+            {!hideDetails && (
+              <Link
+                href={`/business/${business.slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-semibold rounded-full transition-all gap-1.5",
+                  isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                )}
+              >
+                Details
+              </Link>
+            )}
+
             {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
                   <Button
                     onClick={handleBookNow}
                     className={cn(
-                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
+                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all",
                       isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
                     )}
                   >
@@ -485,7 +511,7 @@ export function BusinessCard({
                       <Button 
                         onClick={(e) => e.stopPropagation()} 
                         className={cn(
-                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all",
+                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full transition-all",
                           isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
                         )}
                       >

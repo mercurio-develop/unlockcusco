@@ -38,12 +38,29 @@ export async function universalSearch({
           ]
         })),
         locLower ? {
-          OR: [
-            { locationSlug: { contains: locLower, mode: 'insensitive' as const } },
-            { serviceZones: { contains: locLower, mode: 'insensitive' as const } },
-          ]
+          OR: locLower.split(',').flatMap(l => {
+            const locPart = l.trim();
+            return [
+              { locationSlug: { contains: locPart, mode: 'insensitive' as const } },
+              { serviceZones: { contains: locPart, mode: 'insensitive' as const } },
+            ];
+          })
         } : {},
-        category ? { category: { equals: category, mode: 'insensitive' as const } } : {}
+        category ? {
+          OR: category.split(',').map(c => {
+            const catStr = c.trim();
+            const upper = catStr.toUpperCase();
+            const matches = [catStr];
+            if (upper === 'DINING') matches.push('Meal', 'MEAL', 'meal');
+            if (upper === 'STAYS') matches.push('Stay', 'STAY', 'stay');
+            if (upper === 'ADVENTURE' || upper === 'AGENCY') matches.push('Experience', 'EXPERIENCE', 'experience');
+            if (upper === 'BOLETO') matches.push('Tourist Ticket', 'TOURIST TICKET', 'tourist ticket');
+            
+            return {
+              category: { in: matches, mode: 'insensitive' as const }
+            };
+          })
+        } : {}
       ]
     },
     orderBy: [

@@ -6,6 +6,9 @@ import type { Metadata } from "next"
 import { Star, MapPin, Zap, ArrowLeft, MessageCircle, Clock, ShieldCheck, Heart } from "lucide-react"
 import { AsociadoBadge, GastronomicTemplate, ExpeditionTemplate, SanctuaryTemplate } from "@/features/discovery"
 import { siteConfig } from "@/lib/config/site"
+import { SafeImageWrapper } from "@/components/ui/safe-image"
+import { ScrollCarousel } from "@/components/ui/scroll-carousel"
+import { ExpandableText } from "@/components/ui/expandable-text"
 
 interface BusinessPageProps {
   params: Promise<{ slug: string }>
@@ -17,6 +20,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   const { slug } = await params
   const business = await prisma.business.findUnique({
     where: { slug: slug },
+    include: { premiumProfile: true }
   })
 
   if (!business) {
@@ -25,8 +29,10 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
 
   const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : "the Sacred Valley"
-  const title = `${business.name} — ${categoryName} in ${locationName}`
-  const description = business.tagline || `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`
+  const title = business.seoMetaTitle || `${business.name} — ${categoryName} in ${locationName}`
+  const description = business.seoMetaDesc || business.tagline || `Read reviews, view photos, and contact ${business.name} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`
+
+  const ogImage = business.premiumProfile?.coverPhotoUrl || business.premiumProfile?.logoUrl || `/api/og?title=${encodeURIComponent(business.name)}&description=${encodeURIComponent(categoryName + ' in ' + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`
 
   return {
     title,
@@ -41,7 +47,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
       siteName: "Vallecito",
       images: [
         {
-          url: `/api/og?title=${encodeURIComponent(business.name)}&description=${encodeURIComponent(categoryName + ' in ' + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`,
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: `${business.name} - ${categoryName}`,
@@ -53,7 +59,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
       card: "summary_large_image",
       title,
       description,
-      images: [`/api/og?title=${encodeURIComponent(business.name)}&description=${encodeURIComponent(categoryName + ' in ' + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`],
+      images: [ogImage],
     },
   }
 }
@@ -86,9 +92,35 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       rating: { not: null },
     },
     orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
-    take: 4,
+    take: 10,
     select: { id: true, name: true, slug: true, category: true, rating: true, tagline: true, imageUrl: true, locationSlug: true }
   })
+
+  // Other experiences in same location but DIFFERENT category
+  const otherExperiences = await prisma.business.findMany({
+    where: {
+      locationSlug: business.locationSlug,
+      category: { not: business.category },
+      rating: { not: null },
+    },
+    orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
+    take: 10,
+    select: { id: true, name: true, slug: true, category: true, rating: true, tagline: true, imageUrl: true, locationSlug: true }
+  })
+
+  const TOWNS = [
+    { slug: 'urubamba', name: 'Urubamba' },
+    { slug: 'pisac', name: 'Pisac' },
+    { slug: 'ollantaytambo', name: 'Ollantaytambo' },
+    { slug: 'chinchero', name: 'Chinchero' },
+    { slug: 'maras', name: 'Maras' },
+    { slug: 'yucay', name: 'Yucay' },
+    { slug: 'calca', name: 'Calca' },
+    { slug: 'cusco', name: 'Cusco' },
+  ].filter(t => t.slug !== business.locationSlug)
+
+  const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
+  const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : "the Sacred Valley"
 
   // Format WhatsApp message
   const whatsappMsg = encodeURIComponent(
@@ -98,18 +130,49 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   const isAsociado = business.isAsociado || false
   const isVerified = business.isClaimed || isAsociado
 
+  const schemaTypeMap: Record<string, string> = {
+    'DINING': 'Restaurant',
+    'AGENCY': 'TravelAgency',
+    'WELLNESS': 'HealthAndBeautyBusiness',
+    'STAYS': 'LodgingBusiness',
+    'CULTURE': 'TouristAttraction',
+  }
+  const businessType = schemaTypeMap[business.category] || 'LocalBusiness'
+
+  let socialLinks: any[] = []
+  try {
+    const parsed = business.socialLinks ? JSON.parse(business.socialLinks) : []
+    socialLinks = Array.isArray(parsed) ? parsed : []
+  } catch(e) {}
+  
+  const sameAsLinks = socialLinks.map((s: any) => s.url).filter(Boolean)
+  if (business.instagramHandle) {
+    sameAsLinks.push(`https://instagram.com/${business.instagramHandle.replace('@', '')}`)
+  }
+
+  let images = [business.imageUrl].filter(Boolean)
+  if (business.premiumProfile?.coverPhotoUrl) images.push(business.premiumProfile.coverPhotoUrl)
+  try {
+    const heroImages = business.heroImages ? JSON.parse(business.heroImages) : []
+    if (Array.isArray(heroImages)) {
+      images = [...images, ...heroImages]
+    }
+  } catch(e) {}
+
   // JSON-LD Structured Data
   const jsonLd: any = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": businessType,
     "name": business.name,
-    "image": business.imageUrl,
+    "image": images.length > 0 ? images : undefined,
     "description": business.tagline || business.description,
     "url": `${siteConfig.url}/business/${business.slug}`,
     "telephone": business.whatsapp ? `+51${business.whatsapp.replace(/\D/g, '')}` : undefined,
+    "priceRange": business.priceTier || "$$",
+    "sameAs": sameAsLinks.length > 0 ? sameAsLinks : undefined,
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": business.locationSlug,
+      "addressLocality": locationName,
       "addressRegion": "Cusco",
       "addressCountry": "PE"
     },
@@ -126,7 +189,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   };
 
   if (business.reviews && business.reviews.length > 0) {
-    jsonLd.review = business.reviews.slice(0, 5).map(review => ({
+    jsonLd.review = business.reviews.slice(0, 5).map((review: any) => ({
       "@type": "Review",
       "reviewRating": {
         "@type": "Rating",
@@ -142,7 +205,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   }
 
   if (business.tourPackages && business.tourPackages.length > 0) {
-    jsonLd.offers = business.tourPackages.map(pkg => ({
+    jsonLd.offers = business.tourPackages.map((pkg: any) => ({
       "@type": "Offer",
       "name": pkg.title,
       "description": pkg.description,
@@ -151,87 +214,111 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     }));
   }
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteConfig.url
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Explore",
+        "item": `${siteConfig.url}/explore`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": locationName,
+        "item": `${siteConfig.url}/explore/${business.locationSlug || 'sacred-valley'}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": categoryName,
+        "item": `${siteConfig.url}/explore/${business.locationSlug || 'sacred-valley'}/${business.category.toLowerCase()}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": business.name,
+        "item": `${siteConfig.url}/business/${business.slug}`
+      }
+    ]
+  }
+
   const primaryColor = business.premiumProfile?.primaryColor || "#09090B";
   const accentColor = business.premiumProfile?.accentColor || "#D4AF37";
 
   return (
-    <div 
-      className="min-h-screen font-sans pb-24" 
-      style={{ backgroundColor: primaryColor, '--accent': accentColor } as React.CSSProperties}
-    >
+    <div className="min-h-screen font-sans pb-24 bg-white">
       {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* Hero Image Header */}
-      <div className="relative h-[50vh] md:h-[60vh] w-full border-b border-white/10">
-        <Image
-          src={business.premiumProfile?.coverPhotoUrl || business.imageUrl}
-          alt={business.name}
-          fill
-          priority
-          unoptimized
-          className="object-cover opacity-60 mix-blend-overlay"
-        />
-        <div 
-          className="absolute inset-0 to-transparent" 
-          style={{ background: `linear-gradient(to top, ${primaryColor}, ${primaryColor}66, transparent)` }} 
-        />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      
+      {/* Top Navigation */}
+      <div className="p-6 max-w-6xl mx-auto flex justify-between items-center">
+        <Link 
+          href="/explore" 
+          className="flex items-center gap-2 text-slate-900 hover:bg-slate-100 px-4 py-2 rounded-full transition-colors text-sm font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" /> Explore
+        </Link>
         
-        {/* Top Navigation */}
-        <div className="absolute top-0 left-0 right-0 p-6 z-20 max-w-6xl mx-auto flex justify-between items-center">
-          <Link 
-            href="/explore" 
-            className="flex items-center gap-2 text-white/70 hover:text-white bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-colors text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" /> Explore
-          </Link>
-          
-          <div className="flex gap-2">
-            {isAsociado && <AsociadoBadge className="bg-white text-slate-900" />}
-            <button className="p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-colors">
-              <Heart className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Hero Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 z-20 max-w-6xl mx-auto">
-          <div className="flex flex-col gap-4 max-w-3xl">
-            <span className="text-[#D4AF37] text-xs uppercase tracking-[0.3em] font-bold bg-black/40 px-3 py-1 rounded-full border border-[#D4AF37]/30 backdrop-blur-md self-start">
-              {business.category}
-            </span>
-            <h1 className="text-5xl md:text-7xl font-serif text-white tracking-tight drop-shadow-2xl leading-tight">
-              {business.name}
-            </h1>
-            <p className="text-lg md:text-xl text-white/80 font-medium italic drop-shadow-lg max-w-2xl">
-              &quot;{business.tagline || business.description.slice(0, 100) + '...'}&quot;
-            </p>
-            
-            <div className="flex flex-wrap items-center gap-4 mt-2">
-              {business.rating !== null && (
-                <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
-                  <Star className="h-4 w-4 fill-[#D4AF37] text-[#D4AF37]" />
-                  <span className="font-bold text-white text-base">{business.rating}</span>
-                  <span className="text-sm text-white/50">({business.reviewsCount} reviews)</span>
-                </div>
-              )}
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${business.lat},${business.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white/70 hover:text-white transition-colors text-sm"
-              >
-                <MapPin className="w-4 h-4" /> {business.locationSlug || "Sacred Valley"}
-              </a>
-            </div>
-          </div>
+        <div className="flex gap-2">
+          {isAsociado && <AsociadoBadge className="bg-white text-slate-900 shadow-sm border border-slate-200" />}
         </div>
       </div>
 
+      {/* Header Info */}
+      <div className="max-w-6xl mx-auto px-6 pt-4 pb-8">
+        <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight leading-tight mb-4">
+          {business.name}
+        </h1>
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          {business.rating !== null && (
+            <div className="flex items-center gap-1.5 font-bold text-slate-900">
+              <Star className="h-4 w-4 fill-slate-900 text-slate-900" />
+              <span>{business.rating}</span>
+              <span className="text-slate-500 font-normal underline decoration-slate-300 hover:decoration-slate-900 cursor-pointer">({business.reviewsCount} reviews)</span>
+            </div>
+          )}
+          <span className="text-slate-300">•</span>
+          <span className="text-rose-600 font-bold uppercase tracking-widest text-[10px]">{categoryName}</span>
+          <span className="text-slate-300">•</span>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${business.lat},${business.lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 underline decoration-slate-300 hover:decoration-slate-900 transition-colors font-medium"
+          >
+            {locationName}
+          </a>
+        </div>
+      </div>
+
+      {/* Hero Image Gallery */}
+      <div className="max-w-6xl mx-auto px-6 mb-16">
+        <SafeImageWrapper
+          src={business.premiumProfile?.coverPhotoUrl || business.imageUrl || ""}
+          alt={business.name}
+          wrapperClassName="relative h-[40vh] md:h-[60vh] w-full rounded-[2rem] overflow-hidden bg-slate-100"
+          imgClassName="w-full h-full object-cover"
+        />
+      </div>
+
       {/* Main Content Grid */}
-      <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
         
         {/* Left Column: Experience Details & Reviews */}
         <div className="lg:col-span-2 space-y-20">
@@ -245,19 +332,19 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
           {/* About Section */}
           <section>
-            <h2 className="text-2xl font-serif text-white mb-6">About {business.name}</h2>
+            <h2 className="text-2xl font-serif text-slate-900 mb-6">About {business.name}</h2>
             {business.premiumProfile?.visionStatement && (
-              <p className="text-xl italic text-white/90 mb-8 border-l-2 border-[#D4AF37] pl-4" style={{ borderColor: accentColor }}>&quot;{business.premiumProfile.visionStatement}&quot;</p>
+              <p className="text-xl italic text-slate-700 mb-8 border-l-2 border-rose-300 pl-4">&quot;{business.premiumProfile.visionStatement}&quot;</p>
             )}
-            <p className="text-white/70 leading-relaxed text-lg font-light">
+            <p className="text-slate-600 leading-relaxed text-lg font-light">
                {business.description || "Discover an authentic experience in the heart of the Sacred Valley. Every detail is designed to offer you the best of our local culture and hospitality."}
             </p>
             {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {business.premiumProfile.pillars.map((pillar) => (
-                  <div key={pillar.id} className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                    <h3 className="font-bold mb-2" style={{ color: accentColor }}>{pillar.title}</h3>
-                    <p className="text-white/60 text-sm">{pillar.description}</p>
+                {business.premiumProfile.pillars.map((pillar: any) => (
+                  <div key={pillar.id} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+                    <h3 className="font-bold mb-2 text-slate-900">{pillar.title}</h3>
+                    <p className="text-slate-500 text-sm">{pillar.description}</p>
                   </div>
                 ))}
               </div>
@@ -265,92 +352,89 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           </section>
           
           {/* Reviews Section */}
-          <section>
-            <h2 className="text-2xl font-serif text-white mb-8 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-[#D4AF37]" /> Traveler Reviews
-            </h2>
-            
-            {business.reviews.length > 0 ? (
+          {business.reviews.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-serif text-slate-900 mb-8 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-amber-500" /> Traveler Reviews
+              </h2>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {business.reviews.map((review) => (
-                  <div key={review.id} className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm flex flex-col h-full transition-all hover:bg-white/[0.08]">
+                {business.reviews.map((review: any) => (
+                  <div key={review.id} className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col h-full transition-all hover:shadow-md">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#D4AF37]/40 to-transparent border border-white/10 flex items-center justify-center text-white font-serif text-lg">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-serif text-lg">
                           {review.author.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-white font-medium text-sm">{review.author}</p>
-                          <p className="text-white/40 text-[10px] uppercase tracking-widest mt-0.5">Verified Review</p>
+                          <p className="text-slate-900 font-medium text-sm">{review.author}</p>
+                          <p className="text-slate-400 text-[10px] uppercase tracking-widest mt-0.5">Verified Review</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-3 h-3 ${i < review.rating ? 'fill-[#D4AF37] text-[#D4AF37]' : 'fill-white/10 text-white/10'}`} 
+                            className={`w-3 h-3 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'fill-slate-100 text-slate-100'}`} 
                           />
                         ))}
                       </div>
                     </div>
-                    <p className="text-white/70 text-sm leading-relaxed italic flex-1">
-                      &quot;{review.text}&quot;
-                    </p>
+                    <ExpandableText text={review.text} maxLength={180} />
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-12 text-center backdrop-blur-sm">
-                <p className="text-white/50 font-light">No reviews collected for this location yet.</p>
-              </div>
-            )}
-          </section>
+            </section>
+          )}
 
         </div>
 
         {/* Right Column: Sticky Booking Widget */}
         <div className="lg:col-span-1">
           <div className="sticky top-24 space-y-6">
-            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative">
+            <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
               {/* Subtle light effect for Premium businesses */}
               {isAsociado && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-600/10 blur-[60px] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-600/5 blur-[60px] pointer-events-none" />
               )}
               
-              <h3 className="font-serif text-2xl text-white mb-2">Connect Directly</h3>
-              <p className="text-white/50 text-sm mb-8 font-light leading-relaxed">
-                Connect with {business.name} and avoid platform fees. 100% of your payment goes to the local community.
+              <h3 className="font-serif text-2xl text-slate-900 mb-2">Connect Directly</h3>
+              <p className="text-slate-500 text-sm mb-8 font-light leading-relaxed">
+                Send a message directly to {business.name} to check their current availability and book your visit.
               </p>
 
               <div className="space-y-6">
                 <div className="space-y-3">
-                   <div className="flex items-center gap-3 text-white/70 text-sm">
-                      <Clock className="w-4 h-4 text-[#D4AF37]" /> Usually replies within 1 hour
+                   <div className="flex items-center gap-3 text-slate-600 text-sm">
+                      <Clock className="w-4 h-4 text-amber-500" /> Usually replies within 1 hour
                    </div>
-                   <div className="flex items-center gap-3 text-white/70 text-sm">
-                      <ShieldCheck className="w-4 h-4 text-[#D4AF37]" /> Verified Local Business
+                   <div className="flex items-center gap-3 text-slate-600 text-sm">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" /> Verified Local Business
                    </div>
                 </div>
 
-                {isVerified && business.whatsapp ? (
+                {business.whatsapp ? (
                   <a
                     href={`https://wa.me/51${business.whatsapp}?text=${whatsappMsg}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"
                   >
-                    <Zap className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
-                    {isAsociado ? 'Book via WhatsApp' : 'Contact via WhatsApp'}
+                    <MessageCircle className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
+                    Check Availability
                   </a>
                 ) : (
                   <div className="space-y-4">
-                    <Link
-                      href={`/claim/${business.id}`}
-                      className="w-full bg-white text-black font-bold py-5 rounded-2xl flex items-center justify-center gap-2 transition-all hover:bg-zinc-200 shadow-[0_10px_30px_-5px_rgba(255,255,255,0.1)]"
+                    <a
+                      href={`https://wa.me/51940989011?text=${encodeURIComponent(`Hello Vallecito Concierge, I'd like to check availability for ${business.name}.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"
                     >
+                      <MessageCircle className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
                       Check Availability
-                    </Link>
-                    <p className="text-center text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold mt-2">
+                    </a>
+                    <p className="text-center text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold mt-2">
                       Operated by Vallecito Concierge
                     </p>
                   </div>
@@ -359,10 +443,10 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </div>
 
             {/* Price Tier Info */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-white/40">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-500">
                   <span>Price Range</span>
-                  <span className="text-emerald-400 font-bold">{business.priceTier || "$$"}</span>
+                  <span className="text-emerald-600 font-bold">{business.priceTier || "$$"}</span>
                </div>
             </div>
           </div>
@@ -372,32 +456,92 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
       {/* Nearby section */}
       {nearby.length > 0 && (
-        <div className="max-w-5xl mx-auto px-4 pb-16 mt-12">
-          <h2 className="text-lg font-bold text-white/70 uppercase tracking-widest mb-5">
-            More in {business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : 'the Area'}
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="max-w-5xl mx-auto px-4 pb-8 mt-12 border-t border-slate-100 pt-12">
+          <div className="flex justify-between items-end mb-5">
+            <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest">
+              More {categoryName} in {locationName}
+            </h2>
+            <Link href={`/explore/${business.locationSlug || 'sacred-valley'}/${business.category.toLowerCase()}`} className="text-sm font-medium text-rose-600 hover:text-rose-700 underline decoration-rose-300 hover:decoration-rose-600 transition-colors">
+              Browse all {categoryName} &rarr;
+            </Link>
+          </div>
+          <ScrollCarousel>
             {nearby.map(b => (
               <Link
                 key={b.id}
                 href={`/business/${b.slug}`}
-                className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 transition-all"
+                draggable={false}
+                className="snap-start shrink-0 w-64 group bg-white hover:bg-slate-50 shadow-sm hover:shadow-md border border-slate-200 rounded-2xl p-4 transition-all"
               >
                 {b.imageUrl && (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-3">
-                    <Image src={b.imageUrl} alt={b.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </div>
+                  <SafeImageWrapper
+                    src={b.imageUrl}
+                    alt={b.name}
+                    wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
+                    imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 )}
-                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-1">{b.category}</p>
-                <p className="text-sm font-semibold text-white leading-tight line-clamp-2">{b.name}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500 mb-1 pointer-events-none">{b.category}</p>
+                <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-2 pointer-events-none">{b.name}</p>
                 {b.rating && (
-                  <p className="text-xs text-white/40 mt-1">★ {b.rating.toFixed(1)}</p>
+                  <p className="text-xs text-slate-500 mt-1 pointer-events-none">★ {b.rating.toFixed(1)}</p>
                 )}
               </Link>
             ))}
-          </div>
+          </ScrollCarousel>
         </div>
       )}
+
+      {/* Other Experiences */}
+      {otherExperiences.length > 0 && (
+        <div className="max-w-5xl mx-auto px-4 pb-16">
+          <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest mb-5">
+            Other Experiences in {locationName}
+          </h2>
+          <ScrollCarousel>
+            {otherExperiences.map(b => (
+              <Link
+                key={b.id}
+                href={`/business/${b.slug}`}
+                draggable={false}
+                className="snap-start shrink-0 w-64 group bg-white hover:bg-slate-50 shadow-sm hover:shadow-md border border-slate-200 rounded-2xl p-4 transition-all"
+              >
+                {b.imageUrl && (
+                  <SafeImageWrapper
+                    src={b.imageUrl}
+                    alt={b.name}
+                    wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
+                    imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                )}
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1 pointer-events-none">{b.category}</p>
+                <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-2 pointer-events-none">{b.name}</p>
+                {b.rating && (
+                  <p className="text-xs text-slate-500 mt-1 pointer-events-none">★ {b.rating.toFixed(1)}</p>
+                )}
+              </Link>
+            ))}
+          </ScrollCarousel>
+        </div>
+      )}
+
+      {/* Explore Nearby Towns */}
+      <div className="max-w-5xl mx-auto px-4 pb-24 border-t border-slate-100 pt-16">
+        <h2 className="text-xl font-serif text-slate-900 mb-6 text-center">
+          Explore Nearby Towns
+        </h2>
+        <div className="flex flex-wrap justify-center gap-3">
+          {TOWNS.map(town => (
+            <Link 
+              key={town.slug}
+              href={`/explore/${town.slug}/${business.category.toLowerCase()}`}
+              className="px-6 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full text-slate-700 hover:text-rose-700 transition-colors font-medium text-sm shadow-sm hover:shadow-md"
+            >
+              {town.name}
+            </Link>
+          ))}
+        </div>
+      </div>
 
     </div>
   )

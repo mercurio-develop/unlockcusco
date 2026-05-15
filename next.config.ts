@@ -1,11 +1,4 @@
 import type { NextConfig } from "next";
-import withSerwistInit from "@serwist/next";
-
-const withSerwist = withSerwistInit({
-  swSrc: "src/app/sw.ts",
-  swDest: "public/sw.js",
-  disable: process.env.NODE_ENV !== "production",
-});
 
 const nextConfig: NextConfig = {
   // output: 'export', // Enable this ONLY for final Capacitor build. Note: Requires refactoring all routes to be Client-side only.
@@ -18,6 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "maps.googleapis.com" },
       { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "streetviewpixels-pa.googleapis.com" },
       { protocol: "https", hostname: "*.mapbox.com" },
       { protocol: "https", hostname: "*.apify.com" },
       // Allow localhost images in dev
@@ -27,4 +21,4 @@ const nextConfig: NextConfig = {
   turbopack: {},
 };
 
-export default withSerwist(nextConfig);
+export default nextConfig;

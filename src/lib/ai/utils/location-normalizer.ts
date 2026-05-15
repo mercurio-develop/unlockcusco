@@ -28,6 +28,17 @@ const locationFuse = new Fuse(SACRED_VALLEY_LOCATIONS, {
 export function normalizeLocation(input: string): string | null {
   if (!input) return null;
   
+  const parts = input.split(',').map(p => p.trim()).filter(Boolean);
+  if (parts.length > 1) {
+    const results = parts.map(p => {
+      const normalized = p.toLowerCase();
+      if (SACRED_VALLEY_LOCATIONS.includes(normalized)) return normalized;
+      const res = locationFuse.search(normalized);
+      return res.length > 0 && res[0].item ? res[0].item : null;
+    }).filter(Boolean);
+    return results.length > 0 ? results.join(',') : null;
+  }
+  
   const normalizedInput = input.trim().toLowerCase();
   
   // Exact match fast-path

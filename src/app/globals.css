@@ -158,7 +158,6 @@
 .scrollbar-theme:hover::-webkit-scrollbar-thumb {
   background-color: #cbd5e1; /* slate-300 */
 }
-
 .dark .scrollbar-theme:hover::-webkit-scrollbar-thumb {
-  background-color: #475569; /* slate-600 */
 }
+

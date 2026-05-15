@@ -43,6 +43,8 @@ interface TripContextType {
   setLegTransportProfile: (index: number, profile: TransportProfile) => void;
   mapClickMode: 'start' | 'end' | null;
   setMapClickMode: (mode: 'start' | 'end' | null) => void;
+  mapSearchResults: any[] | null;
+  setMapSearchResults: (results: any[] | null) => void;
   clearStartAnchor: () => void;
   clearEndAnchor: () => void;
   saveItinerary: () => Promise<string | null>;
@@ -62,6 +64,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [transportProfiles, setTransportProfiles] = useState<Record<number, TransportProfile>>({});
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [mapClickMode, setMapClickMode] = useState<'start' | 'end' | null>(null);
+  const [mapSearchResults, setMapSearchResults] = useState<any[] | null>(null);
 
   const setLegTransportProfile = useCallback((index: number, profile: TransportProfile) => {
     setTransportProfiles(prev => ({ ...prev, [index]: profile }));
@@ -296,6 +299,35 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const swapWaypoint = useCallback((targetId: string, newService: Business) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
+      
+      if (targetId === 'itin-start' && prev.startAnchor) {
+        return {
+          ...prev,
+          startAnchor: {
+            ...prev.startAnchor,
+            title: newService.name || 'Current Location',
+            locationStr: newService.name || 'Current Location',
+            lat: newService.lat || prev.startAnchor.lat,
+            lng: newService.lng || prev.startAnchor.lng,
+            service: newService as any
+          }
+        };
+      }
+      
+      if (targetId === 'itin-arrival' && prev.endAnchor) {
+        return {
+          ...prev,
+          endAnchor: {
+            ...prev.endAnchor,
+            title: newService.name || 'Destination',
+            locationStr: newService.name || 'Destination',
+            lat: newService.lat || prev.endAnchor.lat,
+            lng: newService.lng || prev.endAnchor.lng,
+            service: newService as any
+          }
+        };
+      }
+
       const updatedWaypoints = prev.waypoints.map(w => 
         w.id === targetId ? {
           ...w,
@@ -325,7 +357,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const moveWaypoint = useCallback((id: string, direction: "up" | "down") => {
     setActiveItinerary(prev => {
       if (!prev) return null;
-      const index = prev.waypoints.findIndex(w => w.id === id);
+      const index = prev.waypoints.findIndex(w => 
+        w.id === id || 
+        w.title?.toLowerCase().includes(id.toLowerCase()) || 
+        w.locationStr?.toLowerCase().includes(id.toLowerCase())
+      );
       if (index < 0) return prev;
       
       const newWaypoints = [...prev.waypoints];
@@ -391,6 +427,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setLegTransportProfile,
       mapClickMode,
       setMapClickMode,
+      mapSearchResults,
+      setMapSearchResults,
       clearStartAnchor,
       clearEndAnchor,
       saveItinerary,
@@ -398,7 +436,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfiles,
-      mapClickMode, clearStartAnchor, clearEndAnchor, saveItinerary,
+      mapClickMode, mapSearchResults, setMapSearchResults, clearStartAnchor, clearEndAnchor, saveItinerary,
   ]);
 
   return (

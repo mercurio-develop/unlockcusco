@@ -1,16 +1,25 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl } from "react-map-gl/mapbox"
+import { useEffect, useRef, useMemo, useState, useCallback } from "react"
+import { createPortal } from "react-dom"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { CATEGORIES, LOCATIONS } from "../constants"
+import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl, useControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X, ChevronDown, Check } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import { BusinessCard } from "./business-card"
+import useSupercluster from "use-supercluster"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import { getCategoryColor } from "@/lib/utils/category-style";
 
@@ -40,37 +49,200 @@ const getCategoryStyle = (category: string | undefined | null) => {
   }
 }
 
+function StyleSwitcherControl({ mapMode, setMapMode }: { mapMode: string, setMapMode: (mode: "satellite" | "planning") => void }) {
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+
+  useControl(
+    () => {
+      const ctrl = document.createElement('div');
+      ctrl.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+      return {
+        onAdd: () => {
+          setContainer(ctrl);
+          return ctrl;
+        },
+        onRemove: () => {
+          ctrl.parentNode?.removeChild(ctrl);
+          setContainer(null);
+        }
+      };
+    },
+    { position: 'top-right' }
+  );
+
+  if (!container) return null;
+
+  return createPortal(
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setMapMode(mapMode === "satellite" ? "planning" : "satellite");
+      }}
+      className="w-[29px] h-[29px] flex items-center justify-center bg-transparent hover:bg-black/5 transition-colors rounded-none outline-none border-none cursor-pointer"
+      title={mapMode === "satellite" ? "Switch to Map" : "Switch to Satellite"}
+    >
+      {mapMode === "satellite" ? <Layers className="w-[18px] h-[18px] text-[#333] ml-[6px]" /> : <Navigation className="w-[18px] h-[18px] text-[#333] ml-[6px]" />}
+    </button>,
+    container
+  );
+}
+
+function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, selectedId, setPopupBusiness, onSelectBusiness, panelMode, isMobile }: any) {
+  const points = useMemo(() => {
+    return businesses.map((business: any) => ({
+      type: "Feature" as const,
+      properties: { cluster: false, businessId: business.id, category: business.category, business },
+      geometry: { type: "Point" as const, coordinates: [business.lng, business.lat] }
+    }));
+  }, [businesses]);
+
+  // Expand bounds by 50% to prevent edge-clipping markers and allow smooth panning on mobile
+  const paddedBounds = useMemo(() => {
+    if (!bounds) return undefined;
+    const [west, south, east, north] = bounds;
+    const lngPad = (east - west) * 0.5;
+    const latPad = (north - south) * 0.5;
+    return [west - lngPad, south - latPad, east + lngPad, north + latPad] as [number, number, number, number];
+  }, [bounds]);
+
+  const { clusters, supercluster } = useSupercluster({
+    points: points,
+    bounds: paddedBounds,
+    zoom: Math.min(Math.round(zoom), 19),
+    options: { radius: isMobile ? 30 : 60, maxZoom: 12 }
+  });
+
+  const style = getCategoryStyle(category);
+  const Icon = style.icon;
+
+  const displayItems = useMemo(() => {
+    return clusters;
+  }, [clusters]);
+
+  return (
+    <>
+      {displayItems.map((item: any, index: number) => {
+        const [longitude, latitude] = item.geometry.coordinates;
+        const { cluster: isCluster, point_count: pointCount, business, businessId } = item.properties;
+
+        if (isCluster) {
+          return (
+            <Marker
+              key={`cluster-${category}-${item.id}`}
+              longitude={longitude}
+              latitude={latitude}
+              anchor="bottom"
+              onClick={e => {
+                e.originalEvent.stopPropagation();
+                const expansionZoom = supercluster?.getClusterExpansionZoom(item.id);
+                if (expansionZoom && expansionZoom > 19 && supercluster) {
+                  const leaves = supercluster.getLeaves(item.id, Infinity);
+                  const clusterBusinesses = leaves.map((l: any) => l.properties.business);
+                  setPopupBusiness({ isClusterPopup: true, businesses: clusterBusinesses, lat: latitude, lng: longitude } as any);
+                } else {
+                  mapRef.current?.flyTo({
+                    center: [longitude, latitude],
+                    zoom: Math.min(expansionZoom ?? 20, 20),
+                    duration: 1000
+                  });
+                }
+              }}
+            >
+              <div className="cursor-pointer transition-all duration-300 relative flex flex-col items-center hover:scale-110" style={{ zIndex: 20 }}>
+                <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-black flex items-center justify-center border-2 border-white z-20 shadow-md">
+                  {pointCount}
+                </div>
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center shadow-md border-[2.5px] border-white transition-all"
+                  style={{ backgroundColor: style.bg }}
+                >
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: style.bg }} />
+              </div>
+            </Marker>
+          );
+        }
+
+        const bId = businessId || item.properties.businessId;
+        const bData = business || item.properties.business;
+        const isSelected = selectedId === bId;
+
+        return (
+          <Marker
+            key={bId}
+            longitude={longitude}
+            latitude={latitude}
+            anchor="bottom"
+            onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(bData); onSelectBusiness(bId); }}
+          >
+            <div
+              className={cn(
+                "cursor-pointer transition-all duration-300 relative flex flex-col items-center animate-in zoom-in fade-in slide-in-from-bottom-4",
+                isSelected ? "scale-125 z-50" : "scale-100 z-10",
+                (panelMode === "categories" && (bData as any).isItineraryItem && !(bData as any).isLibraryItem) ? "opacity-50 grayscale hover:opacity-100 hover:grayscale-0" : ""
+              )}
+              style={{ animationDuration: `${300 + (index % 10) * 50}ms` }}
+            >
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-[2.5px] border-white transition-all ${isSelected ? "ring-[3px] ring-white/50" : ""}`}
+                style={{ backgroundColor: style.bg }}
+              >
+                <Icon className="w-4 h-4 text-white" />
+              </div>
+              <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: style.bg }} />
+            </div>
+          </Marker>
+        );
+      })}
+    </>
+  );
+}
 
 interface ExploreMapProps {
   businesses: Business[]
   selectedId: string | null
   onSelectBusiness: (id: string) => void
-  mapClickMode?: 'start' | 'end' | null
+  mapClickMode?: "start" | "end" | null
   onMapAnchorPick?: (lat: number, lng: number) => void
+  categoryCounts?: Record<string, number>
+  currentLoc?: string
 }
 
-export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick }: ExploreMapProps) {
+export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "" }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("satellite")
-  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode } = useTrip()
+  const currentCatStr = searchParams.get("cat") || ""
+  const currentCats = currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
+  const selectedMapCategory = currentCats.length > 0 ? (currentCats.length === 1 ? currentCats[0].toUpperCase() : `${currentCats.length} CATEGORIES`) : "ALL"
+  const [bounds, setBounds] = useState<[number, number, number, number] | null>(null)
+  const [zoom, setZoom] = useState<number>(11)
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : true)
+
+  const currentLocStr = searchParams.get("loc") || ""
+  const currentLocs = currentLocStr ? currentLocStr.split(',').filter(Boolean) : []
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode, setMapSearchResults } = useTrip()
   const panelMode = strictPanelMode as string;
-  const currentTrip: any = null;
-  const setCurrentTrip: any = () => {};
-  const activeDayNumber: any = null;
-  const setActiveDayNumber: any = () => {};
-  const isWorkspaceCollapsed: boolean = false;
   const { isChatOpen } = usePreferences()
 
   // FlyTo when start anchor location changes
-  const startLat = panelMode === 'builder'
-    ? currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)?.startAnchor?.lat
-    : activeItinerary?.startAnchor?.lat
-  const startLng = panelMode === 'builder'
-    ? currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)?.startAnchor?.lng
-    : activeItinerary?.startAnchor?.lng
+  const startLat = activeItinerary?.startAnchor?.lat
+  const startLng = activeItinerary?.startAnchor?.lng
   useEffect(() => {
     if (startLat && startLng && mapRef.current) {
       mapRef.current.flyTo({ center: [startLng, startLat], zoom: 13, duration: 900, essential: true })
@@ -78,12 +250,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   }, [startLat, startLng])
 
   // FlyTo when end anchor location changes
-  const endLat = panelMode === 'builder'
-    ? currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)?.endAnchor?.lat
-    : activeItinerary?.endAnchor?.lat
-  const endLng = panelMode === 'builder'
-    ? currentTrip?.days.find((d: any) => d.dayNumber === activeDayNumber)?.endAnchor?.lng
-    : activeItinerary?.endAnchor?.lng
+  const endLat = activeItinerary?.endAnchor?.lat
+  const endLng = activeItinerary?.endAnchor?.lng
   useEffect(() => {
     if (endLat && endLng && mapRef.current) {
       mapRef.current.flyTo({ center: [endLng, endLat], zoom: 13, duration: 900, essential: true })
@@ -92,8 +260,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   // Calculate dynamic right offset for map controls
   // If chat is open, shift left by the chat width (450px)
-  const isProBuilder = pathname?.startsWith('/pro')
-  const controlsRightOffset = (isChatOpen && panelMode !== 'builder' && !isProBuilder) ? "466px" : "16px"
+  const controlsRightOffset = (isChatOpen && panelMode !== 'itinerary') ? "466px" : "16px"
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -101,46 +268,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     ? "mapbox://styles/mapbox/satellite-streets-v12"
     : "mapbox://styles/mapbox/light-v11"
 
-  // Multi-day routes for Pro Builder
-  const [multiDayRoutes, setMultiDayRoutes] = useState<{[dayNumber: number]: GeoJSON.Feature<GeoJSON.LineString>}>({});
-
-  const completedDays = useMemo(() => {
-    if (panelMode !== "builder" || !currentTrip) return [];
-    const daysToRender = currentTrip.days.filter((d: any) => (d.events && d.events.length > 0) || d.dayNumber === activeDayNumber);
-    return daysToRender.map((d: any) => {
-      const pts: [number, number][] = [];
-      if (d.startAnchor?.lat && d.startAnchor?.lng) pts.push([d.startAnchor.lng, d.startAnchor.lat]);
-      for (const evt of d.events || []) {
-        if (evt.type === 'TRANSPORT') {
-          if ((evt as any).fromLat && (evt as any).fromLng) pts.push([(evt as any).fromLng, (evt as any).fromLat]);
-          if ((evt as any).toLat && (evt as any).toLng) pts.push([(evt as any).toLng, (evt as any).toLat]);
-        } else {
-           if (evt.lat && evt.lng) pts.push([evt.lng, evt.lat]);
-        }
-      }
-      if (d.endAnchor?.lat && d.endAnchor?.lng) pts.push([d.endAnchor.lng, d.endAnchor.lat]);
-      return { dayNumber: d.dayNumber, isComplete: !!d.isComplete, isActive: d.dayNumber === activeDayNumber, waypoints: pts };
-    });
-  }, [currentTrip, activeDayNumber, panelMode]);
-
-  useEffect(() => {
-    if (!mapboxToken || completedDays.length === 0) return;
-    
-    const newRoutes: {[dayNumber: number]: GeoJSON.Feature<GeoJSON.LineString>} = {};
-    completedDays.forEach((day: any) => {
-      if (day.waypoints.length < 2) return;
-      
-      newRoutes[day.dayNumber] = {
-        type: 'Feature',
-        properties: { dayNumber: day.dayNumber, isActive: day.isActive, isComplete: day.isComplete },
-        geometry: { type: 'LineString', coordinates: day.waypoints }
-      };
-    });
-    setMultiDayRoutes(newRoutes);
-  }, [completedDays, mapboxToken]);
 
   const waypoints = useMemo(() => {
-    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
+    if (panelMode !== "itinerary") return [];
     
     const pts: [number, number][] = [];
     
@@ -152,28 +282,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         if (waypoint.lat && waypoint.lng) pts.push([waypoint.lng, waypoint.lat]);
       }
       if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
-    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-      if (activeDay) {
-        const start = activeDay.startAnchor;
-        const end = activeDay.endAnchor;
-        if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
-        for (const evt of activeDay.events || []) {
-          if (evt.type === 'TRANSPORT') {
-            if ((evt as any).fromLat && (evt as any).fromLng) pts.push([(evt as any).fromLng, (evt as any).fromLat]);
-            if ((evt as any).toLat && (evt as any).toLng) pts.push([(evt as any).toLng, (evt as any).toLat]);
-          } else {
-             if (evt.lat && evt.lng) pts.push([evt.lng, evt.lat]);
-          }
-        }
-        if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
-      }
     }
     return pts;
-  }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
+  }, [activeItinerary, panelMode]);
 
   const directWaypoints = useMemo(() => {
-    if (panelMode !== "itinerary" && panelMode !== "builder") return [];
+    if (panelMode !== "itinerary") return [];
     const pts: [number, number][] = [];
     
     if (panelMode === "itinerary" && activeItinerary) {
@@ -181,17 +295,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       const end = activeItinerary.endAnchor;
       if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
       if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
-    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-      if (activeDay) {
-        const start = activeDay.startAnchor;
-        const end = activeDay.endAnchor;
-        if (start?.lat && start?.lng) pts.push([start.lng, start.lat]);
-        if (end?.lat && end?.lng) pts.push([end.lng, end.lat]);
-      }
     }
     return pts;
-  }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
+  }, [activeItinerary, panelMode]);
 
   const activeLegIndex = useMemo(() => {
     if (panelMode !== 'itinerary' || !selectedId) return null;
@@ -250,29 +356,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         });
     }
     
-    if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-      if (activeDay) {
-        return (activeDay.events || [])
-          .filter((evt: any) => evt.type !== 'NOTE' && evt.type !== 'TRANSPORT' && (evt.lat !== undefined || (evt as any).locationLat !== undefined || (evt as any).service?.lat !== undefined))
-          .map((evt: any, idx: number) => {
-            const lat = evt.lat ?? (evt as any).locationLat ?? (evt as any).service?.lat;
-            const lng = evt.lng ?? (evt as any).locationLng ?? (evt as any).service?.lng;
-            // Reconstruct a business-like object for the marker
-            const pick = {
-              id: evt.id,
-              name: evt.title,
-              category: (evt as any).service?.category || evt.type,
-              lat,
-              lng,
-              ...((evt as any).service || {})
-            };
-            return { pick, idx };
-          });
-      }
-    }
     return [];
-  }, [activeItinerary, currentTrip, activeDayNumber, panelMode]);
+  }, [activeItinerary, panelMode]);
+
+  const latParam = searchParams.get('lat');
+  const lngParam = searchParams.get('lng');
 
   // Fly to selected business or itinerary point
   useEffect(() => {
@@ -287,10 +375,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     if (panelMode === "itinerary" && activeItinerary) {
       startAnchor = activeItinerary.startAnchor;
       endAnchor = activeItinerary.endAnchor;
-    } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-      startAnchor = activeDay?.startAnchor;
-      endAnchor = activeDay?.endAnchor;
     }
 
     if (selectedId === 'itin-start' && startAnchor?.lat && startAnchor?.lng) {
@@ -316,6 +400,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       targetLng = b.lng;
       targetBusiness = b;
     } 
+
+    // Add fallback to URL params if business not in current page
+    if (!targetLat && latParam && lngParam && selectedId) {
+      targetLat = parseFloat(latParam);
+      targetLng = parseFloat(lngParam);
+      // We might not have the full business object, but we can fly to it
+      targetBusiness = { id: selectedId, name: "Selected Location", lat: targetLat, lng: targetLng } as Business;
+    }
     
     // 2. Active Itinerary (Micro-Day) Match
     if (!targetLat && activeItinerary) {
@@ -338,87 +430,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       }
     } 
     
-    // 3. Pro Builder (Multi-Day) Match
-    if (!targetLat && panelMode === "builder" && currentTrip && activeDayNumber) {
-      const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-      if (activeDay) {
-        for (const evt of activeDay.events || []) {
-          if (evt.id === selectedId) {
-            if (evt.type === 'NOTE') {
-              // Note events have no spatial location, do nothing
-              return;
-            } else if (evt.type === 'TRANSPORT') {
-              // Transport events are lines, not points. Fit bounds to start/end and clear popup.
-              const startLng = (evt as any).fromLng;
-              const startLat = (evt as any).fromLat;
-              const endLng = (evt as any).toLng;
-              const endLat = (evt as any).toLat;
-              if (startLng && startLat && endLng && endLat) {
-                const minLng = Math.min(startLng, endLng);
-                const maxLng = Math.max(startLng, endLng);
-                const minLat = Math.min(startLat, endLat);
-                const maxLat = Math.max(startLat, endLat);
-                
-                // Add padding
-                const lngPad = Math.abs(maxLng - minLng) * 0.2 || 0.05;
-                const latPad = Math.abs(maxLat - minLat) * 0.2 || 0.05;
-
-                mapRef.current?.fitBounds(
-                  [[minLng - lngPad, minLat - latPad], [maxLng + lngPad, maxLat + latPad]],
-                  { padding: 80, duration: 1200 }
-                );
-              }
-              setPopupBusiness(null);
-              return;
-            } else if (evt.type === 'MEAL' && ((evt as any).locationLat !== undefined || evt.lat !== undefined)) {
-              targetLat = (evt as any).locationLat || evt.lat;
-              targetLng = (evt as any).locationLng || evt.lng;
-            } else if (evt.lat !== undefined && evt.lng !== undefined) {
-              targetLat = evt.lat;
-              targetLng = evt.lng;
-            } else if ((evt as any).businessId) {
-              const b = businesses.find(b => b.id === (evt as any).businessId);
-              if (b && b.lat !== null && b.lng !== null) {
-                targetLat = b.lat;
-                targetLng = b.lng;
-                targetBusiness = b;
-              }
-            }
-            // Populate popup from event's service object or event data
-            if (!targetBusiness) {
-              const svc = (evt as any).service;
-              if (svc) {
-                const lat = svc.lat ?? targetLat;
-                const lng = svc.lng ?? targetLng;
-                targetBusiness = { ...svc, lat, lng } as any;
-              } else if (targetLat !== null && targetLng !== null) {
-                targetBusiness = {
-                  id: evt.id,
-                  name: evt.title,
-                  lat: targetLat,
-                  lng: targetLng,
-                  category: (evt as any).category || evt.type,
-                  description: (evt as any).notes || (evt as any).details || undefined,
-                  rating: (evt as any).rating || undefined,
-                  priceTier: undefined,
-                } as any;
-              }
-            }
-            break;
-          }
-          if ((evt as any).alternatives) {
-            const alt = (evt as any).alternatives.find((a: any) => a.id === selectedId);
-            if (alt && alt.lat !== undefined && alt.lng !== undefined) {
-              targetLat = alt.lat;
-              targetLng = alt.lng;
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    // 4. Mock Hotel Fallback (Basecamp Carousel)
+    // 3. Mock Hotel Fallback (Basecamp Carousel)
     if (!targetLat && selectedId?.startsWith('hotel-')) {
       const mockCoords: Record<string, [number, number]> = {
         'hotel-1': [-13.3135, -72.1158],
@@ -437,28 +449,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     } else {
       setPopupBusiness(null);
     }
-  }, [selectedId, businesses, activeItinerary, mapMode, currentTrip, activeDayNumber, panelMode]);
-
-  // Fit bounds to route ONLY when itineraryRoute is newly generated
-  // Disabled as per MVP Crucible to preserve viewport unless explicitly routed
-  useEffect(() => {
-    // We keep this empty so we don't automatically recenter the map on tab change or route generation.
-  }, []);
-
-  // Fly to active day start when day changes
-  useEffect(() => {
-    if (!mapRef.current || !activeDayNumber || !currentTrip || selectedId) return;
-
-    const day = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-    if (day?.startAnchor?.lat && day?.startAnchor?.lng) {
-      mapRef.current.flyTo({
-        center: [day.startAnchor.lng, day.startAnchor.lat],
-        zoom: 13,
-        pitch: (mapMode === "satellite" ? 45 : 0),
-        duration: 1500
-      });
-    }
-  }, [activeDayNumber, currentTrip, mapMode, selectedId]);
+  }, [selectedId, businesses, activeItinerary, mapMode, panelMode]);
 
   if (!mapboxToken) {
     return (
@@ -469,7 +460,32 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     );
   }
 
-  const validBusinesses = businesses.filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng)) as (Business & { lat: number, lng: number })[];
+  const validBusinesses = useMemo(() => {
+    return businesses
+      .filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng))
+      .filter(b => {
+        if (currentCats.length === 0) return true;
+        const bCat = b.category?.toUpperCase() || "UNKNOWN";
+        return currentCats.some(cat => {
+            const c = cat.toUpperCase();
+            if (c === bCat) return true;
+            if (c === "DINING" && bCat === "MEAL") return true;
+            if (c === "STAYS" && bCat === "STAY") return true;
+            if (c === "AGENCY" && bCat === "EXPERIENCE") return true;
+            return false;
+        });
+      }) as (Business & { lat: number, lng: number })[];
+  }, [businesses, currentCats]);
+
+  const pointsByCategory = useMemo(() => {
+    const categories: Record<string, any[]> = {};
+    validBusinesses.forEach(business => {
+      const cat = business.category?.toUpperCase() || 'UNKNOWN';
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push(business);
+    });
+    return categories;
+  }, [validBusinesses]);
 
   const businessSignature = validBusinesses.map(b => b.id).join(',');
   const [prevSignature, setPrevSignature] = useState<string | null>(null);
@@ -517,8 +533,108 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
     : [-72.1167, -13.3047];
 
+  const updateMapBounds = useCallback((evt: any) => {
+    setZoom(evt.viewState.zoom);
+    const mapBounds = mapRef.current?.getMap().getBounds();
+    if (mapBounds) {
+      setBounds([
+        mapBounds.getWest(),
+        mapBounds.getSouth(),
+        mapBounds.getEast(),
+        mapBounds.getNorth()
+      ]);
+    }
+  }, []);
+
+  const navigateLocation = (locValue: string) => {
+    if (setMapSearchResults) setMapSearchResults(null);
+    const params = new URLSearchParams(searchParams.toString());
+    if (locValue) params.set("loc", locValue);
+    else params.delete("loc");
+    router.push(`/explore?${params.toString()}`);
+  }
+
+  const availableMapCategories = useMemo(() => {
+    const activeUpper = currentCats.map(c => c.toUpperCase());
+    const cats = CATEGORIES.filter(cat => 
+      cat.value !== "Template" && 
+      ((categoryCounts[cat.value.toUpperCase()] || 0) > 0 || activeUpper.includes(cat.value.toUpperCase()))
+    ).map(c => c.value.toUpperCase());
+    return ["ALL", ...cats];
+  }, [categoryCounts, currentCats]);
+
+  const toggleCategory = (catValue: string, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (setMapSearchResults) setMapSearchResults(null);
+    const params = new URLSearchParams(searchParams.toString());
+    if (catValue === "ALL") {
+       params.delete("cat");
+    } else {
+       let newCats = [...currentCats];
+       const normalized = catValue.charAt(0).toUpperCase() + catValue.slice(1).toLowerCase();
+       // Check case-insensitively
+       const existingIndex = newCats.findIndex(c => c.toLowerCase() === normalized.toLowerCase());
+       if (existingIndex >= 0) {
+         newCats.splice(existingIndex, 1);
+       } else {
+         newCats.push(normalized);
+       }
+       if (newCats.length > 0) {
+         params.set("cat", newCats.join(','));
+       } else {
+         params.delete("cat");
+       }
+    }
+    router.push(`/explore?${params.toString()}`);
+  }
+
   return (
     <div className="relative w-full h-full group">
+      {/* Floating Filters (Location + Category) */}
+      <div className="absolute top-4 left-4 right-14 z-20 flex flex-col gap-2 pointer-events-auto">
+        {/* Locations */}
+        <div className="flex items-center gap-2 pb-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md bg-slate-900 text-white transition-all active:scale-95 border border-white/20">
+              <MapPin className="w-3.5 h-3.5" />
+              {currentLoc ? LOCATIONS.find(l => l.value === currentLoc)?.label : "Anywhere"}
+              <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 z-[9999]">
+              <DropdownMenuItem onClick={() => navigateLocation("")}>
+                Anywhere
+              </DropdownMenuItem>
+              {LOCATIONS.map(loc => (
+                <DropdownMenuItem key={loc.value} onClick={() => navigateLocation(loc.value)}>
+                  {loc.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Categories */}
+        <div className="flex items-center gap-2 pb-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md bg-slate-900 text-white transition-all active:scale-95 border border-white/20">
+              <Layers className="w-3.5 h-3.5" />
+              {selectedMapCategory === "ALL" ? "All Categories" : selectedMapCategory.charAt(0) + selectedMapCategory.slice(1).toLowerCase()}
+              <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 z-[9999]">
+              <DropdownMenuItem onClick={(e) => toggleCategory("ALL", e as any)} className="justify-between">
+                All Categories {currentCats.length === 0 && <Check className="w-4 h-4 text-rose-600" />}
+              </DropdownMenuItem>
+              {availableMapCategories.filter(c => c !== "ALL").map(cat => (
+                <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between">
+                  {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                  {currentCats.some(c => c.toLowerCase() === cat.toLowerCase()) && <Check className="w-4 h-4 text-rose-600" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
       <Map
         ref={mapRef}
         initialViewState={{ longitude: center[0], latitude: center[1], zoom: 11, pitch: 0, bearing: 0 }}
@@ -534,18 +650,20 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             setPopupBusiness(null)
           }
         }}
+        onMoveEnd={updateMapBounds}
+        onZoomEnd={updateMapBounds}
+        onLoad={() => {
+          const mapBounds = mapRef.current?.getMap().getBounds();
+          if (mapBounds) {
+            setBounds([
+              mapBounds.getWest(),
+              mapBounds.getSouth(),
+              mapBounds.getEast(),
+              mapBounds.getNorth()
+            ]);
+          }
+        }}
       >
-        <NavigationControl 
-          position="top-right" 
-          showCompass={true} 
-          visualizePitch={true} 
-        />
-        <GeolocateControl 
-          position="top-right" 
-          trackUserLocation={true} 
-          showUserLocation={true}
-          positionOptions={{ enableHighAccuracy: true }}
-        />
         <Source id="mapbox-dem" type="raster-dem" url="mapbox://mapbox.mapbox-terrain-dem-v1" tileSize={512} maxzoom={14} />
         {mapMode === "satellite" && <Layer id="sky" type="sky" paint={{ "sky-type": "atmosphere", "sky-atmosphere-sun": [0.0, 0.0], "sky-atmosphere-sun-intensity": 15 }} />}
 
@@ -623,46 +741,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           </Source>
         )}
 
-        {/* Multi-day builder routes */}
-        {panelMode === "builder" && Object.values(multiDayRoutes).map(route => {
-          const isAct = route.properties?.isActive;
-          const isComp = route.properties?.isComplete;
-          const dayNum = route.properties?.dayNumber as number;
-          const color = DAY_COLORS[(dayNum - 1) % DAY_COLORS.length];
-          const opacity = isAct ? 1 : (isComp ? 0.7 : 0.3);
-          
-          return (
-            <Source key={`route-${dayNum}`} id={`route-${dayNum}`} type="geojson" data={route}>
-              {/* White glow effect matching explore map */}
-              <Layer id={`route-glow-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-                paint={{ "line-color": "#ffffff", "line-width": isAct ? 14 : 10, "line-opacity": opacity * 0.5, "line-blur": 6 }} />
-              {/* Main line */}
-              <Layer id={`route-line-${dayNum}`} type="line" layout={{ "line-join": "round", "line-cap": "round" }}
-                paint={{ "line-color": color, "line-width": isAct ? 5 : 3, "line-opacity": opacity, "line-dasharray": isAct ? [1, 2] : [1] }}
-              />
-              {/* Directional Arrows */}
-              <Layer id={`route-arrows-${dayNum}`} type="symbol" layout={{
-                "symbol-placement": "line",
-                "text-field": "▶",
-                "text-size": isAct ? 14 : 10,
-                "symbol-spacing": 60,
-                "text-keep-upright": false
-              }} paint={{
-                "text-color": color,
-                "text-opacity": opacity
-              }} />
-            </Source>
-          );
-        })}
-
         {/* Start Marker */}
         {(() => {
           let start;
           if (panelMode === "itinerary" && activeItinerary) {
             start = activeItinerary.startAnchor;
-          } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-            const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-            start = activeDay?.startAnchor;
           }
           if (!start?.lat || !start?.lng) return null;
           return (
@@ -674,13 +757,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng)
-                } else if (panelMode === 'builder' && currentTrip && activeDayNumber) {
-                  const newDays = currentTrip.days.map((d: any) =>
-                    d.dayNumber === activeDayNumber
-                      ? { ...d, startAnchor: { ...d.startAnchor, lat: e.lngLat.lat, lng: e.lngLat.lng } }
-                      : d
-                  )
-                  setCurrentTrip({ ...currentTrip, days: newDays })
                 }
                 setMapClickMode?.(null)
               }}
@@ -716,9 +792,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           let end;
           if (panelMode === "itinerary" && activeItinerary) {
             end = activeItinerary.endAnchor;
-          } else if (panelMode === "builder" && currentTrip && activeDayNumber) {
-            const activeDay = currentTrip.days.find((d: any) => d.dayNumber === activeDayNumber);
-            end = activeDay?.endAnchor;
           }
           if (!end?.lat || !end?.lng) return null;
           return (
@@ -730,13 +803,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   updateEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, end.title, (end as any).service)
-                } else if (currentTrip && activeDayNumber) {
-                  const newDays = currentTrip.days.map((d: any) =>
-                    d.dayNumber === activeDayNumber
-                      ? { ...d, endAnchor: { ...d.endAnchor, lat: e.lngLat.lat, lng: e.lngLat.lng } }
-                      : d
-                  )
-                  setCurrentTrip({ ...currentTrip, days: newDays })
                 }
                 setMapClickMode?.(null)
               }}
@@ -806,42 +872,21 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           )
         })}
         {/* Regular business markers — hidden in itinerary mode */}
-        {(panelMode !== "itinerary") && validBusinesses.map((business, index) => {
-          const style = getCategoryStyle(business.category);
-          const isSelected = selectedId === business.id;
-          const Icon = style.icon;
-
-          return (
-            <Marker
-              key={`${business.id}-${index}`}
-              longitude={business.lng}
-              latitude={business.lat}
-              anchor="bottom"
-              onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(business); onSelectBusiness(business.id); }}
-            >
-              <div
-                className={cn(
-                  "cursor-pointer transition-all duration-300 relative flex flex-col items-center animate-in zoom-in fade-in slide-in-from-bottom-4",
-                  isSelected ? "scale-125 z-50" : "scale-100 z-10",
-                  (panelMode === "categories" && (business as any).isItineraryItem && !(business as any).isLibraryItem) ? "opacity-50 grayscale hover:opacity-100 hover:grayscale-0" : ""
-                )}
-                style={{ animationDuration: `${300 + (index % 10) * 50}ms` }}
-              >
-                {/* Apple-style shadow blob */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
-                
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-[2.5px] border-white transition-all ${isSelected ? "ring-[3px] ring-white/50" : ""}`}
-                  style={{ backgroundColor: style.bg }}
-                >
-                  <Icon className="w-4 h-4 text-white" />
-                </div>
-                {/* Pointer tip */}
-                <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: style.bg }} />
-              </div>
-            </Marker>
-          );
-        })}
+        {(panelMode !== "itinerary") && Object.entries(pointsByCategory).map(([category, catBusinesses]) => (
+          <CategoryClusterLayer
+            key={category}
+            category={category}
+            businesses={catBusinesses}
+            bounds={bounds}
+            zoom={zoom}
+            mapRef={mapRef}
+            selectedId={selectedId}
+            setPopupBusiness={setPopupBusiness}
+            onSelectBusiness={onSelectBusiness}
+            panelMode={panelMode}
+            isMobile={isMobile}
+          />
+        ))}
 
         {popupBusiness && (popupBusiness as any).lng != null && (popupBusiness as any).lat != null && !isNaN((popupBusiness as any).lng) && !isNaN((popupBusiness as any).lat) && (
           <Popup
@@ -849,7 +894,20 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             onClose={() => setPopupBusiness(null)} maxWidth="280px"
             closeButton={false} closeOnClick={false} className="z-50" offset={32}
           >
-            {(popupBusiness as any).category === 'NOTE' ? (
+            {(popupBusiness as any).isClusterPopup ? (
+              <div className="w-[280px] p-4 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1 shadow-sm"><X className="w-4 h-4"/></button>
+                <h3 className="font-bold text-slate-900 mb-3 border-b pb-2">{(popupBusiness as any).businesses.length} Places Here</h3>
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+                  {(popupBusiness as any).businesses.map((b: any) => (
+                    <div key={b.id} onClick={() => { setPopupBusiness(b); onSelectBusiness(b.id); }} className="cursor-pointer hover:bg-slate-50 p-2 rounded-xl border border-slate-100 transition-colors">
+                      <p className="font-bold text-sm text-slate-800 leading-tight">{b.name}</p>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 mt-1">{b.category}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (popupBusiness as any).category === 'NOTE' ? (
               <div className="w-48 p-4 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700 relative" onClick={e => e.stopPropagation()}>
                 <button onClick={() => setPopupBusiness(null)} className="absolute top-2 right-2 text-slate-400 hover:text-white"><X className="w-4 h-4"/></button>
                 <div className="flex items-center gap-2 mb-2 pr-4 text-slate-400">
@@ -863,24 +921,24 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             ) : (
               <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
                 <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
-                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} />
+                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} hideEndButton={panelMode === "discover"} hideDetails={true} />
               </div>
             )}
           </Popup>
         )}
 
-        <NavigationControl 
-          position="bottom-right" 
-          showCompass={false} 
-          style={{ position: 'absolute', right: controlsRightOffset, bottom: '80px', transition: 'right 0.3s ease-in-out' }} 
-        />
         <GeolocateControl 
-          position="bottom-right" 
+          position="top-right"
           positionOptions={{ enableHighAccuracy: true }}
           trackUserLocation={true}
           showUserHeading={true}
-          style={{ position: 'absolute', right: controlsRightOffset, bottom: '20px', transition: 'right 0.3s ease-in-out' }}
         />
+        <NavigationControl 
+          position="top-right"
+          showCompass={true} 
+          visualizePitch={true} 
+        />
+        <StyleSwitcherControl mapMode={mapMode} setMapMode={setMapMode} />
       </Map>
 
       {/* Drive Time Badge */}
@@ -899,50 +957,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         </div>
       )}
 
-      {/* Multi-Day Legend (Builder Mode) */}
-      {panelMode === "builder" && completedDays.length > 0 && (
-        <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 w-48 pointer-events-auto">
-          <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2">Itinerary Trace</h4>
-          <div className="space-y-2.5">
-            {completedDays.map((day: any) => {
-              const color = DAY_COLORS[(day.dayNumber - 1) % DAY_COLORS.length];
-              return (
-                <button 
-                  key={day.dayNumber} 
-                  onClick={() => setActiveDayNumber(day.dayNumber)}
-                  className={`w-full flex items-center justify-between gap-3 text-left transition-all hover:translate-x-1 ${day.isActive ? 'opacity-100 scale-105' : 'opacity-50 hover:opacity-100'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className={`w-3.5 h-3.5 rounded-full shadow-inner transition-all ${day.isActive ? 'ring-2 ring-offset-2 ring-slate-900/10' : ''}`} 
-                      style={{ backgroundColor: color }} 
-                    />
-                    <span className={`text-sm transition-colors ${day.isActive ? 'text-slate-900 font-bold' : 'text-slate-600 font-medium'}`}>
-                      Day {day.dayNumber}
-                    </span>
-                  </div>
-                  {day.isActive && <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" />}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Floating Style Switcher - Apple Style */}
-      <div 
-        className="absolute top-4 z-20 flex flex-col gap-2 transition-all duration-300"
-        style={{ right: controlsRightOffset }}
-      >
-        <button
-          onClick={() => setMapMode(mapMode === "satellite" ? "planning" : "satellite")}
-          className="w-10 h-10 bg-white/90 backdrop-blur-md hover:bg-white text-slate-900 rounded-full shadow-lg border border-white/50 flex items-center justify-center transition-all active:scale-95"
-          title={mapMode === "satellite" ? "Switch to Map" : "Switch to Satellite"}
-        >
-          {mapMode === "satellite" ? <Layers className="w-4 h-4" /> : <Navigation className="w-4 h-4 text-rose-600" />}
-        </button>
-      </div>
-
       <div className="absolute bottom-1 left-2 z-10 text-[9px] text-slate-400/40 pointer-events-none uppercase tracking-tighter">
         Vallecito OS × Apple Maps Style
       </div>
@@ -953,6 +967,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           Click map to set {mapClickMode === 'start' ? 'Starting Point' : 'End of Day'} — ESC to cancel
         </div>
       )}
+
+      <style>{`
+        .mapboxgl-ctrl-top-right {
+          transition: right 0.3s ease-in-out !important;
+          right: ${controlsRightOffset} !important;
+        }
+      `}</style>
     </div>
   );
 }

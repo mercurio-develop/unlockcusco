@@ -40,7 +40,7 @@ export function HeroSection() {
   };
 
   return (
-    <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-white">
+    <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-slate-50 pt-14">
       {/* Sacred Valley background — visible but light-theme friendly */}
       <div className="absolute inset-0 z-0">
         <img
@@ -50,9 +50,9 @@ export function HeroSection() {
         />
       </div>
       {/* Radial white vignette — keeps center text crisp, shows landscape at edges */}
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_50%_100%_at_50%_50%,rgba(255,255,255,0.85)_0%,rgba(255,255,255,0.45)_50%,transparent_100%)]" />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_70%_90%_at_50%_50%,rgba(248,250,252,0.95)_0%,rgba(248,250,252,0.7)_40%,transparent_100%)]" />
       {/* Bottom fade into white page */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 z-0 bg-linear-to-t from-white to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 z-0 bg-linear-to-t from-slate-50 to-transparent" />
 
       {/* Hero content */}
       <motion.div
@@ -61,24 +61,24 @@ export function HeroSection() {
         transition={{ duration: 0.8 }}
         className="relative z-10 w-full px-4 flex flex-col items-center text-center"
       >
-        <p className="text-rose-600 text-xs uppercase tracking-[0.3em] font-semibold mb-5">
-          Sacred Valley, Peru
-        </p>
 
         <h1 className="text-4xl md:text-6xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-6 max-w-4xl px-2">
-          Beyond the Map.
+          Beyond the Map:<br/>
+          <span className="text-3xl md:text-5xl lg:text-7xl block mt-2 text-rose-500">Experience the Sacred Valley</span>
         </h1>
 
-        <p className="text-base md:text-xl text-slate-500 font-light max-w-2xl leading-relaxed mx-auto mb-12 px-4">
-          Don&apos;t spend your vacation stressing over logistics or piecing together plans on the fly. We build a rock-solid, fully organized itinerary filled with unique, unlisted experiences—so everything is perfectly ready before you even pack your bags.
-        </p>
+        <div className="flex flex-col items-center mb-8 max-w-3xl">
+          <p className="text-base md:text-xl text-slate-600 font-light leading-relaxed mx-auto px-4">
+            Your intelligent guide to the Sacred Valley. Discover hidden local gems, craft personalized itineraries with our AI Concierge, and connect directly with trusted guides and boutique stays. From Cusco to Machu Picchu, experience the Andes like never before.
+          </p>
+        </div>
 
-        {/* Airbnb-style white search bar */}
-        <div className="w-full max-w-2xl relative px-4 md:px-0">
-          <form
-            onSubmit={handleSearch}
-            className="w-full bg-white rounded-2xl md:rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.12)] flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2 border border-gray-100 relative z-20"
-          >
+          {/* Airbnb-style white search bar */}
+          <div className="w-full max-w-2xl relative mt-6 md:mt-0">
+            <form
+              onSubmit={handleSearch}
+              className="w-full bg-slate-50 rounded-2xl md:rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2 border border-slate-200 relative z-20"
+            >
             <input
               ref={inputRef}
               type="text"
@@ -86,7 +86,7 @@ export function HeroSection() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
-              placeholder="e.g., 'I need a taxi from Pisac to Ollantaytambo'"
+              placeholder="e.g., 'Recommend me the best restaurant in the valley'"
               className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-sm md:text-base placeholder:text-gray-400"
             />
             <button
@@ -142,34 +142,18 @@ export function HeroSection() {
             { emoji: "✨", text: "Spiritual ceremonies" },
             { emoji: "🏺", text: "Local artisans & crafts" },
             { emoji: "⛰️", text: "Cultural tours & guides" },
-          ].map(({ emoji, text }) => (
+          ].map(({ emoji, text }, index) => (
             <button
               key={text}
               type="button"
               disabled={isSearching}
               onClick={() => handleSearch(undefined, text)}
-              className="bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-4 py-2 rounded-full text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${index >= 4 ? 'max-md:hidden' : ''}`}
             >
               {emoji} {text}
             </button>
           ))}
         </div>
-
-
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-slate-500 cursor-pointer hover:text-rose-600 transition-colors font-medium"
-        onClick={() => document.getElementById('features-section')?.scrollIntoView({ behavior: "smooth" })}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-      >
-        <span className="text-xs uppercase tracking-widest font-bold">Discover</span>
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
-          <ChevronDown className="w-6 h-6" />
-        </motion.div>
       </motion.div>
     </div>
   )

@@ -56,16 +56,23 @@ export const mutateItinerary = tool({
     }
 
     // Auto-resolve coords from COORDS_MAP when Gemini omits them for generic towns
+    let resolvedLocation = payload.resolvedLocation;
+    if (payload.businessId && !resolvedBusiness && !resolvedLocation) {
+        // Fallback: If Gemini used businessId for a place not in the DB and omitted resolvedLocation
+        resolvedLocation = payload.businessId;
+    }
+
     let resolvedCoords = payload.coords;
-    if (!resolvedCoords && payload.resolvedLocation) {
-      resolvedCoords = lookupCoords(payload.resolvedLocation) ?? undefined;
+    if (!resolvedCoords && resolvedLocation) {
+      resolvedCoords = lookupCoords(resolvedLocation) ?? undefined;
     }
 
     return {
       success: true,
       ...payload,
       coords: resolvedCoords,
-      resolvedBusiness
+      resolvedBusiness,
+      resolvedLocation
     };
   }
 });

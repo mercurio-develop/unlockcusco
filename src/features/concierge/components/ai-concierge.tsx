@@ -35,7 +35,8 @@ export function AiConcierge() {
     setLegTransportProfile,
     removeWaypoint,
     swapWaypoint,
-    insertWaypoint
+    insertWaypoint,
+    setMapSearchResults
   } = useTrip()
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -46,7 +47,7 @@ export function AiConcierge() {
 
   const sidebarOffset = "0px"
 
-  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Day View**: Your personal timeline where we organize your choices into a seamless itinerary.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
+  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **My Route**: Your personal timeline where we organize your choices into a seamless itinerary.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
@@ -97,9 +98,9 @@ export function AiConcierge() {
         itineraryStartTitle: sTitle && !defaultTitles.includes(sTitle) ? sTitle : null,
         itineraryEndTitle: eTitle && !defaultTitles.includes(eTitle) ? eTitle : null,
         itineraryState: activeItinerary ? JSON.stringify({
-          startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
-          endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
-          waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
+          startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time, lat: activeItinerary.startAnchor.lat, lng: activeItinerary.startAnchor.lng } : null,
+          endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time, lat: activeItinerary.endAnchor.lat, lng: activeItinerary.endAnchor.lng } : null,
+          waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime, lat: w.lat, lng: w.lng })) || []
         }) : null
       }
     });
@@ -136,6 +137,10 @@ export function AiConcierge() {
               targetDate: targetDate?.toLocaleDateString() || 'today',
               archetype: travelVibe,
               intensity: travelIntensity,
+              activeFilters: {
+                location: searchParams.get("loc"),
+                category: searchParams.get("cat")
+              },
               itineraryState: activeItinerary ? JSON.stringify({
                 startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
                 endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
@@ -159,7 +164,7 @@ export function AiConcierge() {
     }
   }, [aiPromptToTrigger, sendMessage, setAiPromptToTrigger]);
 
-  // Sync tool results → activeItinerary + day view (v6: msg.parts, state=output-available)
+  // Sync tool results → activeItinerary + my route (v6: msg.parts, state=output-available)
   useEffect(() => {
     try {
     messages.forEach((msg: any) => {
@@ -266,7 +271,7 @@ export function AiConcierge() {
     } catch (e) {
       console.error("Tool sync error:", e);
     }
-  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation]);
+  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation, setMapSearchResults]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
@@ -440,7 +445,7 @@ Please generate my macro trip plan.`;
                         const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
                         const toolInvocation = part.toolInvocation || part;
                         const toolName = part.toolName || toolInvocation.toolName || part.type.replace(/^tool-/, '');
-                        const isDone = part?.state === 'output-available' || toolInvocation.state === 'result';
+                        const isDone = part?.state === 'output-available' || toolInvocation?.state === 'result';
                         const output = toolInvocation.result || part.output;
                         const input = toolInvocation.args || part.input;
 
@@ -648,3 +653,4 @@ Please generate my macro trip plan.`;
     </>
   )
 }
+

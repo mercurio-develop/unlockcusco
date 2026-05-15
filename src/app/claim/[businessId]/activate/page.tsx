@@ -18,7 +18,7 @@ export default async function ActivatePage({ params }: ActivatePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] py-12 px-4 sm:px-6 lg:px-8 font-sans flex items-center">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans flex items-center">
       <ActivationFlow business={{ id: business.id, name: business.name, slug: business.slug }} />
     </div>
   )

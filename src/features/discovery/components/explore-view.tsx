@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import dynamic from "next/dynamic"
 import { useSearchParams, useRouter } from "next/navigation"
-import { LayoutGrid, Map as RouteMap, CalendarDays, Search } from "lucide-react"
+import { LayoutGrid, Map as RouteMap, CalendarDays, Search, Sparkles } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { DiscoverPanel } from "./DiscoverPanel"
 import { BusinessCard } from "@/features/discovery/components/business-card"
@@ -45,8 +45,8 @@ export function ExploreView({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation } = useTrip()
-  const { setIsChatOpen } = usePreferences()
+  const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults } = useTrip()
+  const { isChatOpen, setIsChatOpen } = usePreferences()
   
   const isDrawerOpen = searchParams.get("filter") === "open"
   const setIsDrawerOpen = (open: boolean) => {
@@ -111,6 +111,7 @@ export function ExploreView({
       <div className="bg-slate-100 p-1 rounded-lg flex w-full">
         <button onClick={() => { setPanelMode("discover"); }} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "discover" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><LayoutGrid className="w-4 h-4" /> Discover</button>
         <button onClick={() => setPanelMode("itinerary")} className={`flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${panelMode === "itinerary" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}><RouteMap className="w-4 h-4" /> My Route</button>
+        <button onClick={() => setIsChatOpen(!isChatOpen)} className={`md:hidden flex-1 flex justify-center items-center gap-2 py-1.5 px-3 text-sm font-medium rounded-md transition-colors ${isChatOpen ? "bg-white text-rose-600 shadow-sm ring-1 ring-rose-200" : "text-slate-500 hover:text-slate-700"}`}><Sparkles className={`w-4 h-4 ${isChatOpen ? 'text-rose-600' : 'text-slate-400'}`} /> Concierge</button>
       </div>
 
       <div className={panelMode === "discover" ? "block" : "hidden"}>
@@ -148,7 +149,7 @@ export function ExploreView({
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={mapBusinesses} selectedId={selectedId} onSelectBusiness={(id) => {
+      map={<ExploreMap businesses={mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : mapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={searchParams.get("loc") || ""} onSelectBusiness={(id) => {
         setSelectedId(id);
         window.dispatchEvent(new CustomEvent('drawer-snap-half'));
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 

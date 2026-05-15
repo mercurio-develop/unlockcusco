@@ -25,7 +25,7 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState } = body;
+    const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, activeFilters } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Invalid messages format." }), { status: 400 });
@@ -40,6 +40,10 @@ export async function POST(req: Request) {
       .replace('{userLat}', hasGPS ? String(userLat) : 'NOT_SHARED')
       .replace('{userLng}', hasGPS ? String(userLng) : 'NOT_SHARED')
       .replace('{gpsStatus}', gpsStatus);
+
+    if (activeFilters?.location || activeFilters?.category) {
+      systemInstruction += `\n\n<ACTIVE_FILTERS>\nThe user is currently filtering the map by Location: ${activeFilters.location || 'Any'}, Category: ${activeFilters.category || 'Any'}.\nTake this into account if they ask to search or "show me in the map". You can use multiple locations/categories separated by commas when calling searchDatabase.</ACTIVE_FILTERS>`;
+    }
 
     systemInstruction += `\n\n${CONVERSATION_FLOW_PROMPT}\n\n${PLANNING_PROMPT}\n\n${SUPPORT_PROMPT}\n\n${RESEARCH_PROMPT}`;
 

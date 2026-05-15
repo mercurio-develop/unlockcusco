@@ -13,15 +13,13 @@ interface ExploreSearchProps {
   isDrawerOpen: boolean // Re-using this prop name for internal consistency in ExploreView
   setIsDrawerOpen: (v: boolean) => void
   categoryCounts?: Record<string, number>
-  isProBuilder?: boolean
 }
 
 export function ExploreSearch({ 
   initialQuery,
   isDrawerOpen: showFilters,
   setIsDrawerOpen: setShowFilters,
-  categoryCounts = {},
-  isProBuilder = false
+  categoryCounts = {}
 }: ExploreSearchProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -190,72 +188,6 @@ export function ExploreSearch({
                 </div>
               )}
 
-              {/* Categories - Magazine / Airbnb Hybrid */}
-              <div className="flex flex-col gap-2">
-                <button 
-                  onClick={() => setShowCategories(!showCategories)}
-                  className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
-                >
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Categories</span>
-                  <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showCategories ? "rotate-180" : "")} />
-                </button>
-                <AnimatePresence>
-                  {showCategories && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-3 gap-2 pb-1">
-                        <button
-                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
-                          className={cn(
-                            "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
-                            currentCats.length === 0 
-                              ? "border-slate-900 bg-slate-900 text-white shadow-md" 
-                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                          )}
-                        >
-                          <MapPin className={cn("w-3.5 h-3.5", currentCats.length === 0 ? "text-rose-400" : "text-slate-400")} />
-                          <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
-                        </button>
-                        {CATEGORIES.filter(cat => isProBuilder || cat.value !== "Template").map((cat) => {
-                          const Icon = cat.icon
-                          const isActive = currentCats.includes(cat.value)
-                          const count = categoryCounts[cat.value.toUpperCase()] || 0
-                          return (
-                            <button
-                              key={cat.value}
-                              onClick={() => handleCategoryToggle(cat.value)}
-                              className={cn(
-                                "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
-                                isActive
-                                  ? "border-slate-900 bg-slate-900 text-white shadow-md" 
-                                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                              )}
-                            >
-                              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-rose-400" : "text-slate-400")} />
-                              <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{cat.label}</span>
-                              {count > 0 && !isActive && (
-                                <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-slate-300">
-                                  {count}
-                                </span>
-                              )}
-                              {count > 0 && isActive && (
-                                <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-white/50">
-                                  {count}
-                                </span>
-                              )}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
               {/* Location - Magazine / Airbnb Hybrid Pills */}
               <div className="flex flex-col gap-2">
                 <button 
@@ -299,6 +231,75 @@ export function ExploreSearch({
                             {loc.label}
                           </button>
                         ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Categories - Magazine / Airbnb Hybrid */}
+              <div className="flex flex-col gap-2">
+                <button 
+                  onClick={() => setShowCategories(!showCategories)}
+                  className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
+                >
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Categories</span>
+                  <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showCategories ? "rotate-180" : "")} />
+                </button>
+                <AnimatePresence>
+                  {showCategories && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="grid grid-cols-3 gap-2 pb-1">
+                        <button
+                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                          className={cn(
+                            "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
+                            currentCats.length === 0 
+                              ? "border-slate-900 bg-slate-900 text-white shadow-md" 
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                          )}
+                        >
+                          <MapPin className={cn("w-3.5 h-3.5", currentCats.length === 0 ? "text-rose-400" : "text-slate-400")} />
+                          <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
+                        </button>
+                        {CATEGORIES.filter(cat => 
+                          cat.value !== "Template" && 
+                          (currentCats.includes(cat.value) || (categoryCounts[cat.value.toUpperCase()] || 0) > 0)
+                        ).map((cat) => {
+                          const Icon = cat.icon
+                          const isActive = currentCats.includes(cat.value)
+                          const count = categoryCounts[cat.value.toUpperCase()] || 0
+                          return (
+                            <button
+                              key={cat.value}
+                              onClick={() => handleCategoryToggle(cat.value)}
+                              className={cn(
+                                "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
+                                isActive
+                                  ? "border-slate-900 bg-slate-900 text-white shadow-md" 
+                                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                              )}
+                            >
+                              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-rose-400" : "text-slate-400")} />
+                              <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{cat.label}</span>
+                              {count > 0 && !isActive && (
+                                <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-slate-300">
+                                  {count}
+                                </span>
+                              )}
+                              {count > 0 && isActive && (
+                                <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-white/50">
+                                  {count}
+                                </span>
+                              )}
+                            </button>
+                          )
+                        })}
                       </div>
                     </motion.div>
                   )}

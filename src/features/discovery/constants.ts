@@ -1,4 +1,4 @@
-import { Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, Library, Sparkles } from "lucide-react"
+  import { Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, Car, Scissors, Library, Sparkles } from "lucide-react"
 
 export const CATEGORIES = [
   { label: "Templates", value: "Template", icon: Library },

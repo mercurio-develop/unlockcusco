@@ -1,5 +1,14 @@
 import { HeroSection, FeaturesSection } from "@/features/landing"
 import { siteConfig } from "@/lib/config/site"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Sacred Valley Experiences & Itineraries | VALLECITO",
+  description: "Discover unlisted experiences, hidden gems, and fully organized itineraries in the Sacred Valley, Peru. Book directly with no commissions.",
+  alternates: {
+    canonical: "https://vallecito.app",
+  }
+}
 
 export default async function HomePage() {
   const jsonLd = {
@@ -29,4 +38,5 @@ export default async function HomePage() {
     </div>
   )
 }
+
 

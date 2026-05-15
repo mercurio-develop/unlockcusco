@@ -1,10 +1,12 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import Image from 'next/image'
+import { SafeImageWrapper } from '@/components/ui/safe-image'
 import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
+import { SeoDirectory } from '@/components/ui/seo-directory'
+import { InteractiveList } from '@/features/discovery/components/interactive-list'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -131,7 +133,7 @@ export default async function CategoryPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 font-sans pb-24">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -139,116 +141,35 @@ export default async function CategoryPage({
       />
 
       {/* Hero Section */}
-
-      <div className="relative overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 opacity-30 mix-blend-overlay">
-          <Image
-            src="https://images.unsplash.com/photo-1526392060635-9d60198d3fe3?q=80&w=3000&auto=format&fit=crop"
-            className="object-cover"
-            alt=""
-            fill
-            priority
-            unoptimized
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#09090B]/60 to-[#09090B]" />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
-          <Link href="/explore" className="text-white/40 hover:text-white/70 text-sm transition-colors mb-6 inline-block">
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <Link href="/explore" className="text-slate-500 hover:text-slate-900 text-sm transition-colors mb-6 inline-block">
             ← Explore
           </Link>
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-[#D4AF37] text-xs uppercase tracking-[0.3em]">Sacred Valley</span>
-            <span className="text-white/20">·</span>
-            <span className="text-white/40 text-xs uppercase tracking-widest">{loc}</span>
+            <span className="text-rose-600 font-bold text-[10px] uppercase tracking-widest">Sacred Valley</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500 font-medium text-xs uppercase tracking-widest">{loc}</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif text-white tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight">
             {cat.emoji} {cat.label}
           </h1>
-          <p className="mt-4 text-white/70 text-lg font-light max-w-2xl leading-relaxed">
+          <p className="mt-4 text-slate-600 text-lg font-light max-w-2xl leading-relaxed">
             {description}
           </p>
-          <p className="mt-6 text-[#D4AF37] text-sm font-medium tracking-wide uppercase">
+          <p className="mt-6 text-slate-500 text-sm font-medium tracking-wide">
             {localBusinesses.length} verified locations in {loc}
           </p>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {localBusinesses.map((business) => (
-            <div
-              key={business.id}
-              className="group relative flex flex-col rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md hover:border-white/20 hover:shadow-[0_0_40px_-10px_rgba(212,175,55,0.15)] transition-all duration-300"
-            >
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden w-full">
-                <Image
-                  src={business.imageUrl}
-                  alt={business.name}
-                  fill
-                  unoptimized
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                {business.isClaimed && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-[#25D366] text-white text-[10px] font-bold px-2 py-1 rounded-full">
-                    <Zap className="w-2.5 h-2.5 fill-current" /> 100% Confiable
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="flex flex-col flex-1 p-5">
-                <div className="flex justify-between items-start gap-3 mb-4">
-                  <h2 className="font-bold text-white text-lg leading-tight line-clamp-2 group-hover:text-[#D4AF37] transition-colors">
-                    {business.name}
-                  </h2>
-                  {business.rating !== null && (
-                    <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-lg border border-white/10 shrink-0">
-                      <Star className="h-3.5 w-3.5 fill-[#D4AF37] text-[#D4AF37]" />
-                      <span className="font-bold text-sm text-white">{business.rating}</span>
-                    </div>
-                  )}
-                </div>
-
-                {business.reviewsCount > 0 && (
-                  <p className="text-white/40 text-xs mb-4">{business.reviewsCount} reviews</p>
-                )}
-
-                <div className="mt-auto space-y-2">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.name)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-white/30 hover:text-white/60 text-xs transition-colors"
-                  >
-                    <MapPin className="w-3 h-3" /> View on Google Maps
-                  </a>
-
-                  {business.isClaimed && business.whatsapp ? (
-                    <a
-                      href={`https://wa.me/51${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}! I saw your profile on VALLECITO and I'd like to book. Do you have availability?`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-green-600 text-white text-sm font-semibold py-3 rounded-xl transition-colors"
-                    >
-                      Book Now
-                    </a>
-                  ) : (
-                    <Link
-                      href={`/claim/${business.id}`}
-                      className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-sm font-medium py-3 rounded-xl transition-colors"
-                    >
-                      Check Availability
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Interactive List */}
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <InteractiveList locationSlug={location} category={category} initialBusinesses={localBusinesses} />
       </div>
+      
+      <SeoDirectory />
     </div>
   )
 }
+

@@ -3,11 +3,23 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText } from "lucide-react"
+import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText, ChevronDown } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
+const LOCATIONS = [
+  { id: "cusco", name: "Cusco" },
+  { id: "urubamba", name: "Urubamba" },
+  { id: "pisac", name: "Pisac" },
+  { id: "ollantaytambo", name: "Ollantaytambo" },
+  { id: "chinchero", name: "Chinchero" },
+  { id: "maras", name: "Maras" },
+  { id: "yucay", name: "Yucay" },
+  { id: "calca", name: "Calca" },
+]
 
 export function Navbar() {
   const pathname = usePathname()
@@ -15,7 +27,6 @@ export function Navbar() {
   const [isPrefsOpen, setIsPrefsOpen] = useState(false)
 
   const navItems = [
-    { href: homePath(), label: "Home", icon: Home },
     { href: explorePath(), label: "Explore", icon: Compass },
   ]
 
@@ -38,7 +49,7 @@ export function Navbar() {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
+            const isActive = pathname === item.href || (pathname?.startsWith(item.href) && item.href !== '/')
             return (
               <Link
                 key={item.href}
@@ -51,6 +62,22 @@ export function Navbar() {
               </Link>
             )
           })}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 focus:outline-none">
+              <Map className="w-3.5 h-3.5" />
+              Locations <ChevronDown className="w-3 h-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110]">
+              {LOCATIONS.map((loc) => (
+                <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
+                  <Link href={`/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
+                    {loc.name}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Mobile Links */}
@@ -69,6 +96,21 @@ export function Navbar() {
               </Link>
             )
           })}
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger className="text-slate-400 hover:text-slate-900 transition-colors focus:outline-none flex items-center">
+              <Map className="w-4 h-4" strokeWidth={2} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110] mr-4">
+              {LOCATIONS.map((loc) => (
+                <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
+                  <Link href={`/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
+                    {loc.name}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Right Actions */}
