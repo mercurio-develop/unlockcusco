@@ -142,6 +142,7 @@ export function ExploreSearch({
             placeholder="Search Sacred Valley..." 
             value={value}
             onChange={(e) => handleSearchChange(e.target.value)}
+            data-vaul-no-drag
             className="w-full bg-slate-100/80 border border-slate-200 text-slate-900 text-sm font-semibold pl-10 pr-10 py-3.5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent focus:bg-white transition-all placeholder:text-slate-500 placeholder:font-medium shadow-sm"
           />
           {value && (

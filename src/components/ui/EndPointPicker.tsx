@@ -90,6 +90,7 @@ export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerP
         onFocus={() => setOpen(true)}
         onKeyDown={e => { if (e.key === 'Escape') { setOpen(false); setQuery(""); } e.stopPropagation(); }}
         onClick={e => e.stopPropagation()}
+        data-vaul-no-drag
         className="w-full text-sm font-semibold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-slate-400 focus:outline-none truncate transition-colors"
       />
 
