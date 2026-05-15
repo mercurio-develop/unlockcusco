@@ -122,10 +122,9 @@
     @apply border-border outline-ring/50;
   }
   html, body {
-    height: 100%;
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+    overscroll-behavior: none;
+    min-height: 100%;
+    /* overflow-x: hidden; removed to restore scrolling */
   }
   body {
     @apply bg-background text-foreground;
@@ -167,3 +166,13 @@
 .dark .scrollbar-theme:hover::-webkit-scrollbar-thumb {
 }
 
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

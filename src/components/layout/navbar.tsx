@@ -35,7 +35,7 @@ export function Navbar() {
   if (isProfilePage) return null
 
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-14 flex items-center justify-center transition-all shadow-sm">
+    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-[calc(56px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}

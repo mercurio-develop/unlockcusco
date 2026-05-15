@@ -25,6 +25,10 @@ export function ThreePaneLayout({
   const { isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
   const [snap, setSnap] = useState<number | string | null>(0.5)
+
+  useEffect(() => {
+    if (snap === 0 || !snap) setSnap(0.15);
+  }, [snap]);
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -127,7 +131,7 @@ export function ThreePaneLayout({
 
       {/* Mobile Drawer */}
       <div className="md:hidden pointer-events-none absolute inset-0 z-40">
-        <Drawer.Root dismissible={false} open={true} modal={false} snapPoints={[0.15, 0.5, 0.9]} activeSnapPoint={snap} setActiveSnapPoint={setSnap} repositionInputs={false}>
+        <Drawer.Root dismissible={false} open={true} modal={false} snapPoints={[0.15, 0.5, 0.9]} activeSnapPoint={snap} setActiveSnapPoint={setSnap} repositionInputs={false} scrollLockTimeout={0} onOpenChange={() => {}} shouldScaleBackground={false} closeThreshold={0.99}>
           <Drawer.Portal>
             <Drawer.Content 
               className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
@@ -145,7 +149,7 @@ export function ThreePaneLayout({
               </div>
 
               {/* Bottom Tab Bar (Mobile) */}
-              <div className="shrink-0 h-[72px] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-2">
+              <div className="shrink-0 h-[calc(72px+env(safe-area-inset-bottom))] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-[calc(8px+env(safe-area-inset-bottom))]">
                  <button onClick={() => setPanelMode('discover')} className="flex flex-col items-center gap-1 w-20">
                    <div className={cn("p-2 rounded-xl transition-all", panelMode === 'discover' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
