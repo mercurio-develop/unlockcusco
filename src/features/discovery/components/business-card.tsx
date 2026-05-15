@@ -152,7 +152,7 @@ export function BusinessCard({
       className={cn(
         "group cursor-pointer transition-all duration-300 relative",
         isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100",
-        isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3"
+        isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3 h-full"
       )}
     >
       {/* Top Right Action Menu */}
@@ -244,7 +244,7 @@ export function BusinessCard({
       {/* Info Container */}
       <div className={cn(
         "flex flex-col min-w-0",
-        isHorizontal ? "flex-1 py-0.5 justify-between" : "gap-1"
+        isHorizontal ? "flex-1 py-0.5 justify-between" : "flex-1 gap-1 justify-between"
       )}>
         <div className="flex flex-col gap-0.5">
           <div className={cn(
@@ -381,8 +381,8 @@ export function BusinessCard({
                       setPanelMode('itinerary');
                     }}
                     className={cn(
-                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Navigation className="w-3 h-3" />
@@ -397,8 +397,8 @@ export function BusinessCard({
                       setPanelMode('itinerary');
                     }}
                     className={cn(
-                      "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Bed className="w-3 h-3" />
@@ -409,8 +409,8 @@ export function BusinessCard({
                     <Button
                       disabled
                       className={cn(
-                        "flex-1 bg-slate-100 text-slate-400 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                        "flex-1 bg-slate-100 text-slate-400 font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Repeat className="w-3 h-3" />
@@ -420,8 +420,8 @@ export function BusinessCard({
                     <Button
                       onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
                       className={cn(
-                        "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                        "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Repeat className="w-3 h-3" />
@@ -432,8 +432,8 @@ export function BusinessCard({
                   <Button
                     onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
                     className={cn(
-                      "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-bold rounded-xl transition-all flex items-center justify-center gap-1.5",
-                      isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-xs uppercase tracking-tighter"
+                      "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
+                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Repeat className="w-3 h-3" />
