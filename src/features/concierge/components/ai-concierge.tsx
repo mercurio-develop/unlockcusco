@@ -206,7 +206,7 @@ export function AiConcierge() {
         }
 
         if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
-          insertWaypoint(resolvedBusiness as any);
+          insertWaypoint(resolvedBusiness as any, true);
         }
 
         if (action === 'SET_START') {
@@ -453,6 +453,9 @@ Please generate my macro trip plan.`;
                           if (toolName === 'askAvailability') {
                             return <PendingAvailability key={key} message="Contacting vendor via Ghost Phone..." />
                           }
+                          if (toolName === 'showBoletoInfo') {
+                            return <PendingAvailability key={key} message="Retrieving Boleto Turístico information..." />
+                          }
                           if (toolName === 'askUserLocation') {
                             return (
                               <div key={key} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-3 ml-11 mt-2">
@@ -480,13 +483,15 @@ Please generate my macro trip plan.`;
                         }
 
                         // Render tool errors as inline cards instead of ignoring them
-                        if (output?.error) {
+                        if (output?.error || typeof output === 'string') {
                           return (
                             <div key={key} className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
                               <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shrink-0">
                                 <X className="w-3.5 h-3.5 text-white" />
                               </div>
-                              <span className="text-xs font-medium text-red-800 leading-snug">I ran into a snag — try rephrasing?</span>
+                              <span className="text-xs font-medium text-red-800 leading-snug">
+                                {typeof output === 'string' ? 'Tool failed to execute.' : 'I ran into a snag — try rephrasing?'}
+                              </span>
                             </div>
                           );
                         }
@@ -534,7 +539,17 @@ Please generate my macro trip plan.`;
                           return <PendingAvailability key={key} message={output?.message} />
                         }
                         if (toolName === 'showBoletoInfo') {
-                          return <BoletoInfoCard key={key} data={output?.data} message={output?.message} />
+                          if (!output?.data) {
+                            return (
+                              <div key={key} className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
+                                <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                                  <X className="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <span className="text-xs font-medium text-red-800 leading-snug">Sorry, I couldn't fetch the Boleto information.</span>
+                              </div>
+                            );
+                          }
+                          return <BoletoInfoCard key={key} data={output?.data} message={output?.message || input?.message} />
                         }
                         if (toolName === 'estimateTaxiFare') {
                           return <TaxiFareCard key={key} data={output} />

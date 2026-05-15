@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import { usePreferences } from './preferences-context';
@@ -33,7 +33,7 @@ interface TripContextType {
   setAiPromptToTrigger: (prompt: string | null) => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
   updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
-  insertWaypoint: (service: Business) => boolean;
+  insertWaypoint: (service: Business, skipAiTrigger?: boolean) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
   removeWaypoint: (id: string) => void;
   moveWaypoint: (id: string, direction: "up" | "down") => void;
@@ -108,6 +108,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     return null;
   }, [activeItinerary]);
 
+  // Global cache for Mapbox routing requests to avoid over-fetching
+  const mapboxCacheRef = useRef<Map<string, any>>(new Map());
+
   useEffect(() => {
     if (!activeItinerary) {
       setRouteData(null);
@@ -134,10 +137,16 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!token) return;
 
     const fetchLeg = async (p1: [number, number], p2: [number, number], profile: TransportProfile) => {
+      const cacheKey = `${profile}_${p1[0]},${p1[1]}_${p2[0]},${p2[1]}`;
+      if (mapboxCacheRef.current.has(cacheKey)) {
+        return mapboxCacheRef.current.get(cacheKey);
+      }
+
       const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${p1[0]},${p1[1]};${p2[0]},${p2[1]}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.routes && data.routes[0]) {
+        mapboxCacheRef.current.set(cacheKey, data.routes[0]);
         return data.routes[0];
       }
       return null;
@@ -250,7 +259,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const insertWaypoint = useCallback((service: Business): boolean => {
+  const insertWaypoint = useCallback((service: Business, skipAiTrigger: boolean = false): boolean => {
     setActiveItinerary(prev => {
       const newWaypoint = {
         id: service.id,
@@ -290,8 +299,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    const bName = service.name || "this location";
-    setAiPromptToTrigger(`[INTERNAL] I just added ${bName} to my itinerary.`);
+    if (!skipAiTrigger) {
+      const bName = service.name || "this location";
+      setAiPromptToTrigger(`[INTERNAL] I just added ${bName} to my itinerary.`);
+    }
     setPanelMode('itinerary');
     return true;
   }, []);

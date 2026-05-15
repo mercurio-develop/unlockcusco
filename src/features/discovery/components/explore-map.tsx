@@ -912,7 +912,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             ) : (
               <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
                 <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
-                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} hideEndButton={panelMode === "discover"} hideDetails={true} />
+                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} hideEndButton={panelMode === "discover"} hideDetails={true} hideMapButton={true} />
               </div>
             )}
           </Popup>

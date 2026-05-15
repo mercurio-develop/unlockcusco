@@ -51,6 +51,7 @@ interface BusinessCardProps {
   contactOnly?: boolean
   hideDetails?: boolean
   hideMapButton?: boolean
+  hideContactButton?: boolean
 }
 
 export function BusinessCard({
@@ -63,7 +64,8 @@ export function BusinessCard({
   hideEndButton = false,
   contactOnly = false,
   hideDetails = false,
-  hideMapButton = false
+  hideMapButton = false,
+  hideContactButton = false
 }: BusinessCardProps) {  const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
@@ -445,23 +447,23 @@ export function BusinessCard({
                       onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
                       className={cn(
                         "flex-1 bg-transparent text-slate-700 border border-slate-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold rounded-full transition-all flex items-center justify-center gap-1.5",
-                        isHorizontal ? "h-8 text-[10px] uppercase tracking-tighter" : "py-2.5 text-sm"
+                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Plus className="w-[14px] h-[14px]" strokeWidth={1} />
-                      {isHorizontal ? "Add" : "Add to Day"}
+                      Add
                     </Button>
                     {!hideEndButton && activeItinerary && business.lat != null && business.lng != null && (
                       <Button
                         onClick={(e) => { e.stopPropagation(); updateEndAnchorLocation(business.lat!, business.lng!, business.name); }}
                         className={cn(
                           "bg-transparent text-rose-600 border border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
-                          isHorizontal ? "h-8 px-2 text-[10px] uppercase tracking-widest" : "px-3 py-2.5 text-[11px] uppercase tracking-widest"
+                          isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
                         )}
                         title="Set as end of day"
                       >
                         <Bed className="w-[14px] h-[14px]" strokeWidth={1} />
-                        {isHorizontal ? "" : "Set as end of day"}
+                        {!isHorizontal && "End"}
                       </Button>
                     )}
                   </>
@@ -495,7 +497,8 @@ export function BusinessCard({
               </Link>
             )}
 
-            {isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
+            {!hideContactButton && (
+              isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
                   <Button
                     onClick={handleBookNow}
                     className={cn(
@@ -562,11 +565,13 @@ export function BusinessCard({
                       </Button>
                     </DialogContent>
                   </Dialog>
-                )}
+                )
+            )}
           </div>
         )}
       </div>
     </div>
   )
 }
+
 

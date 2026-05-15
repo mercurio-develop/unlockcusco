@@ -167,8 +167,6 @@ export default async function CategoryPage({
       <div className="max-w-6xl mx-auto px-6 py-12">
         <InteractiveList locationSlug={location} category={category} initialBusinesses={localBusinesses} />
       </div>
-      
-      <SeoDirectory />
     </div>
   )
 }

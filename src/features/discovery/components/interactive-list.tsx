@@ -1,10 +1,13 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Search, Loader2, X } from "lucide-react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { Search, Loader2, X, ChevronDown, Check } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import type { Business } from "@prisma/client"
+import useSWRInfinite from 'swr/infinite'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 interface InteractiveListProps {
   locationSlug: string
@@ -18,84 +21,61 @@ const SORT_OPTIONS = [
   { label: "Most Reviews", value: "reviews_desc" },
 ]
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export function InteractiveList({ locationSlug, category, initialBusinesses }: InteractiveListProps) {
-  const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses)
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState("recommended")
-  const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(initialBusinesses.length >= 30)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
+  
+  // Debounce the query for SWR key
+  const [debouncedQuery, setDebouncedQuery] = useState(query)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 300)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  const getKey = (pageIndex: number, previousPageData: any) => {
+    if (previousPageData && !previousPageData.hasMore) return null // reached the end
+
+    const params = new URLSearchParams()
+    params.set("loc", locationSlug)
+    if (category) params.set("cat", category)
+    if (debouncedQuery) params.set("q", debouncedQuery)
+    if (sort !== "recommended") params.set("sort", sort)
+    params.set("limit", "30")
+    params.set("page", pageIndex.toString())
+    
+    return `/api/businesses?${params.toString()}`
+  }
+
+  const { data, error, isLoading, isValidating, size, setSize } = useSWRInfinite(getKey, fetcher, {
+    fallbackData: debouncedQuery === "" && sort === "recommended" ? [{ businesses: initialBusinesses, hasMore: initialBusinesses.length >= 30 }] : undefined,
+    revalidateFirstPage: false,
+  })
 
   const { ref, inView } = useInView({ threshold: 0 })
 
-  // Reset and search when query or sort changes
-  useEffect(() => {
-    // If initial load and no query/sort change, do nothing
-    if (query === "" && sort === "recommended" && page === 0) return
+  const businesses = useMemo(() => {
+    if (!data) return []
+    const all = data.flatMap(page => page.businesses || [])
+    // Deduplicate just in case
+    const seen = new Set()
+    return all.filter(b => {
+      if (seen.has(b.id)) return false
+      seen.add(b.id)
+      return true
+    })
+  }, [data])
 
-    const fetchResults = async () => {
-      setIsSearching(true)
-      try {
-        const params = new URLSearchParams()
-        params.set("loc", locationSlug)
-        if (category) params.set("cat", category)
-        if (query) params.set("q", query)
-        if (sort !== "recommended") params.set("sort", sort)
-        params.set("limit", "30")
-        params.set("page", "0")
-
-        const res = await fetch(`/api/businesses?${params.toString()}`)
-        const data = await res.json()
-        setBusinesses(data.businesses || [])
-        setHasMore(data.hasMore || false)
-        setPage(0)
-      } catch (error) {
-        console.error("Failed to search businesses:", error)
-      } finally {
-        setIsSearching(false)
-      }
-    }
-
-    const timeoutId = setTimeout(fetchResults, 300)
-    return () => clearTimeout(timeoutId)
-  }, [query, sort, locationSlug, category])
-
-  const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore || isSearching) return
-    setIsLoadingMore(true)
-    try {
-      const nextPage = page + 1
-      const params = new URLSearchParams()
-      params.set("loc", locationSlug)
-      if (category) params.set("cat", category)
-      if (query) params.set("q", query)
-      if (sort !== "recommended") params.set("sort", sort)
-      params.set("limit", "30")
-      params.set("page", nextPage.toString())
-      
-      const res = await fetch(`/api/businesses?${params.toString()}`)
-      const data = await res.json()
-      
-      setBusinesses(prev => {
-        const existingIds = new Set(prev.map(b => b.id))
-        const newBusinesses = (data.businesses || []).filter((b: Business) => !existingIds.has(b.id))
-        return [...prev, ...newBusinesses]
-      })
-      setPage(nextPage)
-      setHasMore(data.hasMore || false)
-    } catch (error) {
-      console.error("Failed to load more:", error)
-    } finally {
-      setIsLoadingMore(false)
-    }
-  }, [page, hasMore, isLoadingMore, isSearching, locationSlug, category, query, sort])
+  const hasMore = data ? data[data.length - 1]?.hasMore : false
+  const isSearching = isLoading && (!data || data.length === 0)
+  const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === "undefined")
 
   useEffect(() => {
-    if (inView) {
-      loadMore()
+    if (inView && hasMore && !isLoadingMore) {
+      setSize(size + 1)
     }
-  }, [inView, loadMore])
+  }, [inView, hasMore, isLoadingMore, size, setSize])
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -121,15 +101,27 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="bg-slate-50 border border-slate-100 text-sm font-medium text-slate-700 py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 appearance-none cursor-pointer"
-          >
-            {SORT_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 bg-slate-50 border border-slate-100 text-sm font-medium text-slate-700 py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 hover:bg-slate-100 transition-colors">
+              <span>{SORT_OPTIONS.find(o => o.value === sort)?.label || "Recommended"}</span>
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48">
+              {SORT_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => setSort(option.value)}
+                  className={cn(
+                    "w-full flex items-center justify-between",
+                    sort === option.value && "bg-rose-50/50 text-rose-600 font-bold"
+                  )}
+                >
+                  {option.label}
+                  {sort === option.value && <Check className="w-4 h-4 text-rose-600" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -145,7 +137,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {businesses.map((business) => (
+          {businesses.map((business: Business) => (
             <BusinessCard
               key={business.id}
               business={business}
@@ -156,7 +148,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
           {/* Infinite Scroll Trigger */}
           {hasMore && (
             <div ref={ref} className="w-full py-8 flex justify-center items-center col-span-full">
-              {isLoadingMore ? <Loader2 className="w-6 h-6 text-rose-600 animate-spin" /> : <div className="h-6" />}
+              {(isLoadingMore || isValidating) ? <Loader2 className="w-6 h-6 text-rose-600 animate-spin" /> : <div className="h-6" />}
             </div>
           )}
         </div>
