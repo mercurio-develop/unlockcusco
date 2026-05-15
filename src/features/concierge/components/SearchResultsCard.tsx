@@ -23,7 +23,7 @@ export function SearchResultsCard({ businesses, messageId, input }: { businesses
 
   if (!list || !Array.isArray(list) || list.length === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-center">
+      <div className="bg-slate-50 rounded-xl p-4 text-center">
         <p className="text-xs text-slate-500">No matching places found.</p>
       </div>
     );
@@ -59,13 +59,13 @@ export function SearchResultsCard({ businesses, messageId, input }: { businesses
 
       <div className="flex overflow-x-auto gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
         {list.map((business: Business, idx: number) => (
-          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
+          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm p-3">
             <BusinessCard
               business={business}
               orientation="vertical"
               onSelect={() => handleSelect(business)}
-              hideMapButton={true}
-              hideContactButton={true}
+              showMap={false}
+              showContact={false}
             />
           </div>
         ))}

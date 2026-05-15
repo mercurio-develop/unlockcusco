@@ -13,6 +13,8 @@ interface PreferencesContextType {
   setTargetDate: (date: Date) => void;
   isMapPicking: { active: boolean, target: 'start' | 'end' | null };
   setIsMapPicking: (val: { active: boolean, target: 'start' | 'end' | null }) => void;
+  mobileViewMode: 'list' | 'map';
+  setMobileViewMode: React.Dispatch<React.SetStateAction<'list' | 'map'>>;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -23,6 +25,13 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
   const [targetDate, setTargetDate] = useState<Date>(new Date());
   const [isMapPicking, setIsMapPicking] = useState<{ active: boolean, target: 'start' | 'end' | null }>({ active: false, target: null });
+  const [mobileViewMode, setMobileViewMode] = useState<'list' | 'map'>('map');
+
+  React.useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setIsChatOpen(true);
+    }
+  }, []);
 
   const value = React.useMemo(() => ({
     isChatOpen,
@@ -34,9 +43,11 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     targetDate,
     setTargetDate,
     isMapPicking,
-    setIsMapPicking
+    setIsMapPicking,
+    mobileViewMode,
+    setMobileViewMode
   }), [
-    isChatOpen, travelVibe, travelIntensity, targetDate, isMapPicking
+    isChatOpen, travelVibe, travelIntensity, targetDate, isMapPicking, mobileViewMode
   ]);
 
   return (

@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { PreferencesProvider } from "@/lib/store/preferences-context";
+import { TripProvider } from "@/lib/store/trip-context";
 import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
@@ -76,10 +77,12 @@ export default function RootLayout({
         <PostHogProvider>
           <PostHogPageView />
           <PreferencesProvider>
-            <Navbar />
-            <main className="flex-1 flex flex-col pt-14 bg-white">
-              {children}
-            </main>
+            <TripProvider>
+              <Navbar />
+              <main className="flex-1 flex flex-col pt-14 bg-white">
+                {children}
+              </main>
+            </TripProvider>
           </PreferencesProvider>
         </PostHogProvider>
         <Analytics />

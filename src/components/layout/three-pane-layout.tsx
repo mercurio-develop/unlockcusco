@@ -1,9 +1,7 @@
 import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
-import { Drawer } from "vaul"
 
 interface ThreePaneLayoutProps {
   sidebar: ReactNode
@@ -22,13 +20,9 @@ export function ThreePaneLayout({
 }: ThreePaneLayoutProps) {
   const { panelMode, setPanelMode } = useTrip()
   const [leftWidth, setLeftWidth] = useState(40)
-  const { isChatOpen, setIsChatOpen } = usePreferences()
+  const { isChatOpen, setIsChatOpen, mobileViewMode, setMobileViewMode } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
-  const [snap, setSnap] = useState<number | string | null>(0.5)
 
-  useEffect(() => {
-    if (snap === 0 || !snap) setSnap(0.15);
-  }, [snap]);
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -68,30 +62,38 @@ export function ThreePaneLayout({
   useEffect(() => {
     const timer = setTimeout(() => window.dispatchEvent(new Event('resize')), 300)
     return () => clearTimeout(timer)
-  }, [showMap, leftWidth])
+  }, [showMap, leftWidth, mobileViewMode])
 
-  // Snap mobile drawer to half when a marker is clicked
   useEffect(() => {
-    const handleSnap = () => setSnap(0.5)
+    const handleSnap = () => {
+      setMobileViewMode('map')
+    }
     window.addEventListener('drawer-snap-half', handleSnap)
-    return () => window.removeEventListener('drawer-snap-half', handleSnap)
+    window.addEventListener('switch-to-map-view', handleSnap)
+    return () => {
+      window.removeEventListener('drawer-snap-half', handleSnap)
+      window.removeEventListener('switch-to-map-view', handleSnap)
+    }
   }, [])
 
   return (
     <div ref={containerRef} className={cn("h-[calc(100dvh-56px)] md:h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
-      {/* Desktop Left / Main Content Panel */}
+      {/* Desktop Left / Main Content Panel / Mobile List Panel */}
       <div 
         style={{ 
-          width: showMap ? `calc(${leftWidth}% - 4px)` : '100%',
-          minWidth: showMap ? '320px' : '100%',
-        }}
+          '--desktop-width': showMap ? `calc(${leftWidth}% - 4px)` : '100%',
+          '--desktop-min-width': showMap ? '320px' : '100%',
+        } as React.CSSProperties}
         className={cn(
-          "transition-none hidden md:flex flex-col h-full relative z-10 bg-white",
-          showMap ? "w-full" : "w-full"
+          "transition-none flex-col h-full relative z-10 bg-white",
+          "w-full md:w-[var(--desktop-width)]",
+          "min-w-full md:min-w-[var(--desktop-min-width)]",
+          "md:flex", // always flex on desktop
+          mobileViewMode === 'list' ? "flex" : "hidden md:flex" // toggle on mobile
         )}
       >
         {/* Sidebar (Header/Search) */}
-        <div className="shrink-0">
+        <div className="shrink-0 overflow-x-hidden">
            {sidebar}
         </div>
 
@@ -111,72 +113,45 @@ export function ThreePaneLayout({
         </div>
       )}
 
-      {/* Map Panel (Full screen on mobile) */}
+      {/* Map Panel */}
       {map && (
         <div 
           className={cn(
             "transition-none flex flex-col relative z-0 bg-slate-100 flex-1",
             "md:[--map-width:calc(100%-4px-var(--left-width))]",
+            "md:w-[var(--map-width)]",
+            "md:flex", // always flex on desktop
+            mobileViewMode === 'map' ? "flex w-full" : "hidden md:flex",
             !showMap ? "hidden" : ""
           )}
           style={{ 
             '--left-width': `${leftWidth}%`, 
-            '--map-width': showMap ? 'calc(100% - var(--left-width))' : '0%',
-            width: 'var(--map-width)'
-          } as any}
+          } as React.CSSProperties}
         >
           {showMap && map}
         </div>
       )}
 
-      {/* Mobile Drawer */}
-      <div className="md:hidden pointer-events-none absolute inset-0 z-40">
-        <Drawer.Root dismissible={false} open={true} modal={false} snapPoints={[0.15, 0.5, 0.9]} activeSnapPoint={snap} setActiveSnapPoint={setSnap} repositionInputs={false} scrollLockTimeout={0} onOpenChange={() => {}} shouldScaleBackground={false} closeThreshold={0.99}>
-          <Drawer.Portal>
-            <Drawer.Content 
-              className="md:hidden bg-white flex flex-col rounded-t-[32px] fixed bottom-0 left-0 right-0 outline-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-gray-100"
-              style={{ pointerEvents: 'auto', height: '85dvh', maxHeight: '85dvh', zIndex: 50 }}
-            >
-              <Drawer.Title className="sr-only">Menu</Drawer.Title>
-              <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-200 mt-4 mb-2" />
-              <div className="flex-1 overflow-hidden flex flex-col pb-12">
-                <div className="shrink-0 overflow-x-hidden">
-                  {sidebar}
-                </div>
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  {content}
-                </div>
-              </div>
-
-              {/* Bottom Tab Bar (Mobile) */}
-              <div className="shrink-0 h-[calc(72px+env(safe-area-inset-bottom))] border-t border-gray-100 bg-white flex items-center justify-around px-6 pb-[calc(8px+env(safe-area-inset-bottom))]">
-                 <button onClick={() => setPanelMode('discover')} className="flex flex-col items-center gap-1 w-20">
-                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'discover' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
-                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                   </div>
-                 </button>
-
-                 <button onClick={() => setIsChatOpen(!isChatOpen)} className="flex flex-col items-center gap-1 -mt-4 w-20">
-                   <div className={cn(
-                     "p-3.5 rounded-2xl transition-all shadow-xl border-2 border-white",
-                     isChatOpen 
-                       ? "bg-rose-600 text-white" 
-                       : "bg-gradient-to-br from-rose-500 to-purple-600 text-white animate-pulse"
-                   )}>
-                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg>
-                   </div>
-                 </button>
-
-                 <button onClick={() => setPanelMode('itinerary')} className="flex flex-col items-center gap-1 w-20">
-                   <div className={cn("p-2 rounded-xl transition-all", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-lg" : "text-slate-400 hover:bg-slate-50")}>
-                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                   </div>
-                 </button>
-              </div>
-            </Drawer.Content>
-          </Drawer.Portal>
-        </Drawer.Root>
+      {/* Mobile Map/List Toggle */}
+      <div className="md:hidden fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-50">
+        <button 
+          onClick={() => setMobileViewMode(m => m === 'list' ? 'map' : 'list')} 
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.25)] font-bold text-sm flex items-center gap-2 transition-transform active:scale-95"
+        >
+          {mobileViewMode === 'list' ? (
+            <>
+              <span>Map</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+            </>
+          ) : (
+            <>
+              <span>List</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+            </>
+          )}
+        </button>
       </div>
+
     </div>
   )
 }

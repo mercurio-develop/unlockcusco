@@ -5,7 +5,8 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, SlidersHorizontal, Navigation, MapPin, ChevronDown } from "lucide-react"
 import posthog from 'posthog-js'
 import { motion, AnimatePresence } from "framer-motion"
-import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS } from "../constants"
+import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS, getCategoryData } from "../constants"
+import { getCategoryColor } from "@/lib/utils/category-style"
 import { cn } from "@/lib/utils"
 
 interface ExploreSearchProps {
@@ -269,12 +270,13 @@ export function ExploreSearch({
                           <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
                         </button>
                         {CATEGORIES.filter(cat => 
-                          cat.value !== "Template" && 
+                          cat.value !== "Template" && cat.value !== "Agency" &&
                           (currentCats.includes(cat.value) || (categoryCounts[cat.value.toUpperCase()] || 0) > 0)
                         ).map((cat) => {
                           const Icon = cat.icon
                           const isActive = currentCats.includes(cat.value)
                           const count = categoryCounts[cat.value.toUpperCase()] || 0
+                          const catColor = getCategoryColor(cat.value)
                           return (
                             <button
                               key={cat.value}
@@ -286,7 +288,10 @@ export function ExploreSearch({
                                   : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                               )}
                             >
-                              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-rose-400" : "text-slate-400")} />
+                              <Icon 
+                                className="w-3.5 h-3.5" 
+                                style={{ color: isActive ? '#fff' : catColor }} 
+                              />
                               <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{cat.label}</span>
                               {count > 0 && !isActive && (
                                 <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-slate-300">

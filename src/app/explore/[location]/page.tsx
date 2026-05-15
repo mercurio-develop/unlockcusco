@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
 import { SeoDirectory } from '@/components/ui/seo-directory'
 import { InteractiveList } from '@/features/discovery/components/interactive-list'
+import { getCategoryData } from '@/features/discovery/constants'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -114,10 +115,27 @@ export default async function LocationPage({
     ]
   }
 
-  const availableCategories = await prisma.business.groupBy({
+  const availableCategoriesRaw = await prisma.business.groupBy({
     by: ['category'],
-    where: { locationSlug: location }
+    where: { locationSlug: location },
+    _count: {
+      _all: true
+    }
   })
+
+  // Combine counts for categories that only differ by case
+  const combinedCategories: Record<string, { category: string, count: number }> = {}
+  availableCategoriesRaw.forEach(c => {
+    if (c.category && c.category.toUpperCase() !== 'AGENCY') {
+      const key = c.category.toUpperCase()
+      if (!combinedCategories[key]) {
+        combinedCategories[key] = { category: c.category, count: c._count._all }
+      } else {
+        combinedCategories[key].count += c._count._all
+      }
+    }
+  })
+  const availableCategories = Object.values(combinedCategories)
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-24">
@@ -146,16 +164,18 @@ export default async function LocationPage({
           {/* Category Filters */}
           <div className="flex flex-wrap gap-2 mt-8">
             {availableCategories.map(c => {
-              const catLabel = CATEGORY_LABELS[c.category.toLowerCase()]
-              if (!catLabel) return null
+              const catData = getCategoryData(c.category)
+              const Icon = catData.icon
+              if (!catData || catData.value === 'Unknown') return null
               return (
                 <Link 
                   key={c.category}
                   href={`/explore/${location}/${c.category.toLowerCase()}`}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full text-slate-700 hover:text-rose-700 transition-colors font-medium text-sm shadow-sm"
+                  className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-full text-slate-700 hover:text-slate-900 transition-colors font-medium text-sm shadow-sm"
                 >
-                  <span>{catLabel.emoji}</span>
-                  <span>{catLabel.label}</span>
+                  <Icon className={`w-4 h-4 ${catData.theme.match(/text-\w+-\d+/)?.[0] || 'text-slate-500'}`} />
+                  <span>{catData.label}</span>
+                  <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full ml-1 font-bold">{c.count}</span>
                 </Link>
               )
             })}

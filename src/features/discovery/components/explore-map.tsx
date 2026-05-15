@@ -548,7 +548,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const availableMapCategories = useMemo(() => {
     const activeUpper = currentCats.map(c => c.toUpperCase());
     const cats = CATEGORIES.filter(cat => 
-      cat.value !== "Template" && 
+      cat.value !== "Template" && cat.value !== "Agency" &&
       ((categoryCounts[cat.value.toUpperCase()] || 0) > 0 || activeUpper.includes(cat.value.toUpperCase()))
     ).map(c => c.value.toUpperCase());
     return ["ALL", ...cats];
@@ -614,14 +614,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48 z-[9999]">
               <DropdownMenuItem onClick={(e) => toggleCategory("ALL", e as any)} className="justify-between">
-                All Categories {currentCats.length === 0 && <Check className="w-4 h-4 text-rose-600" />}
+                <span>All Categories</span>
+                {currentCats.length === 0 && <Check className="w-4 h-4 text-rose-600" />}
               </DropdownMenuItem>
-              {availableMapCategories.filter(c => c !== "ALL").map(cat => (
-                <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between">
-                  {cat.charAt(0) + cat.slice(1).toLowerCase()}
-                  {currentCats.some(c => c.toLowerCase() === cat.toLowerCase()) && <Check className="w-4 h-4 text-rose-600" />}
-                </DropdownMenuItem>
-              ))}
+              {availableMapCategories.filter(c => c !== "ALL").map(cat => {
+                const count = categoryCounts[cat] || 0;
+                return (
+                  <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between">
+                    <div className="flex items-center gap-2">
+                      <span>{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
+                      {count > 0 && (
+                        <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-medium">
+                          {count}
+                        </span>
+                      )}
+                    </div>
+                    {currentCats.some(c => c.toLowerCase() === cat.toLowerCase()) && <Check className="w-4 h-4 text-rose-600" />}
+                  </DropdownMenuItem>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -910,9 +921,23 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 </p>
               </div>
             ) : (
-              <div className="w-[280px] p-2 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
-                <BusinessCard business={popupBusiness as Business} orientation="vertical" hideActions={panelMode === "itinerary"} hideEndButton={panelMode === "discover"} hideDetails={true} hideMapButton={true} />
+              <div className="w-[320px] relative" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setPopupBusiness(null)} className="absolute top-2 right-2 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
+                <BusinessCard 
+                  business={popupBusiness as Business} 
+                  orientation="vertical" 
+                  showActions={panelMode !== "itinerary"} 
+                  showItineraryEnd={panelMode !== "discover"}
+                  onSelect={() => {
+                    const slug = (popupBusiness as Business).slug;
+                    if (slug) router.push(`/business/${slug}`);
+                  }}
+                  onDoubleClick={() => {
+                    const slug = (popupBusiness as Business).slug;
+                    if (slug) router.push(`/business/${slug}`);
+                  }}
+                  showMap={false} 
+                />
               </div>
             )}
           </Popup>

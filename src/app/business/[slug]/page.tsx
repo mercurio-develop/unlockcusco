@@ -9,6 +9,7 @@ import { siteConfig } from "@/lib/config/site"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { ExpandableText } from "@/components/ui/expandable-text"
+import { BackButton } from "@/components/ui/back-button"
 
 interface BusinessPageProps {
   params: Promise<{ slug: string }>
@@ -268,16 +269,19 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       
       {/* Top Navigation */}
       <div className="p-6 max-w-6xl mx-auto flex justify-between items-center">
-        <Link 
-          href="/explore" 
-          className="flex items-center gap-2 text-slate-900 hover:bg-slate-100 px-4 py-2 rounded-full transition-colors text-sm font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" /> Explore
-        </Link>
+        <BackButton />
         
         <div className="flex gap-2">
           {isAsociado && <AsociadoBadge className="bg-white text-slate-900 shadow-sm border border-slate-200" />}
         </div>
+      </div>
+
+      {/* Mobile Floating Back Button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <BackButton 
+          label="Back" 
+          className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-slate-900 px-3 py-2 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.15)] font-bold text-[11px] uppercase tracking-widest border border-slate-200 active:scale-95 transition-transform" 
+        />
       </div>
 
       {/* Header Info */}

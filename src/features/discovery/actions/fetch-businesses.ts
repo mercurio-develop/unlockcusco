@@ -254,7 +254,10 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
 
   const categoryCounts: Record<string, number> = {}
   counts.forEach(c => {
-    categoryCounts[c.category.toUpperCase()] = c._count._all
+    if (c.category) {
+      const key = c.category.toUpperCase()
+      categoryCounts[key] = (categoryCounts[key] || 0) + c._count._all
+    }
   })
 
   return {

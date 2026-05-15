@@ -1,4 +1,3 @@
-import { TripProvider } from "@/lib/store/trip-context";
 import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import type { Metadata } from "next";
@@ -38,7 +37,7 @@ export default function ExploreLayout({
   };
 
   return (
-    <TripProvider>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -47,6 +46,6 @@ export default function ExploreLayout({
       <Suspense fallback={null}>
         <AiConcierge />
       </Suspense>
-    </TripProvider>
+    </>
   );
 }

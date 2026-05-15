@@ -131,7 +131,7 @@ export function Navbar() {
                     <Settings2 className="w-4 h-4" />
                   </button>
                 } />
-                <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200">
+                <DialogContent className="sm:max-w-md w-[95vw] max-h-[90dvh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-white border border-gray-200">
                   <DialogHeader className="mb-4">
                     <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Travel Preferences</DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 mt-1">
@@ -163,7 +163,7 @@ export function Navbar() {
 
                     <div className="flex flex-col gap-3">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Intensity Level</span>
-                      <div className="flex gap-2 w-full">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full">
                         {[
                           { id: 1, label: 'Level 1', desc: 'Accessible', theme: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100', active: 'bg-green-600 text-white border-green-600 shadow-md' },
                           { id: 2, label: 'Level 2', desc: 'Immersive', theme: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', active: 'bg-amber-600 text-white border-amber-600 shadow-md' },
@@ -172,10 +172,10 @@ export function Navbar() {
                           <button
                             key={i.id}
                             onClick={() => setTravelIntensity(travelIntensity === i.id ? null : i.id)}
-                            className={`flex-1 py-3 px-2 flex flex-col items-center justify-center text-center rounded-xl transition-all border ${travelIntensity === i.id ? i.active : i.theme}`}
+                            className={`flex-1 py-3 px-2 flex flex-col sm:flex-row sm:items-center sm:justify-center lg:flex-col items-center justify-center text-center rounded-xl transition-all border gap-1 sm:gap-2 lg:gap-0 ${travelIntensity === i.id ? i.active : i.theme}`}
                           >
                             <span className="font-bold text-sm">{i.label}</span>
-                            <span className={`text-[10px] mt-0.5 ${travelIntensity === i.id ? 'text-white/80' : 'opacity-70'}`}>{i.desc}</span>
+                            <span className={`text-[10px] mt-0.5 sm:mt-0 lg:mt-0.5 ${travelIntensity === i.id ? 'text-white/80' : 'opacity-70'}`}>{i.desc}</span>
                           </button>
                         ))}
                       </div>

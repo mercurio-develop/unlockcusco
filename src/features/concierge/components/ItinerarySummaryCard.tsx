@@ -18,7 +18,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
   const totalCost = itinerary.totalCost ?? 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 w-full my-3">
+    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow p-4 w-full my-3">
       {/* Header */}
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
@@ -34,7 +34,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
       <div className="space-y-1.5 mb-3">
         {(itinerary.waypoints || []).slice(0, 3).map((waypoint, idx) => {
           return (
-            <div key={idx} className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
+            <div key={idx} className="flex items-center gap-2.5 bg-slate-50 rounded-xl px-3 py-2">
               <span className="text-base shrink-0">📍</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] text-slate-400 font-medium leading-none mb-0.5 truncate">{waypoint.category} in {waypoint.locationStr}</p>
@@ -54,7 +54,7 @@ export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-2.5 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-2.5">
         <div>
           <p className="text-[10px] text-slate-400 font-medium">Estimated total</p>
           <p className="text-base font-bold text-slate-900">${totalCost}</p>

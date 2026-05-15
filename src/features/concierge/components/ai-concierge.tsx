@@ -365,8 +365,8 @@ Please generate my macro trip plan.`;
             transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             className="fixed inset-0 sm:inset-auto sm:top-[56px] sm:right-0 z-[100] sm:z-40 w-full sm:w-[450px] h-full sm:h-[calc(100vh-56px)]"
           >
-            <Card className="flex flex-col h-full rounded-none sm:rounded-tl-3xl shadow-2xl border-l border-gray-200 overflow-hidden bg-white/95 backdrop-blur-xl">
-              <div className="bg-gray-50 border-b border-gray-200 p-4 sm:p-5 flex justify-between items-center shrink-0">
+            <Card className="flex flex-col h-full rounded-none sm:rounded-tl-3xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl border-none">
+              <div className="bg-white p-4 sm:p-5 flex justify-between items-center shrink-0 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                   <div className="bg-rose-50 border border-rose-100 p-2 rounded-xl shadow-inner">
                     <Sparkles className="w-4 h-4 text-rose-600" />
@@ -405,7 +405,7 @@ Please generate my macro trip plan.`;
                             className={`p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed shadow-sm ${
                               msg.role === "user" 
                                 ? "bg-slate-900 text-white rounded-tr-sm" 
-                                : "bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm"
+                                : "bg-slate-50 text-slate-800 rounded-tl-sm"
                             }`}
                           >
                             {(() => {
@@ -516,7 +516,7 @@ Please generate my macro trip plan.`;
                         }
                         if (toolName === 'buildMacroTrip') {
                           return (
-                            <div key={key} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 w-full my-3">
+                            <div key={key} className="bg-white rounded-2xl shadow-sm p-4 w-full my-3">
                               <div className="flex items-center gap-2.5 mb-2">
                                 <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
                                   <Navigation className="w-4 h-4 text-purple-600" />
@@ -593,7 +593,7 @@ Please generate my macro trip plan.`;
                       <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-rose-100">
                         <Bot className="w-4 h-4 text-rose-600" />
                       </div>
-                      <div className="p-3 rounded-2xl text-sm bg-gray-50 border border-gray-100 text-slate-800 rounded-tl-sm flex items-center gap-1.5 shadow-sm">
+                      <div className="p-3 rounded-2xl text-sm bg-slate-50 text-slate-800 rounded-tl-sm flex items-center gap-1.5 shadow-sm">
                         <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce"></div>
                         <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                         <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
@@ -604,7 +604,7 @@ Please generate my macro trip plan.`;
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide border-t border-gray-100 bg-white shrink-0">
+              <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide bg-white shrink-0">
                 {(
                   travelVibe === 'Explorer' ? [
                     { label: "Best hikes near me", icon: "🥾", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
@@ -641,7 +641,7 @@ Please generate my macro trip plan.`;
                 ))}
               </div>
 
-              <div className="px-4 pb-6 pt-2 bg-white shrink-0">
+              <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 bg-white shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input 
                     placeholder="Describe your ideal day..." 

@@ -80,12 +80,12 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 relative">
+    <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6 bg-gray-50/50 relative" data-vaul-no-drag>
       {businesses.length > 0 && (
         <div className="flex flex-col gap-3 w-full z-10 mb-4">
-          <div className="flex items-center justify-between w-full">
-            <div className="text-sm font-bold text-slate-800">{totalCount} Places</div>
-            <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-3 md:gap-0">
+            <div className="text-sm font-bold text-slate-800 order-2 md:order-1">{totalCount} Places</div>
+            <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-2 shrink-0 order-1 md:order-2">
               <div ref={sortRef} className="relative z-20">
                 <button 
                   onClick={() => setIsSortOpen(!isSortOpen)}
@@ -142,7 +142,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
               )}
               {cats.map(c => (
                 <button key={c} onClick={() => removeFilter("cat", c)} className={cn(
-                  "shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors",
+                  "shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] md:text-xs font-black uppercase tracking-widest transition-colors",
                   c.toUpperCase() === 'DINING' ? "bg-amber-50 text-amber-700 border-amber-200/50 hover:bg-amber-100" :
                   c.toUpperCase() === 'CULTURE' ? "bg-purple-50 text-purple-700 border-purple-200/50 hover:bg-purple-100" :
                   c.toUpperCase() === 'BOLETO' ? "bg-sky-50 text-sky-700 border-sky-200/50 hover:bg-sky-100" :
@@ -193,7 +193,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
                isHighlighted={selectedId === e.id} 
                onSelect={() => setSelectedId(e.id)} 
                orientation={viewMode === "list" ? "horizontal" : "vertical"}
-               hideMapButton={true}
+               showMap={false}
              />
            ))}
            {hasMore && (

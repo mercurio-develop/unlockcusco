@@ -142,7 +142,8 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
               key={business.id}
               business={business}
               orientation="vertical"
-              contactOnly={true}
+              showItineraryAdd={false}
+              showItineraryEnd={false}
             />
           ))}
           {/* Infinite Scroll Trigger */}

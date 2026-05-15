@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
 import { SeoDirectory } from '@/components/ui/seo-directory'
 import { InteractiveList } from '@/features/discovery/components/interactive-list'
+import { getCategoryData } from '@/features/discovery/constants'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -20,14 +21,6 @@ const LOCATION_LABELS: Record<string, string> = {
   yucay: 'Yucay',
   calca: 'Calca',
   cusco: 'Cusco',
-}
-
-const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
-  dining:    { label: 'Dining',    emoji: '🍽️' },
-  wellness:  { label: 'Wellness',  emoji: '🧘' },
-  adventure: { label: 'Adventure', emoji: '🥾' },
-  stays:     { label: 'Stays',     emoji: '🛌' },
-  culture:   { label: 'Culture',   emoji: '🏺' },
 }
 
 export async function generateStaticParams() {
@@ -46,9 +39,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { location, category } = await params
   const loc = LOCATION_LABELS[location] ?? location
-  const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
+  const cat = getCategoryData(category)
   
-  const title = `${cat.emoji} ${cat.label} in ${loc} — VALLECITO Sacred Valley`
+  const title = `${cat.label} in ${loc} — VALLECITO Sacred Valley`
   const description = `Discover the best ${cat.label} businesses in ${loc}, Sacred Valley. Book directly with zero commissions via WhatsApp.`
 
   return {
@@ -103,8 +96,9 @@ export default async function CategoryPage({
   if (localBusinesses.length === 0) return notFound()
 
   const loc = LOCATION_LABELS[location] ?? location
-  const cat = CATEGORY_LABELS[category] ?? { label: category, emoji: '📍' }
-  const description = CATEGORY_DESCRIPTIONS[category] ?? `Explore the best ${cat.label} options in ${loc}.`
+  const cat = getCategoryData(category)
+  const CatIcon = cat.icon
+  const description = CATEGORY_DESCRIPTIONS[category.toLowerCase()] ?? `Explore the best ${cat.label} options in ${loc}.`
 
   // JSON-LD Structured Data (Breadcrumbs)
   const jsonLd = {
@@ -143,16 +137,17 @@ export default async function CategoryPage({
       {/* Hero Section */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-12">
-          <Link href="/explore" className="text-slate-500 hover:text-slate-900 text-sm transition-colors mb-6 inline-block">
-            ← Explore
+          <Link href={`/explore/${location}`} className="text-slate-500 hover:text-slate-900 text-sm transition-colors mb-6 inline-block">
+            ← Back to {loc}
           </Link>
           <div className="flex items-center gap-3 mb-3">
             <span className="text-rose-600 font-bold text-[10px] uppercase tracking-widest">Sacred Valley</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-medium text-xs uppercase tracking-widest">{loc}</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight">
-            {cat.emoji} {cat.label}
+          <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight flex items-center gap-3">
+            <CatIcon className={`w-8 h-8 md:w-10 md:h-10 ${cat.theme.match(/text-\w+-\d+/)?.[0] || 'text-rose-600'}`} />
+            {cat.label}
           </h1>
           <p className="mt-4 text-slate-600 text-lg font-light max-w-2xl leading-relaxed">
             {description}

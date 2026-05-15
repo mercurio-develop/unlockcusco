@@ -22,6 +22,7 @@ import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { submitLead } from "@/features/leads/actions/submit-lead"
 import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { useTrip } from "@/lib/store/trip-context"
+import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import type { Business } from "@prisma/client"
 import {
@@ -30,15 +31,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-
-const CATEGORY_IMAGE_FALLBACKS: Record<string, string> = {
-  'DINING': "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format&fit=crop",
-  'STAYS': "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop",
-  'WELLNESS': "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop",
-  'CULTURE': "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop",
-  'BOLETO': "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop",
-  'DEFAULT': "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop"
-};
+import { getCategoryData } from "@/features/discovery/constants"
 
 interface BusinessCardProps {
   business: Business
@@ -46,12 +39,13 @@ interface BusinessCardProps {
   onSelect?: () => void
   orientation?: "vertical" | "horizontal"
   onImageLoad?: () => void
-  hideActions?: boolean
-  hideEndButton?: boolean
-  contactOnly?: boolean
-  hideDetails?: boolean
-  hideMapButton?: boolean
-  hideContactButton?: boolean
+  showActions?: boolean
+  showItineraryAdd?: boolean
+  showItineraryEnd?: boolean
+  showContact?: boolean
+  showMap?: boolean
+  showDetails?: boolean
+  onDoubleClick?: () => void
 }
 
 export function BusinessCard({
@@ -60,12 +54,13 @@ export function BusinessCard({
   onSelect,
   orientation = "vertical",
   onImageLoad,
-  hideActions = false,
-  hideEndButton = false,
-  contactOnly = false,
-  hideDetails = false,
-  hideMapButton = false,
-  hideContactButton = false
+  showActions = true,
+  showItineraryAdd = true,
+  showItineraryEnd = true,
+  showContact = true,
+  showMap = true,
+  showDetails = true,
+  onDoubleClick
 }: BusinessCardProps) {  const [touristName, setTouristName] = useState("")
   const [touristPhone, setTouristPhone] = useState("")
   const [date, setDate] = useState("")
@@ -86,8 +81,10 @@ export function BusinessCard({
     isExchangingStart,
     setIsExchangingStart,
     isExchangingEnd, 
-    setIsExchangingEnd 
+    setIsExchangingEnd,
+    setSelectedId
   } = useTrip()
+  const { setMobileViewMode } = usePreferences()
   const router = useRouter()
   
   const isHorizontal = orientation === "horizontal"
@@ -140,8 +137,8 @@ export function BusinessCard({
   const handleCardClick = () => {
     if (onSelect) {
       onSelect()
-      trackBusinessView(business.id)
     }
+    trackBusinessView(business.id)
   }
 
   return (
@@ -151,10 +148,12 @@ export function BusinessCard({
         e.dataTransfer.setData("application/json", JSON.stringify(business));
       }}
       onClick={handleCardClick}
+      onDoubleClick={onDoubleClick}
+      data-vaul-no-drag
       className={cn(
-        "group cursor-pointer transition-all duration-300 relative",
-        isHighlighted ? "opacity-100 scale-[1.02]" : "opacity-90 hover:opacity-100",
-        isHorizontal ? "flex flex-row items-center gap-4" : "flex flex-col gap-3 h-full"
+        "group cursor-pointer transition-all duration-300 relative bg-white border border-slate-200/60 shadow-md hover:shadow-xl rounded-2xl md:rounded-3xl",
+        isHighlighted ? "opacity-100 scale-[1.02] ring-2 ring-rose-500/20" : "opacity-95 md:hover:opacity-100",
+        isHorizontal ? "flex flex-row items-center gap-3 sm:gap-4 p-2.5 sm:p-3" : "flex flex-col gap-3 h-full p-3 sm:p-4"
       )}
     >
       {/* Top Right Action Menu */}
@@ -197,20 +196,20 @@ export function BusinessCard({
       {/* Image Container */}
       <div className={cn(
         "relative overflow-hidden transition-all duration-300 bg-slate-100",
-        isHorizontal ? "w-16 sm:w-20 aspect-square shrink-0 rounded-xl" : "w-full aspect-[4/3] sm:aspect-[4/3] rounded-2xl",
-        isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm group-hover:shadow-md"
+        isHorizontal ? "w-12 sm:w-16 lg:w-20 aspect-square shrink-0 rounded-xl" : "w-full aspect-[4/3] sm:aspect-[4/3] rounded-2xl",
+        isHighlighted ? "shadow-[0_0_0_3px_#E11D48] shadow-rose-600/50" : "shadow-sm md:group-hover:shadow-md"
       )}>
         {(() => {
-          const fallbackImage = CATEGORY_IMAGE_FALLBACKS[business.category?.toUpperCase() || ''] || CATEGORY_IMAGE_FALLBACKS['DEFAULT'];
-          const displayImage = business.imageUrl || fallbackImage;
-          
+          const catData = getCategoryData(business.category);
+          const displayImage = business.imageUrl || catData.fallbackImage;
+
           return (
             <>
               <SafeImageWrapper
                 src={displayImage}
-                fallbackSrc={fallbackImage}
+                fallbackSrc={catData.fallbackImage}
                 alt={business.name}
-                imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                imgClassName="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-700 ease-out"
                 wrapperClassName="w-full h-full"
                 onLoad={() => {
                   if (onImageLoad && !hasReportedLoad) {
@@ -220,9 +219,8 @@ export function BusinessCard({
                 }}
               />
               {/* Magazine-style overlays to normalize image appearance */}
-              <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 group-hover:bg-black/0" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-            </>
+              <div className="absolute inset-0 bg-black/10 transition-opacity duration-500 md:group-hover:bg-black/0" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 opacity-60 md:group-hover:opacity-80 transition-opacity duration-500" />            </>
           );
         })()}
         
@@ -259,7 +257,7 @@ export function BusinessCard({
                   href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)} 
                   className={cn(
                     "font-bold text-slate-900 leading-tight hover:text-rose-600 transition-colors",
-                    isHorizontal ? "text-[15px] sm:text-base" : "text-[15px]"
+                    isHorizontal ? "text-[12px] sm:text-[14px] lg:text-base" : "text-[13px] sm:text-[14px] lg:text-[15px]"
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -268,7 +266,7 @@ export function BusinessCard({
               ) : (
                 <h3 className={cn(
                   "font-bold text-slate-900 leading-tight",
-                  isHorizontal ? "text-[15px] sm:text-base" : "text-[15px]"
+                  isHorizontal ? "text-[12px] sm:text-[14px] lg:text-base" : "text-[13px] sm:text-[14px] lg:text-[15px]"
                 )}>
                   {business.name}
                 </h3>
@@ -280,21 +278,19 @@ export function BusinessCard({
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-             <span className={cn(
-               "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1",
-               business.category?.toUpperCase() === 'DINING'
-                 ? "bg-amber-50 text-amber-700 border-amber-200/50"
-                 : business.category?.toUpperCase() === 'CULTURE'
-                 ? "bg-purple-50 text-purple-700 border-purple-200/50"
-                 : business.category?.toUpperCase() === 'BOLETO'
-                 ? "bg-sky-50 text-sky-700 border-sky-200/50"
-                 : "bg-rose-50 text-rose-600 border-rose-100/50"
-             )}>
-               {business.category?.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
-               {business.category?.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
-               {business.category?.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
-               {business.category}
-             </span>
+             {(() => {
+               const catData = getCategoryData(business.category);
+               const CatIcon = catData.icon;
+               return (
+                 <span className={cn(
+                   "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1",
+                   catData.theme
+                 )}>
+                   <CatIcon className="w-2.5 h-2.5" />
+                   {catData.label}
+                 </span>
+               );
+             })()}
              {business.locationSlug && (
                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
                  <MapPin className="w-2.5 h-2.5" />
@@ -370,9 +366,9 @@ export function BusinessCard({
         </div>
 
         {/* Action Row */}
-        {!hideActions && (
-          <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex gap-2")}>
-            {!contactOnly && (
+        {showActions && (
+          <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex flex-wrap gap-2")}>
+            {showItineraryAdd && (
               <>
                 {isExchangingStart && business.lat != null && business.lng != null ? (
                   <Button
@@ -384,7 +380,7 @@ export function BusinessCard({
                     }}
                     className={cn(
                       "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                      isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Navigation className="w-3 h-3" />
@@ -400,7 +396,7 @@ export function BusinessCard({
                     }}
                     className={cn(
                       "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                      isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Bed className="w-3 h-3" />
@@ -412,7 +408,7 @@ export function BusinessCard({
                       disabled
                       className={cn(
                         "flex-1 bg-slate-100 text-slate-400 font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                        isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Repeat className="w-3 h-3" />
@@ -423,7 +419,7 @@ export function BusinessCard({
                       onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
                       className={cn(
                         "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
-                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                        isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Repeat className="w-3 h-3" />
@@ -435,7 +431,7 @@ export function BusinessCard({
                     onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
                     className={cn(
                       "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
-                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                      isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                     )}
                   >
                     <Repeat className="w-3 h-3" />
@@ -447,18 +443,18 @@ export function BusinessCard({
                       onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
                       className={cn(
                         "flex-1 bg-transparent text-slate-700 border border-slate-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold rounded-full transition-all flex items-center justify-center gap-1.5",
-                        isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                        isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                       )}
                     >
                       <Plus className="w-[14px] h-[14px]" strokeWidth={1} />
                       Add
                     </Button>
-                    {!hideEndButton && activeItinerary && business.lat != null && business.lng != null && (
+                    {showItineraryEnd && activeItinerary && business.lat != null && business.lng != null && (
                       <Button
                         onClick={(e) => { e.stopPropagation(); updateEndAnchorLocation(business.lat!, business.lng!, business.name); }}
                         className={cn(
                           "bg-transparent text-rose-600 border border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
-                          isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                          isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                         )}
                         title="Set as end of day"
                       >
@@ -471,107 +467,109 @@ export function BusinessCard({
               </>
             )}
 
-            {!hideMapButton && business.lat != null && business.lng != null && (
-              <Link
-                href={`/explore?loc=${business.locationSlug}&id=${business.id}&lat=${business.lat}&lng=${business.lng}`}
-                onClick={(e) => e.stopPropagation()}
+            {showMap && business.lat != null && business.lng != null && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(business.id);
+                  window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+                }}
                 className={cn(
                   "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
-                  isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                  isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                 )}
               >
                 Map
-              </Link>
+              </button>
             )}
             
-            {!hideDetails && (
+            {showDetails && (
               <Link
                 href={`/business/${business.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
-                  isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
+                  "hidden md:flex flex-1 items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
+                  isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                 )}
               >
                 Details
               </Link>
             )}
 
-            {!hideContactButton && (
-              isClaimed || business.category === 'TRANSPORT' || business.whatsapp ? (
-                  <Button
-                    onClick={handleBookNow}
-                    className={cn(
-                      "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
-                      isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
-                    )}
-                  >
-                    Contact
-                  </Button>
-                ) : (
-                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogTrigger render={
-                      <Button 
-                        onClick={(e) => e.stopPropagation()} 
-                        className={cn(
-                          "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
-                          isHorizontal ? "h-8 px-3 text-[10px] uppercase tracking-widest" : "h-10 px-4 text-[11px] uppercase tracking-widest"
-                        )}
-                      >
-                        Contact
-                      </Button>
-                    } />
-                    <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
-                      <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
-                        <DialogDescription className="text-sm text-slate-500 mt-1">
-                          Send an inquiry to {business.name} to check for availability and pricing.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-5 py-4">
-                        <div className="grid gap-2.5">
-                          <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
-                          <Input
-                            id="name"
-                            placeholder="e.g. Sarah Jenkins"
-                            value={touristName}
-                            onChange={(e) => setTouristName(e.target.value)}
-                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                          />
-                        </div>
-                        <div className="grid gap-2.5">
-                          <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
-                          <Input
-                            id="phone"
-                            placeholder="e.g. +51 987 654 321"
-                            value={touristPhone}
-                            onChange={(e) => setTouristPhone(e.target.value)}
-                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                          />
-                        </div>
-                        <div className="grid gap-2.5">
-                          <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
-                          <Input
-                            id="date"
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
-                          />
-                        </div>
-                      </div>
-                      <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
-                        Send Inquiry
-                      </Button>
-                    </DialogContent>
-                  </Dialog>
-                )
+            {showContact && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (business.whatsapp || business.category === 'TRANSPORT' || isClaimed) {
+                    if (business.whatsapp) {
+                      handleBookNow(e as any);
+                    } else {
+                      setIsOpen(true);
+                    }
+                  } else {
+                    setIsOpen(true);
+                  }
+                }}
+                className={cn(
+                  "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
+                  isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
+                )}
+              >
+                Contact
+              </Button>
             )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+            
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
+                <DialogHeader className="mb-4">
+                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 mt-1">
+                    Send an inquiry to {business.name} to check for availability and pricing.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-5 py-4">
+                  <div className="grid gap-2.5">
+                    <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g. Sarah Jenkins"
+                      value={touristName}
+                      onChange={(e) => setTouristName(e.target.value)}
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div className="grid gap-2.5">
+                    <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
+                    <Input
+                      id="phone"
+                      placeholder="e.g. +51 987 654 321"
+                      value={touristPhone}
+                      onChange={(e) => setTouristPhone(e.target.value)}
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div className="grid gap-2.5">
+                    <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
+                    />
+                  </div>
+                </div>
+                <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                  Send Inquiry
+                </Button>
+                </DialogContent>
+                </Dialog>
+                </div>
+                )}
+                </div>
+                </div>
+                )
+                }
 
 

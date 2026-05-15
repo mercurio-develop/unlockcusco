@@ -216,9 +216,8 @@ export function ItineraryPanel() {
         {/* Start Anchor */}
         <div 
           onClick={() => setSelectedId('itin-start')}
-          className={`flex flex-col rounded-2xl border-l-4 border border-l-slate-900 transition-all ${selectedId === 'itin-start' ? 'bg-white shadow-md ring-1 ring-slate-900' : 'bg-white border-gray-100 hover:border-gray-200'}`}
-        >
-          <div className="flex gap-4 p-4">
+          className={`flex flex-col rounded-2xl border-l-4 border border-l-slate-900 transition-all ${selectedId === 'itin-start' ? 'bg-white shadow-lg ring-1 ring-slate-900 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
+        >          <div className="flex gap-4 p-4">
             <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
               {activeItinerary.startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
             </div>
@@ -275,7 +274,7 @@ export function ItineraryPanel() {
           <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
               {(activeItinerary.startAnchor as any)?.service && (
-                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" contactOnly />
+                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
               )}
             </div>
           </div>
@@ -288,7 +287,7 @@ export function ItineraryPanel() {
               <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfiles[idx] || 'driving'} setTransportProfile={setLegTransportProfile} />
               
               <div
-                className={`flex flex-col p-4 rounded-2xl border-l-4 border mb-2 border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-md ring-1 ring-[var(--step-color)]' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                className={`flex flex-col p-4 rounded-2xl border-l-4 border mb-2 border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-lg ring-1 ring-[var(--step-color)] scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
                 style={{ '--step-color': getCategoryColor(waypoint.category) } as React.CSSProperties}
               >
                 <div className="flex gap-3 items-start">
@@ -411,7 +410,7 @@ export function ItineraryPanel() {
                 >
                   <div className="overflow-hidden">
                     {waypoint.service && (
-                      <BusinessCard business={waypoint.service} orientation="horizontal" contactOnly />
+                      <BusinessCard business={waypoint.service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
                     )}
                   </div>
                 </div>
@@ -423,9 +422,9 @@ export function ItineraryPanel() {
         {/* End Anchor */}
         <div className="relative">
           <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfiles[(activeItinerary.waypoints || []).length] || 'driving'} setTransportProfile={setLegTransportProfile} />
-          <div
+          <div 
             onClick={() => setSelectedId('itin-arrival')}
-            className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-md ring-1 ring-rose-500' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+            className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-lg ring-1 ring-rose-500 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
           >
             <div className="flex gap-4 p-4">
             <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
@@ -489,7 +488,7 @@ export function ItineraryPanel() {
             <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
                 {(activeItinerary.endAnchor as any)?.service && (
-                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" contactOnly hideMapButton={true} />
+                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} />
                 )}
               </div>
             </div>
