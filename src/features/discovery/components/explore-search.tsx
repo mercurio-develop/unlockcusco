@@ -85,7 +85,7 @@ export function ExploreSearch({
           categories: currentCats
         });
       }
-      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
+      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)
     }, 500)
   }
 
@@ -96,7 +96,7 @@ export function ExploreSearch({
     } else {
       nextCats.push(catValue)
     }
-    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
+    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)
   }
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,15 +159,14 @@ export function ExploreSearch({
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
             "shrink-0 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider px-4 py-3.5 rounded-2xl border transition-all",
-            showFilters 
-              ? "bg-slate-900 text-white border-slate-900 shadow-md" 
+            showFilters
+              ? "bg-slate-900 text-white border-slate-900 shadow-md"
               : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm"
           )}
         >
-          <SlidersHorizontal className="w-4 h-4" />
-          <span className="hidden sm:inline">Refine</span>
-        </button>
-      </div>
+          {showFilters ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
+          <span className="hidden sm:inline">Filters</span>
+        </button>      </div>
 
       <AnimatePresence>
         {showFilters && (
@@ -209,7 +208,7 @@ export function ExploreSearch({
                     >
                       <div className="flex flex-wrap gap-2 pb-1">
                         <button
-                          onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                          onClick={() => navigateFilters("", currentCats, value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)}
                           className={cn(
                             "px-3.5 py-2 rounded-full border transition-all",
                             currentLoc === "" 
@@ -222,7 +221,7 @@ export function ExploreSearch({
                         {LOCATIONS.map((loc) => (
                           <button
                             key={loc.value}
-                            onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                            onClick={() => navigateFilters(loc.value, currentCats, value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)}
                             className={cn(
                               "px-3.5 py-2 rounded-full border transition-all",
                               currentLoc === loc.value 
@@ -258,7 +257,7 @@ export function ExploreSearch({
                     >
                       <div className="grid grid-cols-3 gap-2 pb-1">
                         <button
-                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
+                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)}
                           className={cn(
                             "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
                             currentCats.length === 0 
@@ -364,6 +363,16 @@ export function ExploreSearch({
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+
+              {/* Close Filters CTA */}
+              <div className="mt-2 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="w-full flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98]"
+                >
+                  View Results
+                </button>
               </div>
             </div>
           </motion.div>

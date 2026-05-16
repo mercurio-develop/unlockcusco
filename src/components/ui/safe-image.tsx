@@ -21,13 +21,18 @@ export function SafeImageWrapper({
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const imgRef = useRef<HTMLImageElement>(null);
+  const onLoadRef = useRef(onLoad);
+
+  useEffect(() => {
+    onLoadRef.current = onLoad;
+  }, [onLoad]);
 
   useEffect(() => {
     if (imgRef.current?.complete) {
       setIsLoading(false);
-      if (onLoad) onLoad();
+      if (onLoadRef.current) onLoadRef.current();
     }
-  }, [src, onLoad]);
+  }, [src]);
 
   if (hasError && !fallbackSrc) return null;
 

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
+import { LayoutGrid, Map as RouteMap, CalendarDays, Sparkles } from "lucide-react"
 
 interface ThreePaneLayoutProps {
   sidebar: ReactNode
@@ -20,7 +21,7 @@ export function ThreePaneLayout({
 }: ThreePaneLayoutProps) {
   const { panelMode, setPanelMode } = useTrip()
   const [leftWidth, setLeftWidth] = useState(40)
-  const { isChatOpen, setIsChatOpen, mobileViewMode, setMobileViewMode } = usePreferences()
+  const { mobileViewMode, setMobileViewMode, isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -98,7 +99,7 @@ export function ThreePaneLayout({
         </div>
 
         {/* Primary Content (Scrollable Area) */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col pb-16 md:pb-0">
            {content}
         </div>
       </div>
@@ -132,24 +133,41 @@ export function ThreePaneLayout({
         </div>
       )}
 
-      {/* Mobile Map/List Toggle */}
-      <div className="md:hidden fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-50">
-        <button 
-          onClick={() => setMobileViewMode(m => m === 'list' ? 'map' : 'list')} 
-          className="bg-slate-900 text-white px-5 py-2.5 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.25)] font-bold text-sm flex items-center gap-2 transition-transform active:scale-95"
-        >
-          {mobileViewMode === 'list' ? (
-            <>
-              <span>Map</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-            </>
-          ) : (
-            <>
-              <span>List</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-            </>
-          )}
-        </button>
+      {/* Mobile Bottom Navbar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_14px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-around h-16 px-2">
+          <button 
+            onClick={() => { setPanelMode('discover'); setMobileViewMode('list'); }}
+            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", panelMode === 'discover' && mobileViewMode === 'list' ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
+          >
+            <LayoutGrid className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Discover</span>
+          </button>
+          
+          <button 
+            onClick={() => { setMobileViewMode('map'); }}
+            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", mobileViewMode === 'map' ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
+          >
+            <RouteMap className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Map</span>
+          </button>
+          
+          <button 
+            onClick={() => { setPanelMode('itinerary'); setMobileViewMode('list'); }}
+            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", panelMode === 'itinerary' && mobileViewMode === 'list' ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
+          >
+            <CalendarDays className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Itinerary</span>
+          </button>
+          
+          <button 
+            onClick={() => { setIsChatOpen(!isChatOpen); }}
+            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative", isChatOpen ? "text-rose-600" : "text-slate-500 hover:text-slate-900")}
+          >
+            <Sparkles className={cn("w-5 h-5", isChatOpen ? "text-rose-600" : "text-slate-500")} />
+            <span className="text-[10px] font-medium">Concierge</span>
+          </button>
+        </div>
       </div>
 
     </div>

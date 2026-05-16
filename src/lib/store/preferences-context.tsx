@@ -25,7 +25,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [travelIntensity, setTravelIntensity] = useState<number | null>(null);
   const [targetDate, setTargetDate] = useState<Date>(new Date());
   const [isMapPicking, setIsMapPicking] = useState<{ active: boolean, target: 'start' | 'end' | null }>({ active: false, target: null });
-  const [mobileViewMode, setMobileViewMode] = useState<'list' | 'map'>('map');
+  const [mobileViewMode, setMobileViewMode] = useState<'list' | 'map'>('list');
 
   React.useEffect(() => {
     if (window.innerWidth >= 768) {

@@ -5,6 +5,7 @@ import { ExploreView } from "@/features/discovery"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
+import { cn } from "@/lib/utils"
 
 function ExplorePageContent() {
   const searchParams = useSearchParams()
@@ -15,6 +16,7 @@ function ExplorePageContent() {
     hasMore: boolean
   } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const q = searchParams.get("q") || ""
   const id = searchParams.get("id")
@@ -26,8 +28,13 @@ function ExplorePageContent() {
   const sort = searchParams.get("sort") || "recommended"
 
   useEffect(() => {
+    let ignore = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     async function load() {
       setLoading(true)
+      setError(null)
       try {
         const params = new URLSearchParams()
         if (q) params.set("q", q)
@@ -40,17 +47,47 @@ function ExplorePageContent() {
         if (sort) params.set("sort", sort)
         params.set("limit", "30")
 
-        const res = await fetch(`/api/businesses?${params.toString()}`)
+        const res = await fetch(`/api/businesses?${params.toString()}`, { signal: controller.signal })
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
         const result = await res.json()
-        setData(result)
-      } catch (error) {
-        console.error("Failed to load businesses:", error)
+        if (!ignore) {
+          setData(result)
+        }
+      } catch (err: any) {
+        if (ignore) return;
+        console.error("Failed to load businesses:", err)
+        if (err.name === 'AbortError') {
+          setError("Request timed out after 10 seconds. Check network or ad-blockers.")
+        } else {
+          setError(err.message || "Failed to load")
+        }
       } finally {
-        setLoading(false)
+        if (!ignore) {
+          setLoading(false)
+        }
+        clearTimeout(timeoutId);
       }
     }
     load()
+
+    return () => {
+      ignore = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [q, id, loc, cat, rad, lat, lng, sort])
+
+  if (error) {
+    return (
+      <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4 p-8 text-center">
+        <p className="text-rose-600 font-medium">Error loading data</p>
+        <p className="text-slate-500">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-md">Retry</button>
+      </div>
+    )
+  }
 
   if (!data && loading) {
     return (
@@ -68,15 +105,25 @@ function ExplorePageContent() {
   }
 
   return (
-    <div className={loading ? "opacity-70 pointer-events-none transition-opacity" : "transition-opacity"}>
-      <ExploreView
-        initialBusinesses={data.businesses}
-        initialMapBusinesses={data.allBusinesses || []}
-        initialCategoryCounts={data.categoryCounts || {}}
-        initialHasMore={data.hasMore || false}
-        initialQuery={q}
-        initialSelectedId={id}
-      />
+    <div className="relative">
+      <div className={cn("transition-all duration-300", loading ? "opacity-50 blur-[2px] pointer-events-none" : "")}>
+        <ExploreView
+          initialBusinesses={data.businesses}
+          initialMapBusinesses={data.allBusinesses || []}
+          initialCategoryCounts={data.categoryCounts || {}}
+          initialHasMore={data.hasMore || false}
+          initialQuery={q}
+          initialSelectedId={id}
+        />
+      </div>
+      {loading && data && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-xl border border-slate-200 flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
+            <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Updating...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

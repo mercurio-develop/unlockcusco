@@ -43,10 +43,31 @@ export function ExploreView({
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [mapBounds, setMapBounds] = useState<[number, number, number, number] | null>(null)
+  
   const searchParams = useSearchParams()
   const router = useRouter()
   const { panelMode, setPanelMode, activeItinerary, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults } = useTrip()
   const { isChatOpen, setIsChatOpen } = usePreferences()
+
+  const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
+
+  const isSearchActive = !!initialQuery;
+
+  const visibleBusinesses = useMemo(() => {
+    if (!mapBounds || effectiveBusinesses.length === 0 || isSearchActive) return effectiveBusinesses;
+    const [west, south, east, north] = mapBounds;
+    // Mapbox bounds can sometimes cross the antimeridian, but for simple use cases
+    // we assume a standard bounding box.
+    return effectiveBusinesses.filter(b => {
+      if (b.lat == null || b.lng == null) return false;
+      const lat = Number(b.lat);
+      const lng = Number(b.lng);
+      return lng >= west && lng <= east && lat >= south && lat <= north;
+    });
+  }, [effectiveBusinesses, mapBounds, isSearchActive]);
+
+  const effectiveMapBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : mapBusinesses;
   
   const isDrawerOpen = searchParams.get("filter") === "open"
   const setIsDrawerOpen = (open: boolean) => {
@@ -108,7 +129,7 @@ export function ExploreView({
         <h1 className="text-2xl font-serif tracking-tight text-slate-900">Explore Vallecito</h1>
       </div>
 
-      <div className="flex w-full justify-center md:justify-start overflow-x-auto scrollbar-hide gap-1.5 md:gap-2 pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+      <div className="hidden md:flex w-full justify-start overflow-x-auto scrollbar-hide gap-2 pb-1 px-0">
         <button title="Discover" onClick={() => { setPanelMode("discover"); }} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "discover" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><LayoutGrid className="w-3 h-3 md:w-4 md:h-4" /> <span>Discover</span></button>
         <button title="Concierge" onClick={() => setIsChatOpen(!isChatOpen)} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${isChatOpen ? "bg-rose-600 text-white border-rose-600 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-600 shadow-sm"}`}><Sparkles className={`w-3 h-3 md:w-4 md:h-4 ${isChatOpen ? 'text-white' : 'text-rose-500'}`} /> <span>Concierge</span></button>
         <button title="Itinerary" onClick={() => setPanelMode("itinerary")} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "itinerary" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><CalendarDays className="w-3 h-3 md:w-4 md:h-4" /> <span>Itinerary</span></button>
@@ -129,8 +150,8 @@ export function ExploreView({
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden text-slate-900">
       {panelMode === "discover" ? (
         <DiscoverPanel
-          businesses={businesses}
-          totalCount={mapBusinesses.length}
+          businesses={visibleBusinesses}
+          totalCount={effectiveMapBusinesses.length}
           selectedId={selectedId}
           setSelectedId={setSelectedId}          onReset={() => router.push('/explore')}
           hasMore={hasMore}
@@ -159,7 +180,7 @@ export function ExploreView({
           updateEndAnchorLocation(lat, lng, 'Custom End');
         }
         setMapClickMode(null); 
-      }} />}
+      }} onBoundsChange={setMapBounds} />}
       showMap={true}
     />
   )

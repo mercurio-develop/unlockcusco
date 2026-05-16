@@ -154,6 +154,9 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
 
   if (loc && radiusKm === undefined) {
     const locs = loc.split(',').map(l => l.trim()).filter(Boolean)
+    if (locs.includes('machu-picchu') && !locs.includes('aguas-calientes')) {
+      locs.push('aguas-calientes')
+    }
     if (locs.length > 0) {
       whereClause.locationSlug = { in: locs }
     }
@@ -271,6 +274,7 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
 export async function fetchBusinesses(params: FetchBusinessesParams) {
   const cacheKey = [
     'fetch-businesses',
+    'v2', // cache buster
     params.query || '',
     params.category || '',
     params.loc || '',

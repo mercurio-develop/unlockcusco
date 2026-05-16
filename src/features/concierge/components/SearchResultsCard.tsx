@@ -64,7 +64,7 @@ export function SearchResultsCard({ businesses, messageId, input }: { businesses
               business={business}
               orientation="vertical"
               onSelect={() => handleSelect(business)}
-              showMap={false}
+              showMap={true}
               showContact={false}
             />
           </div>

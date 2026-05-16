@@ -7,7 +7,7 @@ import { CATEGORIES, LOCATIONS } from "../constants"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl, useControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X, ChevronDown, Check } from "lucide-react"
+import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X, ChevronDown, ChevronRight, ChevronUp, Check, Bot } from "lucide-react"
 import type { Business } from "@prisma/client"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
@@ -106,11 +106,16 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
     return [west - lngPad, south - latPad, east + lngPad, north + latPad] as [number, number, number, number];
   }, [bounds]);
 
+  const clusterOptions = useMemo(() => ({
+    radius: isMobile ? 30 : 60,
+    maxZoom: 12
+  }), [isMobile]);
+
   const { clusters, supercluster } = useSupercluster({
     points: points,
     bounds: paddedBounds,
     zoom: Math.min(Math.round(zoom), 19),
-    options: { radius: isMobile ? 30 : 60, maxZoom: 12 }
+    options: clusterOptions
   });
 
   const style = getCategoryStyle(category);
@@ -128,7 +133,7 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
 
         if (isCluster) {
           return (
-            <Marker
+            <Marker pitchAlignment="viewport"
               key={`cluster-${category}-${item.id}`}
               longitude={longitude}
               latitude={latitude}
@@ -144,7 +149,8 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
                   mapRef.current?.flyTo({
                     center: [longitude, latitude],
                     zoom: Math.min(expansionZoom ?? 20, 20),
-                    duration: 1000
+                    duration: 1000,
+                    offset: [0, isMobile ? 220 : 150]
                   });
                 }
               }}
@@ -169,9 +175,13 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
         const bId = businessId || item.properties.businessId;
         const bData = business || item.properties.business;
         const isSelected = selectedId === bId;
+        
+        const isConciergeResult = bData.isConciergeResult;
+        const markerBg = isConciergeResult ? "#6366F1" : style.bg; // Indigo for AI
+        const MarkerIcon = isConciergeResult ? Bot : Icon;
 
         return (
-          <Marker
+          <Marker pitchAlignment="viewport"
             key={bId}
             longitude={longitude}
             latitude={latitude}
@@ -189,11 +199,11 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-[2.5px] border-white transition-all ${isSelected ? "ring-[3px] ring-white/50" : ""}`}
-                style={{ backgroundColor: style.bg }}
+                style={{ backgroundColor: markerBg }}
               >
-                <Icon className="w-4 h-4 text-white" />
+                <MarkerIcon className="w-4 h-4 text-white" />
               </div>
-              <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: style.bg }} />
+              <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: markerBg }} />
             </div>
           </Marker>
         );
@@ -205,14 +215,15 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
 interface ExploreMapProps {
   businesses: Business[]
   selectedId: string | null
-  onSelectBusiness: (id: string) => void
+  onSelectBusiness: (id: string | null) => void
   mapClickMode?: "start" | "end" | null
   onMapAnchorPick?: (lat: number, lng: number) => void
   categoryCounts?: Record<string, number>
   currentLoc?: string
+  onBoundsChange?: (bounds: [number, number, number, number] | null) => void
 }
 
-export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "" }: ExploreMapProps) {
+export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
@@ -220,14 +231,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("satellite")
   const currentCatStr = searchParams.get("cat") || ""
-  const currentCats = currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
+  const currentCats = useMemo(() => currentCatStr ? currentCatStr.split(',').filter(Boolean) : [], [currentCatStr])
   const selectedMapCategory = currentCats.length > 0 ? (currentCats.length === 1 ? currentCats[0].toUpperCase() : `${currentCats.length} CATEGORIES`) : "ALL"
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null)
   const [zoom, setZoom] = useState<number>(11)
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : true)
+  const [isLocationExpanded, setIsLocationExpanded] = useState(false)
+  const [isCategoryExpanded, setIsCategoryExpanded] = useState(false)
 
   const currentLocStr = searchParams.get("loc") || ""
-  const currentLocs = currentLocStr ? currentLocStr.split(',').filter(Boolean) : []
+  const currentLocs = useMemo(() => currentLocStr ? currentLocStr.split(',').filter(Boolean) : [], [currentLocStr])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -236,7 +249,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const { activeItinerary, panelMode: strictPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode, setMapSearchResults } = useTrip()
+  const { activeItinerary, panelMode: strictPanelMode, setPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode, setMapSearchResults } = useTrip()
   const panelMode = strictPanelMode as string;
   const { isChatOpen } = usePreferences()
 
@@ -378,13 +391,17 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     }
 
     if (selectedId === 'itin-start' && startAnchor?.lat && startAnchor?.lng) {
-      mapRef.current?.flyTo({ center: [startAnchor.lng as number, startAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+      const currentZoom = mapRef.current?.getZoom() || 0;
+      const targetZoom = Math.max(currentZoom, 15);
+      mapRef.current?.flyTo({ center: [startAnchor.lng as number, startAnchor.lat as number], zoom: targetZoom, pitch, duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] });
       setPopupBusiness(null);
       return;
     }
 
     if (selectedId === 'itin-arrival' && endAnchor?.lat && endAnchor?.lng) {
-      mapRef.current?.flyTo({ center: [endAnchor.lng as number, endAnchor.lat as number], zoom: 15, pitch, duration: 1200, essential: true });
+      const currentZoom = mapRef.current?.getZoom() || 0;
+      const targetZoom = Math.max(currentZoom, 15);
+      mapRef.current?.flyTo({ center: [endAnchor.lng as number, endAnchor.lat as number], zoom: targetZoom, pitch, duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] });
       setPopupBusiness(null);
       return;
     }
@@ -444,7 +461,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     }
 
     if (targetLat !== null && targetLng !== null) {
-      mapRef.current?.flyTo({ center: [targetLng, targetLat], zoom: 15, pitch: (mapMode === "satellite" ? 60 : 0), duration: 1200, essential: true });
+      const currentZoom = mapRef.current?.getZoom() || 0;
+      const targetZoom = Math.max(currentZoom, 15);
+      mapRef.current?.flyTo({ center: [targetLng, targetLat], zoom: targetZoom, pitch: (mapMode === "satellite" ? 60 : 0), duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] });
       setPopupBusiness(targetBusiness);
     } else {
       setPopupBusiness(null);
@@ -484,7 +503,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
     
-    if (businessSignature !== prevSignature) {
+    // We should refit the bounds if the businesses change, OR if we switch back to the discover panel and nothing is selected
+    const shouldRefit = businessSignature !== prevSignature || (panelMode === 'discover' && !selectedId);
+
+    if (shouldRefit) {
       setPrevSignature(businessSignature);
       
       // Skip fitBounds if we already have a selected item to fly to, to avoid animation conflicts
@@ -518,7 +540,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         });
       }
     }
-  }, [validBusinesses, businessSignature, prevSignature]);
+  }, [validBusinesses, businessSignature, prevSignature, panelMode, selectedId]);
 
   const center = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
@@ -528,20 +550,25 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     setZoom(evt.viewState.zoom);
     const mapBounds = mapRef.current?.getMap().getBounds();
     if (mapBounds) {
-      setBounds([
+      const boundsArr: [number, number, number, number] = [
         mapBounds.getWest(),
         mapBounds.getSouth(),
         mapBounds.getEast(),
         mapBounds.getNorth()
-      ]);
+      ];
+      setBounds(boundsArr);
+      if (onBoundsChange) onBoundsChange(boundsArr);
     }
-  }, []);
+  }, [onBoundsChange]);
 
   const navigateLocation = (locValue: string) => {
     if (setMapSearchResults) setMapSearchResults(null);
     const params = new URLSearchParams(searchParams.toString());
     if (locValue) params.set("loc", locValue);
     else params.delete("loc");
+    params.delete("lat");
+    params.delete("lng");
+    params.delete("id");
     router.push(`/explore?${params.toString()}`);
   }
 
@@ -558,6 +585,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     if (e) e.preventDefault();
     if (setMapSearchResults) setMapSearchResults(null);
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("lat");
+    params.delete("lng");
+    params.delete("id");
     if (catValue === "ALL") {
        params.delete("cat");
     } else {
@@ -583,56 +613,96 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     <div className="relative w-full h-full group">
       {/* Floating Filters (Location + Category) */}
       <div className="absolute top-4 left-4 right-14 z-20 flex flex-col gap-2 pointer-events-auto">
-        {/* Locations */}
-        <div className="flex items-center gap-2 pb-1">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md bg-slate-900 text-white transition-all active:scale-95 border border-white/20">
-              <MapPin className="w-3.5 h-3.5" />
-              {currentLoc ? LOCATIONS.find(l => l.value === currentLoc)?.label : "Anywhere"}
-              <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 z-[9999]">
-              <DropdownMenuItem onClick={() => navigateLocation("")}>
-                Anywhere
-              </DropdownMenuItem>
-              {LOCATIONS.map(loc => (
-                <DropdownMenuItem key={loc.value} onClick={() => navigateLocation(loc.value)}>
-                  {loc.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {/* Mobile Places/Route Toggle */}
+        {activeItinerary && (
+          <div className="md:hidden flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
+            <button
+              onClick={(e) => { e.preventDefault(); setPanelMode('discover'); }}
+              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
+            >
+              Places
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); setPanelMode('itinerary'); }}
+              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
+            >
+              Route
+            </button>
+          </div>
+        )}
 
-        {/* Categories */}
+        {/* Unified Filter (Location + Category) */}
         <div className="flex items-center gap-2 pb-1">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-md bg-slate-900 text-white transition-all active:scale-95 border border-white/20">
-              <Layers className="w-3.5 h-3.5" />
-              {selectedMapCategory === "ALL" ? "All Categories" : selectedMapCategory.charAt(0) + selectedMapCategory.slice(1).toLowerCase()}
-              <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex items-center">
+                <span className="truncate max-w-[80px] md:max-w-[120px]">
+                  {currentLoc ? LOCATIONS.find(l => l.value === currentLoc)?.label : "Anywhere"}
+                </span>
+                <span className="opacity-50 mx-1.5 shrink-0">•</span>
+                <span className="truncate max-w-[80px] md:max-w-[120px]">
+                  {selectedMapCategory === "ALL" ? "All" : selectedMapCategory.charAt(0) + selectedMapCategory.slice(1).toLowerCase()}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 opacity-70 ml-0.5 shrink-0" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 z-[9999]">
-              <DropdownMenuItem onClick={(e) => toggleCategory("ALL", e as any)} className="justify-between">
-                <span>All Categories</span>
-                {currentCats.length === 0 && <Check className="w-4 h-4 text-rose-600" />}
-              </DropdownMenuItem>
-              {availableMapCategories.filter(c => c !== "ALL").map(cat => {
-                const count = categoryCounts[cat] || 0;
-                return (
-                  <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between">
-                    <div className="flex items-center gap-2">
-                      <span>{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
-                      {count > 0 && (
-                        <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-medium">
-                          {count}
-                        </span>
-                      )}
-                    </div>
-                    {currentCats.some(c => c.toLowerCase() === cat.toLowerCase()) && <Check className="w-4 h-4 text-rose-600" />}
+            <DropdownMenuContent className="w-56 z-[9999] max-h-[60vh] overflow-y-auto">
+              <div 
+                className="px-2 py-1.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsLocationExpanded(!isLocationExpanded); }}
+              >
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</span>
+                {isLocationExpanded ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
+              </div>
+              {isLocationExpanded && (
+                <>
+                  <DropdownMenuItem onClick={() => navigateLocation("")} className="justify-between cursor-pointer">
+                    <span>Anywhere</span>
+                    {!currentLoc && <Check className="w-4 h-4 text-rose-600" />}
                   </DropdownMenuItem>
-                );
-              })}
+                  {LOCATIONS.map(loc => (
+                    <DropdownMenuItem key={loc.value} onClick={() => navigateLocation(loc.value)} className="justify-between cursor-pointer">
+                      <span>{loc.label}</span>
+                      {currentLoc === loc.value && <Check className="w-4 h-4 text-rose-600" />}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+              
+              <div className="h-px bg-slate-100 my-1.5 mx-1" />
+              
+              <div 
+                className="px-2 py-1.5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsCategoryExpanded(!isCategoryExpanded); }}
+              >
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</span>
+                {isCategoryExpanded ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
+              </div>
+              {isCategoryExpanded && (
+                <>
+                  <DropdownMenuItem onClick={(e) => toggleCategory("ALL", e as any)} className="justify-between cursor-pointer">
+                    <span>All Categories</span>
+                    {currentCats.length === 0 && <Check className="w-4 h-4 text-rose-600" />}
+                  </DropdownMenuItem>
+                  {availableMapCategories.filter(c => c !== "ALL").map(cat => {
+                    const count = categoryCounts[cat] || 0;
+                    return (
+                      <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <span>{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
+                          {count > 0 && (
+                            <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-medium">
+                              {count}
+                            </span>
+                          )}
+                        </div>
+                        {currentCats.some(c => c.toLowerCase() === cat.toLowerCase()) && <Check className="w-4 h-4 text-rose-600" />}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -657,12 +727,14 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         onLoad={() => {
           const mapBounds = mapRef.current?.getMap().getBounds();
           if (mapBounds) {
-            setBounds([
+            const boundsArr: [number, number, number, number] = [
               mapBounds.getWest(),
               mapBounds.getSouth(),
               mapBounds.getEast(),
               mapBounds.getNorth()
-            ]);
+            ];
+            setBounds(boundsArr);
+            if (onBoundsChange) onBoundsChange(boundsArr);
           }
         }}
       >
@@ -678,18 +750,18 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         )}
 
         {/* Alternative Detour route line */}
-        {itineraryRoute && panelMode === "itinerary" && (
+        {itineraryRoute && (
           <Source id="itinerary-route" type="geojson" data={itineraryRoute}>
             <Layer id="route-glow" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
               paint={{ 
                 "line-color": "#ffffff", 
                 "line-width": 12, 
-                "line-opacity": activeLegIndex !== null ? [
+                "line-opacity": panelMode !== "itinerary" ? 0.2 : (activeLegIndex !== null ? [
                   "case",
                   ["==", ["get", "legIndex"], activeLegIndex],
                   0.4,
                   0.0
-                ] : 0.4, 
+                ] : 0.4), 
                 "line-blur": 6 
               }} />
             <Layer id="route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }}
@@ -706,12 +778,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   "#007AFF" // Default back to Blue
                 ],
                 "line-width": 5, 
-                "line-opacity": activeLegIndex !== null ? [
+                "line-opacity": panelMode !== "itinerary" ? 0.3 : (activeLegIndex !== null ? [
                   "case",
                   ["==", ["get", "legIndex"], activeLegIndex],
                   0.95,
                   0.6
-                ] : 0.95 
+                ] : 0.95)
               }} />
             <Layer id="route-arrows" type="symbol" layout={{
               "symbol-placement": "line",
@@ -733,12 +805,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               ],
               "text-halo-color": "#ffffff",
               "text-halo-width": 2,
-              "text-opacity": activeLegIndex !== null ? [
+              "text-opacity": panelMode !== "itinerary" ? 0.0 : (activeLegIndex !== null ? [
                 "case",
                 ["==", ["get", "legIndex"], activeLegIndex],
                 1.0,
                 0.0
-              ] : 0.0
+              ] : 0.0)
             }} />
           </Source>
         )}
@@ -751,7 +823,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           }
           if (!start?.lat || !start?.lng) return null;
           return (
-            <Marker
+            <Marker pitchAlignment="viewport"
               longitude={start.lng}
               latitude={start.lat}
               anchor="bottom"
@@ -768,7 +840,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 title="Start location"
                 onClick={e => {
                   e.stopPropagation()
-                  mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true })
+                  mapRef.current?.flyTo({ center: [start.lng as number, start.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] })
                 }}
               >
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/20 blur-[3px] rounded-full" />
@@ -797,7 +869,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           }
           if (!end?.lat || !end?.lng) return null;
           return (
-            <Marker
+            <Marker pitchAlignment="viewport"
               longitude={end.lng}
               latitude={end.lat}
               anchor="bottom"
@@ -814,7 +886,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                 title="End location"
                 onClick={e => {
                   e.stopPropagation();
-                  mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: 14, pitch: 0, duration: 1200, essential: true });
+                  const currentZoom = mapRef.current?.getZoom() || 0;
+                  const targetZoom = Math.max(currentZoom, 14);
+                  mapRef.current?.flyTo({ center: [end.lng as number, end.lat as number], zoom: targetZoom, pitch: 0, duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] });
                   if ((end as any).service) {
                     setPopupBusiness((end as any).service);
                     onSelectBusiness((end as any).service.id);
@@ -846,7 +920,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           const Icon = style.icon;
 
           return (
-            <Marker key={`itin-${idx}`} longitude={pick.lng as number} latitude={pick.lat as number} anchor="bottom"
+            <Marker pitchAlignment="viewport" key={`itin-${idx}`} longitude={pick.lng as number} latitude={pick.lat as number} anchor="bottom"
               onClick={e => { e.originalEvent.stopPropagation(); setPopupBusiness(pick); onSelectBusiness(pick.id); }}
             >
               <div
@@ -893,12 +967,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         {popupBusiness && (popupBusiness as any).lng != null && (popupBusiness as any).lat != null && !isNaN((popupBusiness as any).lng) && !isNaN((popupBusiness as any).lat) && (
           <Popup
             anchor="bottom" longitude={(popupBusiness as any).lng as number} latitude={(popupBusiness as any).lat as number}
-            onClose={() => setPopupBusiness(null)} maxWidth="280px"
+            onClose={() => { setPopupBusiness(null); onSelectBusiness(null); }} maxWidth="280px"
             closeButton={false} closeOnClick={false} className="z-50" offset={32}
           >
             {(popupBusiness as any).isClusterPopup ? (
               <div className="w-[280px] p-4 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setPopupBusiness(null)} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1 shadow-sm"><X className="w-4 h-4"/></button>
+                <button onClick={() => { setPopupBusiness(null); onSelectBusiness(null); }} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1 shadow-sm"><X className="w-4 h-4"/></button>
                 <h3 className="font-bold text-slate-900 mb-3 border-b pb-2">{(popupBusiness as any).businesses.length} Places Here</h3>
                 <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
                   {(popupBusiness as any).businesses.map((b: any) => (
@@ -911,7 +985,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               </div>
             ) : (popupBusiness as any).category === 'NOTE' ? (
               <div className="w-48 p-4 bg-slate-900 text-white rounded-2xl shadow-xl border border-slate-700 relative" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setPopupBusiness(null)} className="absolute top-2 right-2 text-slate-400 hover:text-white"><X className="w-4 h-4"/></button>
+                <button onClick={() => { setPopupBusiness(null); onSelectBusiness(null); }} className="absolute top-2 right-2 text-slate-400 hover:text-white"><X className="w-4 h-4"/></button>
                 <div className="flex items-center gap-2 mb-2 pr-4 text-slate-400">
                   <MapPin className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Waypoint</span>
@@ -922,7 +996,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               </div>
             ) : (
               <div className="w-[320px] relative" onClick={e => e.stopPropagation()}>
-                <button onClick={() => setPopupBusiness(null)} className="absolute top-2 right-2 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
+                <button onClick={() => { setPopupBusiness(null); onSelectBusiness(null); }} className="absolute top-2 right-2 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
                 <BusinessCard 
                   business={popupBusiness as Business} 
                   orientation="vertical" 
@@ -958,8 +1032,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       </Map>
 
       {/* Drive Time Badge */}
-      {routeData && routeData.duration != null && (
-        <div className="absolute bottom-6 left-6 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
+      {panelMode === 'itinerary' && routeData && routeData.duration != null && (
+        <div className="absolute top-4 md:top-6 left-4 md:left-6 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
             <Clock className="w-4 h-4 text-blue-500" />
           </div>
@@ -978,9 +1052,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       </div>
 
       {mapClickMode && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-slate-900/90 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-xl backdrop-blur-sm pointer-events-none select-none">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 bg-slate-900/95 text-white text-xs font-bold pl-5 pr-1.5 py-1.5 rounded-full shadow-xl backdrop-blur-sm select-none">
           <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
-          Click map to set {mapClickMode === 'start' ? 'Starting Point' : 'End of Day'} — ESC to cancel
+          <span className="whitespace-nowrap">Tap map to set {mapClickMode === 'start' ? 'Start' : 'End'}</span>
+          <button 
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMapClickMode?.(null); }}
+            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors shrink-0 cursor-pointer pointer-events-auto"
+            title="Cancel"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 

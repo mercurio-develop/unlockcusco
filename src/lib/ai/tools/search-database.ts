@@ -49,8 +49,8 @@ export const searchDatabase = tool({
     // Normalize location using the fuzzy matcher
     let searchLocation = location ? normalizeLocation(location) : null;
     
-    if (searchLocation === 'machupicchu') {
-      searchLocation = 'aguas-calientes';
+    if (searchLocation === 'machupicchu' || searchLocation === 'aguas-calientes') {
+      searchLocation = 'machu-picchu';
     }
 
     // Attempt to map category or first keyword to DB category

@@ -29,6 +29,8 @@ interface TripContextType {
   setIsExchangingStart: (v: boolean) => void;
   isExchangingEnd: boolean;
   setIsExchangingEnd: (v: boolean) => void;
+  isAddingStop: boolean;
+  setIsAddingStop: (v: boolean) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
@@ -60,6 +62,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [exchangeTargetId, setExchangeTargetId] = useState<string | null>(null);
   const [isExchangingStart, setIsExchangingStart] = useState(false);
   const [isExchangingEnd, setIsExchangingEnd] = useState(false);
+  const [isAddingStop, setIsAddingStop] = useState(false);
   const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [transportProfiles, setTransportProfiles] = useState<Record<number, TransportProfile>>({});
   const [routeData, setRouteData] = useState<RouteData | null>(null);
@@ -209,7 +212,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .catch(err => console.error("Mapbox routing error:", err));
   }, [activeItinerary, transportProfiles]);
 
-  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business) => {
+  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business, skipAiTrigger: boolean = false) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
         title: "Today's Plan",
@@ -222,6 +225,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
         startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title, service }
       };
     });
+    if (!skipAiTrigger) {
+      setAiPromptToTrigger(`[INTERNAL] I just updated my start location to ${title}.`);
+    }
   }, []);
 
   const clearStartAnchor = useCallback(() => {
@@ -242,7 +248,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business) => {
+  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business, skipAiTrigger: boolean = false) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
       return {
@@ -257,6 +263,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
         }
       };
     });
+    if (!skipAiTrigger) {
+      setAiPromptToTrigger(`[INTERNAL] I just updated my end location to ${title}.`);
+    }
   }, []);
 
   const insertWaypoint = useCallback((service: Business, skipAiTrigger: boolean = false): boolean => {
@@ -304,10 +313,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setAiPromptToTrigger(`[INTERNAL] I just added ${bName} to my itinerary.`);
     }
     setPanelMode('itinerary');
+    setIsAddingStop(false);
     return true;
   }, []);
 
-  const swapWaypoint = useCallback((targetId: string, newService: Business) => {
+  const swapWaypoint = useCallback((targetId: string, newService: Business, skipAiTrigger: boolean = false) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
       
@@ -356,6 +366,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
     setExchangeTargetId(null);
     setPanelMode('itinerary');
+    if (!skipAiTrigger) {
+      setAiPromptToTrigger(`[INTERNAL] I just swapped an item in my itinerary with ${newService.name || "this location"}.`);
+    }
   }, []);
 
   const removeWaypoint = useCallback((id: string) => {
@@ -424,6 +437,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setIsExchangingStart,
       isExchangingEnd,
       setIsExchangingEnd,
+      isAddingStop,
+      setIsAddingStop,
       aiPromptToTrigger,
       setAiPromptToTrigger,
       setStartAnchorLocation,
@@ -444,7 +459,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       clearEndAnchor,
       saveItinerary,
   }), [
-      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, aiPromptToTrigger,
+      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, isAddingStop, aiPromptToTrigger,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfiles,
       mapClickMode, mapSearchResults, setMapSearchResults, clearStartAnchor, clearEndAnchor, saveItinerary,

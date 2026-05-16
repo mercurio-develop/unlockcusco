@@ -6,7 +6,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   STAYS:      "#007AFF",
   STAY:       "#007AFF",
   CULTURE:    "#AF52DE",
-  SPIRITUAL:  "#BF5AF2",
+  SPIRITUAL:  "#00C7BE",
   BOLETO:     "#FF2D55",
   TRANSPORT:  "#5AC8FA",
   AGENCY:     "#FFCC00",

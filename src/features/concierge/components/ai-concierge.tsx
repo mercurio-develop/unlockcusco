@@ -196,6 +196,15 @@ export function AiConcierge() {
           return;
         }
 
+        // Sync AI recommendations to map
+        if (toolName === 'searchDatabase' && output && !output.error) {
+          const list = Array.isArray(output) ? output : (output.alternatives || []);
+          if (list.length > 0) {
+            const withFlag = list.map((b: any) => ({ ...b, isConciergeResult: true }));
+            setMapSearchResults(withFlag);
+          }
+        }
+
         // mutateItinerary syncs
         if (toolName !== 'mutateItinerary' || !output?.success) return;
 
@@ -410,14 +419,24 @@ Please generate my macro trip plan.`;
                           >
                             {(() => {
                               const text = content || '';
-                              if (!text.includes('[[SETTINGS_ICON]]')) return text;
+                              
+                              const renderBold = (str: string) => {
+                                return str.split(/(\*\*.*?\*\*)/g).map((chunk, i) => {
+                                  if (chunk.startsWith('**') && chunk.endsWith('**')) {
+                                    return <strong key={i} className="font-bold text-inherit">{chunk.slice(2, -2)}</strong>;
+                                  }
+                                  return <span key={i}>{chunk}</span>;
+                                });
+                              };
+
+                              if (!text.includes('[[SETTINGS_ICON]]')) return renderBold(text);
 
                               const parts = text.split('[[SETTINGS_ICON]]');
                               return (
                                 <>
-                                  {parts[0]}
+                                  {renderBold(parts[0])}
                                   <Settings2 className="inline-block w-3.5 h-3.5 mx-0.5 mb-0.5 align-middle text-slate-500" />
-                                  {parts[1]}
+                                  {renderBold(parts[1])}
                                 </>
                               );
                             })()}

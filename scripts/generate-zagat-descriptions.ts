@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { generateText } from 'ai';
+import { generateObject } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
 import * as dotenv from 'dotenv';
 
 // Ensure environment variables are loaded
@@ -59,6 +60,14 @@ Focus exclusively on the positive sentiments and ignore any complaints or negati
 In true Zagat style, weave short direct quotes (1-3 words) from the reviews into the sentence, enclosing the quoted words in single or double quotes.
 Do not add information that is not in the reviews. Keep it extremely brief (max 20-25 words).
 
+Additionally, infer the price tier for this business based on the reviews, similar to Google Maps:
+- '$': Cheap / budget-friendly / great value
+- '$$': Moderate / standard / expected price
+- '$$$': Expensive / high-end / pricey
+- '$$$$': Very Expensive / luxury / exclusive
+
+If the reviews do not mention price, affordability, luxury, or value, default to '$$'.
+
 Business Name: ${b.name}
 Category: ${b.category}
 
@@ -67,22 +76,30 @@ ${reviewsText}
     `;
 
     try {
-      const { text } = await generateText({
+      const { object } = await generateObject({
         model: google('gemini-2.5-flash'), // Fast and efficient for this task
+        schema: z.object({
+          description: z.string().describe('The Zagat-style description of the business'),
+          priceTier: z.enum(['$', '$$', '$$$', '$$$$']).describe('The inferred price tier')
+        }),
         prompt: prompt,
       });
 
       // Clean up the text just in case it added surrounding quotes
-      let cleanText = text.trim();
+      let cleanText = object.description.trim();
       if (cleanText.startsWith('"') && cleanText.endsWith('"')) {
           cleanText = cleanText.substring(1, cleanText.length - 1);
       }
 
       console.log(`Zagat Description: ${cleanText}`);
+      console.log(`Price Tier: ${object.priceTier}`);
 
       await prisma.business.update({
         where: { id: b.id },
-        data: { description: cleanText }
+        data: { 
+          description: cleanText,
+          priceTier: object.priceTier
+        }
       });
       updatedCount++;
       

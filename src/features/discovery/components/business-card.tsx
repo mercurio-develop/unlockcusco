@@ -2,11 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { agencyPath, therapistPath } from "@/paths"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -19,8 +17,6 @@ import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, Exter
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
-import { submitLead } from "@/features/leads/actions/submit-lead"
-import { generateShadowLead } from "@/features/leads/actions/shadow-lead"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
@@ -45,6 +41,7 @@ interface BusinessCardProps {
   showContact?: boolean
   showMap?: boolean
   showDetails?: boolean
+  mapTargetId?: string
   onDoubleClick?: () => void
 }
 
@@ -60,11 +57,9 @@ export function BusinessCard({
   showContact = true,
   showMap = true,
   showDetails = true,
+  mapTargetId,
   onDoubleClick
-}: BusinessCardProps) {  const [touristName, setTouristName] = useState("")
-  const [touristPhone, setTouristPhone] = useState("")
-  const [date, setDate] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
+}: BusinessCardProps) {
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
@@ -86,6 +81,7 @@ export function BusinessCard({
   } = useTrip()
   const { setMobileViewMode } = usePreferences()
   const router = useRouter()
+  const pathname = usePathname()
   
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
@@ -108,32 +104,6 @@ export function BusinessCard({
     window.open(`https://wa.me/51${business.whatsapp.replace(/\\D/g, '')}?text=${msg}`, "_blank")
   }
 
-  const handleConsult = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (!touristName || !date) return
-
-    try {
-      const res = await generateShadowLead(business.id, touristName, date)
-      await submitLead({
-        businessId: business.id,
-        touristName,
-        touristEmail: "inquiry@vallecito.app", // Platform placeholder
-        touristPhone: touristPhone || undefined,
-        date: new Date(date),
-      })
-      if (res.success) {
-        if (res.url) {
-          window.open(res.url, "_blank")
-        } else if (res.delivered) {
-          alert(`Inquiry sent to ${business.name}! They will contact you shortly.`)
-        }
-        setIsOpen(false)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
   const handleCardClick = () => {
     if (onSelect) {
       onSelect()
@@ -153,7 +123,7 @@ export function BusinessCard({
       className={cn(
         "group cursor-pointer transition-all duration-300 relative bg-white border border-slate-200/60 shadow-md hover:shadow-xl rounded-2xl md:rounded-3xl",
         isHighlighted ? "opacity-100 scale-[1.02] ring-2 ring-rose-500/20" : "opacity-95 md:hover:opacity-100",
-        isHorizontal ? "flex flex-row items-center gap-3 sm:gap-4 p-2.5 sm:p-3" : "flex flex-col gap-3 h-full p-3 sm:p-4"
+        isHorizontal ? "flex flex-row items-start gap-3 sm:gap-4 p-2.5 sm:p-3" : "flex flex-col gap-3 h-full p-3 sm:p-4"
       )}
     >
       {/* Top Right Action Menu */}
@@ -179,13 +149,8 @@ export function BusinessCard({
                 </DropdownMenuItem>
               )}
               {business.whatsapp && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }}>
-                  <MessageCircle className="w-4 h-4 mr-2" /> Contact
-                </DropdownMenuItem>
-              )}
-              {!isClaimed && !business.isAsociado && (
-                <DropdownMenuItem onClick={() => setIsOpen(true)}>
-                  <Zap className="w-4 h-4 mr-2" /> Check Availability
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }} className="text-[#25D366] font-medium">
+                  <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -297,9 +262,10 @@ export function BusinessCard({
                  {business.locationSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                </span>
              )}
-             {business.priceTier && <span className="text-emerald-600 text-[10px] font-bold ml-1">{business.priceTier}</span>}
-          </div>
-          
+             {business.priceTier && (business.priceTier !== "$$" || (business.description && business.description.trim().length > 0)) && (
+               <span className="text-emerald-600 text-[10px] font-bold ml-1">{business.priceTier}</span>
+             )}
+             </div>          
           {/* Zagat Description */}
           {business.description && (
             <div className="mt-1" onClick={(e) => {
@@ -384,7 +350,7 @@ export function BusinessCard({
                     )}
                   >
                     <Navigation className="w-3 h-3" />
-                    Set as Start
+                    <span className="hidden sm:inline">Set as Start</span>
                   </Button>
                 ) : isExchangingEnd && business.lat != null && business.lng != null ? (
                   <Button
@@ -400,7 +366,7 @@ export function BusinessCard({
                     )}
                   >
                     <Bed className="w-3 h-3" />
-                    Set as End
+                    <span className="hidden sm:inline">Set as End</span>
                   </Button>
                 ) : exchangeTargetId ? (
                   exchangeTargetId === business.id ? (
@@ -412,7 +378,7 @@ export function BusinessCard({
                       )}
                     >
                       <Repeat className="w-3 h-3" />
-                      Selected
+                      <span className="hidden sm:inline">Selected</span>
                     </Button>
                   ) : (
                     <Button
@@ -423,7 +389,7 @@ export function BusinessCard({
                       )}
                     >
                       <Repeat className="w-3 h-3" />
-                      Swap
+                      <span className="hidden sm:inline">Swap</span>
                     </Button>
                   )
                 ) : isAlreadyInItinerary ? (
@@ -435,7 +401,7 @@ export function BusinessCard({
                     )}
                   >
                     <Repeat className="w-3 h-3" />
-                    Exchange
+                    <span className="hidden sm:inline">Exchange</span>
                   </Button>
                 ) : (
                   <>
@@ -447,21 +413,8 @@ export function BusinessCard({
                       )}
                     >
                       <Plus className="w-[14px] h-[14px]" strokeWidth={1} />
-                      Add
+                      <span className="hidden sm:inline">Add</span>
                     </Button>
-                    {showItineraryEnd && activeItinerary && business.lat != null && business.lng != null && (
-                      <Button
-                        onClick={(e) => { e.stopPropagation(); updateEndAnchorLocation(business.lat!, business.lng!, business.name); }}
-                        className={cn(
-                          "bg-transparent text-rose-600 border border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
-                          isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
-                        )}
-                        title="Set as end of day"
-                      >
-                        <Bed className="w-[14px] h-[14px]" strokeWidth={1} />
-                        {!isHorizontal && "End"}
-                      </Button>
-                    )}
                   </>
                 )}
               </>
@@ -472,15 +425,20 @@ export function BusinessCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedId(business.id);
-                  window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+                  if (pathname === '/explore') {
+                    setSelectedId(mapTargetId || business.id);
+                    window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+                  } else {
+                    router.push(`/explore?loc=${business.locationSlug || ''}&lat=${business.lat}&lng=${business.lng}&id=${business.id}`);
+                  }
                 }}
                 className={cn(
                   "flex-1 flex items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
                   isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                 )}
               >
-                Map
+                <MapPin className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Map</span>
               </button>
             )}
             
@@ -489,87 +447,35 @@ export function BusinessCard({
                 href={`/business/${business.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  "hidden md:flex flex-1 items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
+                  "flex flex-1 items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",
                   isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                 )}
               >
-                Details
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Details</span>
               </Link>
             )}
 
-            {showContact && (
+            {showContact && business.whatsapp && (
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (business.whatsapp || business.category === 'TRANSPORT' || isClaimed) {
-                    if (business.whatsapp) {
-                      handleBookNow(e as any);
-                    } else {
-                      setIsOpen(true);
-                    }
-                  } else {
-                    setIsOpen(true);
-                  }
+                  handleBookNow(e as any);
                 }}
                 className={cn(
-                  "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all",
+                  "flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group",
                   isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
                 )}
               >
-                Contact
+                <MessageCircle className="w-3.5 h-3.5 fill-current group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline">WhatsApp</span>
               </Button>
             )}
-            
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
-                <DialogHeader className="mb-4">
-                  <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">Contact {business.name}</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 mt-1">
-                    Send an inquiry to {business.name} to check for availability and pricing.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-5 py-4">
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="e.g. Sarah Jenkins"
-                      value={touristName}
-                      onChange={(e) => setTouristName(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="phone" className="text-slate-700 font-medium">WhatsApp Number (optional)</Label>
-                    <Input
-                      id="phone"
-                      placeholder="e.g. +51 987 654 321"
-                      value={touristPhone}
-                      onChange={(e) => setTouristPhone(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6 placeholder:text-gray-400"
-                    />
-                  </div>
-                  <div className="grid gap-2.5">
-                    <Label htmlFor="date" className="text-slate-700 font-medium">Estimated Date</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="rounded-xl border-gray-200 bg-gray-50 text-slate-900 focus-visible:ring-rose-600 px-4 py-6"
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleConsult} className="w-full bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
-                  Send Inquiry
-                </Button>
-                </DialogContent>
-                </Dialog>
-                </div>
-                )}
-                </div>
-                </div>
-                )
-                }
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 

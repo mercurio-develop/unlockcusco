@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText, ChevronDown } from "lucide-react"
+import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText, ChevronDown, HelpCircle } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -25,6 +25,7 @@ export function Navbar() {
   const pathname = usePathname()
   const { isChatOpen, setIsChatOpen, travelVibe, setTravelVibe, travelIntensity, setTravelIntensity } = usePreferences()
   const [isPrefsOpen, setIsPrefsOpen] = useState(false)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   const navItems = [
     { href: explorePath(), label: "Explore", icon: Compass },
@@ -66,7 +67,7 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 focus:outline-none">
               <Map className="w-3.5 h-3.5" />
-              Locations <ChevronDown className="w-3 h-3" />
+              Towns <ChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110]">
               {LOCATIONS.map((loc) => (
@@ -88,18 +89,18 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition-colors ${
-                  isActive ? "text-rose-600" : "text-slate-400 hover:text-slate-900"
+                className={`text-xs font-semibold tracking-wide transition-colors ${
+                  isActive ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
                 }`}
               >
-                <item.icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />
+                {item.label}
               </Link>
             )
           })}
           
           <DropdownMenu>
-            <DropdownMenuTrigger className="text-slate-400 hover:text-slate-900 transition-colors focus:outline-none flex items-center">
-              <Map className="w-4 h-4" strokeWidth={2} />
+            <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 focus:outline-none">
+              Towns <ChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110] mr-4">
               {LOCATIONS.map((loc) => (
@@ -124,6 +125,64 @@ export function Navbar() {
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Concierge</span>
               </button>
+
+              <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+                <DialogTrigger render={
+                  <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title="Help & Instructions">
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                } />
+                <DialogContent className="sm:max-w-md w-[95vw] max-h-[90dvh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-white border border-gray-200">
+                  <DialogHeader className="mb-4">
+                    <DialogTitle className="text-2xl font-serif tracking-tight text-slate-900">How to use Vallecito</DialogTitle>
+                    <DialogDescription className="text-sm text-slate-500 mt-1">
+                      Quick guide to planning your perfect Sacred Valley trip.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-5 text-sm text-slate-700 py-2">
+                    <div className="flex gap-3">
+                      <div className="mt-0.5"><Map className="w-5 h-5 text-slate-400"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Map View & Filters</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">Use the unified filter in the top left of the map to select specific towns (like Pisac or Ollantaytambo) and filter by categories (Dining, Stays, Wellness, etc.).</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="mt-0.5"><Compass className="w-5 h-5 text-slate-400"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Discover vs. Route</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">When you start an itinerary, a toggle appears on the map. Use <b>Places</b> to see points of interest, and <b>Route</b> to see your actual travel path and numbered waypoints.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="mt-0.5"><Route className="w-5 h-5 text-slate-400"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Itinerary Builder</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">In the Itinerary tab, you can add, remove, and reorder stops. Set your starting and ending points by clicking them on the map.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="mt-0.5"><Sparkles className="w-5 h-5 text-rose-500"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">AI Concierge</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">Tap the Concierge button to open the chat. The AI can build an entire day for you based on your preferences, check Boleto Turístico info, and estimate taxi fares.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="mt-0.5"><Settings2 className="w-5 h-5 text-slate-400"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Preferences</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">Tap the settings icon to set your "Travel Vibe" and "Intensity Level". The Concierge uses this to give you highly personalized recommendations.</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button onClick={() => setIsHelpOpen(false)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
+                    Got it!
+                  </Button>
+                </DialogContent>
+              </Dialog>
 
               <Dialog open={isPrefsOpen} onOpenChange={setIsPrefsOpen}>
                 <DialogTrigger render={

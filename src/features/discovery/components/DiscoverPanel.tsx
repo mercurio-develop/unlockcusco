@@ -14,7 +14,7 @@ interface DiscoverPanelProps {
   businesses: Business[]
   totalCount: number
   selectedId?: string | null
-  setSelectedId: (id: string) => void
+  setSelectedId: (id: string | null) => void
   onReset: () => void
   hasMore?: boolean
   isLoadingMore?: boolean
@@ -36,6 +36,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
   const sortRef = useRef<HTMLDivElement>(null)
   
   const { ref, inView } = useInView({ threshold: 0 })
+  const { isAddingStop, setIsAddingStop, exchangeTargetId, setExchangeTargetId, isExchangingStart, setIsExchangingStart, isExchangingEnd, setIsExchangingEnd, setPanelMode } = useTrip()
 
   const removeFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -81,6 +82,34 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6 bg-gray-50/50 relative" data-vaul-no-drag>
+      {(isAddingStop || exchangeTargetId || isExchangingStart || isExchangingEnd) && (
+        <div className="mb-4 bg-slate-900 text-white rounded-xl p-4 shadow-md flex items-center justify-between animate-in slide-in-from-top-2 fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+              <List className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Itinerary Mode</p>
+              <p className="text-sm font-medium text-slate-200">
+                {isExchangingStart ? "Pick a new start location" : isExchangingEnd ? "Pick a new end destination" : exchangeTargetId ? "Select a place to swap" : "Browse and click 'Add' on a place to add it as a stop"}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+              setIsAddingStop(false)
+              setExchangeTargetId(null)
+              setIsExchangingStart(false)
+              setIsExchangingEnd(false)
+              setPanelMode('itinerary')
+            }}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {businesses.length > 0 && (
         <div className="flex flex-col gap-3 w-full z-10 mb-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-3 md:gap-0">
@@ -173,9 +202,9 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
               <Search className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
             </div>
           </div>
-          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">No experiences found</h3>
+          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">No places in this area</h3>
           <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-            The Valley is vast, but we couldn't find matches for these specific filters. Try expanding your search or resetting your preferences.
+            Try panning or zooming out the map to find more places, or clear your filters to see the whole Valley.
           </p>
           <button 
             onClick={onReset}
@@ -193,7 +222,11 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
                isHighlighted={selectedId === e.id} 
                onSelect={() => setSelectedId(e.id)} 
                orientation={viewMode === "list" ? "horizontal" : "vertical"}
-               showMap={false}
+               showMap={true}
+               onDoubleClick={() => {
+                 setSelectedId(e.id);
+                 window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+               }}
              />
            ))}
            {hasMore && (

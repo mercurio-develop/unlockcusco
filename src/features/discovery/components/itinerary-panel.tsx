@@ -116,6 +116,7 @@ export function ItineraryPanel() {
     setStartAnchorLocation,
     setIsExchangingStart,
     setIsExchangingEnd,
+    setIsAddingStop,
     saveItinerary,
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
@@ -244,11 +245,25 @@ export function ItineraryPanel() {
                   <Navigation className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={e => { e.stopPropagation(); setMapClickMode(mapClickMode === 'start' ? null : 'start'); }}
-                  className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
-                  title={mapClickMode === 'start' ? "Cancel Adjust Map" : "Adjust Start Point on Map"}
+                  onClick={e => { e.stopPropagation(); setSelectedId('itin-start'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
+                  className="shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
                 >
-                  <MapPin className="w-4 h-4" />
+                  View Map
+                </button>
+                <button
+                  onClick={e => { 
+                    e.stopPropagation(); 
+                    if (mapClickMode === 'start') {
+                      setMapClickMode(null);
+                    } else {
+                      setMapClickMode('start');
+                      window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+                    }
+                  }}
+                  className={`shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{mapClickMode === 'start' ? 'Cancel' : 'Set Marker'}</span>
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingStart(true); setPanelMode('discover'); }}
@@ -410,13 +425,23 @@ export function ItineraryPanel() {
                 >
                   <div className="overflow-hidden">
                     {waypoint.service && (
-                      <BusinessCard business={waypoint.service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
+                      <BusinessCard business={waypoint.service} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
                     )}
                   </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Add Stop Block */}
+        <div className="relative flex justify-center pt-2 pb-6">
+           <button 
+             onClick={() => { setSelectedId(null); setIsAddingStop(true); setPanelMode('discover'); }} 
+             className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm border border-slate-200 border-dashed hover:border-slate-300 hover:shadow"
+           >
+             <Plus className="w-4 h-4" /> Add Stop
+           </button>
         </div>
 
         {/* End Anchor */}
@@ -439,11 +464,25 @@ export function ItineraryPanel() {
                   onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
-                  onClick={e => { e.stopPropagation(); setMapClickMode(mapClickMode === 'end' ? null : 'end'); }}
-                  className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600'}`}
-                  title={mapClickMode === 'end' ? "Cancel Adjust Map" : "Click map to set end"}
+                  onClick={e => { e.stopPropagation(); setSelectedId('itin-arrival'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
+                  className="shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
                 >
-                  <MapPin className="w-4 h-4" />
+                  View Map
+                </button>
+                <button
+                  onClick={e => { 
+                    e.stopPropagation(); 
+                    if (mapClickMode === 'end') {
+                      setMapClickMode(null);
+                    } else {
+                      setMapClickMode('end');
+                      window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+                    }
+                  }}
+                  className={`shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{mapClickMode === 'end' ? 'Cancel' : 'Set Marker'}</span>
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
