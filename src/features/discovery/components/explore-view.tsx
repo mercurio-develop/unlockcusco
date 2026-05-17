@@ -57,14 +57,35 @@ export function ExploreView({
   const visibleBusinesses = useMemo(() => {
     if (!mapBounds || effectiveBusinesses.length === 0 || isSearchActive) return effectiveBusinesses;
     const [west, south, east, north] = mapBounds;
-    // Mapbox bounds can sometimes cross the antimeridian, but for simple use cases
-    // we assume a standard bounding box.
-    return effectiveBusinesses.filter(b => {
-      if (b.lat == null || b.lng == null) return false;
+    const centerLat = (south + north) / 2;
+    const centerLng = (west + east) / 2;
+
+    const inside: Business[] = [];
+    const outside: Business[] = [];
+
+    effectiveBusinesses.forEach(b => {
+      if (b.lat == null || b.lng == null) {
+        outside.push(b);
+        return;
+      }
       const lat = Number(b.lat);
       const lng = Number(b.lng);
-      return lng >= west && lng <= east && lat >= south && lat <= north;
+      if (lng >= west && lng <= east && lat >= south && lat <= north) {
+        inside.push(b);
+      } else {
+        outside.push(b);
+      }
     });
+
+    outside.sort((a, b) => {
+      if (a.lat == null || a.lng == null) return 1;
+      if (b.lat == null || b.lng == null) return -1;
+      const distA = Math.pow(Number(a.lat) - centerLat, 2) + Math.pow(Number(a.lng) - centerLng, 2);
+      const distB = Math.pow(Number(b.lat) - centerLat, 2) + Math.pow(Number(b.lng) - centerLng, 2);
+      return distA - distB;
+    });
+
+    return [...inside, ...outside];
   }, [effectiveBusinesses, mapBounds, isSearchActive]);
 
   const effectiveMapBusinesses = useMemo(() => {

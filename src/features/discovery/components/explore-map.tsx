@@ -610,26 +610,27 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   return (
     <div className="relative w-full h-full group">
-      {/* Floating Filters (Location + Category) */}
-      <div className="absolute top-4 left-4 right-14 z-20 flex flex-col gap-2 pointer-events-auto">
-        {/* Mobile Places/Route Toggle */}
-        {activeItinerary && (
-          <div className="md:hidden flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
-            <button
-              onClick={(e) => { e.preventDefault(); setPanelMode('discover'); }}
-              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
-            >
-              Places
-            </button>
-            <button
-              onClick={(e) => { e.preventDefault(); setPanelMode('itinerary'); }}
-              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
-            >
-              Route
-            </button>
+      {/* Floating Controls (Drive Time - Left) */}
+      <div className="absolute bottom-[104px] md:bottom-8 left-4 md:left-6 z-[60] flex flex-col-reverse gap-2 pointer-events-auto items-start">
+        {/* Drive Time Badge */}
+        {panelMode === 'itinerary' && routeData && routeData.duration != null && (
+          <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3 w-fit mb-1">
+            <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-blue-500" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Drive Time</span>
+              <span className="text-sm font-bold text-slate-700">
+                {Math.floor(routeData.duration / 3600) > 0 ? `${Math.floor(routeData.duration / 3600)}h ` : ''}
+                {Math.floor((routeData.duration % 3600) / 60)}m
+              </span>
+            </div>
           </div>
         )}
+      </div>
 
+      {/* Floating Controls (Filters + Toggle - Right) */}
+      <div className="absolute bottom-[104px] md:bottom-8 right-4 md:right-[60px] z-[60] flex flex-col-reverse gap-2 pointer-events-auto items-end">
         {/* Unified Filter (Location + Category) */}
         <div className="flex items-center gap-2 pb-1">
           <DropdownMenu>
@@ -705,6 +706,24 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mobile Places/Route Toggle */}
+        {activeItinerary && (
+          <div className="md:hidden flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
+            <button
+              onClick={(e) => { e.preventDefault(); setPanelMode('discover'); }}
+              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
+            >
+              Places
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); setPanelMode('itinerary'); }}
+              className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}
+            >
+              Route
+            </button>
+          </div>
+        )}
       </div>
       <Map
         ref={mapRef}
@@ -1029,22 +1048,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         />
         <StyleSwitcherControl mapMode={mapMode} setMapMode={setMapMode} />
       </Map>
-
-      {/* Drive Time Badge */}
-      {panelMode === 'itinerary' && routeData && routeData.duration != null && (
-        <div className="absolute top-4 md:top-6 left-4 md:left-6 z-10 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-            <Clock className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Drive Time</span>
-            <span className="text-sm font-bold text-slate-700">
-              {Math.floor(routeData.duration / 3600) > 0 ? `${Math.floor(routeData.duration / 3600)}h ` : ''}
-              {Math.floor((routeData.duration % 3600) / 60)}m
-            </span>
-          </div>
-        </div>
-      )}
 
       <div className="absolute bottom-1 left-2 z-10 text-[9px] text-slate-400/40 pointer-events-none uppercase tracking-tighter">
         Vallecito OS × Apple Maps Style
