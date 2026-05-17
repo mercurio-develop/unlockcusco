@@ -7,8 +7,9 @@ export function SafeImageWrapper({
   src, 
   alt, 
   wrapperClassName, 
-  imgClassName,
+  imgClassName, 
   fallbackSrc,
+  priority,
   onLoad
 }: { 
   src: string; 
@@ -16,6 +17,7 @@ export function SafeImageWrapper({
   wrapperClassName?: string; 
   imgClassName?: string; 
   fallbackSrc?: string;
+  priority?: boolean;
   onLoad?: () => void;
 }) {
   const [hasError, setHasError] = useState(false);
@@ -46,6 +48,7 @@ export function SafeImageWrapper({
         src={hasError && fallbackSrc ? fallbackSrc : src} 
         alt={alt} 
         referrerPolicy="no-referrer"
+        fetchPriority={priority ? "high" : "auto"}
         className={cn(imgClassName, "relative z-10 transition-opacity duration-500", isLoading ? "opacity-0" : "opacity-100")} 
         onLoad={() => {
           setIsLoading(false);

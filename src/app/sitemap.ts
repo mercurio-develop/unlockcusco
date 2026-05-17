@@ -32,6 +32,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     by: ['locationSlug', 'category'],
   })
 
+  const locationSlugs = Array.from(new Set(combinations.map(c => c.locationSlug).filter(Boolean))) as string[];
+
+  const locationPages: MetadataRoute.Sitemap = locationSlugs.map(loc => ({
+    url: `${baseUrl}/explore/${loc}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }))
+
   const categoryPages: MetadataRoute.Sitemap = combinations
     .filter(combo => combo.locationSlug && combo.category)
     .map(combo => ({
@@ -55,5 +64,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  return [...staticPages, ...categoryPages, ...businessPages]
+  return [...staticPages, ...locationPages, ...categoryPages, ...businessPages]
 }

@@ -1,5 +1,5 @@
 export const siteConfig = {
   name: "VALLECITO",
-  description: "Your local gateway to the Sacred Valley, Peru. Personalized itineraries, direct WhatsApp bookings, and expert-curated experiences in Urubamba, Pisac, and Ollantaytambo. Acclimatize better and explore smarter.",
+  description: "The ultimate Cusco travel guide and itinerary planner. Plan your trip to the Sacred Valley and Machu Picchu with expert advice, custom daily schedules, direct local bookings, and up-to-date travel information to help you acclimatize and explore safely.",
   url: "https://vallecito.app",
 };

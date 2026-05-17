@@ -166,7 +166,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     "@type": businessType,
     "name": business.name,
     "image": images.length > 0 ? images : undefined,
-    "description": business.tagline || business.description,
+    "description": business.description || business.tagline,
     "url": `${siteConfig.url}/business/${business.slug}`,
     "telephone": business.whatsapp ? `+51${business.whatsapp.replace(/\D/g, '')}` : undefined,
     "priceRange": business.priceTier || "$$",
@@ -316,6 +316,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         <SafeImageWrapper
           src={business.premiumProfile?.coverPhotoUrl || business.imageUrl || ""}
           alt={business.name}
+          priority={true}
           wrapperClassName="relative h-[40vh] md:h-[60vh] w-full rounded-[2rem] overflow-hidden bg-slate-100"
           imgClassName="w-full h-full object-cover"
         />
