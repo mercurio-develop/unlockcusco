@@ -6,9 +6,11 @@ import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
+import { useTrip } from "@/lib/store/trip-context"
 
 function ExplorePageContent() {
   const searchParams = useSearchParams()
+  const { activeItinerary, setActiveItinerary, setPanelMode } = useTrip()
   const [data, setData] = useState<{
     businesses: Business[],
     allBusinesses: Business[],
@@ -18,6 +20,7 @@ function ExplorePageContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const tripId = searchParams.get("trip")
   const q = searchParams.get("q") || ""
   const id = searchParams.get("id")
   const loc = searchParams.get("loc") || ""
@@ -26,6 +29,29 @@ function ExplorePageContent() {
   const lat = searchParams.get("lat") || ""
   const lng = searchParams.get("lng") || ""
   const sort = searchParams.get("sort") || "recommended"
+
+  // Load itinerary from URL parameter
+  useEffect(() => {
+    if (tripId && (!activeItinerary || (activeItinerary as any).shortId !== tripId)) {
+      console.log(`[ExplorePage] Fetching itinerary for tripId: ${tripId}`);
+      fetch(`/api/itineraries/${tripId}`)
+        .then(res => res.json())
+        .then(data => {
+          console.log(`[ExplorePage] Itinerary API response:`, data);
+          if (data.success && data.state) {
+            console.log(`[ExplorePage] Setting active itinerary and panel mode to 'itinerary'`);
+            setActiveItinerary({ ...data.state, shortId: tripId });
+            setPanelMode("itinerary");
+          } else {
+            console.error("[ExplorePage] API returned success=false or missing state", data);
+          }
+        })
+        .catch(err => console.error("[ExplorePage] Failed to load itinerary via fetch", err));
+    } else if (tripId && activeItinerary && (activeItinerary as any).shortId === tripId) {
+      console.log(`[ExplorePage] Itinerary ${tripId} already active. Setting panel mode to 'itinerary'.`);
+      setPanelMode("itinerary");
+    }
+  }, [tripId, setActiveItinerary, setPanelMode, activeItinerary]);
 
   useEffect(() => {
     let ignore = false;

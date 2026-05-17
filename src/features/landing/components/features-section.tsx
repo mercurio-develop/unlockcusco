@@ -54,7 +54,7 @@ export function FeaturesSection() {
               <div className="rounded-full bg-slate-800 p-4 border border-slate-700">
                 <Bot className="w-6 h-6 text-rose-400" />
               </div>
-              <h3 className="text-2xl font-serif font-bold text-white">AI Concierge (Beta)</h3>
+              <h3 className="text-2xl font-serif font-bold text-white">AI Concierge</h3>
             </div>
             <p className="text-slate-300 mb-10 leading-relaxed text-lg">
               Your personal guide to the Andes. Our intelligent assistant helps you discover the perfect experiences based on your exact location and preferences.

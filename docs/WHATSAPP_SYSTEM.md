@@ -55,18 +55,36 @@ INCOMING_WEBHOOK_URL=https://vallecito.app/api/whatsapp/
 7. Tourist visits business profile → WhatsApp button now visible
 ```
 
-### Scripts
+### How to Run the Verification Campaign
 
-```bash
-# See full analytics breakdown
-node_modules/.bin/tsx scripts/analytics-whatsapp.ts
+Follow these exact steps to run the campaign safely:
 
-# Preview campaign (no messages sent)
-node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts --dry-run
+1. **Start the Ghost Phone Microservice** (Required for sending messages)
+   Open a new terminal window and run:
+   ```bash
+   cd ghost-phone
+   npm install # if not already installed
+   node index.js
+   ```
+   *(Wait for it to say "Client is ready!" and scan the QR code with your phone if it's your first time).*
 
-# Live run (300 businesses, ~50 min with rate limiting)
-node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts
-```
+2. **Check the Analytics** (Optional but recommended)
+   Open a second terminal at the project root to see how many businesses are currently pending verification:
+   ```bash
+   node_modules/.bin/tsx scripts/analytics-whatsapp.ts
+   ```
+
+3. **Run a Dry Run** (Crucial for safety)
+   Always run a dry run first to see exactly what messages will be generated and who they will be sent to, without actually sending them:
+   ```bash
+   node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts --dry-run
+   ```
+
+4. **Execute the Live Campaign**
+   Once you are happy with the dry run output, run the live script. It will process businesses in batches of 300 and includes a 6-11 second delay between messages to avoid WhatsApp spam detection.
+   ```bash
+   node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts
+   ```
 
 **Campaign log** saved to `/tmp/verification-campaign-YYYY-MM-DD.json`
 

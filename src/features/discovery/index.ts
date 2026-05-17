@@ -4,3 +4,6 @@ export { AsociadoBadge } from './components/asociado-badge';
 export { GastronomicTemplate } from './components/GastronomicTemplate';
 export { ExpeditionTemplate } from './components/ExpeditionTemplate';
 export { SanctuaryTemplate } from './components/SanctuaryTemplate';
+export { StaysTemplate } from './components/StaysTemplate';
+export { CultureTemplate } from './components/CultureTemplate';
+export { BasicTemplate } from './components/BasicTemplate';

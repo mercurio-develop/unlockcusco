@@ -629,8 +629,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         )}
       </div>
 
-      {/* Floating Controls (Filters + Toggle - Right) */}
-      <div className="absolute bottom-[104px] md:bottom-8 right-4 md:right-[60px] z-[60] flex flex-col-reverse gap-2 pointer-events-auto items-end">
+      {/* Floating Controls (Filters + Toggle - Right/Top-Left) */}
+      <div className="absolute bottom-[104px] md:bottom-auto md:top-4 right-4 md:right-auto md:left-4 z-[60] flex flex-col-reverse md:flex-col gap-2 pointer-events-auto items-end md:items-start">
         {/* Unified Filter (Location + Category) */}
         <div className="flex items-center gap-2 pb-1">
           <DropdownMenu>

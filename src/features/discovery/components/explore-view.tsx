@@ -146,8 +146,7 @@ export function ExploreView({
     if (initialSelectedId) {
       setSelectedId(initialSelectedId)
     }
-    setPanelMode("discover")
-  }, [initialSelectedId, setSelectedId, setPanelMode])
+  }, [initialSelectedId, setSelectedId])
 
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">

@@ -73,23 +73,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
     setTransportProfiles(prev => ({ ...prev, [index]: profile }));
   }, []);
 
-  // Load itinerary from URL parameter on mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tripId = urlParams.get('trip');
-    if (tripId && !activeItinerary) {
-      fetch(`/api/itineraries/${tripId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.state) {
-            setActiveItinerary(data.state);
-            setPanelMode("itinerary");
-          }
-        })
-        .catch(err => console.error("Failed to load itinerary", err));
-    }
-  }, []);
-
   const saveItinerary = useCallback(async () => {
     if (!activeItinerary) return null;
     try {

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import {ArrowRight, ChevronDown, MapPin, Sparkles} from "lucide-react"
+import { ArrowRight, ChevronDown, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
 export function HeroSection() {
@@ -62,19 +62,19 @@ export function HeroSection() {
         className="relative z-10 w-full px-4 flex flex-col items-center text-center"
       >
 
-        <h1 className="text-4xl md:text-6xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-6 max-w-4xl px-2">
+        <h1 className="text-5xl md:text-6xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-4 md:mb-6 max-w-4xl px-2">
           Beyond the Map:<br/>
           <span className="text-3xl md:text-5xl lg:text-7xl block mt-2 text-rose-500">Experience the Sacred Valley</span>
         </h1>
 
-        <div className="flex flex-col items-center mb-8 max-w-3xl">
-          <p className="text-base md:text-xl text-slate-600 font-light leading-relaxed mx-auto px-4">
-            Your intelligent guide to the Sacred Valley. Discover hidden local gems, craft personalized itineraries with our AI Concierge, and connect directly with trusted guides and boutique stays. From Cusco to Machu Picchu, experience the Andes like never before.
+        <div className="flex flex-col items-center mb-6 md:mb-8 max-w-3xl">
+          <p className="text-sm md:text-xl text-slate-600 font-light leading-relaxed mx-auto px-4">
+            Your intelligent guide to Cusco, the Sacred Valley, and Machu Picchu. Discover incredible places, craft personalized itineraries with our AI Concierge, and connect directly with trusted guides and boutique stays. Experience the heart of the Andes like never before.
           </p>
         </div>
 
           {/* Airbnb-style white search bar */}
-          <div className="w-full max-w-2xl relative mt-6 md:mt-0">
+          <div className="w-full max-w-2xl relative mt-4 md:mt-0">
             <form
               onSubmit={handleSearch}
               className="w-full bg-slate-50 rounded-2xl md:rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-stretch md:items-center gap-2 p-2 border border-slate-200 relative z-20"
@@ -133,24 +133,50 @@ export function HeroSection() {
           </AnimatePresence>
         </div>
 
+        {/* Popular Itineraries */}
+        <div className="mt-8 w-full max-w-4xl px-2">
+          <p className="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3 md:mb-4">Popular Pre-Built Itineraries</p>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+            {[
+              { id: "classic-sacred-valley", title: "Classic Sacred Valley Full Day" },
+              { id: "cusco-city-tour", title: "Cusco City Tour" },
+              { id: "ultimate-inca-ruins", title: "The Ultimate Inca Ruins Tour" },
+              { id: "top-7-culinary-route", title: "7 Best Restaurants Route" },
+              { id: "maras-moray", title: "Maras, Moray & Chinchero" },
+              { id: "artisan-markets", title: "Best Artisan Markets" },
+              { id: "machu-picchu-day", title: "Machu Picchu Complete Day" },
+            ].map(trip => (
+              <button
+                key={trip.id}
+                type="button"
+                onClick={() => router.push(`/explore?trip=${trip.id}`)}
+                className="bg-white border border-rose-200 text-slate-800 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-medium hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition-all shadow-sm flex items-center gap-1.5 md:gap-2"
+              >
+                <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
+                {trip.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Quick search pills */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-4xl">
+        <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 max-w-4xl px-2">
           {[
-            { emoji: "🍽️", text: "Authentic local dining" },
-            { emoji: "🛏️", text: "Boutique stays & hotels" },
-            { emoji: "🧘", text: "Wellness & Spa retreats" },
-            { emoji: "✨", text: "Spiritual ceremonies" },
-            { emoji: "🏺", text: "Local artisans & crafts" },
-            { emoji: "⛰️", text: "Cultural tours & guides" },
-          ].map(({ emoji, text }, index) => (
+            { icon: <Utensils className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Authentic local dining" },
+            { icon: <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Boutique stays & hotels" },
+            { icon: <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Wellness & Spa retreats" },
+            { icon: <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Spiritual ceremonies" },
+            { icon: <Palette className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Local artisans & crafts" },
+            { icon: <Compass className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Cultural tours & guides" },
+          ].map(({ icon, text }, index) => (
             <button
               key={text}
               type="button"
               disabled={isSearching}
               onClick={() => handleSearch(undefined, text)}
-              className={`bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${index >= 4 ? 'max-md:hidden' : ''}`}
+              className={`bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 ${index >= 4 ? 'max-md:hidden' : ''}`}
             >
-              {emoji} {text}
+              {icon} <span>{text}</span>
             </button>
           ))}
         </div>

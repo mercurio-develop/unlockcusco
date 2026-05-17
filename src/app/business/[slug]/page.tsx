@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { Star, MapPin, Zap, ArrowLeft, MessageCircle, Clock, ShieldCheck, Heart } from "lucide-react"
-import { AsociadoBadge, GastronomicTemplate, ExpeditionTemplate, SanctuaryTemplate } from "@/features/discovery"
+import { AsociadoBadge, GastronomicTemplate, ExpeditionTemplate, SanctuaryTemplate, StaysTemplate, CultureTemplate, BasicTemplate } from "@/features/discovery"
 import { siteConfig } from "@/lib/config/site"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
@@ -13,6 +13,7 @@ import { BackButton } from "@/components/ui/back-button"
 
 interface BusinessPageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export const revalidate = 86400; // Cache for 1 day
@@ -65,8 +66,9 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   }
 }
 
-export default async function BusinessPage({ params }: BusinessPageProps) {
+export default async function BusinessPage({ params, searchParams }: BusinessPageProps) {
   const { slug } = await params
+  const { preview } = await searchParams
 
   const business = await prisma.business.findUnique({
     where: { slug: slug },
@@ -130,6 +132,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   const isAsociado = business.isAsociado || false
   const isVerified = business.isClaimed || isAsociado
+  const isPremiumView = isAsociado || preview === 'premium'
 
   const schemaTypeMap: Record<string, string> = {
     'DINING': 'Restaurant',
@@ -256,7 +259,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   const accentColor = business.premiumProfile?.accentColor || "#D4AF37";
 
   return (
-    <div className="min-h-screen font-sans pb-24 bg-white">
+    <div className="min-h-screen font-sans pb-32 lg:pb-24 bg-white">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -312,49 +315,59 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       </div>
 
       {/* Hero Image Gallery */}
-      <div className="max-w-6xl mx-auto px-6 mb-16">
+      <div className="w-full lg:max-w-6xl lg:mx-auto lg:px-6 mb-8 md:mb-16">
         <SafeImageWrapper
           src={business.premiumProfile?.coverPhotoUrl || business.imageUrl || ""}
           alt={business.name}
           priority={true}
-          wrapperClassName="relative h-[40vh] md:h-[60vh] w-full rounded-[2rem] overflow-hidden bg-slate-100"
+          wrapperClassName="relative h-[50vh] md:h-[60vh] w-full rounded-b-[2rem] lg:rounded-[2rem] overflow-hidden bg-slate-100"
           imgClassName="w-full h-full object-cover"
         />
       </div>
 
       {/* Main Content Grid */}
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
         
         {/* Left Column: Experience Details & Reviews */}
-        <div className="lg:col-span-2 space-y-20">
+        <div className="lg:col-span-2 space-y-12 lg:space-y-20">
           
           {/* Dynamic Template Content */}
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-             {business.category === 'DINING' && <GastronomicTemplate business={business as any} />}
-             {business.category === 'AGENCY' && <ExpeditionTemplate business={business as any} />}
-             {business.category === 'WELLNESS' && <SanctuaryTemplate business={business as any} />}
+             {isPremiumView ? (
+               <>
+                 {business.category === 'DINING' && <GastronomicTemplate business={business as any} />}
+                 {business.category === 'AGENCY' && <ExpeditionTemplate business={business as any} />}
+                 {business.category === 'WELLNESS' && <SanctuaryTemplate business={business as any} />}
+                 {business.category === 'STAYS' && <StaysTemplate business={business as any} />}
+                 {business.category === 'CULTURE' && <CultureTemplate business={business as any} />}
+               </>
+             ) : (
+               <BasicTemplate business={business as any} />
+             )}
           </section>
 
-          {/* About Section */}
-          <section>
-            <h2 className="text-2xl font-serif text-slate-900 mb-6">About {business.name}</h2>
-            {business.premiumProfile?.visionStatement && (
-              <p className="text-xl italic text-slate-700 mb-8 border-l-2 border-rose-300 pl-4">&quot;{business.premiumProfile.visionStatement}&quot;</p>
-            )}
-            <p className="text-slate-600 leading-relaxed text-lg font-light">
-               {business.description || "Discover an authentic experience in the heart of the Sacred Valley. Every detail is designed to offer you the best of our local culture and hospitality."}
-            </p>
-            {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {business.premiumProfile.pillars.map((pillar: any) => (
-                  <div key={pillar.id} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
-                    <h3 className="font-bold mb-2 text-slate-900">{pillar.title}</h3>
-                    <p className="text-slate-500 text-sm">{pillar.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+          {/* About Section (Premium Only) */}
+          {isPremiumView && (
+            <section>
+              <h2 className="text-2xl font-serif text-slate-900 mb-6">About {business.name}</h2>
+              {business.premiumProfile?.visionStatement && (
+                <p className="text-xl italic text-slate-700 mb-8 border-l-2 border-rose-300 pl-4">&quot;{business.premiumProfile.visionStatement}&quot;</p>
+              )}
+              <p className="text-slate-600 leading-relaxed text-lg font-light">
+                 {business.description || "Discover an authentic experience in the heart of the Sacred Valley. Every detail is designed to offer you the best of our local culture and hospitality."}
+              </p>
+              {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                  {business.premiumProfile.pillars.map((pillar: any) => (
+                    <div key={pillar.id} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+                      <h3 className="font-bold mb-2 text-slate-900">{pillar.title}</h3>
+                      <p className="text-slate-500 text-sm">{pillar.description}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
           
           {/* Reviews Section */}
           {business.reviews.length > 0 && (
@@ -546,6 +559,31 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Mobile Sticky Booking Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
+        {business.whatsapp ? (
+          <a
+            href={`https://wa.me/51${business.whatsapp}?text=${whatsappMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(37,211,102,0.4)]"
+          >
+            <MessageCircle className="w-5 h-5 fill-current" />
+            Check Availability
+          </a>
+        ) : (
+          <a
+            href={`https://wa.me/51940989011?text=${encodeURIComponent(`Hello Vallecito Concierge, I'd like to check availability for ${business.name}.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(37,211,102,0.4)]"
+          >
+            <MessageCircle className="w-5 h-5 fill-current" />
+            Check Availability
+          </a>
+        )}
       </div>
 
     </div>
