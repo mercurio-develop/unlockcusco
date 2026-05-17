@@ -67,7 +67,12 @@ export function ExploreView({
     });
   }, [effectiveBusinesses, mapBounds, isSearchActive]);
 
-  const effectiveMapBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : mapBusinesses;
+  const effectiveMapBusinesses = useMemo(() => {
+    if (!mapSearchResults || mapSearchResults.length === 0) return mapBusinesses;
+    const searchMap = new Map((mapSearchResults as Business[]).map(b => [b.id, b]));
+    const otherBusinesses = mapBusinesses.filter(b => !searchMap.has(b.id));
+    return [...Array.from(searchMap.values()), ...otherBusinesses];
+  }, [mapSearchResults, mapBusinesses]);
   
   const isDrawerOpen = searchParams.get("filter") === "open"
   const setIsDrawerOpen = (open: boolean) => {
@@ -170,7 +175,7 @@ export function ExploreView({
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : mapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={searchParams.get("loc") || ""} onSelectBusiness={(id) => {
+      map={<ExploreMap businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={searchParams.get("loc") || ""} onSelectBusiness={(id) => {
         setSelectedId(id);
         window.dispatchEvent(new CustomEvent('drawer-snap-half'));
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 

@@ -47,7 +47,7 @@ export function AiConcierge() {
 
   const sidebarOffset = "0px"
 
-  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Itinerary**: Your personal timeline where we organize your choices into a seamless schedule.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
+  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Itinerary**: Your personal timeline where we organize your choices into a seamless schedule.\n🤖 **AI Recommendations**: Look for the robot icon on the map or in the discover tab. These identify top recommendations specifically curated for you by the Concierge.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
@@ -372,9 +372,9 @@ Please generate my macro trip plan.`;
             animate={{ opacity: 1, y: 0, x: 0, right: sidebarOffset }}
             exit={{ opacity: 0, y: "100%", x: 0 }}
             transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-            className="fixed inset-0 sm:inset-auto sm:top-[56px] sm:right-0 z-[100] sm:z-40 w-full sm:w-[450px] h-full sm:h-[calc(100vh-56px)]"
+            className="fixed left-0 right-0 top-[calc(48px+env(safe-area-inset-top))] bottom-[calc(64px+env(safe-area-inset-bottom))] z-[100] w-full md:top-[48px] md:bottom-auto md:left-auto md:right-0 md:h-[calc(100vh-48px)] md:w-[450px] md:z-40"
           >
-            <Card className="flex flex-col h-full rounded-none sm:rounded-tl-3xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl border-none">
+            <Card className="flex flex-col h-full rounded-none md:rounded-tl-3xl shadow-2xl overflow-hidden bg-white/95 backdrop-blur-xl border-none">
               <div className="bg-white p-4 sm:p-5 flex justify-between items-center shrink-0 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                   <div className="bg-rose-50 border border-rose-100 p-2 rounded-xl shadow-inner">
@@ -653,7 +653,7 @@ Please generate my macro trip plan.`;
                     onClick={() => { 
                       sendMessage({ text: suggestion.label });
                     }}
-                    className={`whitespace-nowrap px-4 py-2 border text-[13px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 ${suggestion.theme}`}
+                    className={`whitespace-nowrap px-2.5 py-1 border text-[11px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 ${suggestion.theme}`}
                   >
                     <span>{suggestion.icon}</span> {suggestion.label}
                   </button>
@@ -668,12 +668,12 @@ Please generate my macro trip plan.`;
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}
                     data-vaul-no-drag
-                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-12 px-5 shadow-inner"
+                    className="bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500 rounded-full h-10 px-4 text-sm shadow-inner"
                   />
                   <Button 
                     type="submit" 
                     size="icon" 
-                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105 h-12 w-12 flex items-center justify-center"
+                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shrink-0 shadow-md transition-transform hover:scale-105 h-10 w-10 flex items-center justify-center"
                     disabled={!input.trim() || isLoading}
                   >
                     <Send className="w-4 h-4 ml-0.5" />
@@ -687,4 +687,3 @@ Please generate my macro trip plan.`;
     </>
   )
 }
-

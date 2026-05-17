@@ -282,7 +282,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
 
       if (!prev) {
-        const DEFAULT_COORDS = { lat: -13.3047, lng: -72.1167 }; // Urubamba
+        const DEFAULT_COORDS = { lat: -13.5226, lng: -71.9673 }; // Cusco
         return {
           title: "Today's Plan",
           startAnchor: {

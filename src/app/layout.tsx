@@ -79,7 +79,7 @@ export default function RootLayout({
           <PreferencesProvider>
             <TripProvider>
               <Navbar />
-              <main className="flex-1 flex flex-col pt-14 bg-white">
+              <main className="flex-1 flex flex-col pt-12 bg-white">
                 {children}
               </main>
             </TripProvider>

@@ -78,7 +78,7 @@ export function ThreePaneLayout({
   }, [])
 
   return (
-    <div ref={containerRef} className={cn("h-[calc(100dvh-56px)] md:h-[calc(100vh-56px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
+    <div ref={containerRef} className={cn("h-[calc(100dvh-48px)] md:h-[calc(100vh-48px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
       {/* Desktop Left / Main Content Panel / Mobile List Panel */}
       <div 
         style={{ 
@@ -134,7 +134,7 @@ export function ThreePaneLayout({
       )}
 
       {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_14px_rgba(0,0,0,0.05)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[110] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_14px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-around h-16 px-2">
           <button 
             onClick={() => { setPanelMode('discover'); setMobileViewMode('list'); }}

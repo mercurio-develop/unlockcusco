@@ -66,11 +66,11 @@ function StyleSwitcherControl({ mapMode, setMapMode }: { mapMode: string, setMap
           setContainer(null);
         }
       };
-    },
-    { position: 'top-right' }
-  );
+      },
+      { position: 'top-right' }
+      );
 
-  if (!container) return null;
+      if (!container) return null;
 
   return createPortal(
     <button
@@ -502,13 +502,13 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
-    
-    // We should refit the bounds if the businesses change, OR if we switch back to the discover panel and nothing is selected
-    const shouldRefit = businessSignature !== prevSignature || (panelMode === 'discover' && !selectedId);
+
+    // We should refit the bounds if the businesses change
+    const shouldRefit = businessSignature !== prevSignature;
 
     if (shouldRefit) {
       setPrevSignature(businessSignature);
-      
+
       // Skip fitBounds if we already have a selected item to fly to, to avoid animation conflicts
       if (selectedId && validBusinesses.some(b => b.id === selectedId)) {
         return;
@@ -540,11 +540,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         });
       }
     }
-  }, [validBusinesses, businessSignature, prevSignature, panelMode, selectedId]);
-
+  }, [validBusinesses, businessSignature, prevSignature, selectedId]);
   const center = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
-    : [-72.1167, -13.3047];
+    : [-71.9675, -13.5226];
 
   const updateMapBounds = useCallback((evt: any) => {
     setZoom(evt.viewState.zoom);

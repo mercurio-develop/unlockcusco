@@ -40,7 +40,7 @@ export function HeroSection() {
   };
 
   return (
-    <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-slate-50 pt-14">
+    <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-slate-50 pt-12">
       {/* Sacred Valley background — visible but light-theme friendly */}
       <div className="absolute inset-0 z-0">
         <img

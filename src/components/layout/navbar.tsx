@@ -36,7 +36,7 @@ export function Navbar() {
   if (isProfilePage) return null
 
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-[calc(56px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
+    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-[calc(48px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}
@@ -144,42 +144,42 @@ export function Navbar() {
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Map className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">Map View & Filters</h4>
+                        <h4 className="font-bold text-slate-900">Map Icon (Towns & Filters)</h4>
                         <p className="mt-1 text-slate-600 leading-relaxed">Use the unified filter in the top left of the map to select specific towns (like Pisac or Ollantaytambo) and filter by categories (Dining, Stays, Wellness, etc.).</p>
                       </div>
                     </div>
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Compass className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">Discover vs. Route</h4>
-                        <p className="mt-1 text-slate-600 leading-relaxed">When you start an itinerary, a toggle appears on the map. Use <b>Places</b> to see points of interest, and <b>Route</b> to see your actual travel path and numbered waypoints.</p>
+                        <h4 className="font-bold text-slate-900">Compass Icon (Discover Mode)</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">Use <b>Discover</b> mode to explore points of interest across the valley. Click places to add them to your itinerary.</p>
                       </div>
                     </div>
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Route className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">Itinerary Builder</h4>
+                        <h4 className="font-bold text-slate-900">Route Icon (Itinerary Builder)</h4>
                         <p className="mt-1 text-slate-600 leading-relaxed">In the Itinerary tab, you can add, remove, and reorder stops. Set your starting and ending points by clicking them on the map.</p>
                       </div>
                     </div>
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Sparkles className="w-5 h-5 text-rose-500"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">AI Concierge</h4>
+                        <h4 className="font-bold text-slate-900">Sparkles Icon (AI Concierge)</h4>
                         <p className="mt-1 text-slate-600 leading-relaxed">Tap the Concierge button to open the chat. The AI can build an entire day for you based on your preferences, check Boleto Turístico info, and estimate taxi fares.</p>
                       </div>
                     </div>
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Settings2 className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">Preferences</h4>
+                        <h4 className="font-bold text-slate-900">Settings Icon (Preferences)</h4>
                         <p className="mt-1 text-slate-600 leading-relaxed">Tap the settings icon to set your "Travel Vibe" and "Intensity Level". The Concierge uses this to give you highly personalized recommendations.</p>
                       </div>
                     </div>
                   </div>
                   
                   <Button onClick={() => setIsHelpOpen(false)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-6 rounded-xl font-bold shadow-lg mt-2 transition-transform hover:scale-[1.02]">
-                    Got it!
+                    Close Help
                   </Button>
                 </DialogContent>
               </Dialog>
@@ -245,7 +245,7 @@ export function Navbar() {
                   </div>
                   
                   <Button onClick={() => setIsPrefsOpen(false)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-6 rounded-xl font-bold shadow-lg mt-4 transition-transform hover:scale-[1.02]">
-                    Save Preferences
+                    Save & Close Preferences
                   </Button>
                 </DialogContent>
               </Dialog>

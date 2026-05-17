@@ -1,6 +1,6 @@
 export const DEFAULT_COORDS = {
-  lat: -13.3047, // Defaulting to Urubamba
-  lng: -72.1167,
+  lat: -13.5226, // Defaulting to Cusco
+  lng: -71.9673,
 };
 
 export const AI_CONCIERGE_INITIAL_MESSAGE = "Welcome to Vallecito. ✨\n\nI am your AI Journey Designer. Are you looking to plan a single day, or an extended expedition spanning multiple days? If multiple days, please share your expected arrival and departure dates.";

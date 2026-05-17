@@ -59,7 +59,7 @@ export function SearchResultsCard({ businesses, messageId, input }: { businesses
 
       <div className="flex overflow-x-auto gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
         {list.map((business: Business, idx: number) => (
-          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm p-3">
+          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start">
             <BusinessCard
               business={business}
               orientation="vertical"

@@ -142,7 +142,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
               key={business.id}
               business={business}
               orientation="vertical"
-              showItineraryAdd={false}
+              showItineraryAdd={true}
               showItineraryEnd={false}
             />
           ))}

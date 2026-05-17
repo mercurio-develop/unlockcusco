@@ -79,7 +79,7 @@ export function BusinessCard({
     setIsExchangingEnd,
     setSelectedId
   } = useTrip()
-  const { setMobileViewMode } = usePreferences()
+  const { setMobileViewMode, setIsChatOpen } = usePreferences()
   const router = useRouter()
   const pathname = usePathname()
   
@@ -406,7 +406,14 @@ export function BusinessCard({
                 ) : (
                   <>
                     <Button
-                      onClick={(e) => { e.stopPropagation(); insertWaypoint(business); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        insertWaypoint(business);
+                        setPanelMode('itinerary');
+                        if (pathname !== '/explore') {
+                          router.push('/explore');
+                        }
+                      }}
                       className={cn(
                         "flex-1 bg-transparent text-slate-700 border border-slate-300 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold rounded-full transition-all flex items-center justify-center gap-1.5",
                         isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
@@ -425,6 +432,7 @@ export function BusinessCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setIsChatOpen(false); // Close the chat overlay to show the map
                   if (pathname === '/explore') {
                     setSelectedId(mapTargetId || business.id);
                     window.dispatchEvent(new CustomEvent('switch-to-map-view'));
