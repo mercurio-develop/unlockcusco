@@ -9,10 +9,13 @@ import useSWRInfinite from 'swr/infinite'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+import { usePathname } from "next/navigation"
+
 interface InteractiveListProps {
   locationSlug: string
   category?: string
   initialBusinesses: Business[]
+  dict?: any
 }
 
 const SORT_OPTIONS = [
@@ -23,9 +26,36 @@ const SORT_OPTIONS = [
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export function InteractiveList({ locationSlug, category, initialBusinesses }: InteractiveListProps) {
+export function InteractiveList({ locationSlug, category, initialBusinesses, dict }: InteractiveListProps) {
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState("recommended")
+  
+  const pathname = usePathname()
+  const isEs = pathname?.split('/')[1] === 'es'
+
+  const t = dict?.explore?.interactiveList || (isEs ? {
+    searchPlaceholder: `Buscar ${category ? category.toLowerCase() : 'experiencias'} en ${locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}...`,
+    sort: "Ordenar:",
+    recommended: "Recomendado",
+    noResultsTitle: "No se encontraron resultados",
+    noResultsDesc: "Intenta ajustar tu búsqueda o las opciones de ordenamiento.",
+    sortOptions: {
+      recommended: "Recomendado",
+      rating_desc: "Mejor Valorado",
+      reviews_desc: "Más Reseñas"
+    }
+  } : {
+    searchPlaceholder: `Search ${category ? category.toLowerCase() : 'experiences'} in ${locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}...`,
+    sort: "Sort:",
+    recommended: "Recommended",
+    noResultsTitle: "No results found",
+    noResultsDesc: "Try adjusting your search query or sorting options.",
+    sortOptions: {
+      recommended: "Recommended",
+      rating_desc: "Highest Rated",
+      reviews_desc: "Most Reviews"
+    }
+  })
   
   // Debounce the query for SWR key
   const [debouncedQuery, setDebouncedQuery] = useState(query)
@@ -85,7 +115,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder={`Search ${category ? category.toLowerCase() : 'experiences'} in ${locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}...`}
+            placeholder={t.searchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"
@@ -100,10 +130,10 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
           )}
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort:</span>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.sort}</span>
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 bg-slate-50 border border-slate-100 text-sm font-medium text-slate-700 py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 hover:bg-slate-100 transition-colors">
-              <span>{SORT_OPTIONS.find(o => o.value === sort)?.label || "Recommended"}</span>
+              <span>{SORT_OPTIONS.find(o => o.value === sort)?.label || t.recommended}</span>
               <ChevronDown className="w-4 h-4 text-slate-400" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
@@ -132,8 +162,8 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
         </div>
       ) : businesses.length === 0 ? (
         <div className="py-24 text-center">
-          <h3 className="text-xl font-serif text-slate-900 mb-2">No results found</h3>
-          <p className="text-slate-500">Try adjusting your search query or sorting options.</p>
+          <h3 className="text-xl font-serif text-slate-900 mb-2">{t.noResultsTitle}</h3>
+          <p className="text-slate-500">{t.noResultsDesc}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -144,6 +174,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses }: I
               orientation="vertical"
               showItineraryAdd={true}
               showItineraryEnd={false}
+              dict={dict}
             />
           ))}
           {/* Infinite Scroll Trigger */}

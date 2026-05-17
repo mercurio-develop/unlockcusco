@@ -221,9 +221,10 @@ interface ExploreMapProps {
   categoryCounts?: Record<string, number>
   currentLoc?: string
   onBoundsChange?: (bounds: [number, number, number, number] | null) => void
+  dict?: any
 }
 
-export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange }: ExploreMapProps) {
+export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange, dict }: ExploreMapProps) {
   const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
@@ -235,9 +236,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const selectedMapCategory = currentCats.length > 0 ? (currentCats.length === 1 ? currentCats[0].toUpperCase() : `${currentCats.length} CATEGORIES`) : "ALL"
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null)
   const [zoom, setZoom] = useState<number>(11)
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : true)
+  const [isMobile, setIsMobile] = useState(true)
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false)
+
+  const t = dict?.exploreMap || {
+    placesHere: "places here",
+    tapMapStart: "Tap map to set Start",
+    tapMapEnd: "Tap map to set End",
+    cancel: "Cancel"
+  }
 
   const currentLocStr = searchParams.get("loc") || ""
   const currentLocs = useMemo(() => currentLocStr ? currentLocStr.split(',').filter(Boolean) : [], [currentLocStr])
@@ -991,7 +999,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
             {(popupBusiness as any).isClusterPopup ? (
               <div className="w-[280px] p-4 bg-white rounded-2xl shadow-xl border border-white/20 relative" onClick={e => e.stopPropagation()}>
                 <button onClick={() => { setPopupBusiness(null); onSelectBusiness(null); }} className="absolute top-4 right-4 z-50 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1 shadow-sm"><X className="w-4 h-4"/></button>
-                <h3 className="font-bold text-slate-900 mb-3 border-b pb-2">{(popupBusiness as any).businesses.length} Places Here</h3>
+                <h3 className="font-bold text-slate-900 mb-3 border-b pb-2">{(popupBusiness as any).businesses.length} {t.placesHere}</h3>
                 <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
                   {(popupBusiness as any).businesses.map((b: any) => (
                     <div key={b.id} onClick={() => { setPopupBusiness(b); onSelectBusiness(b.id); }} className="cursor-pointer hover:bg-slate-50 p-2 rounded-xl border border-slate-100 transition-colors">
@@ -1056,11 +1064,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       {mapClickMode && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 bg-slate-900/95 text-white text-xs font-bold pl-5 pr-1.5 py-1.5 rounded-full shadow-xl backdrop-blur-sm select-none">
           <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
-          <span className="whitespace-nowrap">Tap map to set {mapClickMode === 'start' ? 'Start' : 'End'}</span>
+          <span className="whitespace-nowrap">{mapClickMode === 'start' ? t.tapMapStart : t.tapMapEnd}</span>
           <button 
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMapClickMode?.(null); }}
             className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors shrink-0 cursor-pointer pointer-events-auto"
-            title="Cancel"
+            title={t.cancel}
           >
             <X className="w-4 h-4" />
           </button>

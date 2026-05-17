@@ -1,12 +1,22 @@
+import { getLocalizedField } from "@/lib/utils/localization"
 import { HeartPulse, Sparkles, Wind } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface SanctuaryTemplateProps {
   business: Business & { services: BusinessService[] }
+  dict?: any
+  lang: string
 }
 
-export function SanctuaryTemplate({ business }: SanctuaryTemplateProps) {
+export function SanctuaryTemplate({ business, dict , lang }: SanctuaryTemplateProps) {
   const treatments = business.services || []
+  const t = dict || {
+    title: "Healing & Wellness",
+    subtitle: "Our rituals combine ancestral Andean wisdom with modern techniques to restore your vital balance.",
+    minutes: "Minutes",
+    details: "Details",
+    emptyState: "Preparing the sacred space. Sanctuary sessions available soon."
+  }
 
   return (
     <div className="space-y-16">
@@ -15,9 +25,9 @@ export function SanctuaryTemplate({ business }: SanctuaryTemplateProps) {
           <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
             <HeartPulse className="w-8 h-8 text-emerald-400" />
           </div>
-          <h2 className="text-4xl font-serif text-white mb-4">Sanación & Bienestar</h2>
+          <h2 className="text-4xl font-serif text-white mb-4">{t.title}</h2>
           <p className="text-white/60 leading-relaxed">
-            Nuestros rituales combinan la sabiduría ancestral andina con técnicas modernas para restaurar tu equilibrio vital.
+            {t.subtitle}
           </p>
         </div>
 
@@ -36,22 +46,22 @@ export function SanctuaryTemplate({ business }: SanctuaryTemplateProps) {
                   {item.title}
                 </h3>
                 <p className="text-white/60 text-sm leading-relaxed mb-8">
-                  {item.description}
+                  {getLocalizedField(item, 'description', lang)}
                 </p>
 
                 <div className="flex items-center justify-between pt-6 border-t border-white/5">
                    <div className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-widest">
-                     <Wind className="w-4 h-4" /> {item.durationMins} Minutes
+                     <Wind className="w-4 h-4" /> {item.durationMins} {t.minutes}
                    </div>
                    <button className="text-emerald-400 text-xs font-bold uppercase tracking-widest hover:underline">
-                     Details
+                     {t.details}
                    </button>
                 </div>
               </div>
             ))
           ) : (
             <div className="col-span-full text-center py-20 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
-               <p className="text-white/40">Preparing the sacred space. Sanctuary sessions available soon.</p>
+               <p className="text-white/40">{t.emptyState}</p>
             </div>
           )}
         </div>

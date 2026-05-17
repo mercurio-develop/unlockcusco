@@ -1,12 +1,21 @@
+import { getLocalizedField } from "@/lib/utils/localization"
 import { Utensils, Clock, Flame } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface GastronomicTemplateProps {
   business: Business & { services: BusinessService[] }
+  dict?: any
+  lang: string
 }
 
-export function GastronomicTemplate({ business }: GastronomicTemplateProps) {
+export function GastronomicTemplate({ business, dict , lang }: GastronomicTemplateProps) {
   const menuItems = business.services || []
+  const t = dict || {
+    title: "Menu Highlights",
+    subtitle: "Flavors of the Sacred Valley",
+    signatureDish: "Signature Dish",
+    emptyState: "The digital menu is being updated. Stay tuned!"
+  }
 
   return (
     <div className="space-y-12">
@@ -16,8 +25,8 @@ export function GastronomicTemplate({ business }: GastronomicTemplateProps) {
             <Utensils className="w-6 h-6 text-rose-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif text-white">Menu Highlights</h2>
-            <p className="text-white/50 text-sm">Flavors of the Sacred Valley</p>
+            <h2 className="text-3xl font-serif text-white">{t.title}</h2>
+            <p className="text-white/50 text-sm">{t.subtitle}</p>
           </div>
         </div>
 
@@ -31,7 +40,7 @@ export function GastronomicTemplate({ business }: GastronomicTemplateProps) {
                       {item.title}
                     </h3>
                     <p className="text-white/60 text-sm leading-relaxed mb-4">
-                      {item.description}
+                      {getLocalizedField(item, 'description', lang)}
                     </p>
                     <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-white/40">
                       <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg">
@@ -39,7 +48,7 @@ export function GastronomicTemplate({ business }: GastronomicTemplateProps) {
                       </span>
                       {item.priceUsd > 30 && (
                         <span className="flex items-center gap-1.5 bg-rose-600/20 text-rose-400 px-2.5 py-1 rounded-lg border border-rose-600/30">
-                          <Flame className="w-3.5 h-3.5" /> Signature Dish
+                          <Flame className="w-3.5 h-3.5" /> {t.signatureDish}
                         </span>
                       )}
                     </div>
@@ -52,7 +61,7 @@ export function GastronomicTemplate({ business }: GastronomicTemplateProps) {
             ))
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-white/10 rounded-3xl">
-              <p className="text-white/40">The digital menu is being updated. Stay tuned!</p>
+              <p className="text-white/40">{t.emptyState}</p>
             </div>
           )}
         </div>

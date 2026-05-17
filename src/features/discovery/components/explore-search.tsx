@@ -14,13 +14,15 @@ interface ExploreSearchProps {
   isDrawerOpen: boolean // Re-using this prop name for internal consistency in ExploreView
   setIsDrawerOpen: (v: boolean) => void
   categoryCounts?: Record<string, number>
+  dict?: any
 }
 
 export function ExploreSearch({ 
   initialQuery,
   isDrawerOpen: showFilters,
   setIsDrawerOpen: setShowFilters,
-  categoryCounts = {}
+  categoryCounts = {},
+  dict
 }: ExploreSearchProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -40,6 +42,22 @@ export function ExploreSearch({
   const [localRad, setLocalRad] = useState(currentRad)
   const [showCategories, setShowCategories] = useState(false)
   const [showLocations, setShowLocations] = useState(false)
+
+  const t = dict?.explore || {
+    searchPlaceholder: "Search Sacred Valley...",
+    filters: "Filters",
+    resetAll: "Reset All",
+    townSector: "Town / Sector",
+    anywhere: "Anywhere",
+    categoriesLabel: "Categories",
+    all: "All",
+    radiusSearch: "Radius Search",
+    locating: "Locating...",
+    usingGps: "Using GPS",
+    myLocation: "My Location",
+    viewResults: "View Results",
+    categories: {}
+  }
 
   const currentCats = useMemo(() => {
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
@@ -140,7 +158,7 @@ export function ExploreSearch({
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-slate-900 transition-colors z-10" />
           <input 
             type="text" 
-            placeholder="Search Sacred Valley..." 
+            placeholder={t.searchPlaceholder} 
             value={value}
             onChange={(e) => handleSearchChange(e.target.value)}
             data-vaul-no-drag
@@ -165,7 +183,7 @@ export function ExploreSearch({
           )}
         >
           {showFilters ? <X className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
-          <span className="hidden sm:inline">Filters</span>
+          <span className="hidden sm:inline">{t.filters}</span>
         </button>      </div>
 
       <AnimatePresence>
@@ -184,7 +202,7 @@ export function ExploreSearch({
                     onClick={() => navigateFilters("", [], value.trim(), undefined, undefined, undefined, "recommended")}
                     className="text-[11px] text-rose-500 hover:text-rose-600 font-bold uppercase tracking-wider transition-colors"
                   >
-                    Reset All
+                    {t.resetAll}
                   </button>
                 </div>
               )}
@@ -195,7 +213,7 @@ export function ExploreSearch({
                   onClick={() => setShowLocations(!showLocations)}
                   className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Town / Sector</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">{t.townSector}</span>
                   <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showLocations ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
@@ -216,7 +234,7 @@ export function ExploreSearch({
                               : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 text-[12px] font-bold"
                           )}
                         >
-                          Anywhere
+                          {t.anywhere}
                         </button>
                         {LOCATIONS.map((loc) => (
                           <button
@@ -244,7 +262,7 @@ export function ExploreSearch({
                   onClick={() => setShowCategories(!showCategories)}
                   className="flex items-center justify-between w-full p-2 -ml-2 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">Categories</span>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em] transition-colors">{t.categoriesLabel}</span>
                   <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", showCategories ? "rotate-180" : "")} />
                 </button>
                 <AnimatePresence>
@@ -266,7 +284,7 @@ export function ExploreSearch({
                           )}
                         >
                           <MapPin className={cn("w-3.5 h-3.5", currentCats.length === 0 ? "text-rose-400" : "text-slate-400")} />
-                          <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>All</span>
+                          <span className={cn("whitespace-nowrap", currentCats.length === 0 ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{t.all}</span>
                         </button>
                         {CATEGORIES.filter(cat => 
                           cat.value !== "Template" && cat.value !== "Agency" &&
@@ -291,7 +309,7 @@ export function ExploreSearch({
                                 className="w-3.5 h-3.5" 
                                 style={{ color: isActive ? '#fff' : catColor }} 
                               />
-                              <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{cat.label}</span>
+                              <span className={cn("whitespace-nowrap", isActive ? "text-[10px] font-black uppercase tracking-[0.15em] text-white/90" : "text-[9px] font-semibold tracking-tight")}>{t.categories[cat.value] || cat.label}</span>
                               {count > 0 && !isActive && (
                                 <span className="absolute top-1.5 right-1.5 text-[9px] font-black text-slate-300">
                                   {count}
@@ -315,7 +333,7 @@ export function ExploreSearch({
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em]">Radius Search</span>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-[0.15em]">{t.radiusSearch}</span>
                     <button
                       onClick={() => navigateFilters(currentLoc, currentCats, value.trim(), isRadEnabled ? undefined : localRad, currentLat, currentLng, currentSort)}
                       className={cn(
@@ -336,7 +354,7 @@ export function ExploreSearch({
                       className="text-[10px] text-rose-500 hover:text-rose-600 font-black uppercase tracking-widest transition-colors disabled:opacity-30 flex items-center gap-1"
                     >
                       <Navigation className="w-2.5 h-2.5" />
-                      {isGettingLocation ? "Locating..." : (currentLat ? "Using GPS" : "My Location")}
+                      {isGettingLocation ? t.locating : (currentLat ? t.usingGps : t.myLocation)}
                     </button>
                   )}
                 </div>
@@ -371,7 +389,7 @@ export function ExploreSearch({
                   onClick={() => setShowFilters(false)}
                   className="w-full flex items-center justify-center bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md active:scale-[0.98]"
                 >
-                  View Results
+                  {t.viewResults}
                 </button>
               </div>
             </div>

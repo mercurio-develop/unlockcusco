@@ -20,6 +20,7 @@ import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
+import { getLocalizedField } from "@/lib/utils/localization"
 import type { Business } from "@prisma/client"
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ interface BusinessCardProps {
   showMap?: boolean
   showDetails?: boolean
   mapTargetId?: string
+  dict?: any
   onDoubleClick?: () => void
 }
 
@@ -58,6 +60,7 @@ export function BusinessCard({
   showMap = true,
   showDetails = true,
   mapTargetId,
+  dict,
   onDoubleClick
 }: BusinessCardProps) {
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
@@ -83,10 +86,37 @@ export function BusinessCard({
   const router = useRouter()
   const pathname = usePathname()
   
+  const locale = pathname?.split('/')[1] || 'en'
+  const t = dict?.businessCard || {
+    viewProfile: "View Profile",
+    whatsapp: "WhatsApp",
+    requiresBoleto: "Requires Boleto Turístico",
+    boletoTitle: "Cusco Tourist Ticket (BTC)",
+    boletoDesc1: "This site requires the",
+    boletoDesc2: "It's a unified government-managed ticket allowing access to up to 16 major archaeological sites and museums in Cusco and the Sacred Valley.",
+    options: "Options:",
+    fullTicket: "Full Ticket (130 Soles):",
+    fullTicketDesc: "Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley.",
+    partialTicket: "Partial Ticket (70 Soles):",
+    partialTicketDesc: "Valid for 1-2 days for a specific circuit (e.g., Sacred Valley ruins only).",
+    note: "Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit.",
+    gotIt: "Got it",
+    selected: "Selected",
+    swap: "Swap",
+    exchange: "Exchange",
+    add: "Add",
+    map: "Map",
+    details: "Details",
+    verified: "Verified"
+  }
+
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false
   const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
   const isAlreadyInItinerary = activeItinerary?.waypoints?.some(w => w.id === business.id) || false;
+
+  const bName = getLocalizedField(business, 'name', locale)
+  const bDesc = getLocalizedField(business, 'description', locale)
 
   const handleBookNow = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -200,7 +230,7 @@ export function BusinessCard({
           {isClaimed && (
             <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md flex items-center gap-1 ml-auto">
               <Zap className="w-3 h-3 fill-rose-600 text-rose-600" />
-              <span className={isHorizontal ? "hidden sm:inline" : ""}>Verified</span>
+              <span className={isHorizontal ? "hidden sm:inline" : ""}>{t.verified}</span>
             </span>
           )}
         </div>
@@ -246,13 +276,14 @@ export function BusinessCard({
              {(() => {
                const catData = getCategoryData(business.category);
                const CatIcon = catData.icon;
+               const displayCategory = getLocalizedField(business, 'category', locale) || catData.label;
                return (
                  <span className={cn(
                    "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1",
                    catData.theme
                  )}>
                    <CatIcon className="w-2.5 h-2.5" />
-                   {catData.label}
+                   {displayCategory}
                  </span>
                );
              })()}
@@ -267,9 +298,9 @@ export function BusinessCard({
              )}
              </div>          
           {/* Zagat Description */}
-          {business.description && (
+          {bDesc && (
             <div className="mt-1" onClick={(e) => {
-              if (business.description && business.description.length > 100) {
+              if (bDesc && bDesc.length > 100) {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }
@@ -278,9 +309,9 @@ export function BusinessCard({
                 "text-slate-500 text-xs italic leading-relaxed",
                 !isExpanded && (isHorizontal ? "line-clamp-2" : "line-clamp-3")
               )}>
-                &ldquo;{business.description}&rdquo;
+                &ldquo;{bDesc}&rdquo;
               </p>
-              {business.description.length > 100 && (
+              {bDesc.length > 100 && (
                 <button 
                   type="button" 
                   className="text-[10px] text-rose-600 font-semibold mt-0.5 hover:text-rose-700 transition-colors"
@@ -420,7 +451,7 @@ export function BusinessCard({
                       )}
                     >
                       <Plus className="w-[14px] h-[14px]" strokeWidth={1} />
-                      <span className="hidden sm:inline">Add</span>
+                      <span className="hidden sm:inline">{t.add}</span>
                     </Button>
                   </>
                 )}
@@ -446,7 +477,7 @@ export function BusinessCard({
                 )}
               >
                 <MapPin className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Map</span>
+                <span className="hidden sm:inline">{t.map}</span>
               </button>
             )}
             
@@ -460,7 +491,7 @@ export function BusinessCard({
                 )}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Details</span>
+                <span className="hidden sm:inline">{t.details}</span>
               </Link>
             )}
 
@@ -476,7 +507,7 @@ export function BusinessCard({
                 )}
               >
                 <MessageCircle className="w-3.5 h-3.5 fill-current group-hover:scale-110 transition-transform" />
-                <span className="hidden sm:inline">WhatsApp</span>
+                <span className="hidden sm:inline">{t.whatsapp}</span>
               </Button>
             )}
           </div>

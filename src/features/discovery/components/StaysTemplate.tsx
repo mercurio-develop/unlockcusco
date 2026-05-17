@@ -1,12 +1,28 @@
+import { getLocalizedField } from "@/lib/utils/localization"
 import { Bed, Wifi, Coffee, MapPin, Wind, Sparkles } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface StaysTemplateProps {
   business: Business & { services: BusinessService[] }
+  dict?: any
+  lang: string
 }
 
-export function StaysTemplate({ business }: StaysTemplateProps) {
+export function StaysTemplate({ business, dict , lang }: StaysTemplateProps) {
   const rooms = business.services || []
+
+  const t = dict?.staysTemplate || {
+    accommodations: "Accommodations",
+    subtitle: "Rest in the heart of the Sacred Valley",
+    freeWifi: "Free WiFi",
+    breakfast: "Breakfast",
+    heating: "Heating",
+    central: "Central",
+    defaultDesc: "A comfortable space designed for rest and acclimatization.",
+    premiumSuite: "Premium Suite",
+    perNight: "/ night",
+    noRooms: "Room details are being updated. Check availability for more info."
+  }
 
   return (
     <div className="space-y-12">
@@ -16,8 +32,8 @@ export function StaysTemplate({ business }: StaysTemplateProps) {
             <Bed className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif text-white">Accommodations</h2>
-            <p className="text-white/50 text-sm">Rest in the heart of the Sacred Valley</p>
+            <h2 className="text-3xl font-serif text-white">{t.accommodations}</h2>
+            <p className="text-white/50 text-sm">{t.subtitle}</p>
           </div>
         </div>
 
@@ -25,19 +41,19 @@ export function StaysTemplate({ business }: StaysTemplateProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2">
             <Wifi className="w-5 h-5 text-indigo-400" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Free WiFi</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{t.freeWifi}</span>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2">
             <Coffee className="w-5 h-5 text-amber-400" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Breakfast</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{t.breakfast}</span>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2">
             <Wind className="w-5 h-5 text-sky-400" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Heating</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{t.heating}</span>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2">
             <MapPin className="w-5 h-5 text-emerald-400" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Central</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">{t.central}</span>
           </div>
         </div>
 
@@ -51,26 +67,26 @@ export function StaysTemplate({ business }: StaysTemplateProps) {
                       {room.title}
                     </h3>
                     <p className="text-white/60 text-sm leading-relaxed mb-4">
-                      {room.description || "A comfortable space designed for rest and acclimatization."}
+                      {room.description || t.defaultDesc}
                     </p>
                     <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-white/40">
                       {room.priceUsd > 100 && (
                         <span className="flex items-center gap-1.5 bg-indigo-600/20 text-indigo-400 px-2.5 py-1 rounded-lg border border-indigo-600/30">
-                          <Sparkles className="w-3.5 h-3.5" /> Premium Suite
+                          <Sparkles className="w-3.5 h-3.5" /> {t.premiumSuite}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="text-2xl font-serif text-indigo-400 font-bold shrink-0">
                     ${room.priceUsd}
-                    <span className="text-xs text-white/40 font-sans block text-right mt-1 font-normal">/ night</span>
+                    <span className="text-xs text-white/40 font-sans block text-right mt-1 font-normal">{t.perNight}</span>
                   </div>
                 </div>
               </div>
             ))
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-white/10 rounded-3xl">
-              <p className="text-white/40">Room details are being updated. Check availability for more info.</p>
+              <p className="text-white/40">{t.noRooms}</p>
             </div>
           )}
         </div>

@@ -1,12 +1,26 @@
+import { getLocalizedField } from "@/lib/utils/localization"
 import { Map, Calendar, Gauge, CheckCircle2 } from "lucide-react"
 import type { Business } from "@prisma/client"
 
 interface ExpeditionTemplateProps {
   business: Business & { tourPackages?: any[] }
+  dict?: any
+  lang: string
 }
 
-export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
+export function ExpeditionTemplate({ business, dict , lang }: ExpeditionTemplateProps) {
   const packages = business.tourPackages || []
+  const t = dict || {
+    title: "Trekking & Circuits",
+    subtitle: "Upcoming available expeditions",
+    days: "Days",
+    highlights: "Highlights",
+    included: "Included",
+    priceFrom: "Price from",
+    perPerson: "per person",
+    intensity: "Intensity",
+    emptyState: "Searching for new trails. Expedition dates coming soon!"
+  }
 
   return (
     <div className="space-y-12">
@@ -16,8 +30,8 @@ export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
             <Map className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif text-white">Circuitos & Trekking</h2>
-            <p className="text-white/50 text-sm">Próximas expediciones disponibles</p>
+            <h2 className="text-3xl font-serif text-white">{t.title}</h2>
+            <p className="text-white/50 text-sm">{t.subtitle}</p>
           </div>
         </div>
 
@@ -36,19 +50,19 @@ export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
                            <span className="bg-blue-600/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-600/30 uppercase tracking-wider">
                              {pkg.difficulty}
                            </span>
-                           <span className="text-white/40 text-xs uppercase tracking-widest">• {pkg.durationDays} Days</span>
+                           <span className="text-white/40 text-xs uppercase tracking-widest">• {pkg.durationDays} {t.days}</span>
                         </div>
-                        <h3 className="text-2xl font-serif text-white mb-2">{pkg.title}</h3>
-                        <p className="text-white/60 text-sm italic">{pkg.tagline}</p>
+                        <h3 className="text-2xl font-serif text-white mb-2">{getLocalizedField(pkg, 'title', lang)}</h3>
+                        <p className="text-white/60 text-sm italic">{getLocalizedField(pkg, 'tagline', lang)}</p>
                       </div>
 
                       <p className="text-white/70 text-sm leading-relaxed">
-                        {pkg.description}
+                        {getLocalizedField(pkg, 'description', lang)}
                       </p>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-3">
-                          <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Highlights</h4>
+                          <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{t.highlights}</h4>
                           <ul className="space-y-2">
                             {highlights.map((h, i) => (
                               <li key={i} className="text-xs text-white/80 flex items-start gap-2">
@@ -59,7 +73,7 @@ export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
                           </ul>
                         </div>
                         <div className="space-y-3">
-                          <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Included</h4>
+                          <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{t.included}</h4>
                           <ul className="space-y-2">
                             {included.map((inc, i) => (
                               <li key={i} className="text-xs text-white/60 flex items-center gap-2">
@@ -74,14 +88,14 @@ export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
 
                     <div className="w-full md:w-64 flex flex-col justify-between items-center p-6 bg-white/5 rounded-3xl border border-white/5">
                       <div className="text-center">
-                        <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Price from</p>
+                        <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{t.priceFrom}</p>
                         <p className="text-4xl font-serif text-white font-bold">${pkg.basePriceUsd}</p>
-                        <p className="text-white/40 text-[10px] mt-1">per person</p>
+                        <p className="text-white/40 text-[10px] mt-1">{t.perPerson}</p>
                       </div>
                       
                       <div className="w-full space-y-3 mt-8">
                         <div className="flex items-center justify-between text-[10px] font-bold text-white/40 uppercase px-1">
-                          <span>Intensity</span>
+                          <span>{t.intensity}</span>
                           <span className="text-white/80">{pkg.pace}</span>
                         </div>
                         <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
@@ -95,7 +109,7 @@ export function ExpeditionTemplate({ business }: ExpeditionTemplateProps) {
             })
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-white/10 rounded-3xl">
-              <p className="text-white/40">Searching for new trails. Expedition dates coming soon!</p>
+              <p className="text-white/40">{t.emptyState}</p>
             </div>
           )}
         </div>

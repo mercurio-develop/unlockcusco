@@ -1,0 +1,229 @@
+{
+  "nav": {
+    "explore": "Explorar",
+    "machuPicchu": "Machu Picchu",
+    "concierge": "Concierge"
+  },
+  "home": {
+    "heroTitle1": "Más allá del mapa:",
+    "heroTitle2": "Vive el Valle Sagrado",
+    "heroSubtitle": "Tu guía inteligente de Cusco, el Valle Sagrado y Machu Picchu. Descubre lugares increíbles, crea itinerarios personalizados con nuestro Concierge IA y conecta directamente con guías de confianza y hoteles boutique. Experimenta el corazón de los Andes como nunca antes.",
+    "searchPlaceholder": "ej. 'Recomiéndame el mejor restaurante del valle'",
+    "working": "Buscando...",
+    "search": "Buscar",
+    "popularItineraries": "Itinerarios Populares Pre-Armados",
+    "trips": {
+      "classic": "Valle Sagrado Clásico (Día Completo)",
+      "cusco": "City Tour Cusco",
+      "ruins": "El Tour Definitivo de Ruinas Incas",
+      "culinary": "Ruta de los 7 Mejores Restaurantes",
+      "maras": "Maras, Moray y Chinchero",
+      "artisan": "Mejores Mercados Artesanales",
+      "machupicchu": "Machu Picchu Día Completo"
+    },
+    "pills": {
+      "dining": "Gastronomía local auténtica",
+      "stays": "Hoteles boutique y estancias",
+      "wellness": "Retiros de bienestar y Spa",
+      "spiritual": "Ceremonias espirituales",
+      "artisan": "Artesanos locales",
+      "tours": "Tours culturales y guías"
+    },
+    "featuresTag": "Descubre el Valle Sagrado",
+    "featuresTitle": "Experiencias Auténticas.<br/>Conexiones Directas.",
+    "featuresSubtitle": "Vallecito es una plataforma de descubrimiento local impulsada por IA que te conecta directamente con negocios auténticos, transporte confiable y servicios de confianza en el Valle Sagrado, Perú.",
+    "feat1Title": "Exploración Interactiva",
+    "feat1Desc": "Explora el Valle Sagrado a través de un mapa inmersivo en 3D. Encuentra exactamente lo que necesitas con marcadores de categorías y conecta directamente con los dueños de negocios locales.",
+    "feat1Sub1Title": "Acceso Directo por WhatsApp",
+    "feat1Sub1Desc": "Evita los intermediarios. Toca para abrir instantáneamente una conversación por WhatsApp con guías y negocios locales verificados.",
+    "feat1Sub2Title": "Categorías Curadas",
+    "feat1Sub2Desc": "Filtra fácilmente entre hoteles boutique, guías de confianza, gastronomía local y retiros de bienestar utilizando marcadores intuitivos en el mapa.",
+    "feat2Title": "Concierge IA",
+    "feat2Desc": "Tu guía personal a los Andes. Nuestro asistente inteligente te ayuda a descubrir las experiencias perfectas según tu ubicación exacta y tus preferencias.",
+    "feat2Sub1Title": "Construcción Visual de Rutas",
+    "feat2Sub1Desc": "Añade experiencias bloque por bloque para ver visualmente tu ruta planificada para el día.",
+    "feat2Sub2Title": "Consejos Contextuales",
+    "feat2Sub2Desc": "Haz preguntas sobre la altitud, costumbres locales o joyas ocultas y recibe recomendaciones instantáneas y localizadas."
+  },
+  "navbar": {
+    "towns": "Pueblos",
+    "howToUse": "Cómo usar Vallecito",
+    "quickGuide": "Guía rápida para planear tu viaje perfecto al Valle Sagrado.",
+    "mapIconTitle": "Icono de Mapa (Pueblos y Filtros)",
+    "mapIconDesc": "Usa el filtro unificado en la parte superior izquierda del mapa para seleccionar pueblos específicos (como Pisac u Ollantaytambo) y filtrar por categorías (Gastronomía, Estancias, Bienestar, etc.).",
+    "compassIconTitle": "Icono de Brújula (Modo Descubrir)",
+    "compassIconDesc": "Usa el modo <b>Descubrir</b> para explorar puntos de interés por todo el valle. Haz clic en los lugares para agregarlos a tu itinerario.",
+    "routeIconTitle": "Icono de Ruta (Creador de Itinerarios)",
+    "routeIconDesc": "En la pestaña Itinerario, puedes agregar, eliminar y reordenar paradas. Establece tus puntos de inicio y fin haciendo clic en el mapa.",
+    "sparklesIconTitle": "Icono de Destellos (Concierge IA)",
+    "sparklesIconDesc": "Toca el botón Concierge para abrir el chat. La IA puede organizar un día entero para ti según tus preferencias, consultar información del Boleto Turístico y estimar tarifas de taxi.",
+    "settingsIconTitle": "Icono de Ajustes (Preferencias)",
+    "settingsIconDesc": "Toca el ícono de ajustes para definir tu \"Estilo de Viaje\" y \"Nivel de Intensidad\". El Concierge usa esto para darte recomendaciones altamente personalizadas.",
+    "closeHelp": "Cerrar Ayuda",
+    "travelPreferences": "Preferencias de Viaje",
+    "preferencesDesc": "Define tu estilo e intensidad para recibir recomendaciones personalizadas del Concierge.",
+    "travelVibe": "Estilo de Viaje",
+    "intensityLevel": "Nivel de Intensidad",
+    "vibes": {
+      "LIVING_CULTURE": "Cultura Viva",
+      "GASTRONOMIC": "Gastronomía",
+      "LUXURY_WELLNESS": "Bienestar de Lujo",
+      "SPIRITUAL": "Espiritual",
+      "MOUNTAIN_EXPLORER": "Explorador de Montaña"
+    },
+    "intensities": {
+      "1": {
+        "label": "Nivel 1",
+        "desc": "Accesible"
+      },
+      "2": {
+        "label": "Nivel 2",
+        "desc": "Inmersivo"
+      },
+      "3": {
+        "label": "Nivel 3",
+        "desc": "Al Límite"
+      }
+    },
+    "intensityNote": "El Nivel 1 es relajado y seguro. El Nivel 3 es extremo y fuera de lo común.",
+    "savePreferences": "Guardar Preferencias",
+    "changeLanguage": "Cambiar Idioma",
+    "helpInstructions": "Ayuda e Instrucciones"
+  },
+  "explore": {
+    "errorLoading": "Error al cargar datos",
+    "retry": "Reintentar",
+    "consulting": "Consultando el Valle...",
+    "updating": "Actualizando...",
+    "building": "Construyendo el espacio de trabajo...",
+    "exploreVallecito": "Explorar Vallecito",
+    "discover": "Descubrir",
+    "concierge": "Concierge",
+    "itinerary": "Itinerario",
+    "featureDisabled": "Función deshabilitada",
+    "searchPlaceholder": "Buscar en el Valle Sagrado...",
+    "filters": "Filtros",
+    "resetAll": "Restablecer Todo",
+    "townSector": "Pueblo / Sector",
+    "anywhere": "Cualquier lugar",
+    "categoriesLabel": "Categorías",
+    "all": "Todos",
+    "radiusSearch": "Búsqueda por Radio",
+    "locating": "Ubicando...",
+    "usingGps": "Usando GPS",
+    "myLocation": "Mi Ubicación",
+    "viewResults": "Ver Resultados",
+    "exploreTheValley": "Explorar el Valle",
+    "sacredValley": "Valle Sagrado",
+    "locationDesc": "Descubre experiencias no listadas, joyas ocultas e itinerarios organizados en {loc}. Reserva directamente con proveedores locales sin comisiones.",
+    "verifiedLocations": "ubicaciones verificadas en",
+    "backTo": "Volver a",
+    "categoryDesc": "Explora las mejores opciones de {category} en {loc}.",
+    "categoryDescriptions": {
+      "dining": "Experimenta el renacimiento culinario de los Andes. Desde picanterías tradicionales que sirven cuy asado hasta restaurantes de vanguardia que mezclan ingredientes locales con técnicas modernas.",
+      "wellness": "Reconéctate contigo mismo. Descubre spas holísticos, terapias de sanación inca, retiros de yoga y centros de meditación en las tranquilas montañas del Valle Sagrado.",
+      "adventure": "Haz que tu adrenalina bombee. El Valle Sagrado es un patio de recreo para los buscadores de emociones, ofreciendo trekking, cuatrimotos, rafting y tirolesa por paisajes impresionantes.",
+      "stays": "Descansa en comodidad sin igual. Ya sea que busques un eco-lodge de lujo, un hotel boutique o una acogedora posada familiar, encuentra el campamento base perfecto para tus exploraciones andinas.",
+      "culture": "Sumérgete en la historia viva. Explora mercados artesanales, ruinas antiguas, centros de tejido tradicional y talleres interactivos que preservan el legado de los Incas."
+    },
+    "categories": {
+      "Template": "Plantilla",
+      "Boleto": "Boleto Turístico",
+      "Adventure": "Aventura",
+      "Wellness": "Bienestar",
+      "Spiritual": "Espiritual",
+      "Dining": "Gastronomía",
+      "Culture": "Cultura",
+      "Textiles": "Textiles",
+      "Stays": "Estancias",
+      "Transport": "Transporte",
+      "Agency": "Agencia"
+    }
+  },
+  "business": {
+    "checkAvailability": "Consultar Disponibilidad",
+    "reviews": "Reseñas de Viajeros",
+    "verifiedReview": "Reseña Verificada",
+    "about": "Acerca de",
+    "moreIn": "Más en",
+    "otherExperiences": "Otras Experiencias en",
+    "exploreNearby": "Explorar Pueblos Cercanos",
+    "operatedBy": "Operado por Vallecito Concierge",
+    "priceRange": "Rango de Precios",
+    "connectDirectly": "Conectar Directamente",
+    "replyTime": "Suele responder en 1 hora",
+    "verifiedLocal": "Negocio Local Verificado"
+  },
+  "templates": {
+    "gastronomic": {
+      "title": "Platos Destacados",
+      "subtitle": "Sabores del Valle Sagrado",
+      "signatureDish": "Plato de Autor",
+      "emptyState": "El menú digital está siendo actualizado."
+    },
+    "expedition": {
+      "title": "Circuitos & Trekking",
+      "subtitle": "Próximas expediciones disponibles",
+      "days": "Días",
+      "highlights": "Destacados",
+      "included": "Incluye",
+      "priceFrom": "Precio desde",
+      "perPerson": "por persona",
+      "intensity": "Intensidad",
+      "emptyState": "Buscando nuevas rutas. Próximamente nuevas fechas."
+    },
+    "sanctuary": {
+      "title": "Sanación & Bienestar",
+      "subtitle": "Nuestros rituales combinan la sabiduría ancestral andina con técnicas modernas para restaurar tu equilibrio vital.",
+      "minutes": "Minutos",
+      "details": "Detalles",
+      "emptyState": "Preparando el espacio sagrado. Sesiones disponibles pronto."
+    }
+  },
+  "common": {
+    "back": "Volver"
+  },
+  "discoverPanel": {
+    "places": "Lugares",
+    "sort": "Ordenar:",
+    "recommended": "Recomendado",
+    "sortOptions": {
+      "recommended": "Recomendado",
+      "rating_desc": "Mejor Valorado",
+      "price_asc": "Precio (Menor a Mayor)",
+      "price_desc": "Precio (Mayor a Menor)"
+    },
+    "radius": "Radio",
+    "emptyTitle": "No hay lugares en esta zona",
+    "emptyDesc": "Intenta mover o alejar el mapa para encontrar más lugares, o borra tus filtros para ver todo el Valle.",
+    "resetFilters": "Restablecer todos los filtros",
+    "itineraryMode": "Modo Itinerario",
+    "pickStart": "Elige un nuevo punto de inicio",
+    "pickEnd": "Elige un nuevo destino final",
+    "swapPlace": "Selecciona un lugar para intercambiar",
+    "addStop": "Explora y haz clic en 'Añadir' en un lugar para agregarlo como parada"
+  },
+  "_meta_lang": "es",
+  "businessCard": {
+    "viewProfile": "Ver Perfil",
+    "whatsapp": "WhatsApp",
+    "requiresBoleto": "Requiere Boleto Turístico",
+    "boletoTitle": "Boleto Turístico del Cusco (BTC)",
+    "boletoDesc1": "Este sitio requiere el",
+    "boletoDesc2": "Es un boleto unificado administrado por el gobierno que permite el acceso a hasta 16 sitios arqueológicos y museos importantes en Cusco y el Valle Sagrado.",
+    "options": "Opciones:",
+    "fullTicket": "Boleto Integral (130 Soles):",
+    "fullTicketDesc": "Válido por 10 días. Incluye los 16 sitios en Cusco, Valle Sagrado y Valle Sur.",
+    "partialTicket": "Boleto Parcial (70 Soles):",
+    "partialTicketDesc": "Válido por 1-2 días para un circuito específico (ej., solo ruinas del Valle Sagrado).",
+    "note": "Nota: El boleto no se puede comprar en línea por adelantado. Debe comprarse en persona en la oficina de COSITUC (Av. El Sol 103, Cusco) o en la entrada del primer sitio que visite.",
+    "gotIt": "Entendido",
+    "selected": "Seleccionado",
+    "swap": "Cambiar",
+    "exchange": "Intercambiar",
+    "add": "Añadir",
+    "map": "Mapa",
+    "details": "Detalles",
+    "verified": "Verificado"
+  }
+}

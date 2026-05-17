@@ -19,9 +19,10 @@ interface DiscoverPanelProps {
   hasMore?: boolean
   isLoadingMore?: boolean
   onLoadMore?: () => void
+  dict?: any
 }
 
-export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore }: DiscoverPanelProps) {
+export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore, dict }: DiscoverPanelProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -80,6 +81,27 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
     setIsSortOpen(false)
   }
 
+  const t = dict?.discoverPanel || {
+    places: "Places",
+    sort: "Sort:",
+    recommended: "Recommended",
+    sortOptions: {
+      recommended: "Recommended",
+      rating_desc: "Highest Rated",
+      price_asc: "Price (Low to High)",
+      price_desc: "Price (High to Low)"
+    },
+    radius: "Radius",
+    emptyTitle: "No places in this area",
+    emptyDesc: "Try panning or zooming out the map to find more places, or clear your filters to see the whole Valley.",
+    resetFilters: "Reset all filters",
+    itineraryMode: "Itinerary Mode",
+    pickStart: "Pick a new start location",
+    pickEnd: "Pick a new end destination",
+    swapPlace: "Select a place to swap",
+    addStop: "Browse and click 'Add' on a place to add it as a stop"
+  }
+
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6 bg-gray-50/50 relative" data-vaul-no-drag>
       {(isAddingStop || exchangeTargetId || isExchangingStart || isExchangingEnd) && (
@@ -89,9 +111,9 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
               <List className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Itinerary Mode</p>
+              <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400">{t.itineraryMode}</p>
               <p className="text-sm font-medium text-slate-200">
-                {isExchangingStart ? "Pick a new start location" : isExchangingEnd ? "Pick a new end destination" : exchangeTargetId ? "Select a place to swap" : "Browse and click 'Add' on a place to add it as a stop"}
+                {isExchangingStart ? t.pickStart : isExchangingEnd ? t.pickEnd : exchangeTargetId ? t.swapPlace : t.addStop}
               </p>
             </div>
           </div>
@@ -113,14 +135,14 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
       {businesses.length > 0 && (
         <div className="flex flex-col gap-3 w-full z-10 mb-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-3 md:gap-0">
-            <div className="text-sm font-bold text-slate-800 order-2 md:order-1">{totalCount} Places</div>
+            <div className="text-sm font-bold text-slate-800 order-2 md:order-1">{totalCount} {t.places}</div>
             <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-2 shrink-0 order-1 md:order-2">
               <div ref={sortRef} className="relative z-20">
                 <button 
                   onClick={() => setIsSortOpen(!isSortOpen)}
                   className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg shadow-sm px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest"
                 >
-                  <span>Sort: {SORT_OPTIONS.find(o => o.value === currentSort)?.label || "Recommended"}</span>
+                  <span>{t.sort} {t.sortOptions[currentSort as keyof typeof t.sortOptions] || t.recommended}</span>
                   <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", isSortOpen && "rotate-180")} />
                 </button>
                 
@@ -135,7 +157,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
                           currentSort === option.value ? "text-rose-600 bg-rose-50/50" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                         )}
                       >
-                        {option.label}
+                        {t.sortOptions[option.value as keyof typeof t.sortOptions] || option.label}
                         {currentSort === option.value && <Check className="w-4 h-4" />}
                       </button>
                     ))}
@@ -202,15 +224,15 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
               <Search className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
             </div>
           </div>
-          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">No places in this area</h3>
+          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">{t.emptyTitle}</h3>
           <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-            Try panning or zooming out the map to find more places, or clear your filters to see the whole Valley.
+            {t.emptyDesc}
           </p>
           <button 
             onClick={onReset}
             className="bg-slate-900 text-white px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
           >
-            Reset all filters
+            {t.resetFilters}
           </button>
         </div>
       ) : (
@@ -223,6 +245,7 @@ export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedI
                onSelect={() => setSelectedId(e.id)} 
                orientation={viewMode === "list" ? "horizontal" : "vertical"}
                showMap={true}
+               dict={dict}
                onDoubleClick={() => {
                  setSelectedId(e.id);
                  window.dispatchEvent(new CustomEvent('switch-to-map-view'));

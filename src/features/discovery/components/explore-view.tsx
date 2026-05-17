@@ -22,6 +22,7 @@ interface ExploreViewProps {
   initialHasMore: boolean
   initialQuery: string
   initialSelectedId?: string | null
+  dict?: any
 }
 
 const ExploreMap = dynamic(() => import("@/features/discovery/components/explore-map"), {
@@ -35,7 +36,8 @@ export function ExploreView({
   initialCategoryCounts,
   initialHasMore, 
   initialQuery, 
-  initialSelectedId 
+  initialSelectedId,
+  dict
 }: ExploreViewProps) {
   const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses || [])
   const [mapBusinesses, setMapBusinesses] = useState<Business[]>(initialMapBusinesses || [])
@@ -151,13 +153,13 @@ export function ExploreView({
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-serif tracking-tight text-slate-900">Explore Vallecito</h1>
+        <h1 className="text-2xl font-serif tracking-tight text-slate-900">{dict?.explore?.exploreVallecito || "Explore Vallecito"}</h1>
       </div>
 
       <div className="hidden md:flex w-full justify-start overflow-x-auto scrollbar-hide gap-2 pb-1 px-0">
-        <button title="Discover" onClick={() => { setPanelMode("discover"); }} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "discover" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><LayoutGrid className="w-3 h-3 md:w-4 md:h-4" /> <span>Discover</span></button>
-        <button title="Concierge" onClick={() => setIsChatOpen(!isChatOpen)} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${isChatOpen ? "bg-rose-600 text-white border-rose-600 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-600 shadow-sm"}`}><Sparkles className={`w-3 h-3 md:w-4 md:h-4 ${isChatOpen ? 'text-white' : 'text-rose-500'}`} /> <span>Concierge</span></button>
-        <button title="Itinerary" onClick={() => setPanelMode("itinerary")} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "itinerary" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><CalendarDays className="w-3 h-3 md:w-4 md:h-4" /> <span>Itinerary</span></button>
+        <button title={dict?.explore?.discover || "Discover"} onClick={() => { setPanelMode("discover"); }} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "discover" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><LayoutGrid className="w-3 h-3 md:w-4 md:h-4" /> <span>{dict?.explore?.discover || "Discover"}</span></button>
+        <button title={dict?.explore?.concierge || "Concierge"} onClick={() => setIsChatOpen(!isChatOpen)} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${isChatOpen ? "bg-rose-600 text-white border-rose-600 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-600 shadow-sm"}`}><Sparkles className={`w-3 h-3 md:w-4 md:h-4 ${isChatOpen ? 'text-white' : 'text-rose-500'}`} /> <span>{dict?.explore?.concierge || "Concierge"}</span></button>
+        <button title={dict?.explore?.itinerary || "Itinerary"} onClick={() => setPanelMode("itinerary")} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "itinerary" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><CalendarDays className="w-3 h-3 md:w-4 md:h-4" /> <span>{dict?.explore?.itinerary || "Itinerary"}</span></button>
       </div>
 
       <div className={panelMode === "discover" ? "block" : "hidden"}>
@@ -166,6 +168,7 @@ export function ExploreView({
           isDrawerOpen={isDrawerOpen}
           setIsDrawerOpen={setIsDrawerOpen}
           categoryCounts={categoryCounts}
+          dict={dict}
         />
       </div>
     </div>
@@ -182,11 +185,12 @@ export function ExploreView({
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           onLoadMore={loadMore}
+          dict={dict}
         />
       ) : panelMode === "itinerary" ? (
-        <ItineraryPanel />
+        <ItineraryPanel dict={dict} />
       ) : (
-        <div className="p-8 text-center text-slate-500">Feature disabled</div>
+        <div className="p-8 text-center text-slate-500">{dict?.explore?.featureDisabled || "Feature disabled"}</div>
       )}
     </div>
   )
@@ -205,7 +209,7 @@ export function ExploreView({
           updateEndAnchorLocation(lat, lng, 'Custom End');
         }
         setMapClickMode(null); 
-      }} onBoundsChange={setMapBounds} />}
+      }} onBoundsChange={setMapBounds} dict={dict} />}
       showMap={true}
     />
   )

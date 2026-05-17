@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, Component, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/EndPointPicker";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
 import {
@@ -23,8 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
 
-// Stable component outside ItineraryPanel so React fiber identity is preserved across re-renders
-function TransitEdge({ index, routeData, transportProfile, setTransportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (index: number, p: TransportProfile) => void }) {
+function TransitEdge({ index, routeData, transportProfile, setTransportProfile, t }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (index: number, p: TransportProfile) => void; t?: any }) {
   const leg = routeData?.legs?.[index];
   if (!leg) return (
     <div className="relative h-12 w-full flex items-center">
@@ -45,20 +44,18 @@ function TransitEdge({ index, routeData, transportProfile, setTransportProfile }
             onClick={() => setTransportProfile(index, 'driving')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
           >
-            <Car className="w-3 h-3" /> Drive
+            <Car className="w-3 h-3" /> {t?.drive || "Drive"}
           </button>
           <button 
             onClick={() => setTransportProfile(index, 'walking')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${!isDrive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
           >
-            <Footprints className="w-3 h-3" /> Walk
+            <Footprints className="w-3 h-3" /> {t?.walk || "Walk"}
           </button>
         </div>
-        <div className="flex justify-between items-center px-1">
-          <span className="text-[10px] font-semibold text-slate-600 tracking-tight">{durationMin}m ({distanceKm}km)</span>
-          <span className="text-[10px] font-bold text-emerald-600 whitespace-nowrap text-right">
-            {isDrive ? `Taxi: ~S/ ${Math.max(5, Math.round(distanceKm * 2.5))} • Bus: ~S/ ${Math.max(2, Math.round(distanceKm * 0.4))}` : 'Free'}
-          </span>
+        <div className="flex justify-between items-center px-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {durationMin} min</span>
+          <span className="flex items-center gap-1"><Navigation className="w-3 h-3" /> {distanceKm} km</span>
         </div>
       </div>
     </div>
@@ -90,7 +87,7 @@ class ItineraryErrorBoundary extends Component<{ children: ReactNode }, { error:
   }
 }
 
-export function ItineraryPanel() {
+export function ItineraryPanel({ dict }: { dict?: any }) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
@@ -121,6 +118,62 @@ export function ItineraryPanel() {
   } = useTrip();
   const { setIsChatOpen } = usePreferences();
   const router = useRouter();
+  const pathname = usePathname();
+  const isEs = pathname?.split('/')[1] === 'es';
+
+  const t = isEs ? {
+    emptyTitle: "Tu itinerario está vacío",
+    emptyDesc: "Añade lugares desde la vista Descubrir o el Chat Concierge.",
+    startPoint: "Punto de Partida",
+    startPlaceholder: "¿Dónde empieza tu día?",
+    viewMap: "Ver Mapa",
+    setMarker: "Poner Marcador",
+    cancel: "Cancelar",
+    delete: "Eliminar",
+    removeStop: "Eliminar Parada",
+    areYouSure: "¿Estás seguro de que quieres eliminar",
+    fromItinerary: "de tu itinerario?",
+    remove: "Eliminar",
+    swap: "Cambiar",
+    endHere: "Terminar Aquí",
+    addStop: "Añadir Parada",
+    endPoint: "Punto Final",
+    endPlaceholder: "¿Dónde termina tu día?",
+    arrives: "Llega",
+    saveRoute: "Guardar Ruta",
+    shareRoute: "Compartir",
+    routeSaved: "Ruta Guardada",
+    routeSavedDesc: "Comparte este enlace con tus amigos para que puedan ver tu itinerario.",
+    copy: "Copiar",
+    copied: "Copiado",
+    close: "Cerrar"
+  } : {
+    emptyTitle: "Your itinerary is empty",
+    emptyDesc: "Add places from the Discover view or the Concierge chat.",
+    startPoint: "Start Point",
+    startPlaceholder: "Where does your day start?",
+    viewMap: "View Map",
+    setMarker: "Set Marker",
+    cancel: "Cancel",
+    delete: "Delete",
+    removeStop: "Remove Stop",
+    areYouSure: "Are you sure you want to remove",
+    fromItinerary: "from your itinerary?",
+    remove: "Remove",
+    swap: "Swap",
+    endHere: "End Here",
+    addStop: "Add Stop",
+    endPoint: "End Point",
+    endPlaceholder: "Where does your day end?",
+    arrives: "Arrives",
+    saveRoute: "Save Route",
+    shareRoute: "Share",
+    routeSaved: "Route Saved",
+    routeSavedDesc: "Share this link with your friends so they can view your itinerary.",
+    copy: "Copy",
+    copied: "Copied",
+    close: "Close"
+  };
 
   // Cascade stop times: startAnchor time + legs travel + waypoint durations
   const stopTimes = (() => {
@@ -289,7 +342,7 @@ export function ItineraryPanel() {
           <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
               {(activeItinerary.startAnchor as any)?.service && (
-                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
+                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
               )}
             </div>
           </div>
@@ -332,7 +385,7 @@ export function ItineraryPanel() {
                         )}
                       </div>
                     </div>
-                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{waypoint.title}</p>
+                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{isEs && waypoint.service?.nameEs ? waypoint.service.nameEs : waypoint.title}</p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {waypoint.locationStr}</p>
                   </div>
 
@@ -365,21 +418,21 @@ export function ItineraryPanel() {
                           className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          Delete
+                          {t.delete}
                         </button>
                       } />
                       <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
                         <DialogHeader>
-                          <DialogTitle>Remove Stop</DialogTitle>
+                          <DialogTitle>{t.removeStop}</DialogTitle>
                           <DialogDescription>
-                            Are you sure you want to remove <strong>{waypoint.title}</strong> from your itinerary?
+                            {t.areYouSure} <strong>{waypoint.title}</strong> {t.fromItinerary}
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="mt-4">
-                          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+                          <DialogClose render={<Button variant="outline">{t.cancel}</Button>} />
                           <DialogClose render={
                             <Button variant="destructive" onClick={(e) => { e.stopPropagation(); removeWaypoint(waypoint.id); }}>
-                              Remove
+                              {t.remove}
                             </Button>
                           } />
                         </DialogFooter>
@@ -392,7 +445,7 @@ export function ItineraryPanel() {
                       title="Exchange this place"
                     >
                       <Repeat className="w-3.5 h-3.5" />
-                      Swap
+                      {t.swap}
                     </button>
 
                     {waypoint.lat != null && waypoint.lng != null && (
@@ -406,7 +459,7 @@ export function ItineraryPanel() {
                         className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Flag className="w-3.5 h-3.5" />
-                        End Here
+                        {t.endHere}
                       </button>
                     )}
                   </div>
@@ -425,7 +478,7 @@ export function ItineraryPanel() {
                 >
                   <div className="overflow-hidden">
                     {waypoint.service && (
-                      <BusinessCard business={waypoint.service} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} />
+                      <BusinessCard business={waypoint.service} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
                     )}
                   </div>
                 </div>
@@ -440,13 +493,13 @@ export function ItineraryPanel() {
              onClick={() => { setSelectedId(null); setIsAddingStop(true); setPanelMode('discover'); }} 
              className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm border border-slate-200 border-dashed hover:border-slate-300 hover:shadow"
            >
-             <Plus className="w-4 h-4" /> Add Stop
+             <Plus className="w-4 h-4" /> {t.addStop}
            </button>
         </div>
 
         {/* End Anchor */}
         <div className="relative">
-          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfiles[(activeItinerary.waypoints || []).length] || 'driving'} setTransportProfile={setLegTransportProfile} />
+          <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfiles[(activeItinerary.waypoints || []).length] || 'driving'} setTransportProfile={setLegTransportProfile} t={t} />
           <div 
             onClick={() => setSelectedId('itin-arrival')}
             className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-lg ring-1 ring-rose-500 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
@@ -456,18 +509,18 @@ export function ItineraryPanel() {
               <Bed className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">End Point</p>
+              <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">{t.endPoint}</p>
               <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                 <EndPointPicker
                   value={activeItinerary.endAnchor?.title}
-                  placeholder="Where does your day end?"
+                  placeholder={t.endPlaceholder}
                   onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
                 />
                 <button
                   onClick={e => { e.stopPropagation(); setSelectedId('itin-arrival'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
                   className="shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
                 >
-                  View Map
+                  {t.viewMap}
                 </button>
                 <button
                   onClick={e => { 
@@ -482,7 +535,7 @@ export function ItineraryPanel() {
                   className={`shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{mapClickMode === 'end' ? 'Cancel' : 'Set Marker'}</span>
+                  <span className="hidden sm:inline">{mapClickMode === 'end' ? t.cancel : t.setMarker}</span>
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
@@ -517,7 +570,7 @@ export function ItineraryPanel() {
                     const h = Math.floor(cur/60)%24; const m = cur%60;
                     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
                   })();
-                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ Arrives ~{lastStopMins}</p>;
+                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ {t.arrives} ~{lastStopMins}</p>;
                 }
                 return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
               })()}
@@ -527,7 +580,7 @@ export function ItineraryPanel() {
             <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
                 {(activeItinerary.endAnchor as any)?.service && (
-                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} />
+                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} dict={dict} />
                 )}
               </div>
             </div>
@@ -546,9 +599,9 @@ export function ItineraryPanel() {
               <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/20 shadow-inner">
                 <Share2 className="w-6 h-6 text-emerald-400" />
               </div>
-              <DialogTitle className="text-2xl font-serif tracking-tight text-white">Route Saved! 🎉</DialogTitle>
+              <DialogTitle className="text-2xl font-serif tracking-tight text-white">{t.routeSaved}</DialogTitle>
               <DialogDescription className="text-slate-300 text-sm leading-relaxed">
-                Your Vallecito journey is safely stored. Anyone with this magic link can view your route on any device.
+                {t.routeSavedDesc}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -573,18 +626,18 @@ export function ItineraryPanel() {
               >
                 {isCopied ? (
                   <>
-                    <Check className="w-3.5 h-3.5" /> Copied
+                    <Check className="w-3.5 h-3.5" /> {t.copied}
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" /> Copy
+                    <Copy className="w-3.5 h-3.5" /> {t.copy}
                   </>
                 )}
               </Button>
             </div>
             <DialogFooter className="sm:justify-start">
               <Button onClick={() => setIsSaveModalOpen(false)} variant="ghost" className="text-slate-500 hover:text-slate-900 text-sm font-medium w-full sm:w-auto h-11 rounded-xl">
-                Close
+                {t.close}
               </Button>
             </DialogFooter>
           </div>
