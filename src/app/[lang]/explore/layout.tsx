@@ -12,7 +12,7 @@ export async function generateMetadata({
   const isEs = lang === 'es';
   
   return {
-    title: isEs ? 'Explorar el Valle Sagrado | VALLECITO' : 'Explore the Sacred Valley | VALLECITO',
+    title: isEs ? 'Explorar el Valle Sagrado | UNLOCKCUSCO' : 'Explore the Sacred Valley | UNLOCKCUSCO',
     description: isEs 
       ? 'Descubre restaurantes, hoteles, spas y aventuras en Cusco, Urubamba, Pisac, Ollantaytambo y Machu Picchu. Planificación de viajes con IA.'
       : 'Discover restaurants, hotels, spas, and adventures in Cusco, Urubamba, Pisac, Ollantaytambo and Machu Picchu. AI-powered trip planning.',
@@ -25,7 +25,7 @@ export async function generateMetadata({
       }
     },
     openGraph: {
-      title: isEs ? 'Explorar el Valle Sagrado — VALLECITO' : 'Explore the Sacred Valley — VALLECITO',
+      title: isEs ? 'Explorar el Valle Sagrado — UNLOCKCUSCO' : 'Explore the Sacred Valley — UNLOCKCUSCO',
       description: isEs
         ? 'Encuentra y reserva experiencias locales verificadas en el Valle Sagrado de los Incas. El conserje con IA te ayuda a planear el día perfecto.'
         : 'Find and book verified local experiences in the Sacred Valley of the Incas. AI concierge helps you plan the perfect day.',
@@ -34,7 +34,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: isEs ? 'Explorar el Valle Sagrado — VALLECITO' : 'Explore the Sacred Valley — VALLECITO',
+      title: isEs ? 'Explorar el Valle Sagrado — UNLOCKCUSCO' : 'Explore the Sacred Valley — UNLOCKCUSCO',
       description: isEs 
         ? 'Descubrimiento impulsado por IA de restaurantes, hoteles y aventuras en Cusco y el Valle Sagrado.'
         : 'AI-powered discovery of restaurants, hotels, adventures in Cusco & Sacred Valley.',
@@ -51,7 +51,7 @@ export default function ExploreLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "Explore the Sacred Valley | VALLECITO",
+    "name": "Explore the Sacred Valley | UNLOCKCUSCO",
     "description": "Discover restaurants, hotels, spas, and adventures in Cusco, Urubamba, Pisac, Ollantaytambo and Machu Picchu. AI-powered trip planning.",
     "url": `${siteConfig.url}/explore`,
   };

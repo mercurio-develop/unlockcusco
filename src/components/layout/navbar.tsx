@@ -34,7 +34,7 @@ export function Navbar({ dict }: { dict?: any }) {
   // Use dict or fallback to English if not provided (e.g. some client route issue)
   const t = dict || {
     towns: "Towns",
-    howToUse: "How to use Vallecito",
+    howToUse: "How to use UnlockCusco",
     quickGuide: "Quick guide to planning your perfect Sacred Valley trip.",
     mapIconTitle: "Map Icon (Towns & Filters)",
     mapIconDesc: "Use the unified filter in the top left of the map to select specific towns (like Pisac or Ollantaytambo) and filter by categories (Dining, Stays, Wellness, etc.).",
@@ -96,7 +96,7 @@ export function Navbar({ dict }: { dict?: any }) {
         <Link href={langPrefix} className="flex items-center gap-2 group shrink-0">
           <Bot className="w-4 h-4 text-rose-600" />
           <span className="text-slate-900 font-bold text-sm tracking-wide">
-            Vallecito
+            UnlockCusco
           </span>
         </Link>
 

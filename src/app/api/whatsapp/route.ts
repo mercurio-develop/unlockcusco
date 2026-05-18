@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidateTag } from 'next/cache';
 import { ghostPhoneFetch, GHOST_PHONE_SECRET } from '@/lib/config/services';
 
-const TRIGGER_WORDS = ['VERIFICA', 'VERIFY', 'VALLECITO', 'VALLE', 'SI', 'SÍ', 'YES', 'OK', '1'];
+const TRIGGER_WORDS = ['VERIFICA', 'VERIFY', 'UNLOCKCUSCO', 'VALLE', 'SI', 'SÍ', 'YES', 'OK', '1'];
 
 async function sendWA(phone: string, message: string) {
   try {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
           data: { lat: parseFloat(body.latitude), lng: parseFloat(body.longitude) }
         });
         ;(revalidateTag as (t: string) => void)('businesses');
-        await sendWA(rawPhone, `📍 ¡Ubicación actualizada! Tu pin en el mapa de Vallecito ya refleja tu posición real. / Location updated on the Vallecito map!`);
+        await sendWA(rawPhone, `📍 ¡Ubicación actualizada! Tu pin en el mapa de UnlockCusco ya refleja tu posición real. / Location updated on the UnlockCusco map!`);
       }
       return NextResponse.json({ ok: true });
     }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     // Already verified — just send a reminder
     if (business.isClaimed) {
       const exploreUrl = buildExploreUrl(business);
-      await sendWA(rawPhone, `✅ ${business.name} ya está verificado en Vallecito. Los turistas pueden contactarte directamente.\n\n👉 Tu perfil: ${exploreUrl}`);
+      await sendWA(rawPhone, `✅ ${business.name} ya está verificado en UnlockCusco. Los turistas pueden contactarte directamente.\n\n👉 Tu perfil: ${exploreUrl}`);
       return NextResponse.json({ ok: true, alreadyVerified: true });
     }
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const exploreUrl = buildExploreUrl(business);
     await sendWA(rawPhone,
-      `✅ ¡Verificado, ${business.name}! Ahora los turistas pueden contactarte directamente por WhatsApp en Vallecito.\n\n👉 Ve tu negocio en el mapa:\n${exploreUrl}\n\n📍 ¿Quieres mejorar tu ubicación en el mapa? Comparte tu *ubicación de WhatsApp* respondiendo con tu pin GPS.\n\n---\nVerified! Tourists can now contact you directly. View your listing: ${exploreUrl}`
+      `✅ ¡Verificado, ${business.name}! Ahora los turistas pueden contactarte directamente por WhatsApp en UnlockCusco.\n\n👉 Ve tu negocio en el mapa:\n${exploreUrl}\n\n📍 ¿Quieres mejorar tu ubicación en el mapa? Comparte tu *ubicación de WhatsApp* respondiendo con tu pin GPS.\n\n---\nVerified! Tourists can now contact you directly. View your listing: ${exploreUrl}`
     );
 
     return NextResponse.json({ ok: true, verified: business.name });
@@ -76,5 +76,5 @@ export async function POST(req: NextRequest) {
 function buildExploreUrl(business: { name: string; locationSlug: string | null; category: string }) {
   const loc = business.locationSlug || 'urubamba';
   const cat = (business.category || 'culture').toLowerCase();
-  return `https://vallecito.app/explore/${loc}/${cat}?q=${encodeURIComponent(business.name)}`;
+  return `https://unlockcusco.com/explore/${loc}/${cat}?q=${encodeURIComponent(business.name)}`;
 }

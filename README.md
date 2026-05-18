@@ -1,4 +1,4 @@
-# Vallecito — Sacred Valley Travel Platform
+# UnlockCusco — Sacred Valley Travel Platform
 
 AI-powered travel guide connecting tourists with verified local businesses in the Sacred Valley of the Incas (Cusco region, Peru).
 
@@ -33,7 +33,7 @@ Configure in `.env.local`:
 ```
 GHOST_PHONE_URL=http://localhost:4000
 GHOST_PHONE_SECRET=dev-secret
-INCOMING_WEBHOOK_URL=https://vallecito.app/api/whatsapp/
+INCOMING_WEBHOOK_URL=https://unlockcusco.com/api/whatsapp/
 ```
 
 ## AI Concierge

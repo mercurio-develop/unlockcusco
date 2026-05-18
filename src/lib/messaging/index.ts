@@ -48,7 +48,7 @@ export class MessagingService {
 
   async askAvailability(payload: AvailabilityPayload, provider: 'twilio' | 'ghost' = 'twilio') {
     if (provider === 'twilio' && this.twilioClient) {
-      const body = `Hello ${payload.vendorName}! 🛎️\n\nVallecito Concierge here. We have a client requesting a booking:\nTime: ${payload.requestedTime || 'As soon as possible'}\nParty Size: ${payload.partySize || '1'}\n\nPlease reply YES to confirm availability or NO if you are full.`;
+      const body = `Hello ${payload.vendorName}! 🛎️\n\nUnlockCusco Concierge here. We have a client requesting a booking:\nTime: ${payload.requestedTime || 'As soon as possible'}\nParty Size: ${payload.partySize || '1'}\n\nPlease reply YES to confirm availability or NO if you are full.`;
       return this.sendMessage({ phone: payload.phone, body }, 'twilio');
     }
 

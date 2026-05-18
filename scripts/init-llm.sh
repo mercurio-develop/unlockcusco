@@ -1,6 +1,6 @@
 #!/bin/bash
 # init-llm.sh
-# Initializes the LLM workspace and autonomous workflow setup for Vallecito
+# Initializes the LLM workspace and autonomous workflow setup for UnlockCusco
 
 echo "Initializing LLM Workspace..."
 

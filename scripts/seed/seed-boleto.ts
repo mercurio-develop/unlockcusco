@@ -171,7 +171,7 @@ async function main() {
         isClaimed: true, // Official government sites
         reviews: {
           create: [
-             { author: "Vallecito", rating: 5, text: "Official site included in the Boleto Turístico." }
+             { author: "UnlockCusco", rating: 5, text: "Official site included in the Boleto Turístico." }
           ]
         }
       }

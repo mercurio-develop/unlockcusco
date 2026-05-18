@@ -129,7 +129,7 @@ export function BusinessCard({
     else if (business.category === 'WELLNESS') contextNote = "ask about a session";
 
     const msg = encodeURIComponent(
-      `Hello ${business.name}! 👋 I saw your profile on VALLECITO and I'd like to ${contextNote}. When do you have availability?`
+      `Hello ${business.name}! 👋 I saw your profile on UNLOCKCUSCO and I'd like to ${contextNote}. When do you have availability?`
     )
     window.open(`https://wa.me/51${business.whatsapp.replace(/\\D/g, '')}?text=${msg}`, "_blank")
   }

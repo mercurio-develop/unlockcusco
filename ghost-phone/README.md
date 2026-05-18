@@ -38,6 +38,6 @@ Send a POST request from the Next.js backend (e.g., when a user pays for a Taxi 
 ```json
 {
   "phone": "51987654321",
-  "message": "Hello! A tourist just booked a taxi via Vallecito. Pickup: Pisac, Dropoff: Urubamba."
+  "message": "Hello! A tourist just booked a taxi via UnlockCusco. Pickup: Pisac, Dropoff: Urubamba."
 }
 ```

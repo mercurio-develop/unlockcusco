@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-Vallecito uses WhatsApp as the primary contact channel between tourists and local businesses. The system has two layers:
+UnlockCusco uses WhatsApp as the primary contact channel between tourists and local businesses. The system has two layers:
 
 1. **Ghost Phone** — a local microservice (`ghost-phone/`) that manages a WhatsApp Web session for outbound messaging and receiving replies
 2. **Twilio** — cloud-based WA Business API for production reliability
@@ -33,7 +33,7 @@ Incoming webhook → POST to INCOMING_WEBHOOK_URL (configured in ghost-phone .en
 # ghost-phone/.env
 PORT=4000
 GHOST_PHONE_SECRET=dev-secret
-INCOMING_WEBHOOK_URL=https://vallecito.app/api/whatsapp/
+INCOMING_WEBHOOK_URL=https://unlockcusco.com/api/whatsapp/
 ```
 
 ---
@@ -93,7 +93,7 @@ Follow these exact steps to run the campaign safely:
 ## Incoming Webhook — `/api/whatsapp/`
 
 **File:** `src/app/api/whatsapp/route.ts`  
-**URL:** `POST https://vallecito.app/api/whatsapp/`
+**URL:** `POST https://unlockcusco.com/api/whatsapp/`
 
 ### Logic
 
@@ -107,14 +107,14 @@ Is it a GPS location? (body.latitude && body.longitude)
 
 Is it a text message?
   → Strip country code from phone: "51XXXXXXXXX" → "XXXXXXXXX"
-  → Does text contain trigger word? [VERIFICA, VERIFY, VALLECITO, VALLE, SI, YES, OK, 1]
+  → Does text contain trigger word? [VERIFICA, VERIFY, UNLOCKCUSCO, VALLE, SI, YES, OK, 1]
     → No: ignore
     → Yes: find business by whatsapp field
       → Already claimed: send reminder with profile link
       → Not claimed: set isClaimed=true, revalidateTag('businesses')
         → Send confirmation message with:
           - "¡Verificado!" message
-          - Link: vallecito.app/explore/{locationSlug}/{category}?q={name}
+          - Link: unlockcusco.com/explore/{locationSlug}/{category}?q={name}
           - Request to share GPS location for map accuracy
 ```
 
@@ -146,7 +146,7 @@ business.isClaimed && business.whatsapp
 
 ## B2B Invitation Campaign (separate)
 
-`scripts/campaign-invite.ts` — invites unclaimed businesses to join Vallecito platform.
+`scripts/campaign-invite.ts` — invites unclaimed businesses to join UnlockCusco platform.
 
 - Target: `isClaimed: false && whatsapp: not null`
 - Reply trigger: "VALLE" → sends activation link

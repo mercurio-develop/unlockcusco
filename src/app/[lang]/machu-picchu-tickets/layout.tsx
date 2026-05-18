@@ -10,7 +10,7 @@ export async function generateMetadata({
   const isEs = lang === 'es';
 
   return {
-    title: isEs ? "Disponibilidad de Boletos a Machu Picchu y Trenes | VALLECITO" : "Machu Picchu Tickets & Trains Availability | VALLECITO",
+    title: isEs ? "Disponibilidad de Boletos a Machu Picchu y Trenes | UNLOCKCUSCO" : "Machu Picchu Tickets & Trains Availability | UNLOCKCUSCO",
     description: isEs 
       ? "Consulta la disponibilidad en vivo para los boletos de ingreso a la Llaqta de Machu Picchu y trenes desde Ollantaytambo. Entradas oficiales, sin recargos."
       : "Check live availability for Machu Picchu Llaqta entrance tickets and trains from Ollantaytambo. Official tickets, no markups.",

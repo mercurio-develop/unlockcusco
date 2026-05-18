@@ -112,7 +112,7 @@ mkdir -p $(dirname "scripts/init-llm.sh")
 cat << 'ORQO_EOF' > "scripts/init-llm.sh"
 #!/bin/bash
 # init-llm.sh
-# Initializes the LLM workspace and autonomous workflow setup for Vallecito
+# Initializes the LLM workspace and autonomous workflow setup for UnlockCusco
 
 echo "Initializing LLM Workspace..."
 

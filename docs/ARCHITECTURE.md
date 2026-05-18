@@ -1,8 +1,8 @@
-# Vallecito — System Architecture
+# UnlockCusco — System Architecture
 
-## What is Vallecito?
+## What is UnlockCusco?
 
-Vallecito is a travel platform for the Sacred Valley of the Incas (Cusco region, Peru). It connects tourists with verified local businesses — restaurants, hotels, spas, adventure tours, taxi drivers — via AI-assisted trip planning and direct WhatsApp contact.
+UnlockCusco is a travel platform for the Sacred Valley of the Incas (Cusco region, Peru). It connects tourists with verified local businesses — restaurants, hotels, spas, adventure tours, taxi drivers — via AI-assisted trip planning and direct WhatsApp contact.
 
 ---
 

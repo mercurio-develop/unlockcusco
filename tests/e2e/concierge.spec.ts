@@ -24,7 +24,7 @@ test.describe('AI Concierge Execution Tests', () => {
     
     // Verify chat response does not contain explicit "I've added these..." without tool
     // We can't strictly assert LLM text output easily, but we can verify the UI didn't crash
-    await expect(page.locator('text=Vallecito').first()).toBeVisible();
+    await expect(page.locator('text=UnlockCusco').first()).toBeVisible();
   });
 
   test('AI should use mutateItinerary for swap actions', async ({ page }) => {
@@ -37,6 +37,6 @@ test.describe('AI Concierge Execution Tests', () => {
 
     // Verify system remains stable and tool handles it gracefully
     await page.waitForTimeout(3000);
-    await expect(page.locator('text=Vallecito').first()).toBeVisible();
+    await expect(page.locator('text=UnlockCusco').first()).toBeVisible();
   });
 });

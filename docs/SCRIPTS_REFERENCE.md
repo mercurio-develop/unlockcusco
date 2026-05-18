@@ -74,7 +74,7 @@ node_modules/.bin/tsx scripts/analytics-whatsapp.ts
 node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts --dry-run
 node_modules/.bin/tsx scripts/verify-whatsapp-campaign.ts
 
-# B2B invitation campaign (join Vallecito)
+# B2B invitation campaign (join UnlockCusco)
 node_modules/.bin/tsx scripts/campaign-invite.ts
 ```
 

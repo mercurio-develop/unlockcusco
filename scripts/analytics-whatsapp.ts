@@ -1,5 +1,5 @@
 /**
- * VALLECITO WHATSAPP ANALYTICS
+ * UNLOCKCUSCO WHATSAPP ANALYTICS
  * Run: node_modules/.bin/tsx scripts/analytics-whatsapp.ts
  */
 import { PrismaClient } from '@prisma/client';

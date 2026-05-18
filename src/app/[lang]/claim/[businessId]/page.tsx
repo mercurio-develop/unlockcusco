@@ -21,11 +21,11 @@ export async function generateMetadata({ params }: ClaimPageProps): Promise<Meta
   })
 
   if (!business) {
-    return { title: 'Claim Profile | Vallecito' }
+    return { title: 'Claim Profile | UnlockCusco' }
   }
 
-  const title = `Claim your profile: ${business.name} | Vallecito`
-  const description = `Claim ${business.name} on Vallecito to receive direct reservations and leads without commissions.`
+  const title = `Claim your profile: ${business.name} | UnlockCusco`
+  const description = `Claim ${business.name} on UnlockCusco to receive direct reservations and leads without commissions.`
 
   return {
     title,
@@ -112,7 +112,7 @@ export default async function ClaimPage({ params }: ClaimPageProps) {
                 Stop losing high-value clients in the Sacred Valley.
               </h1>
               <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-                VALLECITO connects international tourists with local experts. Claim your profile for <span className="text-slate-900 font-bold underline decoration-rose-600">FREE</span> to unlock hidden contact details and activate direct WhatsApp booking.
+                UNLOCKCUSCO connects international tourists with local experts. Claim your profile for <span className="text-slate-900 font-bold underline decoration-rose-600">FREE</span> to unlock hidden contact details and activate direct WhatsApp booking.
               </p>
             </div>
 

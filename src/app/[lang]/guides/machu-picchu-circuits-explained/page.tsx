@@ -67,11 +67,11 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
             "headline": isEs ? "Circuitos de Machu Picchu Explicados (Guía 2026)" : metadata.title,
             "description": isEs ? content.desc : metadata.description,
             "image": "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
-            "author": { "@type": "Organization", "name": "Vallecito" },
+            "author": { "@type": "Organization", "name": "UnlockCusco" },
             "publisher": {
               "@type": "Organization",
-              "name": "Vallecito",
-              "logo": { "@type": "ImageObject", "url": "https://vallecito.app/icon.svg" }
+              "name": "UnlockCusco",
+              "logo": { "@type": "ImageObject", "url": "https://unlockcusco.com/icon.svg" }
             },
             "datePublished": "2026-05-15",
           })

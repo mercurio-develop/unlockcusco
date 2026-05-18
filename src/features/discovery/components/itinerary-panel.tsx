@@ -209,7 +209,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
         </div>
         <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">Your Route is Empty</h3>
         <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-          Ask the Vallecito Concierge to &quot;plan a full day itinerary&quot; to see your route magically appear here.
+          Ask the UnlockCusco Concierge to &quot;plan a full day itinerary&quot; to see your route magically appear here.
         </p>
         <button
           onClick={() => setPanelMode("discover")}

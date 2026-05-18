@@ -15,7 +15,7 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
     desc: "Perú es reconocido a nivel mundial como una potencia culinaria. Si bien Lima recibe la mayor parte de la atención, los Andes ofrecen increíbles experiencias de la granja a la mesa, menús de degustación de altura y clásicos locales reconfortantes.",
     viewMap: "Ver en Mapa",
     viewMapDesc: "Hemos guardado estos 7 restaurantes en un mapa listo para usar. Haz clic abajo para ver sus ubicaciones exactas y obtener detalles de contacto.",
-    openRoute: "Abrir Ruta en Vallecito",
+    openRoute: "Abrir Ruta en UnlockCusco",
     h2_1: "1. MIL Centro (Moray)",
     p1_1: "Creado por Virgilio Martínez (de Central en Lima), MIL se encuentra justo encima de las ruinas de Moray. Es una experiencia inmersiva con un menú de degustación de 8 platos de altura que destaca los ingredientes de diferentes elevaciones andinas.",
     h2_2: "2. Chicha por Gastón Acurio (Cusco)",
@@ -35,7 +35,7 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
     desc: "Peru is recognized globally as a culinary powerhouse. While Lima gets most of the spotlight, the Andes offer incredible farm-to-table experiences, high-altitude tasting menus, and comforting local classics.",
     viewMap: "View on Map",
     viewMapDesc: "We've saved all 7 of these restaurants into a ready-to-use map. Click below to see their exact locations and get contact details.",
-    openRoute: "Open Route in Vallecito",
+    openRoute: "Open Route in UnlockCusco",
     h2_1: "1. MIL Centro (Moray)",
     p1_1: "Created by Virgilio Martínez (of Central in Lima), MIL sits right above the Moray ruins. It's an immersive, 8-course high-altitude tasting menu that highlights ingredients from different Andean elevations.",
     h2_2: "2. Chicha por Gastón Acurio (Cusco)",
@@ -63,11 +63,11 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
             "headline": isEs ? "Los 7 Mejores Restaurantes en Cusco y el Valle Sagrado" : metadata.title,
             "description": isEs ? content.desc : metadata.description,
             "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop",
-            "author": { "@type": "Organization", "name": "Vallecito" },
+            "author": { "@type": "Organization", "name": "UnlockCusco" },
             "publisher": {
               "@type": "Organization",
-              "name": "Vallecito",
-              "logo": { "@type": "ImageObject", "url": "https://vallecito.app/icon.svg" }
+              "name": "UnlockCusco",
+              "logo": { "@type": "ImageObject", "url": "https://unlockcusco.com/icon.svg" }
             },
             "datePublished": "2026-05-15",
           })

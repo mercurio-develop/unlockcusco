@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Vallecito AI Concierge is a chat widget powered by Gemini 2.5 Flash via AI SDK v6. It helps tourists plan their Sacred Valley itinerary through conversational AI, supporting restaurant discovery, taxi booking, full-day itinerary building, and live day view updates.
+The UnlockCusco AI Concierge is a chat widget powered by Gemini 2.5 Flash via AI SDK v6. It helps tourists plan their Sacred Valley itinerary through conversational AI, supporting restaurant discovery, taxi booking, full-day itinerary building, and live day view updates.
 
 ---
 

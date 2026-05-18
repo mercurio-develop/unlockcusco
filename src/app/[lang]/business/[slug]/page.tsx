@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   })
 
   if (!business) {
-    return { title: 'Not Found | Vallecito' }
+    return { title: 'Not Found | UnlockCusco' }
   }
 
   const isEs = lang === 'es'
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
       title,
       description,
       url: `${siteConfig.url}/${lang}/business/${business.slug}`,
-      siteName: "Vallecito",
+      siteName: "UnlockCusco",
       images: [
         {
           url: ogImage,
@@ -178,8 +178,8 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   // Format WhatsApp message
   const whatsappMsg = encodeURIComponent(
     isEs 
-      ? `¡Hola ${business.name}! 👋 Vi su perfil en Vallecito y me gustaría hacer una reserva. ¿Cuándo tienen disponibilidad?`
-      : `Hello ${business.name}! 👋 I saw your profile on Vallecito and I'd like to make a reservation. When do you have availability?`
+      ? `¡Hola ${business.name}! 👋 Vi su perfil en UnlockCusco y me gustaría hacer una reserva. ¿Cuándo tienen disponibilidad?`
+      : `Hello ${business.name}! 👋 I saw your profile on UnlockCusco and I'd like to make a reservation. When do you have availability?`
   )
 
   const isAsociado = business.isAsociado || false
@@ -252,7 +252,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       },
       "author": {
         "@type": "Person",
-        "name": review.author || "Vallecito User"
+        "name": review.author || "UnlockCusco User"
       },
       "reviewBody": review.text,
       "datePublished": new Date().toISOString().split('T')[0]
@@ -478,7 +478,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                 ) : (
                   <div className="space-y-4">
                     <a
-                      href={`https://wa.me/51940989011?text=${encodeURIComponent(isEs ? `Hola Vallecito Concierge, me gustaría consultar la disponibilidad de ${business.name}.` : `Hello Vallecito Concierge, I'd like to check availability for ${business.name}.`)}`}
+                      href={`https://wa.me/51940989011?text=${encodeURIComponent(isEs ? `Hola UnlockCusco Concierge, me gustaría consultar la disponibilidad de ${business.name}.` : `Hello UnlockCusco Concierge, I'd like to check availability for ${business.name}.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"

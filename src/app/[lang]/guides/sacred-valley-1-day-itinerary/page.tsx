@@ -16,7 +16,7 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
     desc: "Si solo tienes un día para explorar el Valle Sagrado antes de tomar el tren a Machu Picchu, debes ser estratégico. Esta ruta clásica visita los lugares imprescindibles sin que te sientas demasiado apresurado.",
     interactiveMap: "Mapa de Ruta Interactivo",
     interactiveMapDesc: "No solo leas al respecto. Carga esta misma ruta en nuestro mapa interactivo, ajusta las paradas y conéctate con conductores.",
-    openInMap: "Abrir en Mapa de Vallecito",
+    openInMap: "Abrir en Mapa de UnlockCusco",
     h2_1: "Mañana: Las Alpacas y Pisac",
     p1_1: "Comienza tu día temprano saliendo de Cusco. Tu primera parada debería ser <strong>Awana Kancha</strong>, un hermoso santuario donde puedes conocer llamas, alpacas y vicuñas, y aprender sobre técnicas de tejido tradicionales.",
     p1_2: "Continúa bajando hacia el valle hasta el pueblo de <strong>Pisac</strong>. Si es domingo, martes o jueves, el famoso mercado artesanal estará en pleno apogeo. No olvides subir la montaña en auto para ver las impresionantes <strong>Ruinas de Pisac</strong>—algunas de las terrazas agrícolas más impresionantes de todo el imperio Inca.",
@@ -31,7 +31,7 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
     desc: "If you only have one day to explore the Sacred Valley before catching your train to Machu Picchu, you need to be strategic. This classic route hits the absolute must-see highlights without feeling too rushed.",
     interactiveMap: "Interactive Route Map",
     interactiveMapDesc: "Don't just read about it. Load this exact route into our interactive map, adjust the stops, and connect with drivers.",
-    openInMap: "Open in Vallecito Map",
+    openInMap: "Open in UnlockCusco Map",
     h2_1: "Morning: The Alpacas and Pisac",
     p1_1: "Start your day early leaving Cusco. Your first stop should be <strong>Awana Kancha</strong>, a beautiful sanctuary where you can meet llamas, alpacas, and vicuñas, and learn about traditional weaving techniques.",
     p1_2: "Continue down into the valley to the town of <strong>Pisac</strong>. If it's a Sunday, Tuesday, or Thursday, the famous artisan market will be in full swing. Don't forget to drive up the mountain to see the breathtaking <strong>Pisac Ruins</strong>—some of the most impressive agricultural terraces in the entire Inca empire.",
@@ -56,14 +56,14 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
             "image": "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
             "author": {
               "@type": "Organization",
-              "name": "Vallecito"
+              "name": "UnlockCusco"
             },
             "publisher": {
               "@type": "Organization",
-              "name": "Vallecito",
+              "name": "UnlockCusco",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://vallecito.app/icon.svg"
+                "url": "https://unlockcusco.com/icon.svg"
               }
             },
             "datePublished": "2026-05-15",

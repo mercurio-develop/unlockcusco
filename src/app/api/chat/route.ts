@@ -18,7 +18,7 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
       redis: Redis.fromEnv(),
       limiter: Ratelimit.slidingWindow(10, "1h"),
       analytics: true,
-      prefix: "@upstash/ratelimit/vallecito-chat",
+      prefix: "@upstash/ratelimit/unlockcusco-chat",
     })
   : null;
 

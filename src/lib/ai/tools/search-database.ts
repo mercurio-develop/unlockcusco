@@ -66,7 +66,7 @@ export const searchDatabase = tool({
     }
 
     // Cache key based on basic parameters (we don't cache fuzzy keyword expansions to allow for varied results)
-    const cacheKey = `vallecito:search:v8:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
+    const cacheKey = `unlockcusco:search:v8:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
     
     const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
       ? Redis.fromEnv()
@@ -167,7 +167,7 @@ export const searchDatabase = tool({
         descriptionEs: b.descriptionEs,
         imageUrl: b.imageUrl,
         slug: b.slug,
-        recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
+        recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
       }));
     }
     
@@ -188,7 +188,7 @@ export const searchDatabase = tool({
       descriptionEs: b.descriptionEs,
       imageUrl: b.imageUrl,
       slug: b.slug,
-      recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
+      recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
     }));
   }
 } as any);

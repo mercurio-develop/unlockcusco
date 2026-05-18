@@ -53,7 +53,7 @@ async function main() {
       const { output } = await generateText({
         model: google('gemini-2.5-pro'),
         output: Output.object({ schema: enrichmentSchema }),
-        prompt: `You are an expert travel writer for Vallecito, an upscale local business directory in the Sacred Valley of Peru.
+        prompt: `You are an expert travel writer for UnlockCusco, an upscale local business directory in the Sacred Valley of Peru.
 Write a compelling, evocative Zagat-style description and 3 realistic guest reviews for the following retreat center.
 
 Business Name: ${business.name}

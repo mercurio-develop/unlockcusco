@@ -1059,7 +1059,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       </Map>
 
       <div className="absolute bottom-1 left-2 z-10 text-[9px] text-slate-400/40 pointer-events-none uppercase tracking-tighter">
-        Vallecito OS × Apple Maps Style
+        UnlockCusco OS × Apple Maps Style
       </div>
 
       {mapClickMode && (

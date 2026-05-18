@@ -10,7 +10,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang } = await params
   const isEs = lang === 'es'
-  const title = isEs ? "Experiencias e Itinerarios en el Valle Sagrado | VALLECITO" : "Sacred Valley Experiences & Itineraries | VALLECITO"
+  const title = isEs ? "Experiencias e Itinerarios en el Valle Sagrado | UNLOCKCUSCO" : "Sacred Valley Experiences & Itineraries | UNLOCKCUSCO"
   const description = isEs 
     ? "Descubre experiencias no listadas, joyas ocultas e itinerarios completamente organizados en el Valle Sagrado, Perú. Reserva directamente sin comisiones." 
     : "Discover unlisted experiences, hidden gems, and fully organized itineraries in the Sacred Valley, Peru. Book directly with no commissions."

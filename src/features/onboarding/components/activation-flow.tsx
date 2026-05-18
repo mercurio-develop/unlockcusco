@@ -143,7 +143,7 @@ export function ActivationFlow({ business }: ActivationFlowProps) {
         </form>
 
         <div className="mt-8 flex flex-col items-center gap-2">
-          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">Zero Commissions • Direct Access • Vallecito</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">Zero Commissions • Direct Access • UnlockCusco</p>
         </div>
       </Card>
     </div>

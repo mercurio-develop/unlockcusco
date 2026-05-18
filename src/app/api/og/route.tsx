@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const title = searchParams.get('title') || 'VALLECITO';
+    const title = searchParams.get('title') || 'UNLOCKCUSCO';
     const description = searchParams.get('description') || 'Discover the Sacred Valley of the Incas';
     const rating = searchParams.get('rating');
     const image = searchParams.get('image');
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
             {/* Logo/Brand */}
             <div style={{ display: 'flex', alignItems: 'center', marginTop: 40, gap: '12px' }}>
               <div style={{ width: 40, height: 40, background: '#e11d48', borderRadius: 20 }} />
-              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.1em' }}>VALLECITO</div>
+              <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.1em' }}>UNLOCKCUSCO</div>
             </div>
           </div>
         </div>

@@ -153,7 +153,7 @@ export function ExploreView({
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-serif tracking-tight text-slate-900">{dict?.explore?.exploreVallecito || "Explore Vallecito"}</h1>
+        <h1 className="text-2xl font-serif tracking-tight text-slate-900">{dict?.explore?.exploreUnlockCusco || "Explore UnlockCusco"}</h1>
       </div>
 
       <div className="hidden md:flex w-full justify-start overflow-x-auto scrollbar-hide gap-2 pb-1 px-0">

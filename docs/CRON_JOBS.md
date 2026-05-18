@@ -1,6 +1,6 @@
 # Vercel Cron Jobs & Data Lifecycle
 
-Vallecito uses Vercel Cron Jobs to automate data lifecycle management and keep the PostgreSQL database performant while minimizing storage costs.
+UnlockCusco uses Vercel Cron Jobs to automate data lifecycle management and keep the PostgreSQL database performant while minimizing storage costs.
 
 ## Current Cron Jobs
 

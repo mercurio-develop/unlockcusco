@@ -20,7 +20,7 @@ export async function generateShadowLead(businessId: string, touristName: string
     throw new Error("WhatsApp number not available for this business")
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vallecito.app";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://unlockcusco.com";
   
   let contextNote = "recommended your business";
   if (business.category === 'DINING') contextNote = "recommended your restaurant/cafe";
@@ -28,7 +28,7 @@ export async function generateShadowLead(businessId: string, touristName: string
   else if (business.category === 'WELLNESS') contextNote = "recommended your wellness services";
   else if (business.category === 'TRANSPORT') contextNote = "recommended your transport services";
 
-  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (VALLECITO) just ${contextNote} to ${touristName} for the date ${date}.\n\nSince your profile is still 'Unverified', the tourist couldn't message you directly. To receive the tourist's contact info and close this sale, click here to activate your free profile: ${baseUrl}/claim/${businessId}`
+  const rawText = `Hello team at ${business.name}! 👋 Our AI assistant (UNLOCKCUSCO) just ${contextNote} to ${touristName} for the date ${date}.\n\nSince your profile is still 'Unverified', the tourist couldn't message you directly. To receive the tourist's contact info and close this sale, click here to activate your free profile: ${baseUrl}/claim/${businessId}`
 
   try {
     await ghostPhoneFetch('/api/message/send', { phone: business.whatsapp, message: rawText });

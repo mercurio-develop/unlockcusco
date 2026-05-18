@@ -1,8 +1,8 @@
 /**
- * VALLECITO B2B CAMPAIGN SCRIPT
+ * UNLOCKCUSCO B2B CAMPAIGN SCRIPT
  * 
  * Purpose: Send mass invitations to local businesses in the Sacred Valley
- * to join the Vallecito platform.
+ * to join the UnlockCusco platform.
  * 
  * Usage: Run locally with access to the Ghost Phone microservice.
  * npx tsx scripts/campaign-invite.ts
@@ -17,7 +17,7 @@ const WEBHOOK_SECRET = 'dev-secret';
 async function sendInvite(phone: string, businessName: string) {
   const message = `Hola ${businessName}! 👋 
   
-Soy del equipo de Vallecito.app. Estamos lanzando la plataforma #1 para conectar turistas con los mejores negocios del Valle Sagrado.
+Soy del equipo de UnlockCusco.com. Estamos lanzando la plataforma #1 para conectar turistas con los mejores negocios del Valle Sagrado.
 
 Hemos pre-registrado tu perfil y queremos invitarte a tomar el control de tus leads directamente por WhatsApp.
 
@@ -41,7 +41,7 @@ Responde con la palabra "VALLE" para recibir tu enlace de activación gratuito. 
 }
 
 async function runCampaign() {
-  console.log("🚀 Starting Vallecito B2B Invitation Campaign...");
+  console.log("🚀 Starting UnlockCusco B2B Invitation Campaign...");
   
   // Fetch all unclaimed businesses with phone numbers
   const businesses = await prisma.business.findMany({

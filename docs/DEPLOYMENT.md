@@ -1,6 +1,6 @@
 # Deployment & Production Setup Guide
 
-This document outlines the steps required to take the Vallecito application from a local Docker environment to a production-ready state using Supabase and Vercel.
+This document outlines the steps required to take the UnlockCusco application from a local Docker environment to a production-ready state using Supabase and Vercel.
 
 ## 1. Database Setup (Supabase)
 
@@ -9,7 +9,7 @@ For production, we use **Supabase** due to its built-in connection pooling, gene
 ### Creating the Project
 1. Create a free account at [Supabase](https://supabase.com/).
 2. Click **New Project** and select your organization.
-3. Name the project (e.g., `vallecito-prod`) and generate a secure database password. Save this password!
+3. Name the project (e.g., `unlockcusco-prod`) and generate a secure database password. Save this password!
 4. Choose a region closest to your Vercel deployment (e.g., `us-east-1`).
 
 ### Getting Connection Strings

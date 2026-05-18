@@ -8,9 +8,9 @@ fi
 echo "Restoring database from prisma/backups/base_save_point.sql..."
 
 # Drop and recreate schema to ensure a clean slate
-docker exec -i vallecito-db psql -U postgres -d vallecito -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+docker exec -i unlockcusco-db psql -U postgres -d unlockcusco -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
 # Import the SQL dump
-cat prisma/backups/base_save_point.sql | docker exec -i vallecito-db psql -U postgres -d vallecito
+cat prisma/backups/base_save_point.sql | docker exec -i unlockcusco-db psql -U postgres -d unlockcusco
 
 echo "Restore complete!"
