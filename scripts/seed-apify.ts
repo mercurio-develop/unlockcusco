@@ -121,27 +121,6 @@ async function main() {
             continue
           }
 
-          // Try Instagram extraction for high-quality authenticated photos
-          try {
-            console.log(`   📸 Searching Instagram for: ${name}`);
-            const igRun = await apifyClient.actor("apify/instagram-scraper").call({
-              search: `${name} peru`,
-              searchType: "hashtag",
-              searchLimit: 1,
-              resultsType: "posts",
-              resultsLimit: 1,
-            });
-            const { items: igItems } = await apifyClient.dataset(igRun.defaultDatasetId).listItems();
-            if (igItems.length > 0 && (igItems[0] as Record<string, unknown>).displayUrl) {
-              imageUrl = (igItems[0] as Record<string, unknown>).displayUrl as string;
-              console.log(`   ✨ Found authentic Instagram image!`);
-            } else {
-              console.log(`   ⚠️ No IG image, using enhanced Google Maps photo.`);
-            }
-          } catch {
-            console.log(`   ⚠️ IG scraper failed, using enhanced Google Maps photo.`);
-          }
-
           const reviewsData = ((item.reviews as Record<string, unknown>[]) || [])
             .filter((r) => r.text && r.stars)
             .slice(0, 5)
