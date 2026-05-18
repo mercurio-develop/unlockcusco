@@ -5,19 +5,13 @@ test.describe('AI Concierge Execution Tests', () => {
     // Navigate to explore page
     await page.goto('/explore');
 
-    // Ensure the chat is open (click the FAB if it's closed)
-    // The exact selector depends on the UI, assuming there's a button with a chat icon or text
-    const chatFab = page.locator('button:has-text("Concierge"), button[title="Concierge"]');
-    if (await chatFab.isVisible()) {
-      await chatFab.click();
-    }
-
     // Wait for chat to load
-    await expect(page.locator('input[placeholder="Describe your ideal day..."]')).toBeVisible();
+    const inputLocator = page.getByPlaceholder(/Describe (your|tu)/i);
+    await expect(inputLocator).toBeVisible();
 
     // Fill the input
-    await page.fill('input[placeholder="Describe your ideal day..."]', 'show me only the restaurants in the map in urubamba');
-    await page.press('input[placeholder="Describe your ideal day..."]', 'Enter');
+    await inputLocator.fill('show me only the restaurants in the map in urubamba');
+    await inputLocator.press('Enter');
 
     // Wait for the AI to process and respond
     // If the prompt is correct, the AI will call searchDatabase which updates the mapSearchResults state
@@ -37,8 +31,9 @@ test.describe('AI Concierge Execution Tests', () => {
     await page.goto('/explore');
 
     // Provide a mocked or seeded itinerary state if possible, or just send the command
-    await page.fill('input[placeholder="Describe your ideal day..."]', 'swap native peruvian restaurant with kampu in urubamba');
-    await page.press('input[placeholder="Describe your ideal day..."]', 'Enter');
+    const inputLocator2 = page.getByPlaceholder(/Describe (your|tu)/i);
+    await inputLocator2.fill('swap native peruvian restaurant with kampu in urubamba');
+    await inputLocator2.press('Enter');
 
     // Verify system remains stable and tool handles it gracefully
     await page.waitForTimeout(3000);

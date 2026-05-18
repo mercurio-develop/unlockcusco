@@ -228,6 +228,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
+  const locale = pathname?.split('/')[1] || 'en'
   const searchParams = useSearchParams()
   const [popupBusiness, setPopupBusiness] = useState<Business | (Partial<Business> & { title?: string, priceTier?: string, rating?: number, description?: string, menuUrl?: string }) | null>(null)
   const [mapMode, setMapMode] = useState<"satellite" | "planning">("satellite")
@@ -1030,11 +1031,11 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   showItineraryEnd={panelMode !== "discover"}
                   onSelect={() => {
                     const slug = (popupBusiness as Business).slug;
-                    if (slug) router.push(`/business/${slug}`);
+                    if (slug) router.push(`/${locale}/business/${slug}`);
                   }}
                   onDoubleClick={() => {
                     const slug = (popupBusiness as Business).slug;
-                    if (slug) router.push(`/business/${slug}`);
+                    if (slug) router.push(`/${locale}/business/${slug}`);
                   }}
                   showMap={false} 
                 />

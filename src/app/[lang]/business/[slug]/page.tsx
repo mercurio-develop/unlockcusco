@@ -546,7 +546,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
       {/* Other Experiences */}
       {otherExperiences.length > 0 && (
-        <div className="max-w-5xl mx-auto px-4 pb-16">
+        <div className="max-w-5xl mx-auto px-4 pb-16 mt-10">
           <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest mb-5">
             {dict.business.otherExperiences} {locationName}
           </h2>

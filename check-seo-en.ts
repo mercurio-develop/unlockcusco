@@ -27,8 +27,10 @@ async function main() {
   
   const filledCount = await prisma.business.count({
     where: {
-      seoMetaTitle: { not: null },
-      seoMetaTitle: { not: "" }
+      NOT: [
+        { seoMetaTitle: null },
+        { seoMetaTitle: "" }
+      ]
     }
   })
   

@@ -483,7 +483,7 @@ export function BusinessCard({
             
             {showDetails && (
               <Link
-                href={`/business/${business.slug}`}
+                href={`/${locale}/business/${business.slug}`}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
                   "flex flex-1 items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",

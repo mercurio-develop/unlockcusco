@@ -10,13 +10,11 @@ import { AlertCircle, CheckCircle2, TrendingUp, Lock, ArrowRight, Star, ShieldCh
 import { siteConfig } from "@/lib/config/site"
 
 interface ClaimPageProps {
-  params: Promise<{ businessId: string }>
+  params: Promise<{ businessId: string; lang: string }>
 }
 
-export const revalidate = 86400; // Cache for 1 day
-
 export async function generateMetadata({ params }: ClaimPageProps): Promise<Metadata> {
-  const { businessId } = await params
+  const { businessId, lang } = await params
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: { name: true, imageUrl: true }
@@ -33,9 +31,16 @@ export async function generateMetadata({ params }: ClaimPageProps): Promise<Meta
     title,
     description,
     alternates: {
-      canonical: `${siteConfig.url}/claim/${businessId}`,
+      canonical: `${siteConfig.url}/${lang}/claim/${businessId}`,
+      languages: {
+        en: `${siteConfig.url}/en/claim/${businessId}`,
+        es: `${siteConfig.url}/es/claim/${businessId}`,
+        'x-default': `${siteConfig.url}/en/claim/${businessId}`,
+      }
     },
     openGraph: {
+      title,
+      description,
       title,
       description,
       url: `${siteConfig.url}/claim/${businessId}`,
