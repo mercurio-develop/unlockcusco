@@ -274,7 +274,7 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
 export async function fetchBusinesses(params: FetchBusinessesParams) {
   const cacheKey = [
     'fetch-businesses',
-    'v4', // cache buster
+    'v7', // cache buster
     params.query || '',
     params.category || '',
     params.loc || '',

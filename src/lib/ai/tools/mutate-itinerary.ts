@@ -13,32 +13,35 @@ function lookupCoords(name: string): { lat: number; lng: number } | null {
   return null;
 }
 
+const payloadSchema = z.object({
+  action: z.enum([
+    'SWAP_STOP', 
+    'SET_START', 
+    'SET_END', 
+    'UPDATE_TIME', 
+    'ADD_WAYPOINT', 
+    'REMOVE_WAYPOINT',
+    'MOVE_WAYPOINT',
+    'CLEAR_START',
+    'CLEAR_END',
+    'SET_TRANSPORT_PROFILE'
+  ]),
+  targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
+  businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
+  resolvedLocation: z.string().optional().describe('The name of a generic location if not a specific business'),
+  coords: z.object({ lat: z.number(), lng: z.number() }).optional().describe('Coordinates for the generic location'),
+  time: z.string().optional().describe('The new time (HH:MM)'),
+  direction: z.enum(['up', 'down']).optional().describe('Direction to move a waypoint'),
+  transportProfile: z.enum(['driving', 'walking']).optional().describe('New transport mode for a leg'),
+  legIndex: z.number().optional().describe('The 0-based index of the route leg to modify transport for')
+});
+
+type Payload = z.infer<typeof payloadSchema>;
+
 export const mutateItinerary = tool({
   description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add/remove stops, reorder waypoints, clear start/end locations, or change transport modes (driving/walking) for specific legs.',
-  parameters: z.object({
-    action: z.enum([
-      'SWAP_STOP', 
-      'SET_START', 
-      'SET_END', 
-      'UPDATE_TIME', 
-      'ADD_WAYPOINT', 
-      'REMOVE_WAYPOINT',
-      'MOVE_WAYPOINT',
-      'CLEAR_START',
-      'CLEAR_END',
-      'SET_TRANSPORT_PROFILE'
-    ]),
-    targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
-    businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
-    resolvedLocation: z.string().optional().describe('The name of a generic location if not a specific business'),
-    coords: z.object({ lat: z.number(), lng: z.number() }).optional().describe('Coordinates for the generic location'),
-    time: z.string().optional().describe('The new time (HH:MM)'),
-    direction: z.enum(['up', 'down']).optional().describe('Direction to move a waypoint'),
-    transportProfile: z.enum(['driving', 'walking']).optional().describe('New transport mode for a leg'),
-    legIndex: z.number().optional().describe('The 0-based index of the route leg to modify transport for')
-  }),
-  // @ts-ignore
-  execute: async (payload: any) => {
+  parameters: payloadSchema,
+  execute: async (payload: Payload) => {
     let resolvedBusiness = null;
     
     if (payload.businessId) {
@@ -75,4 +78,4 @@ export const mutateItinerary = tool({
       resolvedLocation
     };
   }
-});
+} as any);

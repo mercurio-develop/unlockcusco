@@ -18,7 +18,7 @@ export default function NotFound() {
             Lost in the Valley?
           </h1>
           <p className="text-lg text-slate-600">
-            We couldn't find the page you were looking for. It might have been moved or is currently under construction.
+            We couldn&apos;t find the page you were looking for. It might have been moved or is currently under construction.
           </p>
         </div>
 

@@ -40,18 +40,21 @@ export const BOLETO_DATA = {
   }
 };
 
+const payloadSchema = z.object({
+  circuit: z.enum(["all", "I", "II", "III"]).describe("Which circuit to show information about. 'all' shows the full ticket. I is City Ruins, II is South Valley/Museums, III is Sacred Valley."),
+  message: z.string().describe("A brief conversational message to the user explaining the ticket.")
+});
+
+type Payload = z.infer<typeof payloadSchema>;
+
 export const showBoletoInfo = tool({
   description: "Displays information, prices, and maps for the Boleto Turístico del Cusco (Cusco Tourist Ticket) and its different circuits.",
-  parameters: z.object({
-    circuit: z.enum(["all", "I", "II", "III"]).describe("Which circuit to show information about. 'all' shows the full ticket. I is City Ruins, II is South Valley/Museums, III is Sacred Valley."),
-    message: z.string().describe("A brief conversational message to the user explaining the ticket.")
-  }),
-  // @ts-ignore
-  execute: async ({ circuit, message }) => {
+  parameters: payloadSchema,
+  execute: async ({ circuit, message }: Payload) => {
     return {
       circuit,
       message,
       data: BOLETO_DATA[circuit as keyof typeof BOLETO_DATA]
     };
   }
-});
+} as any);

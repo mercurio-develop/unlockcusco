@@ -112,7 +112,7 @@ async function main() {
   });
 
   for (const b of finalBusinesses) {
-    let reviewsText = b.reviews.map(r => `- ${r.text}`).join('\n');
+    const reviewsText = b.reviews.map(r => `- ${r.text}`).join('\n');
     let prompt = "";
 
     if (!reviewsText || reviewsText.trim().length === 0) {

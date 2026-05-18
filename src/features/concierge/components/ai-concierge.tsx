@@ -46,8 +46,12 @@ export function AiConcierge() {
   const processedPromptsRef = useRef<Set<string>>(new Set())
 
   const sidebarOffset = "0px"
+  
+  const isEs = pathname?.split('/')[1] === 'es'
 
-  const welcomeText = "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Itinerary**: Your personal timeline where we organize your choices into a seamless schedule.\n🤖 **AI Recommendations**: Look for the robot icon on the map or in the discover tab. These identify top recommendations specifically curated for you by the Concierge.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
+  const welcomeText = isEs 
+    ? "Bienvenido a Vallecito. ✨ Soy tu guía local en el Valle Sagrado.\n\nPuedo ayudarte a planear un día perfecto. **Esto es lo que puedo hacer por ti:**\n• **Crear y Modificar Itinerarios:** Puedo armar un plan de día completo, o hacer ajustes específicos a tu ruta actual.\n• **Control del Itinerario:** Pídeme que establezca tus lugares de inicio o fin, cambie experiencias que no te gusten, reordene paradas, o las elimine por completo.\n• **Encontrar Joyas Ocultas:** Recomendar los mejores restaurantes locales, hospedajes y actividades.\n• **Manejar Logística:** Estimar tarifas de taxi, revisar info del Boleto Turístico, y responder preguntas locales.\n\nAquí tienes cómo navegar:\n🔍 **Descubrir**: Explora experiencias locales usando los filtros de arriba.\n📅 **Itinerario**: Tu línea de tiempo personal donde organizamos tus opciones en un horario perfecto.\n🤖 **Recomendaciones de IA**: Busca el ícono del robot en el mapa o en la pestaña de descubrir. Estos identifican las mejores recomendaciones curadas específicamente para ti por el Concierge.\n✨ **Personalizar**: Usa el ícono de ajustes ([[SETTINGS_ICON]]) en el menú superior para establecer tu estilo de viaje e intensidad para mejores recomendaciones.\n\nEstoy listo cuando tú lo estés. Dime, ¿qué tienes en mente para la aventura de hoy?"
+    : "Welcome to Vallecito. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Itinerary**: Your personal timeline where we organize your choices into a seamless schedule.\n🤖 **AI Recommendations**: Look for the robot icon on the map or in the discover tab. These identify top recommendations specifically curated for you by the Concierge.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
   const initialMessages: any[] = useMemo(() => [
     {
       id: "1",
@@ -67,8 +71,8 @@ export function AiConcierge() {
     body: {
       userLat: userCoords?.lat,
       userLng: userCoords?.lng,
-      localTime: new Date().toLocaleTimeString(),
-      targetDate: targetDate?.toLocaleDateString() || 'today',
+      // localTime and targetDate are now passed dynamically during sendMessage 
+      // to avoid Next.js hydration mismatches from Date.now() on SSR vs Client
       archetype: travelVibe,
       intensity: travelIntensity,
       itineraryState: activeItinerary ? JSON.stringify({
@@ -359,7 +363,7 @@ Please generate my macro trip plan.`;
     }
   }, [searchParams, travelVibe, travelIntensity, pathname, router, targetDate, sendMessage, setIsChatOpen]);
 
-  if (pathname !== "/explore" && !pathname?.startsWith('/pro')) {
+  if (!pathname?.includes("/explore") && !pathname?.includes("/pro")) {
     return null;
   }
 
@@ -626,26 +630,26 @@ Please generate my macro trip plan.`;
               <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide bg-white shrink-0">
                 {(
                   travelVibe === 'Explorer' ? [
-                    { label: "Best hikes near me", icon: "🥾", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
-                    { label: "Off-the-beaten-path ruins", icon: "🏺", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
-                    { label: "Market day schedule", icon: "🧶", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
-                    { label: "I need a Taxi", icon: "🚕", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" }
+                    { label: isEs ? "Mejores caminatas cerca" : "Best hikes near me", icon: "🥾", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: isEs ? "Ruinas poco conocidas" : "Off-the-beaten-path ruins", icon: "🏺", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+                    { label: isEs ? "Días de mercado local" : "Market day schedule", icon: "🧶", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: isEs ? "Necesito un Taxi" : "I need a Taxi", icon: "🚕", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" }
                   ] : travelVibe === 'Foodie' ? [
-                    { label: "Best local ceviche", icon: "🐟", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
-                    { label: "Farm-to-table dining", icon: "🌽", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
-                    { label: "Pisco tasting spots", icon: "🍸", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
-                    { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" }
+                    { label: isEs ? "Mejor ceviche local" : "Best local ceviche", icon: "🐟", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: isEs ? "Comida de la granja a la mesa" : "Farm-to-table dining", icon: "🌽", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: isEs ? "Lugares para probar Pisco" : "Pisco tasting spots", icon: "🍸", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
+                    { label: isEs ? "Necesito un Taxi" : "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" }
                   ] : travelVibe === 'Luxury' ? [
-                    { label: "Best spa in the valley", icon: "💆‍♀️", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
-                    { label: "Hire a private driver", icon: "🚙", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
-                    { label: "Fine dining with views", icon: "🥂", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
-                    { label: "Plan my full day", icon: "🌅", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" }
+                    { label: isEs ? "Mejor spa en el valle" : "Best spa in the valley", icon: "💆‍♀️", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" },
+                    { label: isEs ? "Contratar conductor privado" : "Hire a private driver", icon: "🚙", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                    { label: isEs ? "Alta cocina con vistas" : "Fine dining with views", icon: "🥂", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: isEs ? "Planear mi día completo" : "Plan my full day", icon: "🌅", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" }
                   ] : [
-                    { label: "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
-                    { label: "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
-                    { label: "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
-                    { label: "Local Travel Tips", icon: "💡", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
-                    { label: "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
+                    { label: isEs ? "Planear mi día completo" : "Plan my full day", icon: "🌅", theme: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
+                    { label: isEs ? "Buscar Restaurante" : "Find a Restaurant", icon: "🍽️", theme: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" },
+                    { label: isEs ? "Necesito un Taxi" : "I need a Taxi", icon: "🚕", theme: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
+                    { label: isEs ? "Tips locales" : "Local Travel Tips", icon: "💡", theme: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" },
+                    { label: isEs ? "Buscar un Hotel" : "Find a Hotel", icon: "🏨", theme: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }
                   ]
                 ).map(suggestion => (
                   <button
@@ -663,7 +667,7 @@ Please generate my macro trip plan.`;
               <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 bg-white shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input 
-                    placeholder="Describe your ideal day..." 
+                    placeholder={isEs ? "Describe tu día ideal..." : "Describe your ideal day..."} 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}

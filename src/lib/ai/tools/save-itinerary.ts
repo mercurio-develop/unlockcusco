@@ -1,16 +1,16 @@
-import { tool, jsonSchema } from 'ai';
+import { tool } from 'ai';
+import { z } from 'zod';
+
+const payloadSchema = z.object({
+  itineraryState: z.string().describe("The current itinerary state as a JSON string.")
+});
+
+type Payload = z.infer<typeof payloadSchema>;
 
 export const generateSaveLink = tool({
   description: 'Generates a magic link to save the current itinerary. Call this whenever a user asks you to save the itinerary, save their trip, or give them a link to their route.',
-  parameters: jsonSchema({
-    type: 'object',
-    properties: {
-      itineraryState: { type: 'string', description: "The current itinerary state as a JSON string." }
-    },
-    required: ['itineraryState']
-  }),
-  // @ts-ignore
-  execute: async ({ itineraryState }: any) => {
+  parameters: payloadSchema,
+  execute: async ({ itineraryState }: Payload) => {
     try {
       const stateObj = JSON.parse(itineraryState);
       const host = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -31,4 +31,4 @@ export const generateSaveLink = tool({
       return { success: false, error: 'Internal error generating link' };
     }
   }
-});
+} as any);

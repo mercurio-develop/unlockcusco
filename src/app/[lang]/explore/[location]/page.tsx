@@ -6,6 +6,7 @@ import { siteConfig } from '@/lib/config/site'
 import { SeoDirectory } from '@/components/ui/seo-directory'
 import { InteractiveList } from '@/features/discovery/components/interactive-list'
 import { getCategoryData } from '@/features/discovery/constants'
+import { getDictionary, Locale } from '@/lib/dictionaries'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -41,24 +42,32 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ location: string }>
+  params: Promise<{ location: string, lang: string }>
 }): Promise<Metadata> {
-  const { location } = await params
+  const { location, lang } = await params
   const loc = LOCATION_LABELS[location] ?? location
+  const isEs = lang === 'es'
   
-  const title = `Explore ${loc} — VALLECITO Sacred Valley`
-  const description = `Discover the best experiences, restaurants, hotels, and adventures in ${loc}, Sacred Valley. Book directly with zero commissions.`
+  const title = isEs ? `Explorar ${loc} — VALLECITO Valle Sagrado` : `Explore ${loc} — VALLECITO Sacred Valley`
+  const description = isEs 
+    ? `Descubre las mejores experiencias, restaurantes, hoteles y aventuras en ${loc}, Valle Sagrado. Reserva directamente sin comisiones.`
+    : `Discover the best experiences, restaurants, hotels, and adventures in ${loc}, Sacred Valley. Book directly with zero commissions.`
 
   return {
     title,
     description,
     alternates: {
-      canonical: `${siteConfig.url}/explore/${location}`,
+      canonical: `${siteConfig.url}/${lang}/explore/${location}`,
+      languages: {
+        en: `${siteConfig.url}/en/explore/${location}`,
+        es: `${siteConfig.url}/es/explore/${location}`,
+        'x-default': `${siteConfig.url}/en/explore/${location}`,
+      }
     },
     openGraph: {
       title,
       description,
-      url: `${siteConfig.url}/explore/${location}`,
+      url: `${siteConfig.url}/${lang}/explore/${location}`,
       type: "website",
       images: [
         {
@@ -81,9 +90,10 @@ export async function generateMetadata({
 export default async function LocationPage({
   params,
 }: {
-  params: Promise<{ location: string }>
+  params: Promise<{ location: string, lang: string }>
 }) {
-  const { location } = await params
+  const { location, lang } = await params
+  const dict = await getDictionary(lang as Locale)
 
   const localBusinesses = await prisma.business.findMany({
     where: { locationSlug: location },
@@ -103,14 +113,14 @@ export default async function LocationPage({
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "Explore",
-        "item": "https://vallecito.app/explore"
+        "name": dict.explore.exploreVallecito,
+        "item": `${siteConfig.url}/${lang}/explore`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": loc,
-        "item": `https://vallecito.app/explore/${location}`
+        "item": `${siteConfig.url}/${lang}/explore/${location}`
       }
     ]
   }
@@ -148,17 +158,17 @@ export default async function LocationPage({
       {/* Hero Section */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-12">
-          <Link href="/explore" className="text-slate-500 hover:text-slate-900 text-sm transition-colors mb-6 inline-block">
-            ← Explore The Valley
+          <Link href={`/${lang}/explore`} className="text-slate-500 hover:text-slate-900 text-sm transition-colors mb-6 inline-block">
+            &larr; {dict.explore.exploreTheValley}
           </Link>
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-rose-600 font-bold text-[10px] uppercase tracking-widest">Sacred Valley</span>
+            <span className="text-rose-600 font-bold text-[10px] uppercase tracking-widest">{dict.explore.sacredValley}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight">
-            Explore {loc}
+            {dict.nav.explore} {loc}
           </h1>
           <p className="mt-4 text-slate-600 text-lg font-light max-w-2xl leading-relaxed">
-            Discover unlisted experiences, hidden gems, and fully organized itineraries in {loc}. Book directly with local providers with zero commissions.
+            {dict.explore.locationDesc.replace('{loc}', loc)}
           </p>
           
           {/* Category Filters */}
@@ -170,11 +180,11 @@ export default async function LocationPage({
               return (
                 <Link 
                   key={c.category}
-                  href={`/explore/${location}/${c.category.toLowerCase()}`}
+                  href={`/${lang}/explore/${location}/${c.category.toLowerCase()}`}
                   className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-full text-slate-700 hover:text-slate-900 transition-colors font-medium text-sm shadow-sm"
                 >
                   <Icon className={`w-4 h-4 ${catData.theme.match(/text-\w+-\d+/)?.[0] || 'text-slate-500'}`} />
-                  <span>{catData.label}</span>
+                  <span>{dict.explore.categories[catData.value as keyof typeof dict.explore.categories] || catData.label}</span>
                   <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full ml-1 font-bold">{c.count}</span>
                 </Link>
               )
@@ -185,7 +195,7 @@ export default async function LocationPage({
 
       {/* Interactive List */}
       <div className="max-w-6xl mx-auto px-6 py-12">
-        <InteractiveList locationSlug={location} initialBusinesses={localBusinesses} />
+        <InteractiveList locationSlug={location} initialBusinesses={localBusinesses} dict={dict} />
       </div>
     </div>
   )

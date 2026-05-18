@@ -7,7 +7,7 @@ test.describe('AI Concierge Execution Tests', () => {
 
     // Ensure the chat is open (click the FAB if it's closed)
     // The exact selector depends on the UI, assuming there's a button with a chat icon or text
-    const chatFab = page.locator('button:has-text("Chat"), button[aria-label="Open Concierge"]');
+    const chatFab = page.locator('button:has-text("Concierge"), button[title="Concierge"]');
     if (await chatFab.isVisible()) {
       await chatFab.click();
     }

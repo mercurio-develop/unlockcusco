@@ -1,0 +1,6 @@
+feat(i18n): create scalable localization architecture for database fields and components
+
+- Created getLocalizedField helper to automatically map Es fields based on locale.
+- Refactored BusinessCard, BasicTemplate, and other templates to use the helper instead of manual inline ternary checks.
+- Migrated inline BusinessCard text translations to the central en.json and es.json files for maintainability.
+- Ensured dict and lang are passed correctly down the component tree to avoid hydration issues.

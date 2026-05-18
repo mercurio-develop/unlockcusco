@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { PreferencesProvider } from "@/lib/store/preferences-context";
 import { TripProvider } from "@/lib/store/trip-context";
@@ -11,6 +11,7 @@ import PostHogPageView from "@/components/providers/posthog-pageview";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { getDictionary, Locale } from "@/lib/dictionaries";
 
 import { siteConfig } from "@/lib/config/site";
 
@@ -63,14 +64,20 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+export default async function RootLayout(props: {
   children: React.ReactNode;
-}>) {
+  params: Promise<{ lang: string }>;
+}) {
+  const params = await props.params;
+  const dict = await getDictionary(params.lang as Locale);
+
+  const {
+    children
+  } = props;
+
   return (
     <html
-      lang="en"
+      lang={params.lang}
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
@@ -78,7 +85,7 @@ export default function RootLayout({
           <PostHogPageView />
           <PreferencesProvider>
             <TripProvider>
-              <Navbar />
+              <Navbar dict={dict.navbar} />
               <main className="flex-1 flex flex-col pt-12 bg-white">
                 {children}
               </main>

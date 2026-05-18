@@ -2,6 +2,8 @@ import { tool } from 'ai';
 import { microDaySchema } from '../schemas/planner-schema';
 import { COORDS_MAP } from '@/lib/constants';
 
+import { z } from 'zod';
+
 function lookupCoords(name: string): { lat: number; lng: number } | null {
   if (!name) return null;
   const lower = name.toLowerCase();
@@ -27,13 +29,14 @@ function normalizeAnchor(anchor: any): any {
   return result;
 }
 
+type Payload = z.infer<typeof microDaySchema>;
+
 export const buildItinerary = tool({
   description: `Generates a full daily itinerary using the Journey Skeleton. Use this to plan a specific day with start/end anchors, waypoints, and transit.
 CRITICAL: You MUST include realistic transit edges between every location. Do not invent fake businesses, use places from your searchDatabase results.
 You can include 'pax' (number of passengers) to estimate per-person costs. Ensure totalCost is correctly calculated.`,
   parameters: microDaySchema,
-  // @ts-ignore
-  execute: async (payload: any) => {
+  execute: async (payload: Payload) => {
     payload.startAnchor = normalizeAnchor(payload.startAnchor);
     payload.endAnchor = normalizeAnchor(payload.endAnchor);
     payload.waypoints = (payload.waypoints ?? []).map((wp: any) => {
@@ -49,4 +52,4 @@ You can include 'pax' (number of passengers) to estimate per-person costs. Ensur
     }
     return payload;
   }
-});
+} as any);

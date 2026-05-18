@@ -12,7 +12,9 @@ model Business {
   id                     String                  @id @default(cuid())
   slug                   String                  @unique
   name                   String
+  nameEs                 String?
   category               String                  @default("DINING")
+  categoryEs             String?
   lat                    Float?
   lng                    Float?
   rating                 Float?
@@ -25,7 +27,9 @@ model Business {
   isFeatured             Boolean                 @default(false)
   locationSlug           String                  @default("")
   tagline                String                  @default("")
+  taglineEs              String?
   description            String                  @default("")
+  descriptionEs          String?
   contactEmail           String                  @default("")
   socialLinks            String                  @default("{}")
   instagramHandle        String?
@@ -41,8 +45,11 @@ model Business {
   serviceZones           String                  @default("[]")
   guideName              String?
   seoMetaTitle           String?
+  seoMetaTitleEs         String?
   seoMetaDesc            String?
+  seoMetaDescEs          String?
   specialties            String                  @default("[]")
+  specialtiesEs          String?
   themeConfig            String                  @default("{}")
   featuresJson           String                  @default("[]")
   qrCodeUrl              String?
@@ -54,14 +61,16 @@ model Business {
 }
 
 model BusinessService {
-  id           String   @id @default(cuid())
-  businessId   String
-  title        String
-  description  String
-  priceUsd     Float
-  durationMins Int      @default(60)
-  imageUrl     String?
-  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  businessId    String
+  title         String
+  titleEs       String?
+  description   String
+  descriptionEs String?
+  priceUsd      Float
+  durationMins  Int      @default(60)
+  imageUrl      String?
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
@@ -139,26 +148,34 @@ model BusinessPillar {
   id               String                 @id @default(cuid())
   premiumProfileId String
   title            String
+  titleEs          String?
   description      String
+  descriptionEs    String?
   icon             String?
   premiumProfile   BusinessPremiumProfile @relation(fields: [premiumProfileId], references: [id], onDelete: Cascade)
 }
 
 model TourPackage {
-  id           String   @id @default(cuid())
-  businessId   String
-  title        String
-  tagline      String?
-  description  String
-  durationDays Int?
-  difficulty   String?
-  pace         String?
-  basePriceUsd Float
-  included     String   @default("[]")
-  highlights   String   @default("[]")
-  itinerary    String   @default("[]")
-  gallery      String   @default("[]")
-  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  businessId    String
+  title         String
+  titleEs       String?
+  tagline       String?
+  taglineEs     String?
+  description   String
+  descriptionEs String?
+  durationDays  Int?
+  difficulty    String?
+  pace          String?
+  basePriceUsd  Float
+  included      String   @default("[]")
+  includedEs    String?
+  highlights    String   @default("[]")
+  highlightsEs  String?
+  itinerary     String   @default("[]")
+  itineraryEs   String?
+  gallery       String   @default("[]")
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }
 
 enum RideStatus {
@@ -181,4 +198,3 @@ model SavedItinerary {
   state     Json
   createdAt DateTime @default(now())
 }
-

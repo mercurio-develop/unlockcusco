@@ -7,8 +7,9 @@ import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { useTrip } from "@/lib/store/trip-context"
+import { getDictionary, Locale } from "@/lib/dictionaries"
 
-function ExplorePageContent() {
+function ExplorePageContent({ dict }: { dict: any }) {
   const searchParams = useSearchParams()
   const { activeItinerary, setActiveItinerary, setPanelMode } = useTrip()
   const [data, setData] = useState<{
@@ -72,6 +73,7 @@ function ExplorePageContent() {
         if (lng) params.set("lng", lng)
         if (sort) params.set("sort", sort)
         params.set("limit", "30")
+        params.set("lang", dict?._meta_lang || "en")
 
         const res = await fetch(`/api/businesses?${params.toString()}`, { signal: controller.signal })
         if (!res.ok) {
@@ -108,9 +110,9 @@ function ExplorePageContent() {
   if (error) {
     return (
       <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4 p-8 text-center">
-        <p className="text-rose-600 font-medium">Error loading data</p>
+        <p className="text-rose-600 font-medium">{dict.explore?.errorLoading}</p>
         <p className="text-slate-500">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-md">Retry</button>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-md">{dict.explore?.retry}</button>
       </div>
     )
   }
@@ -120,7 +122,7 @@ function ExplorePageContent() {
       <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
         <p className="text-slate-500 font-medium animate-pulse">
-          Consulting the Valley...
+          {dict.explore?.consulting}
         </p>
       </div>
     )
@@ -140,13 +142,14 @@ function ExplorePageContent() {
           initialHasMore={data.hasMore || false}
           initialQuery={q}
           initialSelectedId={id}
+          dict={dict}
         />
       </div>
       {loading && data && (
         <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
           <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-2xl shadow-xl border border-slate-200 flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
-            <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">Updating...</p>
+            <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">{dict.explore?.updating}</p>
           </div>
         </div>
       )}
@@ -154,16 +157,25 @@ function ExplorePageContent() {
   )
 }
 
-export default function ExplorePage() {
+export default function ExplorePage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = use(params)
+  const [dict, setDict] = useState<any>(null)
+
+  useEffect(() => {
+    getDictionary(lang as Locale).then(d => setDict(d))
+  }, [lang])
+
+  if (!dict) return null
+
   return (
     <div className="relative">
       <Suspense fallback={
         <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />
-          <p className="text-slate-500 font-medium animate-pulse">Building the workspace...</p>
+          <p className="text-slate-500 font-medium animate-pulse">{dict.explore?.building}</p>
         </div>
       }>
-        <ExplorePageContent />
+        <ExplorePageContent dict={dict} />
       </Suspense>
     </div>
   )

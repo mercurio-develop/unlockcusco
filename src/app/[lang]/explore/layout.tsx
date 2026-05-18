@@ -1,4 +1,4 @@
-import { AiConcierge } from "@/features/concierge";
+import { AiConciergeClient } from "@/features/concierge";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config/site";
@@ -44,7 +44,7 @@ export default function ExploreLayout({
       />
       {children}
       <Suspense fallback={null}>
-        <AiConcierge />
+        <AiConciergeClient />
       </Suspense>
     </>
   );

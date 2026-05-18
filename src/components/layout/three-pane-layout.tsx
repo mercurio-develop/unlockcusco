@@ -23,9 +23,10 @@ export function ThreePaneLayout({
   const [leftWidth, setLeftWidth] = useState(40)
   const { mobileViewMode, setMobileViewMode, isChatOpen, setIsChatOpen } = usePreferences()
   const [isDragging, setIsDragging] = useState(false)
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    setIsMobile(window.innerWidth < 768)
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)

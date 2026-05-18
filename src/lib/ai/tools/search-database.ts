@@ -1,4 +1,4 @@
-import { tool, jsonSchema } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { universalSearch } from '@/features/discovery/queries/universal-search';
 import { Redis } from '@upstash/redis';
@@ -25,25 +25,21 @@ const DB_CATEGORY_MAP: Array<[string[], string]> = [
    'agency'],
 ];
 
+const payloadSchema = z.object({
+  query: z.string().optional().describe("Broad fetch or specific name"),
+  searchKeywords: z.array(z.string()).optional().describe("If the user asks for a vibe, concept, or specific item (e.g., 'romantic', 'pizza'), generate 3-5 related literal keywords that might appear in a business description (e.g., 'wine', 'view', 'candlelight', 'pizza', 'italian'). If it's a general request, leave empty or provide basic keywords."),
+  category: z.string().optional().describe("The category to search for, e.g. DINING, STAYS, WELLNESS, TRANSPORT, ADVENTURE, CULTURE, TEXTILES, AGENCY"),
+  location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
+  userLat: z.number().optional(),
+  userLng: z.number().optional()
+});
+
+type Payload = z.infer<typeof payloadSchema>;
+
 export const searchDatabase = tool({
   description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries. Supports Spatial RAG by calculating real-world distances if coordinates are provided.',
-  parameters: jsonSchema({
-    type: 'object',
-    properties: {
-      searchKeywords: { 
-        type: 'array', 
-        items: { type: 'string' },
-        description: "If the user asks for a vibe, concept, or specific item (e.g., 'romantic', 'pizza'), generate 3-5 related literal keywords that might appear in a business description (e.g., 'wine', 'view', 'candlelight', 'pizza', 'italian'). If it's a general request, leave empty or provide basic keywords." 
-      },
-      category: { type: 'string', description: "The category to search for, e.g. DINING, STAYS, WELLNESS, TRANSPORT, ADVENTURE, CULTURE, TEXTILES, AGENCY" },
-      location: { type: 'string', description: "The specific town to search in, e.g. pisac, urubamba" },
-      userLat: { type: 'number' },
-      userLng: { type: 'number' }
-    },
-    required: []
-  }),
-  // @ts-ignore
-  execute: async ({ query, searchKeywords, category, location, userLat, userLng }: any) => {
+  parameters: payloadSchema,
+  execute: async ({ query, searchKeywords, category, location, userLat, userLng }: Payload) => {
     let dbCategory: string | undefined = undefined;
     
     // Normalize location using the fuzzy matcher
@@ -168,6 +164,7 @@ export const searchDatabase = tool({
         whatsapp: b.whatsapp,
         tagline: b.tagline,
         description: b.description,
+        descriptionEs: b.descriptionEs,
         imageUrl: b.imageUrl,
         slug: b.slug,
         recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
@@ -188,9 +185,10 @@ export const searchDatabase = tool({
       locationSlug: b.locationSlug,
       tagline: b.tagline,
       description: b.description,
+      descriptionEs: b.descriptionEs,
       imageUrl: b.imageUrl,
       slug: b.slug,
       recommendationNote: b.isAsociado ? "Vallecito Preferred Partner - Highly Recommended" : undefined
     }));
   }
-});
+} as any);

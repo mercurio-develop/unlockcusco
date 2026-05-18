@@ -4,15 +4,22 @@ import { calculateDistance } from '@/lib/utils/geo';
 import { prisma } from '@/lib/prisma';
 import { COORDS_MAP } from '@/lib/constants';
 
+const payloadSchema = z.object({
+  origin: z.string().optional().default("").describe('The user\'s current location (e.g. Urubamba, Cusco, Pisac, Ollantaytambo). If unknown, default to empty string.'),
+  originLat: z.number().optional().describe('Origin latitude'),
+  originLng: z.number().optional().describe('Origin longitude'),
+  destinationId: z.string().optional().describe('The ID of the business the user wants to go to (if known).'),
+  destinationName: z.string().optional().default("").describe('The exact name of the destination business, OR the name of the town (e.g. Calca, Urubamba).'),
+  destLat: z.number().optional().describe('Destination latitude'),
+  destLng: z.number().optional().describe('Destination longitude'),
+});
+
+type Payload = z.infer<typeof payloadSchema>;
+
 export const estimateTaxiFare = tool({
   description: 'Estimates the taxi fare and travel time from the user\'s current location to a destination business OR a general town in the Sacred Valley. Use this when the user asks for a taxi, transport, or how to get there.',
-  parameters: z.object({
-    origin: z.string().optional().default("").describe('The user\'s current location (e.g. Urubamba, Cusco, Pisac, Ollantaytambo). If unknown, default to empty string.'),
-    destinationId: z.string().optional().describe('The ID of the business the user wants to go to (if known).'),
-    destinationName: z.string().optional().default("").describe('The exact name of the destination business, OR the name of the town (e.g. Calca, Urubamba).'),
-  }),
-  // @ts-ignore
-  execute: async ({ origin, originLat, originLng, destinationId, destinationName, destLat, destLng }) => {
+  parameters: payloadSchema,
+  execute: async ({ origin, originLat, originLng, destinationId, destinationName, destLat, destLng }: Payload) => {
      let dest;
      let dName = destinationName || "";
      let finalDestinationName = dName || "Destination";
@@ -132,5 +139,5 @@ export const estimateTaxiFare = tool({
        } : undefined
      };
   }
-});
+} as any);
 

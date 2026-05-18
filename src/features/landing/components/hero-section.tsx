@@ -1,28 +1,32 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, ChevronDown, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
-export function HeroSection() {
+export function HeroSection({ dict }: { dict: any }) {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const router = useRouter()
+  const pathname = usePathname() || '/'
+  const locale = pathname.split('/')[1] || 'en'
+  const langPrefix = ['en', 'es'].includes(locale) ? `/${locale}` : '/en'
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = (e?: React.FormEvent, directPrompt?: string) => {
     if (e) e.preventDefault()
     const finalQuery = directPrompt || query.trim()
     if (!finalQuery) {
-      router.push("/explore")
+      router.push(`${langPrefix}/explore`)
       return
     }
     setIsSearching(true)
     setTimeout(() => {
-      router.push(`/explore?ai_prompt=${encodeURIComponent(finalQuery)}`)
+      router.push(`${langPrefix}/explore?ai_prompt=${encodeURIComponent(finalQuery)}`)
     }, 400)
   }
 
@@ -43,10 +47,13 @@ export function HeroSection() {
     <div className="min-h-[90vh] w-full relative flex flex-col items-center justify-center overflow-hidden bg-slate-50 pt-12">
       {/* Sacred Valley background — visible but light-theme friendly */}
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=3000&auto=format&fit=crop"
-          className="object-cover object-center w-full h-full"
+          className="object-cover object-center"
           alt="Sacred Valley, Andes Mountains"
+          fill
+          priority
+          sizes="100vw"
         />
       </div>
       {/* Radial white vignette — keeps center text crisp, shows landscape at edges */}
@@ -63,13 +70,13 @@ export function HeroSection() {
       >
 
         <h1 className="text-5xl md:text-6xl lg:text-8xl font-serif tracking-tight text-slate-900 mb-4 md:mb-6 max-w-4xl px-2">
-          Beyond the Map:<br/>
-          <span className="text-3xl md:text-5xl lg:text-7xl block mt-2 text-rose-500">Experience the Sacred Valley</span>
+          {dict.heroTitle1}<br/>
+          <span className="text-3xl md:text-5xl lg:text-7xl block mt-2 text-rose-500">{dict.heroTitle2}</span>
         </h1>
 
         <div className="flex flex-col items-center mb-6 md:mb-8 max-w-3xl">
           <p className="text-sm md:text-xl text-slate-600 font-light leading-relaxed mx-auto px-4">
-            Your intelligent guide to Cusco, the Sacred Valley, and Machu Picchu. Discover incredible places, craft personalized itineraries with our AI Concierge, and connect directly with trusted guides and boutique stays. Experience the heart of the Andes like never before.
+            {dict.heroSubtitle}
           </p>
         </div>
 
@@ -86,7 +93,7 @@ export function HeroSection() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)} // delay to allow click
-              placeholder="e.g., 'Recommend me the best restaurant in the valley'"
+              placeholder={dict.searchPlaceholder}
               className="bg-transparent border-none text-slate-900 focus:outline-none focus:ring-0 w-full px-4 py-3 text-sm md:text-base placeholder:text-gray-400"
             />
             <button
@@ -97,11 +104,11 @@ export function HeroSection() {
               {isSearching ? (
                 <span className="flex items-center gap-2 text-sm">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span className="hidden md:inline">Working...</span>
+                  <span className="hidden md:inline">{dict.working}</span>
                 </span>
               ) : (
                 <span className="flex items-center gap-2 text-sm">
-                  <span className="hidden md:inline">Search</span>
+                  <span className="hidden md:inline">{dict.search}</span>
                   <ArrowRight className="w-4 h-4" />
                 </span>
               )}
@@ -135,21 +142,21 @@ export function HeroSection() {
 
         {/* Popular Itineraries */}
         <div className="mt-8 w-full max-w-4xl px-2">
-          <p className="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3 md:mb-4">Popular Pre-Built Itineraries</p>
+          <p className="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3 md:mb-4">{dict.popularItineraries}</p>
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {[
-              { id: "classic-sacred-valley", title: "Classic Sacred Valley Full Day" },
-              { id: "cusco-city-tour", title: "Cusco City Tour" },
-              { id: "ultimate-inca-ruins", title: "The Ultimate Inca Ruins Tour" },
-              { id: "top-7-culinary-route", title: "7 Best Restaurants Route" },
-              { id: "maras-moray", title: "Maras, Moray & Chinchero" },
-              { id: "artisan-markets", title: "Best Artisan Markets" },
-              { id: "machu-picchu-day", title: "Machu Picchu Complete Day" },
+              { id: "classic-sacred-valley", title: dict.trips.classic },
+              { id: "cusco-city-tour", title: dict.trips.cusco },
+              { id: "ultimate-inca-ruins", title: dict.trips.ruins },
+              { id: "top-7-culinary-route", title: dict.trips.culinary },
+              { id: "maras-moray", title: dict.trips.maras },
+              { id: "artisan-markets", title: dict.trips.artisan },
+              { id: "machu-picchu-day", title: dict.trips.machupicchu },
             ].map(trip => (
               <button
                 key={trip.id}
                 type="button"
-                onClick={() => router.push(`/explore?trip=${trip.id}`)}
+                onClick={() => router.push(`${langPrefix}/explore?trip=${trip.id}`)}
                 className="bg-white border border-rose-200 text-slate-800 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-medium hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition-all shadow-sm flex items-center gap-1.5 md:gap-2"
               >
                 <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
@@ -162,12 +169,12 @@ export function HeroSection() {
         {/* Quick search pills */}
         <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 max-w-4xl px-2">
           {[
-            { icon: <Utensils className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Authentic local dining" },
-            { icon: <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Boutique stays & hotels" },
-            { icon: <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Wellness & Spa retreats" },
-            { icon: <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Spiritual ceremonies" },
-            { icon: <Palette className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Local artisans & crafts" },
-            { icon: <Compass className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: "Cultural tours & guides" },
+            { icon: <Utensils className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.dining },
+            { icon: <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.stays },
+            { icon: <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.wellness },
+            { icon: <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.spiritual },
+            { icon: <Palette className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.artisan },
+            { icon: <Compass className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.tours },
           ].map(({ icon, text }, index) => (
             <button
               key={text}
@@ -179,6 +186,13 @@ export function HeroSection() {
               {icon} <span>{text}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => router.push(`${langPrefix}/guides`)}
+            className="bg-slate-900 backdrop-blur-sm border border-slate-900 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-slate-800 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+          >
+            📚 <span>Read Travel Guides</span>
+          </button>
         </div>
       </motion.div>
     </div>

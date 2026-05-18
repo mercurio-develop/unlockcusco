@@ -598,7 +598,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     if (catValue === "ALL") {
        params.delete("cat");
     } else {
-       let newCats = [...currentCats];
+       const newCats = [...currentCats];
        const normalized = catValue.charAt(0).toUpperCase() + catValue.slice(1).toLowerCase();
        // Check case-insensitively
        const existingIndex = newCats.findIndex(c => c.toLowerCase() === normalized.toLowerCase());
