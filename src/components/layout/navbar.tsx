@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Home, Map, Sparkles, Route, Settings2, MessageSquareText, ChevronDown, HelpCircle, Languages } from "lucide-react"
+import { Compass, Home, Map, Sparkles, Bot, Route, Settings2, MessageSquareText, ChevronDown, HelpCircle, Languages } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -94,7 +94,7 @@ export function Navbar({ dict }: { dict?: any }) {
         
         {/* Brand/Logo */}
         <Link href={langPrefix} className="flex items-center gap-2 group shrink-0">
-          <Sparkles className="w-4 h-4 text-rose-600" />
+          <Bot className="w-4 h-4 text-rose-600" />
           <span className="text-slate-900 font-bold text-sm tracking-wide">
             Vallecito
           </span>
