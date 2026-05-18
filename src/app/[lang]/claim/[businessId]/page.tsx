@@ -41,9 +41,7 @@ export async function generateMetadata({ params }: ClaimPageProps): Promise<Meta
     openGraph: {
       title,
       description,
-      title,
-      description,
-      url: `${siteConfig.url}/claim/${businessId}`,
+      url: `${siteConfig.url}/${lang}/claim/${businessId}`,
       images: [
         {
           url: business.imageUrl || "/images/og-default.jpg",
