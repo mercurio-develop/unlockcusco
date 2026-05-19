@@ -10,7 +10,6 @@ export const CATEGORIES = [
   { label: "Wellness", value: "Wellness", icon: Sprout, theme: "bg-teal-50 text-teal-700 border-teal-200/50", fallbackImage: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop" },
   { label: "Spiritual", value: "Spiritual", icon: Sparkles, theme: "bg-indigo-50 text-indigo-700 border-indigo-200/50", fallbackImage: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop" },
   { label: "Dining", value: "Dining", icon: Utensils, theme: "bg-amber-50 text-amber-700 border-amber-200/50", fallbackImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=600&auto=format&fit=crop" },
-  { label: "Culture", value: "Culture", icon: Landmark, theme: "bg-purple-50 text-purple-700 border-purple-200/50", fallbackImage: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop" },
   { label: "Textiles", value: "Textiles", icon: Scissors, theme: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200/50", fallbackImage: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop" },
   { label: "Stays", value: "Stays", icon: Bed, theme: "bg-blue-50 text-blue-700 border-blue-200/50", fallbackImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop" },
   { label: "Transport", value: "Transport", icon: Car, theme: "bg-slate-50 text-slate-700 border-slate-200/50", fallbackImage: DEFAULT_CATEGORY_IMAGE },
