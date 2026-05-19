@@ -225,5 +225,34 @@
     "map": "Mapa",
     "details": "Detalles",
     "verified": "Verificado"
+  },
+  "sorocheGuide": {
+    "metadata": {
+      "title": "Cómo Evitar y Curar el Soroche (Mal de Altura) en Cusco",
+      "description": "Una guía práctica y natural para prevenir y tratar el mal de altura (soroche) en Cusco, Perú. Aprende sobre el mate de coca, la hidratación y la aclimatación adecuada."
+    },
+    "title": "Cómo Evitar y Curar el Soroche (Mal de Altura) en Cusco",
+    "desc": "Cusco se encuentra a 3,400 metros sobre el nivel del mar. Es normal sentir el cambio de altitud, pero con un poco de preparación y los remedios tradicionales andinos, puedes disfrutar de tu viaje sin problemas.",
+    "h2_1": "¿Qué es el Soroche?",
+    "p1_1": "El soroche es la palabra local para el mal de altura. Ocurre porque hay menos oxígeno en el aire en lugares elevados. Los síntomas incluyen dolor de cabeza leve, fatiga y dificultad para respirar.",
+    "h2_2": "Prevención Primero (Reglas de Oro)",
+    "l2_1_strong": "Tómatelo con calma:",
+    "l2_1_text": " Tu primer día en Cusco debe ser de descanso. No planifiques caminatas extenuantes.",
+    "l2_2_strong": "Hidratación constante:",
+    "l2_2_text": " Bebe mucha más agua de lo habitual. El aire de la montaña es seco.",
+    "l2_3_strong": "Come ligero:",
+    "l2_3_text": " Evita comidas pesadas y grasosas al llegar, ya que la digestión es más lenta en la altura.",
+    "h2_3": "Remedios Naturales y Tradicionales",
+    "l3_1_strong": "Mate de Coca:",
+    "l3_1_text": " El antiguo remedio andino. Las hojas de coca son un estimulante suave que ayuda con la digestión y la oxigenación. Bébelo por la mañana o la tarde.",
+    "l3_2_strong": "Té de Muña:",
+    "l3_2_text": " La menta andina es excelente para asentar el estómago y aliviar los síntomas de la altura.",
+    "l3_3_strong": "Agua de Florida:",
+    "l3_3_text": " Una colonia de hierbas que muchos guías locales usan. Inhalar su aroma ayuda a abrir las vías respiratorias y despejar la mente.",
+    "h2_4": "Cuándo buscar ayuda",
+    "p4_1": "Si el dolor de cabeza es intenso o sientes náuseas fuertes, no te preocupes. La mayoría de los hoteles en Cusco cuentan con tanques de oxígeno en recepción. Unos minutos de oxígeno suelen ser suficientes para que te sientas como nuevo.",
+    "callToAction": "¿Deseas un itinerario que te ayude a aclimatarte?",
+    "callToActionDesc": "Pídele a nuestro Concierge de IA que diseñe un plan de viaje que aumente gradualmente la altitud, asegurando que te mantengas saludable.",
+    "askAi": "Hablar con el Concierge"
   }
 }

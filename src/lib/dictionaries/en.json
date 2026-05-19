@@ -225,5 +225,34 @@
     "map": "Map",
     "details": "Details",
     "verified": "Verified"
+  },
+  "sorocheGuide": {
+    "metadata": {
+      "title": "How to Avoid & Heal Soroche (Altitude Sickness) in Cusco",
+      "description": "A practical, natural guide to preventing and treating altitude sickness (soroche) in Cusco, Peru. Learn about Coca tea, hydration, and proper acclimatization."
+    },
+    "title": "How to Avoid & Heal Soroche (Altitude Sickness) in Cusco",
+    "desc": "Cusco sits at 11,150 feet (3,400 meters) above sea level. It is completely normal to feel the altitude, but with a little preparation and traditional Andean remedies, you can enjoy your trip worry-free.",
+    "h2_1": "What is Soroche?",
+    "p1_1": "Soroche is the local word for altitude sickness. It happens because there is less oxygen in the air at high elevations. Symptoms include mild headaches, fatigue, and shortness of breath.",
+    "h2_2": "Prevention First (The Golden Rules)",
+    "l2_1_strong": "Take it easy:",
+    "l2_1_text": " Your first day in Cusco should be for resting. Do not plan strenuous hikes right away.",
+    "l2_2_strong": "Hydrate constantly:",
+    "l2_2_text": " Drink much more water than usual. The mountain air is dry.",
+    "l2_3_strong": "Eat light:",
+    "l2_3_text": " Avoid heavy, fatty meals when you arrive, as digestion slows down at high altitudes.",
+    "h2_3": "Natural & Traditional Remedies",
+    "l3_1_strong": "Coca Tea (Mate de Coca):",
+    "l3_1_text": " The ancient Andean remedy. Coca leaves are a mild stimulant that help with digestion and oxygenation. Drink it in the morning or afternoon.",
+    "l3_2_strong": "Muña Tea:",
+    "l3_2_text": " Andean mint is excellent for settling the stomach and relieving altitude symptoms.",
+    "l3_3_strong": "Agua de Florida:",
+    "l3_3_text": " An herbal cologne used by local guides. Inhaling its scent helps open up the airways and clear the mind.",
+    "h2_4": "When to seek help",
+    "p4_1": "If you have a severe headache or strong nausea, don't worry. Most hotels in Cusco have oxygen tanks at the front desk. A few minutes of oxygen is usually all it takes to feel like yourself again.",
+    "callToAction": "Want an acclimatization-friendly itinerary?",
+    "callToActionDesc": "Ask our AI Concierge to design a travel plan that gradually increases in altitude, ensuring you stay healthy.",
+    "askAi": "Ask the AI Concierge"
   }
 }
