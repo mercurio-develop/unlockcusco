@@ -40,6 +40,11 @@ model Business {
   viewsCount             Int                     @default(0)
   whatsappClicksCount    Int                     @default(0)
   aiRecommendationsCount Int                     @default(0)
+  googlePlaceId          String?                 @unique
+  googleMapsUrl          String?
+  website                String?
+  openingHours           Json?
+  priceLevel             String?
   vehicleType            String?
   capacity               Int?
   serviceZones           String                  @default("[]")
