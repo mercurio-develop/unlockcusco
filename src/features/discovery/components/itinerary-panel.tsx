@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 import { getCategoryColor } from "@/lib/utils/category-style";
-import { EndPointPicker } from "@/components/ui/EndPointPicker";
+import { EndPointPicker } from "@/components/ui/end-point-picker";
 import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import { Reorder } from "framer-motion";
