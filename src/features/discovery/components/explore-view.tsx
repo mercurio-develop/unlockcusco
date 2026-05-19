@@ -57,7 +57,9 @@ export function ExploreView({
   const isSearchActive = !!initialQuery;
 
   const visibleBusinesses = useMemo(() => {
-    if (!mapBounds || effectiveBusinesses.length === 0 || isSearchActive) return effectiveBusinesses;
+    if (isSearchActive) return effectiveBusinesses;
+    if (!mapBounds) return [];
+    if (effectiveBusinesses.length === 0) return effectiveBusinesses;
     const [west, south, east, north] = mapBounds;
     const centerLat = (south + north) / 2;
     const centerLng = (west + east) / 2;
@@ -183,7 +185,7 @@ export function ExploreView({
           selectedId={selectedId}
           setSelectedId={setSelectedId}          onReset={() => router.push('/explore')}
           hasMore={hasMore}
-          isLoadingMore={isLoadingMore}
+          isLoadingMore={isLoadingMore || (!mapBounds && !isSearchActive)}
           onLoadMore={loadMore}
           dict={dict}
         />
