@@ -24,6 +24,22 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
 
 export async function POST(req: Request) {
   try {
+    if (ratelimit) {
+      const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+      const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+      
+      if (!success) {
+        return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        });
+      }
+    }
+
     const body = await req.json();
     const { messages, userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, activeFilters } = body;
 
