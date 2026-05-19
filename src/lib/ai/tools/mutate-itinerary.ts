@@ -58,16 +58,37 @@ export const mutateItinerary = tool({
       });
     }
 
-    // Auto-resolve coords from COORDS_MAP when Gemini omits them for generic towns
     let resolvedLocation = payload.resolvedLocation;
-    if (payload.businessId && !resolvedBusiness && !resolvedLocation) {
-        // Fallback: If Gemini used businessId for a place not in the DB and omitted resolvedLocation
-        resolvedLocation = payload.businessId;
-    }
-
     let resolvedCoords = payload.coords;
+
     if (!resolvedCoords && resolvedLocation) {
       resolvedCoords = lookupCoords(resolvedLocation) ?? undefined;
+    }
+
+    if (!resolvedBusiness && resolvedLocation && !resolvedCoords) {
+      resolvedBusiness = await prisma.business.findFirst({
+        where: {
+          name: {
+            contains: resolvedLocation,
+            mode: 'insensitive'
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          category: true,
+          lat: true,
+          lng: true,
+          rating: true,
+        }
+      });
+      if (resolvedBusiness && resolvedBusiness.lat && resolvedBusiness.lng) {
+        resolvedCoords = { lat: resolvedBusiness.lat, lng: resolvedBusiness.lng };
+      }
+    }
+
+    if (payload.businessId && !resolvedBusiness && !resolvedLocation) {
+        resolvedLocation = payload.businessId;
     }
 
     return {
