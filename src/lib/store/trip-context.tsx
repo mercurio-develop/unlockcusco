@@ -33,8 +33,8 @@ interface TripContextType {
   setIsAddingStop: (v: boolean) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (prompt: string | null) => void;
-  setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
-  updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
+  setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business, skipAiTrigger?: boolean) => void;
+  updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business, skipAiTrigger?: boolean) => void;
   insertWaypoint: (service: Business, skipAiTrigger?: boolean) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
   removeWaypoint: (id: string) => void;

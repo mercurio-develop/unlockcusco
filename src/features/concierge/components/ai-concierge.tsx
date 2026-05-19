@@ -227,7 +227,8 @@ export function AiConcierge() {
             coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
             coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
             resolvedLocation || resolvedBusiness?.name || 'Current Location',
-            resolvedBusiness as any
+            resolvedBusiness as any,
+            true // skipAiTrigger to prevent infinite chat loop
           );
           setPanelMode('itinerary');
         }
@@ -237,7 +238,8 @@ export function AiConcierge() {
             coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
             coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
             resolvedLocation || resolvedBusiness?.name || 'Destination',
-            resolvedBusiness as any
+            resolvedBusiness as any,
+            true // skipAiTrigger to prevent infinite chat loop
           );
           setPanelMode('itinerary');
         }
