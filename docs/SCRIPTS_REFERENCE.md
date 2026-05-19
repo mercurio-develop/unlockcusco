@@ -120,3 +120,18 @@ npx prisma studio
 # Regenerate client after schema change
 npx prisma generate
 ```
+
+## Apify Scraping Pipeline
+
+To scrape Google Maps and enrich the data (SEO + Zagat descriptions in EN/ES), use the unified pipeline:
+
+```bash
+./scripts/run-apify-pipeline.sh
+```
+
+**Requirements:**
+- Ensure `APIFY_API_TOKEN` and `GEMINI_API_KEY` are in your `.env`.
+- Ensure `POSTGRES_PRISMA_URL` points to your **local** database.
+
+**Pushing to Supabase (Production):**
+After validating the local data via Prisma Studio (`npx prisma studio`), you can push the schema and data to Supabase using standard database tools (e.g., `pg_dump` to export local and `psql` to import to remote, or running the script directly against the production URL if confident).
