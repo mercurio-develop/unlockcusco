@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import { Sparkles, Map } from "lucide-react";
+import { sanitizeHtml } from "@/lib/utils/sanitize";
 
 export const metadata: Metadata = {
   title: "The Ultimate 1-Day Sacred Valley Itinerary",
@@ -102,17 +103,17 @@ export default async function GuidePage({ params }: { params: Promise<{ lang: st
 
         <div className="prose prose-slate prose-lg max-w-none">
           <h2>{content.h2_1}</h2>
-          <p dangerouslySetInnerHTML={{ __html: content.p1_1 }} />
-          <p dangerouslySetInnerHTML={{ __html: content.p1_2 }} />
+          <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.p1_1) }} />
+          <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.p1_2) }} />
 
           <h2>{content.h2_2}</h2>
-          <p dangerouslySetInnerHTML={{ __html: content.p2_1 }} />
+          <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.p2_1) }} />
 
           <h2>{content.h2_3}</h2>
-          <p dangerouslySetInnerHTML={{ __html: content.p3_1 }} />
+          <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.p3_1) }} />
 
           <h2>{content.h2_4}</h2>
-          <p dangerouslySetInnerHTML={{ __html: content.p4_1 }} />
+          <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.p4_1) }} />
         </div>
 
       </div>
