@@ -175,13 +175,13 @@ export function AiConcierge() {
       if (!msg || msg.role !== 'assistant') return;
       
       const toolParts = msg.parts?.filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool') 
-                        || msg.toolInvocations?.map((ti: any) => ({ 
+                        || (msg.toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({ 
                              type: 'tool-invocation', 
                              toolInvocation: ti, 
-                             state: ti.state === 'result' ? 'output-available' : undefined, 
-                             output: ti.result, 
-                             toolCallId: ti.toolCallId, 
-                             toolName: ti.toolName 
+                             state: ti?.state === 'result' ? 'output-available' : undefined, 
+                             output: ti?.result, 
+                             toolCallId: ti?.toolCallId, 
+                             toolName: ti?.toolName 
                            }))
                         || [];
 
@@ -451,14 +451,14 @@ Please generate my macro trip plan.`;
                       {/* Tool parts (AI SDK v6: msg.parts, state=output-available or older v3 msg.toolInvocations) */}
                       {(() => {
                         const partsTools = ((msg as any).parts || []).filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool');
-                        const invocationsTools = ((msg as any).toolInvocations || []).map((ti: any) => ({
+                        const invocationsTools = ((msg as any).toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({
                           type: 'tool-invocation',
                           toolInvocation: ti,
-                          state: ti.state === 'result' ? 'output-available' : undefined,
-                          output: ti.result,
-                          input: ti.args,
-                          toolCallId: ti.toolCallId,
-                          toolName: ti.toolName
+                          state: ti?.state === 'result' ? 'output-available' : undefined,
+                          output: ti?.result,
+                          input: ti?.args,
+                          toolCallId: ti?.toolCallId,
+                          toolName: ti?.toolName
                         }));
                         // Prefer parts tools if they exist, otherwise fallback to invocations mapped
                         return partsTools.length > 0 ? partsTools : invocationsTools;
