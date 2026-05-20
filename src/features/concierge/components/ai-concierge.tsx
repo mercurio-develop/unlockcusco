@@ -17,6 +17,8 @@ import { BoletoInfoCard } from "./BoletoInfoCard"
 import { TaxiFareCard } from "./TaxiFareCard"
 import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
+import { getInitialMessages } from "../constants"
+import { buildChatPayload, formatItineraryState } from "../actions/chat-payload"
 
 export function AiConcierge() {
   const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate } = usePreferences()
@@ -49,17 +51,7 @@ export function AiConcierge() {
   
   const isEs = pathname?.split('/')[1] === 'es'
 
-  const welcomeText = isEs 
-    ? "Bienvenido a UnlockCusco. ✨ Soy tu guía local en el Valle Sagrado.\n\nPuedo ayudarte a planear un día perfecto. **Esto es lo que puedo hacer por ti:**\n• **Crear y Modificar Itinerarios:** Puedo armar un plan de día completo, o hacer ajustes específicos a tu ruta actual.\n• **Control del Itinerario:** Pídeme que establezca tus lugares de inicio o fin, cambie experiencias que no te gusten, reordene paradas, o las elimine por completo.\n• **Encontrar Joyas Ocultas:** Recomendar los mejores restaurantes locales, hospedajes y actividades.\n• **Manejar Logística:** Estimar tarifas de taxi, revisar info del Boleto Turístico, y responder preguntas locales.\n\nAquí tienes cómo navegar:\n🔍 **Descubrir**: Explora experiencias locales usando los filtros de arriba.\n📅 **Itinerario**: Tu línea de tiempo personal donde organizamos tus opciones en un horario perfecto.\n🤖 **Recomendaciones de IA**: Busca el ícono del robot en el mapa o en la pestaña de descubrir. Estos identifican las mejores recomendaciones curadas específicamente para ti por el Concierge.\n✨ **Personalizar**: Usa el ícono de ajustes ([[SETTINGS_ICON]]) en el menú superior para establecer tu estilo de viaje e intensidad para mejores recomendaciones.\n\nEstoy listo cuando tú lo estés. Dime, ¿qué tienes en mente para la aventura de hoy?"
-    : "Welcome to UnlockCusco. ✨ I'm your local guide to the Sacred Valley.\n\nI can help you plan a perfect day. **Here's what I can do for you:**\n• **Build & Modify Itineraries:** I can create a full day plan, or make specific tweaks to your current route.\n• **Itinerary Control:** Ask me to set your start or end locations, swap out experiences you don't like, reorder stops, or remove them entirely.\n• **Find Hidden Gems:** Recommend the best local restaurants, stays, and activities.\n• **Handle Logistics:** Estimate taxi fares, check Boleto Turístico info, and answer local questions.\n\nHere's how to navigate:\n🔍 **Discover**: Browse local experiences using the filters above.\n📅 **Itinerary**: Your personal timeline where we organize your choices into a seamless schedule.\n🤖 **AI Recommendations**: Look for the robot icon on the map or in the discover tab. These identify top recommendations specifically curated for you by the Concierge.\n✨ **Personalize**: Use the settings icon ([[SETTINGS_ICON]]) in the top menu to set your travel style and intensity for better recommendations.\n\nI'm ready when you are. Tell me, what's on your mind for today's adventure?";
-  const initialMessages: any[] = useMemo(() => [
-    {
-      id: "1",
-      role: "assistant",
-      content: welcomeText,
-      parts: [{ type: 'text', text: welcomeText }],
-    }
-  ], []);
+  const initialMessages = useMemo(() => getInitialMessages(isEs), [isEs]);
 
   const [input, setInput] = useState("");
   // null = tourist has not shared location; avoids sending Urubamba default as if it were real GPS
@@ -67,7 +59,7 @@ export function AiConcierge() {
 
   const chat = useChat({
     api: '/api/chat',
-    messages: initialMessages,
+    messages: initialMessages as any,
     body: {
       userLat: userCoords?.lat,
       userLng: userCoords?.lng,
@@ -75,11 +67,7 @@ export function AiConcierge() {
       // to avoid Next.js hydration mismatches from Date.now() on SSR vs Client
       archetype: travelVibe,
       intensity: travelIntensity,
-      itineraryState: activeItinerary ? JSON.stringify({
-        startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
-        endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
-        waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
-      }) : null
+      itineraryState: formatItineraryState(activeItinerary)
     }
   } as any);
 
@@ -88,25 +76,14 @@ export function AiConcierge() {
   const isLoading = status === 'submitted' || status === 'streaming';
 
   const sendMessage = useMemo(() => (msg: { text: string }) => {
-    const defaultTitles = ['Current Location', 'Destination'];
-    const sTitle = activeItinerary?.startAnchor?.title;
-    const eTitle = activeItinerary?.endAnchor?.title;
     (chat as any).sendMessage({ text: msg.text }, {
-      body: {
-        userLat: userCoords?.lat,
-        userLng: userCoords?.lng,
-        localTime: new Date().toLocaleTimeString(),
-        targetDate: targetDate?.toLocaleDateString() || 'today',
-        archetype: travelVibe,
-        intensity: travelIntensity,
-        itineraryStartTitle: sTitle && !defaultTitles.includes(sTitle) ? sTitle : null,
-        itineraryEndTitle: eTitle && !defaultTitles.includes(eTitle) ? eTitle : null,
-        itineraryState: activeItinerary ? JSON.stringify({
-          startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time, lat: activeItinerary.startAnchor.lat, lng: activeItinerary.startAnchor.lng } : null,
-          endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time, lat: activeItinerary.endAnchor.lat, lng: activeItinerary.endAnchor.lng } : null,
-          waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime, lat: w.lat, lng: w.lng })) || []
-        }) : null
-      }
+      body: buildChatPayload({
+        userCoords,
+        travelVibe,
+        travelIntensity,
+        targetDate,
+        activeItinerary
+      })
     });
   }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
 
@@ -134,23 +111,17 @@ export function AiConcierge() {
         (chat as any).sendMessage(
           { text: `I just shared my GPS location. I am at coordinates ${latitude.toFixed(5)}, ${longitude.toFixed(5)}. What can you recommend nearby?` },
           {
-            body: {
-              userLat: latitude,
-              userLng: longitude,
-              localTime: new Date().toLocaleTimeString(),
-              targetDate: targetDate?.toLocaleDateString() || 'today',
-              archetype: travelVibe,
-              intensity: travelIntensity,
+            body: buildChatPayload({
+              userCoords: { lat: latitude, lng: longitude },
+              travelVibe,
+              travelIntensity,
+              targetDate,
+              activeItinerary,
               activeFilters: {
                 location: searchParams.get("loc"),
                 category: searchParams.get("cat")
-              },
-              itineraryState: activeItinerary ? JSON.stringify({
-                startAnchor: activeItinerary.startAnchor ? { title: activeItinerary.startAnchor.title, time: activeItinerary.startAnchor.time } : null,
-                endAnchor: activeItinerary.endAnchor ? { title: activeItinerary.endAnchor.title, time: activeItinerary.endAnchor.time } : null,
-                waypoints: activeItinerary.waypoints?.map(w => ({ id: w.id, title: w.title, startTime: w.startTime })) || []
-              }) : null
-            }
+              }
+            })
           }
         );
       },
