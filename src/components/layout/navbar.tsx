@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Compass, Home, Map, Sparkles, Bot, Route, Settings2, MessageSquareText, ChevronDown, HelpCircle, Languages } from "lucide-react"
 import { homePath, explorePath, dashboardPath } from "@/paths"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -24,7 +24,12 @@ const LOCATIONS = [
 
 export function Navbar({ dict }: { dict?: any }) {
   const pathname = usePathname() || '/'
-  const { isChatOpen, setIsChatOpen, travelVibe, setTravelVibe, travelIntensity, setTravelIntensity } = usePreferences()
+  const isChatOpen = useUiStore(s => s.isChatOpen)
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
+  const travelVibe = useUiStore(s => s.travelVibe)
+  const setTravelVibe = useUiStore(s => s.setTravelVibe)
+  const travelIntensity = useUiStore(s => s.travelIntensity)
+  const setTravelIntensity = useUiStore(s => s.setTravelIntensity)
   const [isPrefsOpen, setIsPrefsOpen] = useState(false)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 

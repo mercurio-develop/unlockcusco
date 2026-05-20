@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, Utensils, Landmark, Ticket, MapPin } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
-import { useTrip } from "@/lib/store/trip-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
 import { useRouter, useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
@@ -37,7 +37,15 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
   const sortRef = useRef<HTMLDivElement>(null)
   
   const { ref, inView } = useInView({ threshold: 0 })
-  const { isAddingStop, setIsAddingStop, exchangeTargetId, setExchangeTargetId, isExchangingStart, setIsExchangingStart, isExchangingEnd, setIsExchangingEnd, setPanelMode } = useTrip()
+  const isAddingStop = useUiStore(s => s.isAddingStop);
+  const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
+  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
+  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
+  const isExchangingStart = useUiStore(s => s.isExchangingStart);
+  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
+  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
+  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
 
   const removeFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString())

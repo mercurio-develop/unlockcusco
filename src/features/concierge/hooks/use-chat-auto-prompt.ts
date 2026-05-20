@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { usePreferences } from "@/lib/store/preferences-context";
+import { useUiStore } from "@/lib/store/use-ui-store";
 
 export function useChatAutoPrompt(
   sendMessage: (msg: { text: string }) => void,
   isChatOpen: boolean,
   chatStatus: string
 ) {
-  const { setIsChatOpen } = usePreferences();
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();

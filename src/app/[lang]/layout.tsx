@@ -2,9 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "../globals.css";
 import { Navbar } from "@/components/layout/navbar";
-import { PreferencesProvider } from "@/lib/store/preferences-context";
-import { TripProvider } from "@/lib/store/trip-context";
-import { AiConcierge } from "@/features/concierge";
 import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/posthog-pageview";
@@ -83,14 +80,10 @@ export default async function RootLayout(props: {
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
         <PostHogProvider>
           <PostHogPageView />
-          <PreferencesProvider>
-            <TripProvider>
-              <Navbar dict={dict.navbar} />
-              <main className="flex-1 flex flex-col pt-12 bg-white">
-                {children}
-              </main>
-            </TripProvider>
-          </PreferencesProvider>
+          <Navbar dict={dict.navbar} />
+          <main className="flex-1 flex flex-col pt-12 bg-white">
+            {children}
+          </main>
         </PostHogProvider>
         <Analytics />
         <SpeedInsights />

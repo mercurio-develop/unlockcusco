@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
-import { useTrip } from "@/lib/store/trip-context"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
 import { cn } from "@/lib/utils"
 import { LayoutGrid, Map as RouteMap, CalendarDays, Sparkles } from "lucide-react"
 
@@ -19,9 +18,13 @@ export function ThreePaneLayout({
   showMap = true,
   className
 }: ThreePaneLayoutProps) {
-  const { panelMode, setPanelMode } = useTrip()
+  const panelMode = useUiStore(s => s.panelMode)
+  const setPanelMode = useUiStore(s => s.setPanelMode)
   const [leftWidth, setLeftWidth] = useState(40)
-  const { mobileViewMode, setMobileViewMode, isChatOpen, setIsChatOpen } = usePreferences()
+  const mobileViewMode = useUiStore(s => s.mobileViewMode)
+  const setMobileViewMode = useUiStore(s => s.setMobileViewMode)
+  const isChatOpen = useUiStore(s => s.isChatOpen)
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
   const [isDragging, setIsDragging] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 

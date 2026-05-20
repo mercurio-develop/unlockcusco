@@ -2,8 +2,11 @@
 
 import { useState, Component, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useTrip } from "@/lib/store/trip-context";
-import { usePreferences } from "@/lib/store/preferences-context";
+import { useUiStore } from "@/lib/store/use-ui-store"
+import { useItineraryStore } from "@/lib/store/use-itinerary-store"
+import { useMapboxRoute, type RouteData } from "@/features/discovery/hooks/use-mapbox-route"
+import { useCallback } from "react"
+import { saveItineraryAction } from "@/features/itinerary/actions/save-itinerary";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/end-point-picker";
 import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
@@ -22,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { DICTIONARIES } from "../constants";
 import { Input } from "@/components/ui/input";
-import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
+import type { TransportProfile } from "@/lib/store/use-itinerary-store";
 
 function TransitEdge({ index, routeData, transportProfile, setTransportProfile, t }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (index: number, p: TransportProfile) => void; t?: any }) {
   const leg = routeData?.legs?.[index];
@@ -92,31 +95,51 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
-  const {
-    activeItinerary,
-    setPanelMode,
-    selectedId,
-    setSelectedId,
-    exchangeTargetId,
-    setExchangeTargetId,
-    removeWaypoint,
-    moveWaypoint,
-    setWaypoints,
-    routeData,
-    transportProfiles,
-    setLegTransportProfile,
-    updateEndAnchorLocation,
-    mapClickMode,
-    setMapClickMode,
-    clearStartAnchor,
-    clearEndAnchor,
-    setStartAnchorLocation,
-    setIsExchangingStart,
-    setIsExchangingEnd,
-    setIsAddingStop,
-    saveItinerary,
-  } = useTrip();
-  const { setIsChatOpen, conciergeSendMessage } = usePreferences();
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
+  const removeWaypoint = useItineraryStore(s => s.removeWaypoint);
+  const moveWaypoint = useItineraryStore(s => s.moveWaypoint);
+  const setWaypoints = useItineraryStore(s => s.setWaypoints);
+  const clearStartAnchor = useItineraryStore(s => s.clearStartAnchor);
+  const clearEndAnchor = useItineraryStore(s => s.clearEndAnchor);
+  const transportProfiles = useItineraryStore(s => s.transportProfiles);
+  const setLegTransportProfile = useItineraryStore(s => s.setLegTransportProfile);
+
+  const panelMode = useUiStore(s => s.panelMode);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const selectedId = useUiStore(s => s.selectedId);
+  const setSelectedId = useUiStore(s => s.setSelectedId);
+  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
+  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
+  const isExchangingStart = useUiStore(s => s.isExchangingStart);
+  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
+  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
+  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
+  const isAddingStop = useUiStore(s => s.isAddingStop);
+  const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
+  const mapClickMode = useUiStore(s => s.mapClickMode);
+  const setMapClickMode = useUiStore(s => s.setMapClickMode);
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+
+  const { routeData } = useMapboxRoute();
+
+  const saveItinerary = useCallback(async () => {
+    if (!activeItinerary) return null;
+    try {
+      const data = await saveItineraryAction(activeItinerary);
+      if (data.success && data.shortId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('trip', data.shortId);
+        window.history.replaceState({}, '', url.toString());
+        return url.toString();
+      }
+    } catch (e) {
+      console.error("Failed to save itinerary:", e);
+    }
+    return null;
+  }, [activeItinerary]);
   const router = useRouter();
   const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';

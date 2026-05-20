@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTrip } from "@/lib/store/trip-context";
-import { usePreferences } from "@/lib/store/preferences-context";
+import { useUiStore } from "@/lib/store/use-ui-store";
+import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { buildChatPayload } from "../utils/chat-payload";
 
 export function useChatLocation(
@@ -11,8 +11,10 @@ export function useChatLocation(
 ) {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const searchParams = useSearchParams();
-  const { setStartAnchorLocation, setPanelMode } = useTrip();
-  const { travelVibe, travelIntensity } = usePreferences();
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const travelVibe = useUiStore(s => s.travelVibe);
+  const travelIntensity = useUiStore(s => s.travelIntensity);
 
   const handleShareLocation = () => {
     if (!navigator.geolocation) {

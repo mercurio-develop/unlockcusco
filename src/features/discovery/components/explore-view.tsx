@@ -6,8 +6,9 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { LayoutGrid, CalendarDays, Sparkles } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { ExplorePanel } from "./explore-panel"
-import { useTrip } from "@/lib/store/trip-context"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
+import { useItineraryStore } from "@/lib/store/use-itinerary-store"
+
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
 import { ItineraryPanel } from "./itinerary-panel"
 import { useExploreViewState } from "../hooks/use-explore-view"
@@ -60,8 +61,21 @@ export function ExploreView({
   
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults, activeItinerary, setActiveItinerary } = useTrip()
-  const { isChatOpen, setIsChatOpen, conciergeSendMessage } = usePreferences()
+  const panelMode = useUiStore(s => s.panelMode);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const selectedId = useUiStore(s => s.selectedId);
+  const setSelectedId = useUiStore(s => s.setSelectedId);
+  const mapClickMode = useUiStore(s => s.mapClickMode);
+  const setMapClickMode = useUiStore(s => s.setMapClickMode);
+  const mapSearchResults = useUiStore(s => s.mapSearchResults);
+  const isChatOpen = useUiStore(s => s.isChatOpen);
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+
+  const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
 
   const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
   const isSearchActive = !!initialQuery;

@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useItineraryStore } from '@/lib/store/use-itinerary-store';
-import type { RouteData, TransportProfile } from '@/lib/store/trip-context';
+import type { TransportProfile } from '@/lib/store/use-itinerary-store';
+
+export interface RouteData {
+  geometry: any;
+  legs: any[];
+  legGeometries?: any[];
+  profile: TransportProfile;
+  duration?: number;
+}
 
 export function useMapboxRoute() {
   const activeItinerary = useItineraryStore(s => s.activeItinerary);

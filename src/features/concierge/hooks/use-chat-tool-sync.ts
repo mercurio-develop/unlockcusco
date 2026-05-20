@@ -1,14 +1,23 @@
 import { useEffect, useRef } from "react";
-import { useTrip } from "@/lib/store/trip-context";
+import { useUiStore } from "@/lib/store/use-ui-store";
+import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { DEFAULT_COORDS } from "@/lib/constants";
 
 export function useChatToolSync(messages: any[]) {
-  const { 
-    activeItinerary, setActiveItinerary, setStartAnchorLocation, updateEndAnchorLocation,
-    setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor,
-    setLegTransportProfile, removeWaypoint, swapWaypoint, insertWaypoint,
-    setMapSearchResults
-  } = useTrip();
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
+  
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
+  const moveWaypoint = useItineraryStore(s => s.moveWaypoint);
+  const clearStartAnchor = useItineraryStore(s => s.clearStartAnchor);
+  const clearEndAnchor = useItineraryStore(s => s.clearEndAnchor);
+  const setLegTransportProfile = useItineraryStore(s => s.setLegTransportProfile);
+  const removeWaypoint = useItineraryStore(s => s.removeWaypoint);
+  const swapWaypoint = useItineraryStore(s => s.swapWaypoint);
+  const insertWaypoint = useItineraryStore(s => s.insertWaypoint);
 
   const processedToolCalls = useRef<Set<string>>(new Set());
 

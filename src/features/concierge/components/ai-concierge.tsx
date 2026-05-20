@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
 import { useConciergeChat } from "../hooks/use-concierge-chat"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
 import { ChatMessage } from "./chat-message"
 import { ChatMessageText } from "./chat-message-text"
 import { ToolRenderer } from "./tool-renderer"
@@ -22,7 +22,7 @@ export function AiConcierge() {
     handleSubmit, handleShareLocation, sendMessage
   } = useConciergeChat();
 
-  const { travelVibe } = usePreferences()
+  const travelVibe = useUiStore(s => s.travelVibe)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const sidebarOffset = "0px"

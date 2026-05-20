@@ -9,8 +9,10 @@ import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { Star, Zap, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X, ChevronDown, ChevronRight, ChevronUp, Check, Bot } from "lucide-react"
 import type { Business } from "@prisma/client"
-import { useTrip } from "@/lib/store/trip-context"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
+import { useItineraryStore } from "@/lib/store/use-itinerary-store"
+import { useMapboxRoute } from "@/features/discovery/hooks/use-mapbox-route"
+
 import { cn } from "@/lib/utils"
 import { BusinessCard } from "./business-card"
 import useSupercluster from "use-supercluster"
@@ -253,9 +255,20 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const { activeItinerary, panelMode: strictPanelMode, setPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode, setMapSearchResults } = useTrip()
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
+  const insertWaypoint = useItineraryStore(s => s.insertWaypoint);
+
+  const strictPanelMode = useUiStore(s => s.panelMode);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const setMapClickMode = useUiStore(s => s.setMapClickMode);
+  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
+  const isChatOpen = useUiStore(s => s.isChatOpen);
+  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+
+  const { routeData } = useMapboxRoute();
   const panelMode = strictPanelMode as string;
-  const { isChatOpen, conciergeSendMessage } = usePreferences()
 
   // FlyTo when start anchor location changes
   const startLat = activeItinerary?.startAnchor?.lat

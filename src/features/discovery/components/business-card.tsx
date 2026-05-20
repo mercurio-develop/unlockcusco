@@ -17,8 +17,9 @@ import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, Exter
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
-import { useTrip } from "@/lib/store/trip-context"
-import { usePreferences } from "@/lib/store/preferences-context"
+import { useUiStore } from "@/lib/store/use-ui-store"
+import { useItineraryStore } from "@/lib/store/use-itinerary-store"
+
 import { cn } from "@/lib/utils"
 import { getLocalizedField } from "@/lib/utils/localization"
 import { DICTIONARIES } from "../constants"
@@ -67,23 +68,24 @@ export function BusinessCard({
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
-  const { 
-    activeItinerary, 
-    panelMode, 
-    setPanelMode, 
-    exchangeTargetId, 
-    setExchangeTargetId, 
-    swapWaypoint, 
-    insertWaypoint, 
-    setStartAnchorLocation,
-    updateEndAnchorLocation, 
-    isExchangingStart,
-    setIsExchangingStart,
-    isExchangingEnd, 
-    setIsExchangingEnd,
-    setSelectedId
-  } = useTrip()
-  const { setMobileViewMode, setIsChatOpen, conciergeSendMessage } = usePreferences()
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const swapWaypoint = useItineraryStore(s => s.swapWaypoint);
+  const insertWaypoint = useItineraryStore(s => s.insertWaypoint);
+  const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
+  const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
+
+  const panelMode = useUiStore(s => s.panelMode);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
+  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
+  const isExchangingStart = useUiStore(s => s.isExchangingStart);
+  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
+  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
+  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
+  const setSelectedId = useUiStore(s => s.setSelectedId);
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   const router = useRouter()
   const pathname = usePathname()
   

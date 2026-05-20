@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useChat } from '@ai-sdk/react';
-import { useTrip } from "@/lib/store/trip-context";
-import { usePreferences } from "@/lib/store/preferences-context";
+import { useUiStore } from "@/lib/store/use-ui-store";
+import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { getInitialMessages } from "../constants";
 import { buildChatPayload, formatItineraryState } from "../utils/chat-payload";
 
@@ -11,8 +11,13 @@ import { useChatAutoPrompt } from "./use-chat-auto-prompt";
 import { useChatToolSync } from "./use-chat-tool-sync";
 
 export function useConciergeChat() {
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate, setConciergeSendMessage } = usePreferences();
-  const { activeItinerary } = useTrip();
+  const isChatOpen = useUiStore(s => s.isChatOpen);
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const travelVibe = useUiStore(s => s.travelVibe);
+  const travelIntensity = useUiStore(s => s.travelIntensity);
+  const targetDate = useUiStore(s => s.targetDate);
+  const setConciergeSendMessage = useUiStore(s => s.setConciergeSendMessage);
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
   const pathname = usePathname();
 
   const isEs = pathname?.split('/')[1] === 'es';

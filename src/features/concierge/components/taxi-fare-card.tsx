@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, MapPin, Clock, DollarSign, CreditCard, CheckCircle2, Navigation, Map, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTrip } from "@/lib/store/trip-context";
+import { useItineraryStore } from "@/lib/store/use-itinerary-store";
+import { useUiStore } from "@/lib/store/use-ui-store";
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 
 interface TaxiFareCardProps {
@@ -28,7 +29,8 @@ interface TaxiFareCardProps {
 export function TaxiFareCard({ data }: TaxiFareCardProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
-  const { setActiveItinerary, setPanelMode } = useTrip();
+  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
 
   const handlePay = () => {
     setIsPaying(true);

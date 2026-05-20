@@ -2,12 +2,12 @@
 
 import { Business } from "@prisma/client";
 
-import { useTrip } from "@/lib/store/trip-context";
+import { useUiStore } from "@/lib/store/use-ui-store";
 import { useRouter } from "next/navigation";
 import { BusinessCard } from "@/features/discovery/components/business-card";
 
 export function SearchResultsCard({ businesses, messageId, input }: { businesses: Business[], messageId?: string, input?: any }) {
-  const { setSelectedId } = useTrip();
+  const setSelectedId = useUiStore(s => s.setSelectedId);
   const router = useRouter();
 
   const isFallback = !Array.isArray(businesses) && (businesses as any)?.alternatives;
