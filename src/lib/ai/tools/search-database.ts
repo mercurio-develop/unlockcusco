@@ -4,7 +4,6 @@ import { universalSearch } from '@/features/discovery/queries/universal-search';
 import { Redis } from '@upstash/redis';
 import { calculateDistance } from '@/lib/utils/geo';
 import { normalizeLocation } from '@/lib/ai/utils/location-normalizer';
-import Fuse from 'fuse.js';
 
 const DB_CATEGORY_MAP: Array<[string[], string]> = [
   [['dining','restaurant','food','eat','lunch','dinner','breakfast','coffee','cafe','ceviche','pizza','vegan','vegetarian','bar','drink','menu','gastro','comida','almuerzo','cena','eats','meal','supper','bistro'],
@@ -85,11 +84,14 @@ export const searchDatabase = tool({
     // If not cached, fetch broad category/location matches from Prisma
     if (!results) {
       try {
+        // Construct a semantic query by combining provided query and keywords
+        const semanticQuery = [query, ...(searchKeywords || [])].filter(Boolean).join(" ");
+
         results = (await universalSearch({ 
-          query: query || "", // Broad fetch or specific name
+          query: semanticQuery,
           category: dbCategory,
           location: searchLocation || undefined, 
-          limit: 100 // Fetch a larger pool for in-memory fuzzy matching
+          limit: 30 // Smaller limit since it's already ranked semantically
         })) as unknown as Record<string, unknown>[];
       } catch (e) {
         console.error("universalSearch failed:", e);
@@ -107,25 +109,6 @@ export const searchDatabase = tool({
 
     // Strict Filter: Only return businesses with valid ratings (> 0)
     results = results.filter((b: any) => typeof b.rating === 'number' && b.rating > 0);
-
-    // Apply In-Memory Fuzzy Search if keywords exist
-    if (searchKeywords && searchKeywords.length > 0 && results.length > 0) {
-      const fuse = new Fuse(results, {
-        keys: ['name', 'tagline', 'description', 'specialties', 'category'],
-        includeScore: true,
-        threshold: 0.6, // Allow some fuzziness for semantic matching
-        ignoreLocation: true,
-      });
-
-      // Join keywords into a single string for Fuse to score across all text fields
-      const queryStr = searchKeywords.join(" ");
-      const fuzzyResults = fuse.search(queryStr);
-      
-      // Map back to the original objects, keeping only matches
-      if (fuzzyResults.length > 0) {
-        results = fuzzyResults.map(res => res.item as Record<string, unknown>);
-      }
-    }
 
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
     if (userLat && userLng) {

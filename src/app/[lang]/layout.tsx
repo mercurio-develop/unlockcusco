@@ -53,6 +53,15 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     images: ["/images/og-default.jpg"],
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "UnlockCusco",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {

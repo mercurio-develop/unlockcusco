@@ -1,20 +1,20 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider   = "postgresql"
+  url        = env("POSTGRES_PRISMA_URL")
+  directUrl  = env("POSTGRES_URL_NON_POOLING")
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions"), vector]
 }
 
 model Business {
   id                     String                  @id @default(cuid())
   slug                   String                  @unique
   name                   String
-  nameEs                 String?
   category               String                  @default("DINING")
-  categoryEs             String?
   lat                    Float?
   lng                    Float?
   rating                 Float?
@@ -27,9 +27,7 @@ model Business {
   isFeatured             Boolean                 @default(false)
   locationSlug           String                  @default("")
   tagline                String                  @default("")
-  taglineEs              String?
   description            String                  @default("")
-  descriptionEs          String?
   contactEmail           String                  @default("")
   socialLinks            String                  @default("{}")
   instagramHandle        String?
@@ -40,24 +38,31 @@ model Business {
   viewsCount             Int                     @default(0)
   whatsappClicksCount    Int                     @default(0)
   aiRecommendationsCount Int                     @default(0)
-  googlePlaceId          String?                 @unique
-  googleMapsUrl          String?
-  website                String?
-  openingHours           Json?
-  priceLevel             String?
   vehicleType            String?
   capacity               Int?
   serviceZones           String                  @default("[]")
   guideName              String?
   seoMetaTitle           String?
-  seoMetaTitleEs         String?
   seoMetaDesc            String?
-  seoMetaDescEs          String?
   specialties            String                  @default("[]")
-  specialtiesEs          String?
   themeConfig            String                  @default("{}")
   featuresJson           String                  @default("[]")
   qrCodeUrl              String?
+  categoryEs             String?
+  descriptionEs          String?
+  nameEs                 String?
+  seoMetaDescEs          String?
+  seoMetaTitleEs         String?
+  specialtiesEs          String?
+  taglineEs              String?
+  googleMapsUrl          String?
+  googlePlaceId          String?                 @unique
+  openingHours           Json?
+  priceLevel             String?
+  website                String?
+  bookingType            String                  @default("INSTANT")
+  embedding              Unsupported("vector(3072)")?
+  minAdvanceHours        Int                     @default(0)
   premiumProfile         BusinessPremiumProfile?
   services               BusinessService[]
   leads                  Lead[]
@@ -69,12 +74,12 @@ model BusinessService {
   id            String   @id @default(cuid())
   businessId    String
   title         String
-  titleEs       String?
   description   String
-  descriptionEs String?
   priceUsd      Float
   durationMins  Int      @default(60)
   imageUrl      String?
+  descriptionEs String?
+  titleEs       String?
   business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }
 
@@ -153,10 +158,10 @@ model BusinessPillar {
   id               String                 @id @default(cuid())
   premiumProfileId String
   title            String
-  titleEs          String?
   description      String
-  descriptionEs    String?
   icon             String?
+  descriptionEs    String?
+  titleEs          String?
   premiumProfile   BusinessPremiumProfile @relation(fields: [premiumProfileId], references: [id], onDelete: Cascade)
 }
 
@@ -164,23 +169,43 @@ model TourPackage {
   id            String   @id @default(cuid())
   businessId    String
   title         String
-  titleEs       String?
   tagline       String?
-  taglineEs     String?
   description   String
-  descriptionEs String?
   durationDays  Int?
   difficulty    String?
   pace          String?
   basePriceUsd  Float
   included      String   @default("[]")
-  includedEs    String?
   highlights    String   @default("[]")
-  highlightsEs  String?
   itinerary     String   @default("[]")
-  itineraryEs   String?
   gallery       String   @default("[]")
+  descriptionEs String?
+  highlightsEs  String?
+  includedEs    String?
+  itineraryEs   String?
+  taglineEs     String?
+  titleEs       String?
   business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model SavedItinerary {
+  id        String   @id @default(cuid())
+  shortId   String   @unique
+  state     Json
+  createdAt DateTime @default(now())
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id               String           @id @db.Uuid
+  email            String           @unique
+  firstName        String?
+  lastName         String?
+  avatarUrl        String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  savedItineraries SavedItinerary[]
 }
 
 enum RideStatus {
@@ -195,24 +220,4 @@ enum MessageSender {
   TOURIST
   DRIVER
   SYSTEM
-}
-
-model SavedItinerary {
-  id        String   @id @default(cuid())
-  shortId   String   @unique
-  state     Json
-  userId    String?  @db.Uuid
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-}
-
-model User {
-  id               String           @id @db.Uuid // Matches Supabase auth.users.id
-  email            String           @unique
-  firstName        String?
-  lastName         String?
-  avatarUrl        String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  savedItineraries SavedItinerary[]
 }
