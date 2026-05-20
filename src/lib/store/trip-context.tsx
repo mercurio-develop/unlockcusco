@@ -198,7 +198,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business, skipAiTrigger: boolean = false) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
-        title: "Today's Plan",
+        title: undefined,
         startAnchor: { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '09:00', service },
         endAnchor:   { title: 'Destination', locationStr: 'Destination', type: 'GENERIC_TOWN' as const, lat: -13.3047, lng: -72.1167, time: '18:00' },
         waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
@@ -234,7 +234,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business, skipAiTrigger: boolean = false) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
-        title: "Today's Plan",
+        title: undefined,
         startAnchor: { title: 'Current Location', locationStr: 'Current Location', type: 'GENERIC_TOWN' as const, lat: -13.5226, lng: -71.9673, time: '09:00' },
         endAnchor:   { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '18:00', service },
         waypoints: [], transitEdges: [], needsAccommodationUpsell: false, totalCost: 0,
@@ -272,7 +272,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       if (!prev) {
         const DEFAULT_COORDS = { lat: -13.5226, lng: -71.9673 }; // Cusco
         return {
-          title: "Today's Plan",
+          title: undefined,
           startAnchor: {
             title: 'Current Location', locationStr: 'Current Location',
             type: 'GENERIC_TOWN' as const,
