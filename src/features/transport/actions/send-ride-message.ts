@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
+"use server";
+
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request: Request) {
+export async function sendRideMessage(rideId: string, text: string) {
   try {
-    const { rideId, text } = await request.json();
-
     if (!rideId || !text) {
-      return NextResponse.json({ error: "Missing rideId or text" }, { status: 400 });
+      return { error: "Missing rideId or text" };
     }
 
     // Since rideId could be the stripeIntentId from the frontend, we need to resolve it
@@ -17,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     if (!ride) {
-      return NextResponse.json({ error: "Ride not found" }, { status: 404 });
+      return { error: "Ride not found" };
     }
 
     const message = await prisma.rideMessage.create({
@@ -28,9 +27,9 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ success: true, message });
+    return { success: true, message };
   } catch (error) {
     console.error("Error creating ride message:", error);
-    return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
+    return { error: "Failed to send message" };
   }
 }
