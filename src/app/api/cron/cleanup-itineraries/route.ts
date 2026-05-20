@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { cleanupOldItineraries } from '@/features/itinerary/services/cleanup-service';
 
 export async function GET(request: Request) {
   // Validate Vercel Cron Secret to prevent unauthorized access
@@ -12,26 +12,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Calculate the date 30 days ago
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Delete records older than 30 days
-    const result = await prisma.savedItinerary.deleteMany({
-      where: {
-        createdAt: {
-          lt: thirtyDaysAgo
-        }
-      }
-    });
-
-    console.log(`Cron /cleanup-itineraries: Deleted ${result.count} old itineraries.`);
-
-    return NextResponse.json({
-      success: true,
-      deletedCount: result.count,
-      cutoffDate: thirtyDaysAgo.toISOString()
-    });
+    const result = await cleanupOldItineraries();
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Failed to cleanup old itineraries:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
