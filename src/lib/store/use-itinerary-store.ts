@@ -17,11 +17,11 @@ export interface ItineraryState {
   swapWaypoint: (targetId: string, newService: Business) => void;
   removeWaypoint: (id: string) => void;
   moveWaypoint: (id: string, direction: "up" | "down") => void;
-  setWaypoints: (waypoints: any[]) => void;
+  setWaypoints: (waypoints: OptimizedPlan["waypoints"]) => void;
   setLegTransportProfile: (index: number, profile: TransportProfile) => void;
 }
 
-export const useItineraryStore = create<ItineraryState>((set, get) => ({
+export const useItineraryStore = create<ItineraryState>((set) => ({
   activeItinerary: null,
   transportProfiles: {},
 
@@ -58,8 +58,8 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
             title: "Current Location",
             locationStr: "Current Location",
             type: 'GENERIC_TOWN' as const,
-            lat: undefined as any,
-            lng: undefined as any,
+            lat: undefined,
+            lng: undefined,
             time: '09:00',
             service: undefined
           }
@@ -142,7 +142,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
             endAnchor: {
               title: 'Destination', locationStr: 'Destination',
               type: 'GENERIC_TOWN' as const,
-              lat: undefined as any, lng: undefined as any, time: '18:00'
+              lat: undefined, lng: undefined, time: '18:00'
             },
             waypoints: [newWaypoint],
             transitEdges: [],
@@ -178,7 +178,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
               locationStr: newService.name || 'Current Location',
               lat: newService.lat || prev.startAnchor.lat,
               lng: newService.lng || prev.startAnchor.lng,
-              service: newService as any
+              service: newService
             }
           }
         };
@@ -194,7 +194,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
               locationStr: newService.name || 'Destination',
               lat: newService.lat || prev.endAnchor.lat,
               lng: newService.lng || prev.endAnchor.lng,
-              service: newService as any
+              service: newService
             }
           }
         };

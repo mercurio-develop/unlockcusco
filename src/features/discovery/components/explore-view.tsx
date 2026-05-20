@@ -82,15 +82,6 @@ export function ExploreView({
   const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
   const isSearchActive = !!initialQuery;
 
-  useEffect(() => {
-    if (initialItinerary && (!activeItinerary || (activeItinerary as any).shortId !== initialItinerary.shortId)) {
-      setActiveItinerary(initialItinerary)
-      setPanelMode("itinerary")
-    } else if (initialItinerary && activeItinerary && (activeItinerary as any).shortId === initialItinerary.shortId && panelMode !== "itinerary") {
-      setPanelMode("itinerary")
-    }
-  }, [initialItinerary, activeItinerary, setActiveItinerary, setPanelMode])
-
   const visibleBusinesses = useMemo(() => {
     return getVisibleBusinesses(effectiveBusinesses, mapBounds, isSearchActive)
   }, [effectiveBusinesses, mapBounds, isSearchActive])

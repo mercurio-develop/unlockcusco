@@ -4,6 +4,7 @@ import { searchParamsCache } from "@/features/discovery/search-params"
 import { getDictionary, Locale } from "@/lib/dictionaries"
 import { getItinerary } from "@/features/itinerary/queries/get-itinerary"
 import { Loader2 } from "lucide-react"
+import { StoreInitializer } from "@/lib/store/store-initializer"
 
 export default async function ExplorePage({ 
   params, 
@@ -21,7 +22,7 @@ export default async function ExplorePage({
       query: parsedParams.q,
       category: parsedParams.cat,
       loc: parsedParams.loc,
-      radiusKm: parsedParams.rad,
+      radiusKm: parsedParams.rad ?? undefined,
       userLat: parsedParams.lat ?? undefined,
       userLng: parsedParams.lng ?? undefined,
       sort: parsedParams.sort,
@@ -36,6 +37,7 @@ export default async function ExplorePage({
 
   return (
     <div className="relative">
+      <StoreInitializer initialItinerary={initialItinerary} />
       <Suspense fallback={
         <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />

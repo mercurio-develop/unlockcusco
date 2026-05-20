@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { getDictionary, Locale } from "@/lib/dictionaries";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { siteConfig } from "@/lib/config/site";
 
@@ -79,11 +80,13 @@ export default async function RootLayout(props: {
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
         <PostHogProvider>
-          <PostHogPageView />
-          <Navbar dict={dict.navbar} />
-          <main className="flex-1 flex flex-col pt-12 bg-white">
-            {children}
-          </main>
+          <NuqsAdapter>
+            <PostHogPageView />
+            <Navbar dict={dict.navbar} />
+            <main className="flex-1 flex flex-col pt-12 bg-white">
+              {children}
+            </main>
+          </NuqsAdapter>
         </PostHogProvider>
         <Analytics />
         <SpeedInsights />

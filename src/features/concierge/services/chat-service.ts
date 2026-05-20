@@ -8,7 +8,32 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-export async function processChatStream(messages: any[], bodyData: any) {
+export type ChatMessagePart = { type: 'text'; text: string } | any;
+export interface ChatMessage {
+  id?: string;
+  role: 'user' | 'assistant' | 'system' | 'data' | 'tool';
+  content?: string;
+  parts?: ChatMessagePart[];
+  [key: string]: any;
+}
+
+export interface ChatRequestData {
+  userLat?: number | null;
+  userLng?: number | null;
+  localTime?: string;
+  targetDate?: string;
+  archetype?: keyof typeof PSYCHOGRAPHIC_MATRIX;
+  intensity?: "1" | "2" | "3";
+  itineraryStartTitle?: string;
+  itineraryEndTitle?: string;
+  itineraryState?: string;
+  activeFilters?: {
+    location?: string;
+    category?: string;
+  };
+}
+
+export async function processChatStream(messages: ChatMessage[], bodyData: ChatRequestData) {
   const { userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, activeFilters } = bodyData;
 
   const hasGPS = userLat != null && userLng != null;
@@ -31,11 +56,11 @@ export async function processChatStream(messages: any[], bodyData: any) {
     systemInstruction += `\n\n<CURRENT_ITINERARY>\n${itineraryState}\n</CURRENT_ITINERARY>`;
   }
 
-  if (archetype && intensity && (PSYCHOGRAPHIC_MATRIX as any)[archetype]?.[intensity]) {
-    systemInstruction += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${(PSYCHOGRAPHIC_MATRIX as any)[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;
+  if (archetype && intensity && PSYCHOGRAPHIC_MATRIX[archetype]?.[intensity]) {
+    systemInstruction += `\n\n<PSYCHOGRAPHIC_PROFILE>\nThe user is a [${archetype}] traveler seeking Intensity Level [${intensity}]. YOU MUST STRICTLY ALIGN YOUR RECOMMENDATIONS AND TONE WITH THIS EXACT DEFINITION: "${PSYCHOGRAPHIC_MATRIX[archetype][intensity]}".\nDo not suggest Level 3 intensity items to a Level 1 user, and vice versa. Adjust your conversational personality to match their risk tolerance and desires.\n</PSYCHOGRAPHIC_PROFILE>`;
   }
 
-  const normalizedMessages = messages.map((msg: any) => {
+  const normalizedMessages = messages.map((msg: ChatMessage) => {
     if (!msg.parts && typeof msg.content === 'string') {
       return { ...msg, parts: [{ type: 'text', text: msg.content }] };
     }
@@ -67,7 +92,7 @@ export async function processChatStream(messages: any[], bodyData: any) {
     return msg;
   });
 
-  const modelMessages = await convertToModelMessages(normalizedMessages);
+  const modelMessages = await convertToModelMessages(normalizedMessages as Parameters<typeof convertToModelMessages>[0]);
 
   const result = streamText({
     model: google('gemini-2.5-flash'),
