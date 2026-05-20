@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useQueryStates } from "nuqs"
+import { searchParamsParsers } from "../search-params"
 import { LayoutGrid, CalendarDays, Sparkles } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { ExplorePanel } from "./explore-panel"
@@ -59,7 +61,7 @@ export function ExploreView({
     initialHasMore
   })
   
-  const searchParams = useSearchParams()
+  const [params, setParams] = useQueryStates(searchParamsParsers)
   const router = useRouter()
   const panelMode = useUiStore(s => s.panelMode);
   const setPanelMode = useUiStore(s => s.setPanelMode);
@@ -97,12 +99,9 @@ export function ExploreView({
     return getEffectiveMapBusinesses(mapBusinesses, mapSearchResults)
   }, [mapBusinesses, mapSearchResults])
   
-  const isDrawerOpen = searchParams.get("filter") === "open"
+  const isDrawerOpen = params.filter === "open"
   const setIsDrawerOpen = (open: boolean) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (open) params.set("filter", "open")
-    else params.delete("filter")
-    router.push(`?${params.toString()}`, { scroll: false })
+    setParams({ filter: open ? "open" : null })
   }
 
   useEffect(() => {
@@ -163,7 +162,7 @@ export function ExploreView({
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={searchParams.get("loc") || ""} onSelectBusiness={(id) => {
+      map={<ExploreMap businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""} onSelectBusiness={(id) => {
         setSelectedId(id);
         window.dispatchEvent(new CustomEvent('drawer-snap-half'));
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 

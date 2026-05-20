@@ -1,6 +1,7 @@
 "use client"
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { useQueryStates } from "nuqs"
+import { searchParamsParsers } from "../search-params"
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, SlidersHorizontal, Navigation, MapPin, ChevronDown } from "lucide-react"
 import posthog from 'posthog-js'
@@ -24,20 +25,18 @@ export function ExploreSearch({
   categoryCounts = {},
   dict
 }: ExploreSearchProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const [params, setParams] = useQueryStates(searchParamsParsers)
   const [value, setValue] = useState(initialQuery)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
-  const currentLoc = searchParams.get("loc") || ""
-  const currentCatStr = searchParams.get("cat") || ""
-  const isRadEnabled = searchParams.has("rad")
-  const currentRad = searchParams.has("rad") ? parseFloat(searchParams.get("rad")!) : 2
-  const currentLat = searchParams.get("lat") || ""
-  const currentLng = searchParams.get("lng") || ""
-  const currentSort = searchParams.get("sort") || "recommended"
+  const currentLoc = params.loc || ""
+  const currentCatStr = params.cat || ""
+  const isRadEnabled = params.rad !== null
+  const currentRad = isRadEnabled ? params.rad! : 5
+  const currentLat = params.lat?.toString() || ""
+  const currentLng = params.lng?.toString() || ""
+  const currentSort = params.sort || "recommended"
   
   const [localRad, setLocalRad] = useState(currentRad)
   const [showCategories, setShowCategories] = useState(false)
@@ -54,27 +53,24 @@ export function ExploreSearch({
   }, [categoryCounts])
 
   useEffect(() => {
-    setValue(searchParams.get("q") || "")
-  }, [searchParams])
+    setValue(params.q || "")
+  }, [params.q])
 
   useEffect(() => {
     setLocalRad(currentRad)
   }, [currentRad])
 
   const navigateFilters = (loc?: string, cats?: string[], q?: string, rad?: number, lat?: string, lng?: string, sort?: string) => {
-    const params = new URLSearchParams()
-    if (q) params.set("q", q)
-    if (loc) params.set("loc", loc)
-    if (cats && cats.length > 0) params.set("cat", cats.join(','))
-    if (rad !== undefined) params.set("rad", rad.toString())
-    if (lat && lng) {
-      params.set("lat", lat)
-      params.set("lng", lng)
-    }
-    if (sort && sort !== "recommended") params.set("sort", sort)
-    if (showFilters) params.set("filter", "open")
-    
-    router.push(`${pathname}?${params.toString()}`)
+    setParams({
+      q: q || null,
+      loc: loc || null,
+      cat: cats && cats.length > 0 ? cats.join(',') : null,
+      rad: rad !== undefined ? rad : null,
+      lat: lat ? parseFloat(lat) : null,
+      lng: lng ? parseFloat(lng) : null,
+      sort: sort && sort !== "recommended" ? sort : null,
+      filter: showFilters ? "open" : null,
+    })
   }
 
   const handleSearchChange = (newVal: string) => {
@@ -358,7 +354,7 @@ export function ExploreSearch({
                           min="0" 
                           max={RADIUS_MARKS.length - 1} 
                           step="1"
-                          value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(2)}
+                          value={RADIUS_MARKS.indexOf(localRad) !== -1 ? RADIUS_MARKS.indexOf(localRad) : RADIUS_MARKS.indexOf(5)}
                           onChange={handleRadiusChange}
                           className="flex-1 accent-rose-600 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                         />
