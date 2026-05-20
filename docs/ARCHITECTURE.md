@@ -171,3 +171,14 @@ TWILIO_WHATSAPP_NUMBER=
 # Analytics
 NEXT_PUBLIC_POSTHOG_KEY=
 ```
+
+---
+
+## Feature-Sliced Architecture Standards
+
+UnlockCusco organizes the codebase into feature slices (`src/features/`). To maintain clean architecture, all code within features must adhere to the following standards:
+
+1. **Component Naming:** React components must use `kebab-case.tsx` (e.g., `ticket-item.tsx`). Do not use `PascalCase.tsx` for filenames.
+2. **Logic Extraction:** Complex state management, context consumption, and side-effects must be extracted out of UI components and into custom hooks located in the `hooks/` directory (e.g., `hooks/use-concierge-chat.ts`). The `.tsx` files should serve primarily as presentation layers.
+3. **Data Transformations:** Functions that format data or build payloads should live in `utils/` (e.g., `utils/chat-payload.ts`), not in `actions/`.
+4. **Server Actions:** The `actions/` directory is strictly reserved for Next.js Server Actions (files containing `"use server"`).

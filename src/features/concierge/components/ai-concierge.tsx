@@ -1,263 +1,34 @@
 "use client"
 import { Business } from "@prisma/client";
 
-import { useState, useEffect, useRef, useMemo } from "react"
-import { useSearchParams, usePathname, useRouter } from "next/navigation"
+import { useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, X, Send, Bot, User, Settings2, Check, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { useChat } from '@ai-sdk/react';
-import { DEFAULT_COORDS } from "@/lib/constants"
-import { ItinerarySummaryCard } from "@/features/concierge/components/ItinerarySummaryCard"
-import { PendingAvailability } from "@/features/concierge/components/PendingAvailability"
-import { SearchResultsCard } from "@/features/concierge/components/SearchResultsCard"
-import { BoletoInfoCard } from "./BoletoInfoCard"
-import { TaxiFareCard } from "./TaxiFareCard"
-import { useTrip } from "@/lib/store/trip-context"
+
+import { ItinerarySummaryCard } from "./itinerary-summary-card"
+import { PendingAvailability } from "./pending-availability"
+import { SearchResultsCard } from "./search-results-card"
+import { BoletoInfoCard } from "./boleto-info-card"
+import { TaxiFareCard } from "./taxi-fare-card"
+import { useConciergeChat } from "../hooks/use-concierge-chat"
 import { usePreferences } from "@/lib/store/preferences-context"
-import { getInitialMessages } from "../constants"
-import { buildChatPayload, formatItineraryState } from "../actions/chat-payload"
 
 export function AiConcierge() {
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate } = usePreferences()
-  const { 
-    panelMode, 
-    aiPromptToTrigger, 
-    setAiPromptToTrigger,
-    activeItinerary,
-    setActiveItinerary,
-    setStartAnchorLocation,
-    updateEndAnchorLocation,
-    setPanelMode,
-    moveWaypoint,
-    clearStartAnchor,
-    clearEndAnchor,
-    setLegTransportProfile,
-    removeWaypoint,
-    swapWaypoint,
-    insertWaypoint,
-    setMapSearchResults
-  } = useTrip()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const processedToolCalls = useRef<Set<string>>(new Set())
-  const processedPromptsRef = useRef<Set<string>>(new Set())
-
-  const sidebarOffset = "0px"
+  const {
+    isChatOpen, setIsChatOpen, pathname,
+    messages, input, setInput, isLoading,
+    handleSubmit, handleShareLocation, sendMessage
+  } = useConciergeChat();
   
+  const { travelVibe } = usePreferences()
+
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const sidebarOffset = "0px"
+
   const isEs = pathname?.split('/')[1] === 'es'
-
-  const initialMessages = useMemo(() => getInitialMessages(isEs), [isEs]);
-
-  const [input, setInput] = useState("");
-  // null = tourist has not shared location; avoids sending Urubamba default as if it were real GPS
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-
-  const chat = useChat({
-    api: '/api/chat',
-    messages: initialMessages as any,
-    body: {
-      userLat: userCoords?.lat,
-      userLng: userCoords?.lng,
-      // localTime and targetDate are now passed dynamically during sendMessage 
-      // to avoid Next.js hydration mismatches from Date.now() on SSR vs Client
-      archetype: travelVibe,
-      intensity: travelIntensity,
-      itineraryState: formatItineraryState(activeItinerary)
-    }
-  } as any);
-
-  const messages = chat.messages || [];
-  const status = (chat as any).status || 'ready';
-  const isLoading = status === 'submitted' || status === 'streaming';
-
-  const sendMessage = useMemo(() => (msg: { text: string }) => {
-    (chat as any).sendMessage({ text: msg.text }, {
-      body: buildChatPayload({
-        userCoords,
-        travelVibe,
-        travelIntensity,
-        targetDate,
-        activeItinerary
-      })
-    });
-  }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    sendMessage({ text: input });
-    setInput("");
-  };
-
-  const handleShareLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserCoords({ lat: latitude, lng: longitude });
-        setStartAnchorLocation(latitude, longitude);
-        setPanelMode('itinerary');
-
-        // Bypass memoized sendMessage (stale closure bug) — pass fresh coords directly in body
-        (chat as any).sendMessage(
-          { text: `I just shared my GPS location. I am at coordinates ${latitude.toFixed(5)}, ${longitude.toFixed(5)}. What can you recommend nearby?` },
-          {
-            body: buildChatPayload({
-              userCoords: { lat: latitude, lng: longitude },
-              travelVibe,
-              travelIntensity,
-              targetDate,
-              activeItinerary,
-              activeFilters: {
-                location: searchParams.get("loc"),
-                category: searchParams.get("cat")
-              }
-            })
-          }
-        );
-      },
-      () => {
-        alert("Unable to retrieve your location. Please check permissions.");
-      }
-    );
-  };
-
-  useEffect(() => {
-    if (aiPromptToTrigger) {
-      // Send context silently — does NOT open the chat. User opens chat themselves via FAB.
-      sendMessage({ text: aiPromptToTrigger });
-      setAiPromptToTrigger(null);
-    }
-  }, [aiPromptToTrigger, sendMessage, setAiPromptToTrigger]);
-
-  // Sync tool results → activeItinerary + my route (v6: msg.parts, state=output-available)
-  useEffect(() => {
-    try {
-    messages.forEach((msg: any) => {
-      if (!msg || msg.role !== 'assistant') return;
-      
-      const toolParts = msg.parts?.filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool') 
-                        || (msg.toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({ 
-                             type: 'tool-invocation', 
-                             toolInvocation: ti, 
-                             state: ti?.state === 'result' ? 'output-available' : undefined, 
-                             output: ti?.result, 
-                             toolCallId: ti?.toolCallId, 
-                             toolName: ti?.toolName 
-                           }))
-                        || [];
-
-      toolParts.forEach((p: any) => {
-        if (!p || p?.state !== 'output-available') return;
-        if (processedToolCalls.current.has(p.toolCallId)) return;
-
-        const toolName = p.toolName || p.type?.replace(/^tool-/, '');
-        const output = p.output;
-
-        // Auto-activate full itinerary from buildItinerary
-        if (toolName === 'buildItinerary' && output && !output.error) {
-          setActiveItinerary(output);
-          setPanelMode('itinerary');
-          processedToolCalls.current.add(p.toolCallId);
-          return;
-        }
-
-        // Sync AI recommendations to map
-        if (toolName === 'searchDatabase' && output && !output.error) {
-          const list = Array.isArray(output) ? output : (output.alternatives || []);
-          if (list.length > 0) {
-            const withFlag = list.map((b: any) => ({ ...b, isConciergeResult: true }));
-            setMapSearchResults(withFlag);
-          }
-        }
-
-        // mutateItinerary syncs
-        if (toolName !== 'mutateItinerary' || !output?.success) return;
-
-        const { action, targetId, resolvedBusiness, resolvedLocation, coords, time, direction, transportProfile, legIndex } = output;
-
-        if (action === 'SWAP_STOP' && targetId && resolvedBusiness) {
-          swapWaypoint(targetId, resolvedBusiness as any);
-        }
-
-        if (action === 'ADD_WAYPOINT' && resolvedBusiness) {
-          insertWaypoint(resolvedBusiness as any, true);
-        }
-
-        if (action === 'SET_START') {
-          setStartAnchorLocation(
-            coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
-            coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
-            resolvedLocation || resolvedBusiness?.name || 'Current Location',
-            resolvedBusiness as any,
-            true // skipAiTrigger to prevent infinite chat loop
-          );
-          setPanelMode('itinerary');
-        }
-
-        if (action === 'SET_END') {
-          updateEndAnchorLocation(
-            coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
-            coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
-            resolvedLocation || resolvedBusiness?.name || 'Destination',
-            resolvedBusiness as any,
-            true // skipAiTrigger to prevent infinite chat loop
-          );
-          setPanelMode('itinerary');
-        }
-
-        if (action === 'REMOVE_WAYPOINT' && targetId) {
-          removeWaypoint(targetId);
-        }
-
-        if (action === 'MOVE_WAYPOINT' && targetId && direction) {
-          moveWaypoint(targetId, direction);
-        }
-
-        if (action === 'CLEAR_START') {
-          clearStartAnchor();
-        }
-
-        if (action === 'CLEAR_END') {
-          clearEndAnchor();
-        }
-
-        if (action === 'SET_TRANSPORT_PROFILE' && legIndex !== undefined && transportProfile) {
-          setLegTransportProfile(legIndex, transportProfile);
-        }
-
-        if (action === 'UPDATE_TIME' && targetId && time) {
-          setActiveItinerary(prev => {
-            if (!prev) return prev;
-            if (targetId === 'itin-start') {
-              return { ...prev, startAnchor: { ...prev.startAnchor, time } };
-            } else if (targetId === 'itin-arrival') {
-              return { ...prev, endAnchor: { ...prev.endAnchor, time } };
-            } else {
-              const updatedWaypoints = prev.waypoints.map((w: any) =>
-                w.id === targetId ? { ...w, startTime: time } : w
-              );
-              return { ...prev, waypoints: updatedWaypoints };
-            }
-          });
-        }
-
-        processedToolCalls.current.add(p.toolCallId);
-      });
-    });
-    } catch (e) {
-      console.error("Tool sync error:", e);
-    }
-  }, [messages, activeItinerary, setActiveItinerary, userCoords, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation, setMapSearchResults]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
@@ -267,25 +38,19 @@ export function AiConcierge() {
 
   useEffect(() => {
     if (!messagesEndRef.current) return;
-    
     const scrollContainer = messagesEndRef.current.parentElement;
     if (!scrollContainer) return;
 
     let isScrolledToBottom = true;
-
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       isScrolledToBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
     };
-
     scrollContainer.addEventListener('scroll', handleScroll);
 
     const resizeObserver = new ResizeObserver(() => {
-      if (isScrolledToBottom) {
-        scrollToBottom("auto");
-      }
+      if (isScrolledToBottom) scrollToBottom("auto");
     });
-
     resizeObserver.observe(scrollContainer);
 
     return () => {
@@ -297,44 +62,6 @@ export function AiConcierge() {
   useEffect(() => {
     scrollToBottom("smooth");
   }, [messages.length, isLoading])
-
-  useEffect(() => {
-    const aiPrompt = searchParams.get("ai_prompt");
-    const data = searchParams.get("data");
-
-    if (aiPrompt && !processedPromptsRef.current.has(aiPrompt + (data || ""))) {
-      processedPromptsRef.current.add(aiPrompt + (data || ""));
-      setIsChatOpen(true);
-
-      let promptText = aiPrompt;
-      if (aiPrompt === "macro_trip" && data) {
-        try {
-          const parsedData = JSON.parse(decodeURIComponent(data));
-          promptText = `I have completed the Journey Designer. Here is my profile:\n
-Dates: ${parsedData.dates?.start} to ${parsedData.dates?.end}
-Travelers: ${parsedData.pax}
-Exertion Profile: ${parsedData.exertionProfile}
-Lenses of Discovery: ${parsedData.lenses?.join(', ')}
-Autonomy Ratio: ${parsedData.autonomy}
-Needs Hotels: ${parsedData.needsHotels ? 'Yes' : 'No'}\n
-Please generate my macro trip plan.`;
-        } catch (e) {
-          console.error("Failed to parse journey designer data", e);
-        }
-      }
-
-      setTimeout(() => {
-        sendMessage({ text: promptText });
-      }, 300);
-
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("ai_prompt");
-      params.delete("data");
-      const newSearch = params.toString();
-      const newUrl = newSearch ? `${pathname}?${newSearch}` : pathname;
-      router.replace(newUrl, { scroll: false });
-    }
-  }, [searchParams, travelVibe, travelIntensity, pathname, router, targetDate, sendMessage, setIsChatOpen]);
 
   if (!pathname?.includes("/explore") && !pathname?.includes("/pro")) {
     return null;
@@ -478,7 +205,6 @@ Please generate my macro trip plan.`;
                           return null;
                         }
 
-                        // Render tool errors as inline cards instead of ignoring them
                         if (output?.error || typeof output === 'string') {
                           return (
                             <div key={key} className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 ml-11 mt-2">
