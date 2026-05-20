@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { scrapeMachuPicchuTickets } from "@/features/discovery/actions/scrape-tickets";
 
 export default function MachuPicchuPage() {
   const router = useRouter();
@@ -20,16 +21,11 @@ export default function MachuPicchuPage() {
     setResults(null);
 
     try {
-      const res = await fetch(`/api/machu-picchu/scrape?date=${date}`);
-      const data = await res.json();
-      if (res.ok) {
-        setResults(data);
-      } else {
-        alert(data.error || "Failed to fetch availability.");
-      }
-    } catch (err) {
+      const data = await scrapeMachuPicchuTickets(date);
+      setResults(data);
+    } catch (err: any) {
       console.error(err);
-      alert("Error checking availability.");
+      alert(err.message || "Error checking availability.");
     } finally {
       setLoading(false);
     }
