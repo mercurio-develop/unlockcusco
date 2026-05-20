@@ -23,6 +23,7 @@ interface ExploreViewProps {
   initialHasMore: boolean
   initialQuery: string
   initialSelectedId?: string | null
+  initialItinerary?: any
   dict?: any
 }
 
@@ -38,6 +39,7 @@ export function ExploreView({
   initialHasMore, 
   initialQuery, 
   initialSelectedId,
+  initialItinerary,
   dict
 }: ExploreViewProps) {
   const {
@@ -58,11 +60,20 @@ export function ExploreView({
   
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { panelMode, setPanelMode, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults } = useTrip()
+  const { panelMode, setPanelMode, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults, activeItinerary, setActiveItinerary } = useTrip()
   const { isChatOpen, setIsChatOpen, conciergeSendMessage } = usePreferences()
 
   const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
   const isSearchActive = !!initialQuery;
+
+  useEffect(() => {
+    if (initialItinerary && (!activeItinerary || (activeItinerary as any).shortId !== initialItinerary.shortId)) {
+      setActiveItinerary(initialItinerary)
+      setPanelMode("itinerary")
+    } else if (initialItinerary && activeItinerary && (activeItinerary as any).shortId === initialItinerary.shortId && panelMode !== "itinerary") {
+      setPanelMode("itinerary")
+    }
+  }, [initialItinerary, activeItinerary, setActiveItinerary, setPanelMode])
 
   const visibleBusinesses = useMemo(() => {
     return getVisibleBusinesses(effectiveBusinesses, mapBounds, isSearchActive)
