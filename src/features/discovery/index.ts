@@ -1,5 +1,5 @@
 export { ExploreView } from './components/explore-view';
-export { fetchBusinesses } from './actions/fetch-businesses';
+export { getBusinesses } from './queries/get-businesses';
 export { AsociadoBadge } from './components/asociado-badge';
 export { GastronomicTemplate } from './components/templates/business-template-gastronomic';
 export { ExpeditionTemplate } from './components/templates/business-template-expedition';

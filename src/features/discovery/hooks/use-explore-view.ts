@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
-import { fetchBusinesses } from "../actions/fetch-businesses"
+import { getBusinesses } from "../queries/get-businesses"
 
 export interface UseExploreViewStateProps {
   initialBusinesses: Business[]
@@ -46,7 +46,7 @@ export function useExploreViewState({
       const sort = searchParams.get("sort") || undefined
       const rad = searchParams.get("rad") ? Number(searchParams.get("rad")) : undefined
 
-      const result = await fetchBusinesses({
+      const result = await getBusinesses({
         query: q,
         category: cat,
         loc: loc,

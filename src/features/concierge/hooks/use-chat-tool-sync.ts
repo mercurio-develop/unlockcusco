@@ -50,13 +50,13 @@ export function useChatToolSync(messages: any[]) {
           const { action, targetId, resolvedBusiness, resolvedLocation, coords, time, direction, transportProfile, legIndex } = output;
 
           if (action === 'SWAP_STOP' && targetId && resolvedBusiness) swapWaypoint(targetId, resolvedBusiness as any);
-          if (action === 'ADD_WAYPOINT' && resolvedBusiness) insertWaypoint(resolvedBusiness as any, true);
+          if (action === 'ADD_WAYPOINT' && resolvedBusiness) insertWaypoint(resolvedBusiness as any);
           if (action === 'SET_START') {
             setStartAnchorLocation(
               coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
               coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
               resolvedLocation || resolvedBusiness?.name || 'Current Location',
-              resolvedBusiness as any, true
+              resolvedBusiness as any
             );
             setPanelMode('itinerary');
           }
@@ -65,7 +65,7 @@ export function useChatToolSync(messages: any[]) {
               coords?.lat || resolvedBusiness?.lat || DEFAULT_COORDS.lat,
               coords?.lng || resolvedBusiness?.lng || DEFAULT_COORDS.lng,
               resolvedLocation || resolvedBusiness?.name || 'Destination',
-              resolvedBusiness as any, true
+              resolvedBusiness as any
             );
             setPanelMode('itinerary');
           }

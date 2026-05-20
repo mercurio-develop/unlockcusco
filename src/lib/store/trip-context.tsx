@@ -31,11 +31,9 @@ interface TripContextType {
   setIsExchangingEnd: (v: boolean) => void;
   isAddingStop: boolean;
   setIsAddingStop: (v: boolean) => void;
-  aiPromptToTrigger: string | null;
-  setAiPromptToTrigger: (prompt: string | null) => void;
-  setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business, skipAiTrigger?: boolean) => void;
-  updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business, skipAiTrigger?: boolean) => void;
-  insertWaypoint: (service: Business, skipAiTrigger?: boolean) => boolean;
+  setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
+  updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
+  insertWaypoint: (service: Business) => boolean;
   swapWaypoint: (targetId: string, newService: Business) => void;
   removeWaypoint: (id: string) => void;
   moveWaypoint: (id: string, direction: "up" | "down") => void;
@@ -55,7 +53,7 @@ interface TripContextType {
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
 export function TripProvider({ children }: { children: ReactNode }) {
-  const { setIsChatOpen } = usePreferences();
+  const { setIsChatOpen, conciergeSendMessage } = usePreferences();
   const [activeItinerary, setActiveItinerary] = useState<OptimizedPlan | null>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>("discover");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -63,7 +61,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const [isExchangingStart, setIsExchangingStart] = useState(false);
   const [isExchangingEnd, setIsExchangingEnd] = useState(false);
   const [isAddingStop, setIsAddingStop] = useState(false);
-  const [aiPromptToTrigger, setAiPromptToTrigger] = useState<string | null>(null);
   const [transportProfiles, setTransportProfiles] = useState<Record<number, TransportProfile>>({});
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [mapClickMode, setMapClickMode] = useState<'start' | 'end' | null>(null);
@@ -195,7 +192,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       .catch(err => console.error("Mapbox routing error:", err));
   }, [activeItinerary, transportProfiles]);
 
-  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business, skipAiTrigger: boolean = false) => {
+  const setStartAnchorLocation = useCallback((lat: number, lng: number, title: string = "Current Location", service?: Business) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
         title: undefined,
@@ -208,9 +205,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
         startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title, service }
       };
     });
-    if (!skipAiTrigger) {
-      setAiPromptToTrigger(`[INTERNAL] I just updated my start location to ${title}.`);
-    }
   }, []);
 
   const clearStartAnchor = useCallback(() => {
@@ -231,7 +225,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business, skipAiTrigger: boolean = false) => {
+  const updateEndAnchorLocation = useCallback((lat: number, lng: number, title: string = "Custom End Location", service?: Business) => {
     setActiveItinerary(prev => {
       const base = prev ?? {
         title: undefined,
@@ -251,12 +245,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
         }
       };
     });
-    if (!skipAiTrigger) {
-      setAiPromptToTrigger(`[INTERNAL] I just updated my end location to ${title}.`);
-    }
   }, []);
 
-  const insertWaypoint = useCallback((service: Business, skipAiTrigger: boolean = false): boolean => {
+  const insertWaypoint = useCallback((service: Business): boolean => {
     setActiveItinerary(prev => {
       const newWaypoint = {
         id: service.id,
@@ -296,16 +287,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
       };
     });
 
-    if (!skipAiTrigger) {
-      const bName = service.name || "this location";
-      setAiPromptToTrigger(`[INTERNAL] I just added ${bName} to my itinerary.`);
-    }
     setPanelMode('itinerary');
     setIsAddingStop(false);
     return true;
   }, []);
 
-  const swapWaypoint = useCallback((targetId: string, newService: Business, skipAiTrigger: boolean = false) => {
+  const swapWaypoint = useCallback((targetId: string, newService: Business) => {
     setActiveItinerary(prev => {
       if (!prev) return null;
       
@@ -354,9 +341,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
     });
     setExchangeTargetId(null);
     setPanelMode('itinerary');
-    if (!skipAiTrigger) {
-      setAiPromptToTrigger(`[INTERNAL] I just swapped an item in my itinerary with ${newService.name || "this location"}.`);
-    }
   }, []);
 
   const removeWaypoint = useCallback((id: string) => {
@@ -427,8 +411,6 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setIsExchangingEnd,
       isAddingStop,
       setIsAddingStop,
-      aiPromptToTrigger,
-      setAiPromptToTrigger,
       setStartAnchorLocation,
       updateEndAnchorLocation,
       insertWaypoint,
@@ -447,7 +429,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       clearEndAnchor,
       saveItinerary,
   }), [
-      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, isAddingStop, aiPromptToTrigger,
+      activeItinerary, panelMode, selectedId, exchangeTargetId, isExchangingStart, isExchangingEnd, isAddingStop,
       setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, swapWaypoint,
       removeWaypoint, moveWaypoint, setWaypoints, routeData, transportProfiles,
       mapClickMode, mapSearchResults, setMapSearchResults, clearStartAnchor, clearEndAnchor, saveItinerary,

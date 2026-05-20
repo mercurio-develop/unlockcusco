@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useEffect, useState, use } from "react"
-import { ExploreView } from "@/features/discovery"
+import { ExploreView, getBusinesses } from "@/features/discovery"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import type { Business } from "@prisma/client"
@@ -63,23 +63,17 @@ function ExplorePageContent({ dict }: { dict: any }) {
       setLoading(true)
       setError(null)
       try {
-        const params = new URLSearchParams()
-        if (q) params.set("q", q)
-        if (id) params.set("id", id)
-        if (loc) params.set("loc", loc)
-        if (cat) params.set("cat", cat)
-        if (rad) params.set("rad", rad)
-        if (lat) params.set("lat", lat)
-        if (lng) params.set("lng", lng)
-        if (sort) params.set("sort", sort)
-        params.set("limit", "30")
-        params.set("lang", dict?._meta_lang || "en")
+        const result = await getBusinesses({
+          query: q,
+          category: cat,
+          loc,
+          radiusKm: rad ? parseFloat(rad) : undefined,
+          userLat: lat ? parseFloat(lat) : undefined,
+          userLng: lng ? parseFloat(lng) : undefined,
+          sort,
+          limit: 30
+        });
 
-        const res = await fetch(`/api/businesses?${params.toString()}`, { signal: controller.signal })
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`)
-        }
-        const result = await res.json()
         if (!ignore) {
           setData(result)
         }

@@ -37,7 +37,7 @@ function interleaveCategories(sortedBusinesses: any[]) {
   return interleaved
 }
 
-export interface FetchBusinessesParams {
+export interface GetBusinessesParams {
   query?: string
   category?: string
   loc?: string
@@ -70,7 +70,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * c;
 }
 
-async function fetchBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20 }: FetchBusinessesParams) {
+async function getBusinessesInternal({ query = "", category = "", loc = "", radiusKm, userLat, userLng, sort = "recommended", page = 0, limit = 20 }: GetBusinessesParams) {
   let targetCategory = category
   const q = query.trim()
   let isHeuristicMatch = false
@@ -271,9 +271,9 @@ async function fetchBusinessesInternal({ query = "", category = "", loc = "", ra
   }
 }
 
-export async function fetchBusinesses(params: FetchBusinessesParams) {
+export async function getBusinesses(params: GetBusinessesParams) {
   const cacheKey = [
-    'fetch-businesses',
+    'get-businesses',
     'v7', // cache buster
     params.query || '',
     params.category || '',
@@ -287,7 +287,7 @@ export async function fetchBusinesses(params: FetchBusinessesParams) {
   ]
 
   const fetcher = unstable_cache(
-    async () => fetchBusinessesInternal(params),
+    async () => getBusinessesInternal(params),
     cacheKey,
     {
       revalidate: 60, // 1 minute — keeps fresh when new businesses are added

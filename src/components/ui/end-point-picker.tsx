@@ -4,6 +4,8 @@ import { MapPin, Zap, Loader2 } from "lucide-react";
 import { COORDS_MAP } from "@/lib/constants";
 import { getCategoryColor } from "@/lib/utils/category-style";
 
+import { getBusinesses } from "@/features/discovery";
+
 const QUICK_HUBS = [
   { name: "Urubamba",      lat: -13.3047, lng: -72.1167 },
   { name: "Ollantaytambo", lat: -13.2588, lng: -72.2633 },
@@ -60,9 +62,8 @@ export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerP
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/businesses?q=${encodeURIComponent(q)}&limit=5`);
-        const data = await res.json();
-        setBizResults((data.businesses || data || []).filter((b: any) => b.lat && b.lng));
+        const data = await getBusinesses({ query: q, limit: 5 });
+        setBizResults((data.businesses || []).filter((b: any) => b.lat && b.lng));
       } catch { setBizResults([]); }
       finally { setLoading(false); }
     }, 300);

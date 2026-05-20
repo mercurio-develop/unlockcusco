@@ -83,7 +83,7 @@ export function BusinessCard({
     setIsExchangingEnd,
     setSelectedId
   } = useTrip()
-  const { setMobileViewMode, setIsChatOpen } = usePreferences()
+  const { setMobileViewMode, setIsChatOpen, conciergeSendMessage } = usePreferences()
   const router = useRouter()
   const pathname = usePathname()
   
@@ -354,6 +354,9 @@ export function BusinessCard({
                       setStartAnchorLocation(business.lat!, business.lng!, business.name, business as any);
                       setIsExchangingStart(false);
                       setPanelMode('itinerary');
+                      if (conciergeSendMessage) {
+                        conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to ${business.name}.` });
+                      }
                     }}
                     className={cn(
                       "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
@@ -370,6 +373,9 @@ export function BusinessCard({
                       updateEndAnchorLocation(business.lat!, business.lng!, business.name, business as any);
                       setIsExchangingEnd(false);
                       setPanelMode('itinerary');
+                      if (conciergeSendMessage) {
+                        conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${business.name}.` });
+                      }
                     }}
                     className={cn(
                       "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
@@ -393,7 +399,13 @@ export function BusinessCard({
                     </Button>
                   ) : (
                     <Button
-                      onClick={(e) => { e.stopPropagation(); swapWaypoint(exchangeTargetId, business); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        swapWaypoint(exchangeTargetId, business); 
+                        if (conciergeSendMessage) {
+                          conciergeSendMessage({ text: `[INTERNAL] I just swapped an item in my itinerary with ${business.name || "this location"}.` });
+                        }
+                      }}
                       className={cn(
                         "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
                         isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
@@ -421,6 +433,9 @@ export function BusinessCard({
                         e.stopPropagation(); 
                         insertWaypoint(business);
                         setPanelMode('itinerary');
+                        if (conciergeSendMessage) {
+                          conciergeSendMessage({ text: `[INTERNAL] I just added ${business.name || "this location"} to my itinerary.` });
+                        }
                         if (pathname !== '/explore') {
                           router.push('/explore');
                         }

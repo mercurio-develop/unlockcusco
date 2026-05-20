@@ -1,7 +1,7 @@
 import useSWRInfinite from 'swr/infinite'
 import { useMemo } from 'react'
 import type { Business } from '@prisma/client'
-import { fetchBusinesses } from '../actions/fetch-businesses'
+import { getBusinesses } from '../queries/get-businesses';
 
 export interface UseBusinessesProps {
   locationSlug: string
@@ -13,7 +13,7 @@ export interface UseBusinessesProps {
 
 const fetcher = async (key: any[]) => {
   const [_, loc, cat, q, sort, limit, page] = key;
-  return fetchBusinesses({ 
+  return getBusinesses({ 
     loc, 
     category: cat || undefined, 
     query: q || undefined, 

@@ -15,6 +15,8 @@ interface PreferencesContextType {
   setIsMapPicking: (val: { active: boolean, target: 'start' | 'end' | null }) => void;
   mobileViewMode: 'list' | 'map';
   setMobileViewMode: React.Dispatch<React.SetStateAction<'list' | 'map'>>;
+  conciergeSendMessage: ((msg: { text: string }) => void) | null;
+  setConciergeSendMessage: (fn: ((msg: { text: string }) => void) | null) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -26,6 +28,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const [targetDate, setTargetDate] = useState<Date>(new Date());
   const [isMapPicking, setIsMapPicking] = useState<{ active: boolean, target: 'start' | 'end' | null }>({ active: false, target: null });
   const [mobileViewMode, setMobileViewMode] = useState<'list' | 'map'>('list');
+  const [conciergeSendMessage, setConciergeSendMessage] = useState<((msg: { text: string }) => void) | null>(null);
 
   React.useEffect(() => {
     if (window.innerWidth >= 768) {
@@ -45,9 +48,11 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     isMapPicking,
     setIsMapPicking,
     mobileViewMode,
-    setMobileViewMode
+    setMobileViewMode,
+    conciergeSendMessage,
+    setConciergeSendMessage
   }), [
-    isChatOpen, travelVibe, travelIntensity, targetDate, isMapPicking, mobileViewMode
+    isChatOpen, travelVibe, travelIntensity, targetDate, isMapPicking, mobileViewMode, conciergeSendMessage
   ]);
 
   return (

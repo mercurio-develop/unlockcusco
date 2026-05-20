@@ -59,7 +59,7 @@ export function ExploreView({
   const searchParams = useSearchParams()
   const router = useRouter()
   const { panelMode, setPanelMode, selectedId, setSelectedId, mapClickMode, setMapClickMode, updateEndAnchorLocation, setStartAnchorLocation, mapSearchResults } = useTrip()
-  const { isChatOpen, setIsChatOpen } = usePreferences()
+  const { isChatOpen, setIsChatOpen, conciergeSendMessage } = usePreferences()
 
   const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
   const isSearchActive = !!initialQuery;
@@ -144,8 +144,10 @@ export function ExploreView({
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 
         if (mapClickMode === 'start') {
           setStartAnchorLocation(lat, lng, 'Custom Start');
+          if (conciergeSendMessage) conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to coordinates ${lat.toFixed(5)}, ${lng.toFixed(5)}.` });
         } else if (mapClickMode === 'end') {
           updateEndAnchorLocation(lat, lng, 'Custom End');
+          if (conciergeSendMessage) conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to coordinates ${lat.toFixed(5)}, ${lng.toFixed(5)}.` });
         }
         setMapClickMode(null); 
       }} onBoundsChange={setMapBounds} dict={dict} />}

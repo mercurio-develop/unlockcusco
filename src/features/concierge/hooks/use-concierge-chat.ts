@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useChat } from '@ai-sdk/react';
 import { useTrip } from "@/lib/store/trip-context";
@@ -11,7 +11,7 @@ import { useChatAutoPrompt } from "./use-chat-auto-prompt";
 import { useChatToolSync } from "./use-chat-tool-sync";
 
 export function useConciergeChat() {
-  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate } = usePreferences();
+  const { isChatOpen, setIsChatOpen, travelVibe, travelIntensity, targetDate, setConciergeSendMessage } = usePreferences();
   const { activeItinerary } = useTrip();
   const pathname = usePathname();
 
@@ -49,8 +49,14 @@ export function useConciergeChat() {
     });
   }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
 
-  // Handle URL and global state prompts
-  useChatAutoPrompt(sendMessage);
+  // Register the sendMessage function globally so other components can trigger it synchronously
+  useEffect(() => {
+    setConciergeSendMessage(() => sendMessage);
+    return () => setConciergeSendMessage(null);
+  }, [sendMessage, setConciergeSendMessage]);
+
+  // Handle URL prompts deterministically
+  useChatAutoPrompt(sendMessage, isChatOpen, status);
 
   // Sync tool executions to map state
   useChatToolSync(messages);

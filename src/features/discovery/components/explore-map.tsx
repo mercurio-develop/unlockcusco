@@ -255,7 +255,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   const { activeItinerary, panelMode: strictPanelMode, setPanelMode, setStartAnchorLocation, updateEndAnchorLocation, insertWaypoint, routeData, setMapClickMode, setMapSearchResults } = useTrip()
   const panelMode = strictPanelMode as string;
-  const { isChatOpen } = usePreferences()
+  const { isChatOpen, conciergeSendMessage } = usePreferences()
 
   // FlyTo when start anchor location changes
   const startLat = activeItinerary?.startAnchor?.lat
@@ -853,6 +853,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   setStartAnchorLocation(e.lngLat.lat, e.lngLat.lng)
+                  if (conciergeSendMessage) {
+                    conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to coordinates ${e.lngLat.lat.toFixed(5)}, ${e.lngLat.lng.toFixed(5)}.` });
+                  }
                 }
                 setMapClickMode?.(null)
               }}
@@ -899,6 +902,9 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               onDragEnd={(e) => {
                 if (panelMode === 'itinerary') {
                   updateEndAnchorLocation(e.lngLat.lat, e.lngLat.lng, end.title, (end as any).service)
+                  if (conciergeSendMessage) {
+                    conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${end.title}.` });
+                  }
                 }
                 setMapClickMode?.(null)
               }}

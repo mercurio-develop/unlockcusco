@@ -1,26 +1,21 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useTrip } from "@/lib/store/trip-context";
 import { usePreferences } from "@/lib/store/preferences-context";
 
-export function useChatAutoPrompt(sendMessage: (msg: { text: string }) => void) {
+export function useChatAutoPrompt(
+  sendMessage: (msg: { text: string }) => void,
+  isChatOpen: boolean,
+  chatStatus: string
+) {
   const { setIsChatOpen } = usePreferences();
-  const { aiPromptToTrigger, setAiPromptToTrigger } = useTrip();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   
   const processedPromptsRef = useRef<Set<string>>(new Set());
+  const pendingPromptRef = useRef<string | null>(null);
 
-  // Handle global state trigger
-  useEffect(() => {
-    if (aiPromptToTrigger) {
-      sendMessage({ text: aiPromptToTrigger });
-      setAiPromptToTrigger(null);
-    }
-  }, [aiPromptToTrigger, sendMessage, setAiPromptToTrigger]);
-
-  // Handle URL params trigger
+  // 1. Detect URL params and set pending prompt
   useEffect(() => {
     const aiPrompt = searchParams.get("ai_prompt");
     const data = searchParams.get("data");
@@ -37,7 +32,7 @@ export function useChatAutoPrompt(sendMessage: (msg: { text: string }) => void) 
         } catch (e) { console.error("Failed to parse journey designer data", e); }
       }
 
-      setTimeout(() => sendMessage({ text: promptText }), 300);
+      pendingPromptRef.current = promptText;
 
       const params = new URLSearchParams(searchParams.toString());
       params.delete("ai_prompt");
@@ -45,5 +40,13 @@ export function useChatAutoPrompt(sendMessage: (msg: { text: string }) => void) 
       const newSearch = params.toString();
       router.replace(newSearch ? `${pathname}?${newSearch}` : pathname, { scroll: false });
     }
-  }, [searchParams, pathname, router, sendMessage, setIsChatOpen]);
+  }, [searchParams, pathname, router, setIsChatOpen]);
+
+  // 2. Deterministic Execution: Send message when chat is actually ready
+  useEffect(() => {
+    if (pendingPromptRef.current && isChatOpen && chatStatus === 'ready') {
+      sendMessage({ text: pendingPromptRef.current });
+      pendingPromptRef.current = null;
+    }
+  }, [isChatOpen, chatStatus, sendMessage]);
 }

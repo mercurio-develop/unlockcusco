@@ -108,7 +108,6 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
     updateEndAnchorLocation,
     mapClickMode,
     setMapClickMode,
-    setAiPromptToTrigger,
     clearStartAnchor,
     clearEndAnchor,
     setStartAnchorLocation,
@@ -117,7 +116,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
     setIsAddingStop,
     saveItinerary,
   } = useTrip();
-  const { setIsChatOpen } = usePreferences();
+  const { setIsChatOpen, conciergeSendMessage } = usePreferences();
   const router = useRouter();
   const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';
@@ -234,6 +233,9 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                     if (navigator.geolocation) {
                       navigator.geolocation.getCurrentPosition((pos) => {
                         setStartAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
+                        if (conciergeSendMessage) {
+                          conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
+                        }
                       }, (err) => {
                         alert("Could not access your location. Please check browser permissions.");
                       });
@@ -402,6 +404,9 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                         onClick={e => {
                           e.stopPropagation();
                           updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title, waypoint.service);
+                          if (conciergeSendMessage) {
+                            conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${waypoint.title}.` });
+                          }
                           removeWaypoint(waypoint.id);
                         }}
                         title="Set as end of trip"
@@ -463,7 +468,12 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                 <EndPointPicker
                   value={activeItinerary.endAnchor?.title}
                   placeholder={t.endPlaceholder}
-                  onSelect={({ lat, lng, name, service }) => updateEndAnchorLocation(lat, lng, name, service)}
+                  onSelect={({ lat, lng, name, service }) => {
+                    updateEndAnchorLocation(lat, lng, name, service);
+                    if (conciergeSendMessage) {
+                      conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${name}.` });
+                    }
+                  }}
                 />
                 <button
                   onClick={e => { e.stopPropagation(); setSelectedId('itin-arrival'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
