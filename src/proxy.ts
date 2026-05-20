@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 const locales = ['en', 'es']
 const defaultLocale = 'en'
@@ -22,22 +23,25 @@ function getLocale(request: NextRequest) {
   return defaultLocale
 }
 
-export default function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   // Check if there is any supported locale in the pathname
   const { pathname } = request.nextUrl
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   )
 
-  if (pathnameHasLocale) return
+  if (!pathnameHasLocale) {
+    // Redirect if there is no locale
+    const locale = getLocale(request)
+    request.nextUrl.pathname = `/${locale}${pathname}`
+    
+    // e.g. incoming request is /business/casa-cori
+    // The new URL is now /en/business/casa-cori
+    return NextResponse.redirect(request.nextUrl)
+  }
 
-  // Redirect if there is no locale
-  const locale = getLocale(request)
-  request.nextUrl.pathname = `/${locale}${pathname}`
-  
-  // e.g. incoming request is /business/casa-cori
-  // The new URL is now /en/business/casa-cori
-  return NextResponse.redirect(request.nextUrl)
+  // Next, update Supabase session
+  return await updateSession(request)
 }
 
 export const config = {

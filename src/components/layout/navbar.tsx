@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+import { AuthButton } from "@/features/auth/components/auth-button"
+
 const LOCATIONS = [
   { id: "cusco", name: "Cusco" },
   { id: "urubamba", name: "Urubamba" },
@@ -22,7 +24,7 @@ const LOCATIONS = [
   { id: "calca", name: "Calca" },
 ]
 
-export function Navbar({ dict }: { dict?: any }) {
+export function Navbar({ dict, user }: { dict?: any, user?: any | null }) {
   const pathname = usePathname() || '/'
   const isChatOpen = useUiStore(s => s.isChatOpen)
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
@@ -176,6 +178,8 @@ export function Navbar({ dict }: { dict?: any }) {
         
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <AuthButton user={user} lang={locale} dict={(dict as any)?.auth || {}} />
+          
           <div className="flex items-center bg-slate-100/80 p-1 rounded-full border border-slate-200/60 shadow-inner" title={t.changeLanguage}>
             <button
               onClick={() => handleLanguageSwitch('en')}
