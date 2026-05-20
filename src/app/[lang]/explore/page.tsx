@@ -8,6 +8,7 @@ import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { useTrip } from "@/lib/store/trip-context"
 import { getDictionary, Locale } from "@/lib/dictionaries"
+import { getItinerary } from "@/features/itinerary/queries/get-itinerary"
 
 function ExplorePageContent({ dict }: { dict: any }) {
   const searchParams = useSearchParams()
@@ -35,19 +36,18 @@ function ExplorePageContent({ dict }: { dict: any }) {
   useEffect(() => {
     if (tripId && (!activeItinerary || (activeItinerary as any).shortId !== tripId)) {
       console.log(`[ExplorePage] Fetching itinerary for tripId: ${tripId}`);
-      fetch(`/api/itineraries/${tripId}`)
-        .then(res => res.json())
-        .then(data => {
+      getItinerary(tripId)
+        .then((data: any) => {
           console.log(`[ExplorePage] Itinerary API response:`, data);
           if (data.success && data.state) {
             console.log(`[ExplorePage] Setting active itinerary and panel mode to 'itinerary'`);
-            setActiveItinerary({ ...data.state, shortId: tripId });
+            setActiveItinerary({ ...data.state as any, shortId: tripId });
             setPanelMode("itinerary");
           } else {
             console.error("[ExplorePage] API returned success=false or missing state", data);
           }
         })
-        .catch(err => console.error("[ExplorePage] Failed to load itinerary via fetch", err));
+        .catch((err: any) => console.error("[ExplorePage] Failed to load itinerary via fetch", err));
     } else if (tripId && activeItinerary && (activeItinerary as any).shortId === tripId) {
       console.log(`[ExplorePage] Itinerary ${tripId} already active. Setting panel mode to 'itinerary'.`);
       setPanelMode("itinerary");

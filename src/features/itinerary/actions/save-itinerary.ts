@@ -1,12 +1,19 @@
-import { NextResponse } from 'next/server';
+"use server";
+
 import { prisma } from '@/lib/prisma';
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { headers } from "next/headers";
 import { z } from "zod";
 
-const ItinerarySchema = z.object({
-  state: z.string().min(1)
-});
+const ItineraryStateSchema = z.any().refine(
+  (val) => {
+    if (typeof val === 'string') return val.trim().length > 0;
+    if (typeof val === 'object' && val !== null) return Object.keys(val).length > 0;
+    return false;
+  },
+  { message: "State must be a non-empty string or object" }
+);
 
 const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
   ? new Ratelimit({
@@ -26,29 +33,23 @@ function generateShortId(length = 6) {
   return result;
 }
 
-export async function POST(request: Request) {
+export async function saveItineraryAction(state: unknown) {
   try {
-    // 1. Rate Limiting
     if (ratelimit) {
-      const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
+      const headersList = await headers();
+      const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
       const { success } = await ratelimit.limit(ip);
       if (!success) {
-        return NextResponse.json({ error: "Too many requests. Please try again in a minute." }, { status: 429 });
+        return { error: "Too many requests. Please try again in a minute." };
       }
     }
 
-    // 2. Body Parsing & Validation
-    const rawData = await request.json();
-    const result = ItinerarySchema.safeParse(rawData);
-    
-    if (!result.success) {
-      return NextResponse.json({ error: 'Invalid state' }, { status: 400 });
+    const validationResult = ItineraryStateSchema.safeParse(state);
+    if (!validationResult.success) {
+      return { error: 'Invalid state' };
     }
 
-    const { state } = result.data;
-
     let shortId = generateShortId();
-    // Simple collision check loop (in production might want more robust handling)
     for (let i = 0; i < 5; i++) {
       const existing = await prisma.savedItinerary.findUnique({
         where: { shortId }
@@ -60,13 +61,13 @@ export async function POST(request: Request) {
     const saved = await prisma.savedItinerary.create({
       data: {
         shortId,
-        state: state
+        state: validationResult.data
       }
     });
 
-    return NextResponse.json({ success: true, shortId: saved.shortId });
+    return { success: true, shortId: saved.shortId };
   } catch (error) {
     console.error('Failed to save itinerary:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return { error: 'Internal server error' };
   }
 }

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 import type { Business } from "@prisma/client";
 import { usePreferences } from './preferences-context';
+import { saveItineraryAction } from '@/features/itinerary/actions/save-itinerary';
 
 export type PanelMode = "discover" | "itinerary";
 export type TransportProfile = "driving" | "walking";
@@ -73,12 +74,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   const saveItinerary = useCallback(async () => {
     if (!activeItinerary) return null;
     try {
-      const res = await fetch('/api/itineraries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: activeItinerary })
-      });
-      const data = await res.json();
+      const data = await saveItineraryAction(activeItinerary);
       if (data.success && data.shortId) {
         const url = new URL(window.location.href);
         url.searchParams.set('trip', data.shortId);

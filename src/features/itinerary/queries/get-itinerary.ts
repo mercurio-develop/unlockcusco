@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+"use server";
+
 import { prisma } from '@/lib/prisma';
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { headers } from "next/headers";
 
 const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
   ? new Ratelimit({
@@ -12,38 +14,33 @@ const ratelimit = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDI
     })
   : null;
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function getItinerary(id: string) {
   try {
     // 1. Rate Limiting
     if (ratelimit) {
-      const ip = request.headers.get("x-forwarded-for") || "127.0.0.1";
+      const headersList = await headers();
+      const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
       const { success } = await ratelimit.limit(ip);
       if (!success) {
-        return NextResponse.json({ error: "Too many requests. Please try again in a minute." }, { status: 429 });
+        return { error: "Too many requests. Please try again in a minute." };
       }
     }
 
-    const resolvedParams = await params;
-    const shortId = resolvedParams.id;
-    
-    if (!shortId) {
-      return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    if (!id) {
+      return { error: 'Missing id' };
     }
 
     const saved = await prisma.savedItinerary.findUnique({
-      where: { shortId }
+      where: { shortId: id }
     });
 
     if (!saved) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      return { error: 'Not found' };
     }
 
-    return NextResponse.json({ success: true, state: saved.state });
+    return { success: true, state: saved.state };
   } catch (error) {
     console.error('Failed to load itinerary:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return { error: 'Internal server error' };
   }
 }

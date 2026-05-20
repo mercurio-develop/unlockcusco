@@ -1,5 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { saveItineraryAction } from '@/features/itinerary/actions/save-itinerary';
 
 const payloadSchema = z.object({
   itineraryState: z.string().describe("The current itinerary state as a JSON string.")
@@ -15,13 +16,8 @@ export const generateSaveLink = tool({
       const stateObj = JSON.parse(itineraryState);
       const host = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       
-      const res = await fetch(`${host}/api/itineraries`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: stateObj })
-      });
+      const data = await saveItineraryAction(stateObj);
       
-      const data = await res.json();
       if (data.success && data.shortId) {
         return { success: true, url: `${host}/explore?trip=${data.shortId}` };
       }
