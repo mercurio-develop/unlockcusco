@@ -54,6 +54,12 @@ export const mutateItinerary = tool({
           lat: true,
           lng: true,
           rating: true,
+          slug: true,
+          imageUrl: true,
+          tagline: true,
+          description: true,
+          priceTier: true,
+          reviewsCount: true
         }
       });
     }
@@ -80,6 +86,12 @@ export const mutateItinerary = tool({
           lat: true,
           lng: true,
           rating: true,
+          slug: true,
+          imageUrl: true,
+          tagline: true,
+          description: true,
+          priceTier: true,
+          reviewsCount: true
         }
       });
       if (resolvedBusiness && resolvedBusiness.lat && resolvedBusiness.lng) {
