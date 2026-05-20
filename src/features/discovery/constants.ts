@@ -42,3 +42,86 @@ export const SORT_OPTIONS = [
 ]
 
 export const RADIUS_MARKS: number[] = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 10, 15];
+
+export const DICTIONARIES = {
+  exploreMap: {
+    backToList: "Back to list",
+    showList: "Show List",
+    searchThisArea: "Search this area",
+    viewDetails: "View details",
+    noResults: "No results in this area",
+  },
+  basicTemplate: {
+    about: "About",
+    generalInfo: "General Information",
+    defaultDesc: "Discover an authentic experience in the heart of the Sacred Valley. Visit us to learn more about our services and offerings.",
+    areYouOwner: "Are you the owner?",
+    claimPrompt: "Claim this business profile to unlock premium templates, showcase your services, and connect directly with tourists via WhatsApp.",
+    claimBtn: "Claim Business Profile"
+  },
+  cultureTemplate: {
+    livingHeritage: "Living Heritage",
+    subtitle: "Discover the artisans and ancient processes",
+    localArtisans: "Local Artisans",
+    localArtisansDesc: "Meet the master weavers and creators preserving ancestral knowledge.",
+    ancientTech: "Ancient Techniques",
+    ancientTechDesc: "Experience natural dyeing and backstrap loom weaving in person.",
+    authenticGoods: "Authentic Goods",
+    authenticGoodsDesc: "Support local families by purchasing genuine, handmade textiles.",
+    experiences: "Experiences & Workshops",
+    defaultDesc: "An immersive cultural experience guided by local experts.",
+    walkIn: "Walk-in visits are welcome. Check availability for guided tours."
+  },
+  staysTemplate: {
+    accommodation: "Accommodation & Amenities",
+    subtitle: "Your home in the Sacred Valley",
+    checkIn: "Check-in",
+    checkInTime: "3:00 PM",
+    checkOut: "Check-out",
+    checkOutTime: "11:00 AM",
+    rooms: "Rooms & Suites",
+    defaultDesc: "A peaceful retreat offering comfort and authentic hospitality.",
+    bookNow: "Book your stay directly with us for the best rates."
+  },
+  discoverPanel: {
+    places: "Places",
+  },
+  interactiveList: {
+    searchPlaceholder: "Search...", // Component will adapt dynamically
+    sort: "Sort:",
+    recommended: "Recommended",
+    noResultsTitle: "No results found",
+    noResultsDesc: "Try adjusting your search query or sorting options.",
+    sortOptions: {
+      recommended: "Recommended",
+      rating_desc: "Highest Rated",
+      reviews_desc: "Most Reviews"
+    }
+  },
+  interactiveListEs: {
+    searchPlaceholder: "Buscar...",
+    sort: "Ordenar:",
+    recommended: "Recomendado",
+    noResultsTitle: "No se encontraron resultados",
+    noResultsDesc: "Intenta ajustar tu búsqueda o las opciones de ordenamiento.",
+    sortOptions: {
+      recommended: "Recomendado",
+      rating_desc: "Mejor Valorado",
+      reviews_desc: "Más Reseñas"
+    }
+  },
+  businessCard: {
+    reviews: "reviews",
+    closed: "Closed",
+    open: "Open",
+    viewDetails: "View Details",
+  },
+  exploreView: {
+    exploreUnlockCusco: "Explore UnlockCusco",
+    discover: "Discover",
+    concierge: "Concierge",
+    itinerary: "Itinerary",
+    featureDisabled: "Feature disabled"
+  }
+}
+
