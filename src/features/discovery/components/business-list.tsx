@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Search, Loader2, X, ChevronDown, Check } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import type { Business } from "@prisma/client"
-import useSWRInfinite from 'swr/infinite'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-
 import { usePathname } from "next/navigation"
+import { useBusinessList } from "../hooks/use-business-list"
+import { DICTIONARIES } from "../constants"
 
 interface InteractiveListProps {
   locationSlug: string
@@ -24,38 +24,14 @@ const SORT_OPTIONS = [
   { label: "Most Reviews", value: "reviews_desc" },
 ]
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
-
-export function InteractiveList({ locationSlug, category, initialBusinesses, dict }: InteractiveListProps) {
+export function BusinessList({ locationSlug, category, initialBusinesses, dict }: InteractiveListProps) {
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState("recommended")
   
   const pathname = usePathname()
   const isEs = pathname?.split('/')[1] === 'es'
 
-  const t = dict?.explore?.interactiveList || (isEs ? {
-    searchPlaceholder: `Buscar ${category ? category.toLowerCase() : 'experiencias'} en ${locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}...`,
-    sort: "Ordenar:",
-    recommended: "Recomendado",
-    noResultsTitle: "No se encontraron resultados",
-    noResultsDesc: "Intenta ajustar tu búsqueda o las opciones de ordenamiento.",
-    sortOptions: {
-      recommended: "Recomendado",
-      rating_desc: "Mejor Valorado",
-      reviews_desc: "Más Reseñas"
-    }
-  } : {
-    searchPlaceholder: `Search ${category ? category.toLowerCase() : 'experiences'} in ${locationSlug.charAt(0).toUpperCase() + locationSlug.slice(1)}...`,
-    sort: "Sort:",
-    recommended: "Recommended",
-    noResultsTitle: "No results found",
-    noResultsDesc: "Try adjusting your search query or sorting options.",
-    sortOptions: {
-      recommended: "Recommended",
-      rating_desc: "Highest Rated",
-      reviews_desc: "Most Reviews"
-    }
-  })
+  const t = dict?.explore?.interactiveList || (isEs ? DICTIONARIES.interactiveListEs : DICTIONARIES.interactiveList)
   
   // Debounce the query for SWR key
   const [debouncedQuery, setDebouncedQuery] = useState(query)
@@ -64,42 +40,15 @@ export function InteractiveList({ locationSlug, category, initialBusinesses, dic
     return () => clearTimeout(timer)
   }, [query])
 
-  const getKey = (pageIndex: number, previousPageData: any) => {
-    if (previousPageData && !previousPageData.hasMore) return null // reached the end
-
-    const params = new URLSearchParams()
-    params.set("loc", locationSlug)
-    if (category) params.set("cat", category)
-    if (debouncedQuery) params.set("q", debouncedQuery)
-    if (sort !== "recommended") params.set("sort", sort)
-    params.set("limit", "30")
-    params.set("page", pageIndex.toString())
-    
-    return `/api/businesses?${params.toString()}`
-  }
-
-  const { data, error, isLoading, isValidating, size, setSize } = useSWRInfinite(getKey, fetcher, {
-    fallbackData: debouncedQuery === "" && sort === "recommended" ? [{ businesses: initialBusinesses, hasMore: initialBusinesses.length >= 30 }] : undefined,
-    revalidateFirstPage: false,
+  const { businesses, hasMore, isSearching, isLoadingMore, size, setSize } = useBusinessList({
+    locationSlug,
+    category,
+    debouncedQuery,
+    sort,
+    initialBusinesses
   })
 
   const { ref, inView } = useInView({ threshold: 0 })
-
-  const businesses = useMemo(() => {
-    if (!data) return []
-    const all = data.flatMap(page => page.businesses || [])
-    // Deduplicate just in case
-    const seen = new Set()
-    return all.filter(b => {
-      if (seen.has(b.id)) return false
-      seen.add(b.id)
-      return true
-    })
-  }, [data])
-
-  const hasMore = data ? data[data.length - 1]?.hasMore : false
-  const isSearching = isLoading && (!data || data.length === 0)
-  const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === "undefined")
 
   useEffect(() => {
     if (inView && hasMore && !isLoadingMore) {
@@ -180,7 +129,7 @@ export function InteractiveList({ locationSlug, category, initialBusinesses, dic
           {/* Infinite Scroll Trigger */}
           {hasMore && (
             <div ref={ref} className="w-full py-8 flex justify-center items-center col-span-full">
-              {(isLoadingMore || isValidating) ? <Loader2 className="w-6 h-6 text-rose-600 animate-spin" /> : <div className="h-6" />}
+              {isLoadingMore ? <Loader2 className="w-6 h-6 text-rose-600 animate-spin" /> : <div className="h-6" />}
             </div>
           )}
         </div>

@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, SlidersHorizontal, Navigation, MapPin, ChevronDown } from "lucide-react"
 import posthog from 'posthog-js'
 import { motion, AnimatePresence } from "framer-motion"
-import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS, getCategoryData } from "../constants"
+import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS, getCategoryData, DICTIONARIES } from "../constants"
 import { getCategoryColor } from "@/lib/utils/category-style"
 import { cn } from "@/lib/utils"
 
@@ -43,21 +43,7 @@ export function ExploreSearch({
   const [showCategories, setShowCategories] = useState(false)
   const [showLocations, setShowLocations] = useState(false)
 
-  const t = dict?.explore || {
-    searchPlaceholder: "Search Sacred Valley...",
-    filters: "Filters",
-    resetAll: "Reset All",
-    townSector: "Town / Sector",
-    anywhere: "Anywhere",
-    categoriesLabel: "Categories",
-    all: "All",
-    radiusSearch: "Radius Search",
-    locating: "Locating...",
-    usingGps: "Using GPS",
-    myLocation: "My Location",
-    viewResults: "View Results",
-    categories: {}
-  }
+  const t = dict?.explore || DICTIONARIES.explore
 
   const currentCats = useMemo(() => {
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []

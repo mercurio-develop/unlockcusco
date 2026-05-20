@@ -19,7 +19,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import { DICTIONARIES } from "../constants";
 import { Input } from "@/components/ui/input";
 import type { RouteData, TransportProfile } from "@/lib/store/trip-context";
 
@@ -121,59 +122,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
   const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';
 
-  const t = isEs ? {
-    emptyTitle: "Tu itinerario está vacío",
-    emptyDesc: "Añade lugares desde la vista Descubrir o el Chat Concierge.",
-    startPoint: "Punto de Partida",
-    startPlaceholder: "¿Dónde empieza tu día?",
-    viewMap: "Ver Mapa",
-    setMarker: "Poner Marcador",
-    cancel: "Cancelar",
-    delete: "Eliminar",
-    removeStop: "Eliminar Parada",
-    areYouSure: "¿Estás seguro de que quieres eliminar",
-    fromItinerary: "de tu itinerario?",
-    remove: "Eliminar",
-    swap: "Cambiar",
-    endHere: "Terminar Aquí",
-    addStop: "Añadir Parada",
-    endPoint: "Punto Final",
-    endPlaceholder: "¿Dónde termina tu día?",
-    arrives: "Llega",
-    saveRoute: "Guardar Ruta",
-    shareRoute: "Compartir",
-    routeSaved: "Ruta Guardada",
-    routeSavedDesc: "Comparte este enlace con tus amigos para que puedan ver tu itinerario.",
-    copy: "Copiar",
-    copied: "Copiado",
-    close: "Cerrar"
-  } : {
-    emptyTitle: "Your itinerary is empty",
-    emptyDesc: "Add places from the Discover view or the Concierge chat.",
-    startPoint: "Start Point",
-    startPlaceholder: "Where does your day start?",
-    viewMap: "View Map",
-    setMarker: "Set Marker",
-    cancel: "Cancel",
-    delete: "Delete",
-    removeStop: "Remove Stop",
-    areYouSure: "Are you sure you want to remove",
-    fromItinerary: "from your itinerary?",
-    remove: "Remove",
-    swap: "Swap",
-    endHere: "End Here",
-    addStop: "Add Stop",
-    endPoint: "End Point",
-    endPlaceholder: "Where does your day end?",
-    arrives: "Arrives",
-    saveRoute: "Save Route",
-    shareRoute: "Share",
-    routeSaved: "Route Saved",
-    routeSavedDesc: "Share this link with your friends so they can view your itinerary.",
-    copy: "Copy",
-    copied: "Copied",
-    close: "Close"
-  };
+  const t = dict?.itineraryPanel || (isEs ? DICTIONARIES.itineraryPanelEs : DICTIONARIES.itineraryPanel);
 
   // Cascade stop times: startAnchor time + legs travel + waypoint durations
   const stopTimes = (() => {

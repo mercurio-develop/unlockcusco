@@ -7,20 +7,12 @@ interface ExpeditionTemplateProps {
   dict?: any
   lang: string
 }
+import { DICTIONARIES } from "../../constants"
 
 export function ExpeditionTemplate({ business, dict , lang }: ExpeditionTemplateProps) {
   const packages = business.tourPackages || []
-  const t = dict || {
-    title: "Trekking & Circuits",
-    subtitle: "Upcoming available expeditions",
-    days: "Days",
-    highlights: "Highlights",
-    included: "Included",
-    priceFrom: "Price from",
-    perPerson: "per person",
-    intensity: "Intensity",
-    emptyState: "Searching for new trails. Expedition dates coming soon!"
-  }
+
+  const t = dict?.expeditionTemplate || DICTIONARIES.expeditionTemplate
 
   return (
     <div className="space-y-12">

@@ -21,6 +21,7 @@ import { useTrip } from "@/lib/store/trip-context"
 import { usePreferences } from "@/lib/store/preferences-context"
 import { cn } from "@/lib/utils"
 import { getLocalizedField } from "@/lib/utils/localization"
+import { DICTIONARIES } from "../constants"
 import type { Business } from "@prisma/client"
 import {
   DropdownMenu,
@@ -87,28 +88,7 @@ export function BusinessCard({
   const pathname = usePathname()
   
   const locale = pathname?.split('/')[1] || 'en'
-  const t = dict?.businessCard || {
-    viewProfile: "View Profile",
-    whatsapp: "WhatsApp",
-    requiresBoleto: "Requires Boleto Turístico",
-    boletoTitle: "Cusco Tourist Ticket (BTC)",
-    boletoDesc1: "This site requires the",
-    boletoDesc2: "It's a unified government-managed ticket allowing access to up to 16 major archaeological sites and museums in Cusco and the Sacred Valley.",
-    options: "Options:",
-    fullTicket: "Full Ticket (130 Soles):",
-    fullTicketDesc: "Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley.",
-    partialTicket: "Partial Ticket (70 Soles):",
-    partialTicketDesc: "Valid for 1-2 days for a specific circuit (e.g., Sacred Valley ruins only).",
-    note: "Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit.",
-    gotIt: "Got it",
-    selected: "Selected",
-    swap: "Swap",
-    exchange: "Exchange",
-    add: "Add",
-    map: "Map",
-    details: "Details",
-    verified: "Verified"
-  }
+  const t = dict?.businessCard || DICTIONARIES.businessCard
 
   const isHorizontal = orientation === "horizontal"
   const isClaimed = business.isClaimed || false

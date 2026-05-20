@@ -7,16 +7,12 @@ interface SanctuaryTemplateProps {
   dict?: any
   lang: string
 }
+import { DICTIONARIES } from "../../constants"
 
 export function SanctuaryTemplate({ business, dict , lang }: SanctuaryTemplateProps) {
   const treatments = business.services || []
-  const t = dict || {
-    title: "Healing & Wellness",
-    subtitle: "Our rituals combine ancestral Andean wisdom with modern techniques to restore your vital balance.",
-    minutes: "Minutes",
-    details: "Details",
-    emptyState: "Preparing the sacred space. Sanctuary sessions available soon."
-  }
+
+  const t = dict?.sanctuaryTemplate || DICTIONARIES.sanctuaryTemplate
 
   return (
     <div className="space-y-16">

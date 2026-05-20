@@ -6,7 +6,7 @@ import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
 import { SeoDirectory } from '@/components/ui/seo-directory'
-import { InteractiveList } from '@/features/discovery/components/interactive-list'
+import { BusinessList } from "@/features/discovery/components/business-list"
 import { getCategoryData } from '@/features/discovery/constants'
 import { getDictionary, Locale } from '@/lib/dictionaries'
 
@@ -166,7 +166,7 @@ export default async function CategoryPage({
 
       {/* Interactive List */}
       <div className="max-w-6xl mx-auto px-6 py-12">
-        <InteractiveList locationSlug={location} category={category} initialBusinesses={localBusinesses} dict={dict} />
+        <BusinessList locationSlug={location} category={category} initialBusinesses={localBusinesses} dict={dict} />
       </div>
     </div>
   )

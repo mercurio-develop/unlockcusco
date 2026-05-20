@@ -1,9 +1,9 @@
 export { ExploreView } from './components/explore-view';
 export { fetchBusinesses } from './actions/fetch-businesses';
 export { AsociadoBadge } from './components/asociado-badge';
-export { GastronomicTemplate } from './components/GastronomicTemplate';
-export { ExpeditionTemplate } from './components/ExpeditionTemplate';
-export { SanctuaryTemplate } from './components/SanctuaryTemplate';
-export { StaysTemplate } from './components/StaysTemplate';
-export { CultureTemplate } from './components/CultureTemplate';
-export { BasicTemplate } from './components/BasicTemplate';
+export { GastronomicTemplate } from './components/templates/business-template-gastronomic';
+export { ExpeditionTemplate } from './components/templates/business-template-expedition';
+export { SanctuaryTemplate } from './components/templates/business-template-sanctuary';
+export { StaysTemplate } from './components/templates/business-template-stays';
+export { CultureTemplate } from './components/templates/business-template-culture';
+export { BasicTemplate } from './components/templates/business-template-basic';

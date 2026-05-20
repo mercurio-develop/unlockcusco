@@ -22,7 +22,7 @@ interface DiscoverPanelProps {
   dict?: any
 }
 
-export function DiscoverPanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore, dict }: DiscoverPanelProps) {
+export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore, dict }: DiscoverPanelProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const searchParams = useSearchParams()
   const router = useRouter()

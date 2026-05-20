@@ -29,7 +29,7 @@ export function useBusinessList({ locationSlug, category, debouncedQuery, sort, 
     return ['businesses', locationSlug, category, debouncedQuery, sort, 30, pageIndex];
   }
 
-  const { data, error, isLoading, isValidating, size, setSize } = useSWRInfinite(getKey, fetcher, {
+  const { data, error, isLoading, isValidating, size, setSize } = useSWRInfinite<{businesses: Business[], hasMore: boolean}>(getKey, fetcher, {
     fallbackData: debouncedQuery === "" && sort === "recommended" 
       ? [{ businesses: initialBusinesses, hasMore: initialBusinesses.length >= 30 }] 
       : undefined,

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useMemo, useState, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { CATEGORIES, LOCATIONS } from "../constants"
+import { CATEGORIES, LOCATIONS, DICTIONARIES } from "../constants"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl, useControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -241,12 +241,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false)
 
-  const t = dict?.exploreMap || {
-    placesHere: "places here",
-    tapMapStart: "Tap map to set Start",
-    tapMapEnd: "Tap map to set End",
-    cancel: "Cancel"
-  }
+  const t = dict?.exploreMap || DICTIONARIES.exploreMap
 
   const currentLocStr = searchParams.get("loc") || ""
   const currentLocs = useMemo(() => currentLocStr ? currentLocStr.split(',').filter(Boolean) : [], [currentLocStr])

@@ -8,22 +8,12 @@ interface CultureTemplateProps {
   lang: string
 }
 
+import { DICTIONARIES } from "../../constants"
+
 export function CultureTemplate({ business, dict , lang }: CultureTemplateProps) {
   const workshops = business.services || []
 
-  const t = dict?.cultureTemplate || {
-    livingHeritage: "Living Heritage",
-    subtitle: "Discover the artisans and ancient processes",
-    localArtisans: "Local Artisans",
-    localArtisansDesc: "Meet the master weavers and creators preserving ancestral knowledge.",
-    ancientTech: "Ancient Techniques",
-    ancientTechDesc: "Experience natural dyeing and backstrap loom weaving in person.",
-    authenticGoods: "Authentic Goods",
-    authenticGoodsDesc: "Support local families by purchasing genuine, handmade textiles.",
-    experiences: "Experiences & Workshops",
-    defaultDesc: "An immersive cultural experience guided by local experts.",
-    walkIn: "Walk-in visits are welcome. Check availability for guided tours."
-  }
+  const t = dict?.cultureTemplate || DICTIONARIES.cultureTemplate
 
   return (
     <div className="space-y-12">

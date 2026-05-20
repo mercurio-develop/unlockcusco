@@ -7,15 +7,12 @@ interface GastronomicTemplateProps {
   dict?: any
   lang: string
 }
+import { DICTIONARIES } from "../../constants"
 
 export function GastronomicTemplate({ business, dict , lang }: GastronomicTemplateProps) {
   const menuItems = business.services || []
-  const t = dict || {
-    title: "Menu Highlights",
-    subtitle: "Flavors of the Sacred Valley",
-    signatureDish: "Signature Dish",
-    emptyState: "The digital menu is being updated. Stay tuned!"
-  }
+
+  const t = dict?.gastronomicTemplate || DICTIONARIES.gastronomicTemplate
 
   return (
     <div className="space-y-12">

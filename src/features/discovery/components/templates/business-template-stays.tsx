@@ -8,21 +8,12 @@ interface StaysTemplateProps {
   lang: string
 }
 
+import { DICTIONARIES } from "../../constants"
+
 export function StaysTemplate({ business, dict , lang }: StaysTemplateProps) {
   const rooms = business.services || []
 
-  const t = dict?.staysTemplate || {
-    accommodations: "Accommodations",
-    subtitle: "Rest in the heart of the Sacred Valley",
-    freeWifi: "Free WiFi",
-    breakfast: "Breakfast",
-    heating: "Heating",
-    central: "Central",
-    defaultDesc: "A comfortable space designed for rest and acclimatization.",
-    premiumSuite: "Premium Suite",
-    perNight: "/ night",
-    noRooms: "Room details are being updated. Check availability for more info."
-  }
+  const t = dict?.staysTemplate || DICTIONARIES.staysTemplate
 
   return (
     <div className="space-y-12">

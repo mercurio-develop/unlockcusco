@@ -9,15 +9,10 @@ interface BasicTemplateProps {
   lang: string
 }
 
+import { DICTIONARIES } from "../../constants"
+
 export function BasicTemplate({ business, dict , lang }: BasicTemplateProps) {
-  const t = dict?.basicTemplate || {
-    about: "About",
-    generalInfo: "General Information",
-    defaultDesc: "Discover an authentic experience in the heart of the Sacred Valley. Visit us to learn more about our services and offerings.",
-    areYouOwner: "Are you the owner?",
-    claimPrompt: "Claim this business profile to unlock premium templates, showcase your services, and connect directly with tourists via WhatsApp.",
-    claimBtn: "Claim Business Profile"
-  }
+  const t = dict?.basicTemplate || DICTIONARIES.basicTemplate
 
   return (
     <div className="space-y-8">
