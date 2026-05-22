@@ -98,9 +98,11 @@ export function ItineraryPanel({ dict }: {
   dict?: any
 }) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const removeWaypoint = useItineraryStore(s => s.removeWaypoint);
@@ -213,6 +215,13 @@ export function ItineraryPanel({ dict }: {
           </h2>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsClearModalOpen(true)}
+            className="h-8 px-3 rounded-full bg-rose-50 text-rose-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-rose-100 transition-colors"
+            title="Clear Itinerary"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Clear
+          </button>
           <button
             onClick={async () => {
               const url = await saveItinerary();
@@ -624,6 +633,44 @@ export function ItineraryPanel({ dict }: {
           </div>
         </DialogContent>
       </Dialog>
-    </ItineraryErrorBoundary>
+
+      <Dialog open={isClearModalOpen} onOpenChange={setIsClearModalOpen}>
+        <DialogContent className="sm:max-w-md border-0 shadow-2xl rounded-2xl p-0 overflow-hidden">
+          <div className="bg-white p-6 pb-2 relative overflow-hidden">
+            <DialogHeader className="relative z-10 space-y-2">
+              <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">Clear Itinerary</DialogTitle>
+              <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
+                Are you sure you want to clear the entire itinerary? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-6 pt-4 bg-white space-y-4">
+            <DialogFooter className="flex gap-2 sm:justify-end">
+              <Button
+                onClick={() => setIsClearModalOpen(false)}
+                variant="outline"
+                className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200 text-sm font-medium w-full sm:w-auto h-11 rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setActiveItinerary(null);
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete('trip');
+                  window.history.replaceState({}, '', url.toString());
+                  setIsClearModalOpen(false);
+                }}
+                className="bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium w-full sm:w-auto h-11 rounded-xl"
+              >
+                Clear Itinerary
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>    </ItineraryErrorBoundary>
   );
 }

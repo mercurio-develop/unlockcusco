@@ -18,6 +18,7 @@ import { useExploreViewState } from "../hooks/use-explore-view"
 import { getVisibleBusinesses, getEffectiveMapBusinesses } from "../utils/business-filters"
 import { DICTIONARIES } from "../constants"
 
+import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema"
 import type { Business } from "@prisma/client"
 
 interface ExploreViewProps {
@@ -42,6 +43,7 @@ export function ExploreView({
   initialHasMore, 
   initialQuery, 
   initialSelectedId,
+  initialItinerary,
   dict
 }: ExploreViewProps) {
 
@@ -98,6 +100,13 @@ export function ExploreView({
       setSelectedId(initialSelectedId)
     }
   }, [initialSelectedId, setSelectedId])
+
+  const initialTripId = (initialItinerary as (OptimizedPlan & { shortId?: string }) | undefined)?.shortId;
+  useEffect(() => {
+    if (initialTripId) {
+      setPanelMode("itinerary");
+    }
+  }, [initialTripId, setPanelMode]);
 
   const d = DICTIONARIES.exploreView
 

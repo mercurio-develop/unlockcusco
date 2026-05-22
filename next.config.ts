@@ -9,6 +9,14 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml',
+        destination: '/api/sitemap',
+      },
+    ]
+  },
   // output: 'export', // Enable this ONLY for final Capacitor build. Note: Requires refactoring all routes to be Client-side only.
   /* config options here */
   // Force server restart to load GEMINI_API_KEY from Google AI Studio

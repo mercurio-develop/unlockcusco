@@ -667,7 +667,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         </div>
 
         {activeItinerary && (
-          <div className="md:hidden flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
+          <div className="flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
             <button onClick={(e) => { e.preventDefault(); useUiStore.getState().setPanelMode('discover'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Places</button>
             <button onClick={(e) => { e.preventDefault(); useUiStore.getState().setPanelMode('itinerary'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Route</button>
           </div>
