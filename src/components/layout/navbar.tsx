@@ -12,8 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils"
 import type { User } from "@prisma/client"
 
-import { AuthButton } from "@/features/auth/components/auth-button"
-
 const LOCATIONS = [
   { id: "cusco", name: "Cusco" },
   { id: "urubamba", name: "Urubamba" },
@@ -183,8 +181,6 @@ export function Navbar({ dict, user }: {
         
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <AuthButton user={user ?? null} lang={locale} dict={(dict as any)?.auth || {}} />
           
           <div className="flex items-center bg-slate-100/80 p-1 rounded-full border border-slate-200/60 shadow-inner" title={t.changeLanguage}>
             <button

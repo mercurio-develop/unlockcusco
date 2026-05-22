@@ -38,7 +38,50 @@ export async function getItinerary(id: string) {
       return { error: 'Not found' };
     }
 
-    return { success: true, state: saved.state };
+    // Hydrate state with fresh business data from the DB
+    const state = saved.state as any;
+    if (state) {
+      const businessIds = new Set<string>();
+
+      // Collect IDs from waypoints
+      if (Array.isArray(state.waypoints)) {
+        state.waypoints.forEach((wp: any) => {
+          if (wp.id) businessIds.add(wp.id);
+          else if (wp.service?.id) businessIds.add(wp.service.id);
+        });
+      }
+
+      // Collect IDs from anchors
+      if (state.startAnchor?.service?.id) businessIds.add(state.startAnchor.service.id);
+      if (state.endAnchor?.service?.id) businessIds.add(state.endAnchor.service.id);
+
+      if (businessIds.size > 0) {
+        const businesses = await prisma.business.findMany({
+          where: { id: { in: Array.from(businessIds) } }
+        });
+        const businessMap = new Map(businesses.map(b => [b.id, b]));
+
+        if (Array.isArray(state.waypoints)) {
+          state.waypoints.forEach((wp: any) => {
+            const bId = wp.id || wp.service?.id;
+            if (bId && businessMap.has(bId)) {
+              const b = businessMap.get(bId);
+              wp.service = b;
+              wp.category = b?.category || wp.category;
+            }
+          });
+        }
+
+        if (state.startAnchor?.service?.id && businessMap.has(state.startAnchor.service.id)) {
+          state.startAnchor.service = businessMap.get(state.startAnchor.service.id);
+        }
+        if (state.endAnchor?.service?.id && businessMap.has(state.endAnchor.service.id)) {
+          state.endAnchor.service = businessMap.get(state.endAnchor.service.id);
+        }
+      }
+    }
+
+    return { success: true, state };
   } catch (error) {
     console.error('Failed to load itinerary:', error);
     return { error: 'Internal server error' };
