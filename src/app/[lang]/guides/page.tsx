@@ -24,6 +24,12 @@ const GUIDES_EN = [
     slug: "best-restaurants-cusco-sacred-valley",
     description: "From world-class tasting menus at MIL to hidden local gems in Urubamba, discover where to eat in the Andes.",
     imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop",
+  },
+  {
+    title: "The Route of Coffee and Cacao",
+    slug: "coffee-cacao-route",
+    description: "Immerse yourself in Peru's rich agricultural heritage with a bean-to-cup and bean-to-bar journey.",
+    imageUrl: "/images/dummy/mil.jpg",
   }
 ];
 
@@ -45,6 +51,12 @@ const GUIDES_ES = [
     slug: "best-restaurants-cusco-sacred-valley",
     description: "Desde menús de degustación de clase mundial en MIL hasta joyas locales escondidas en Urubamba, descubre dónde comer en los Andes.",
     imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop",
+  },
+  {
+    title: "La Ruta del Café y Cacao",
+    slug: "coffee-cacao-route",
+    description: "Sumérgete en la rica herencia agrícola de Perú con un viaje desde el grano hasta la taza y la barra.",
+    imageUrl: "/images/dummy/mil.jpg",
   }
 ];
 
