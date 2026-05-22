@@ -4,8 +4,9 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass } from "lucide-react"
+import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
+import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function HeroSection({ dict }: { dict: Record<string, any> }) {
@@ -142,29 +143,52 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
         </div>
 
         {/* Popular Itineraries */}
-        <div className="mt-8 w-full max-w-4xl px-2">
+        <div className="mt-8 w-full max-w-5xl px-2">
           <p className="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3 md:mb-4">{dict.popularItineraries}</p>
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+          <ScrollCarousel className="pb-4">
             {[
-              { id: "classic-sacred-valley", title: dict.trips.classic },
-              { id: "cusco-city-tour", title: dict.trips.cusco },
-              { id: "ultimate-inca-ruins", title: dict.trips.ruins },
-              { id: "top-7-culinary-route", title: dict.trips.culinary },
-              { id: "maras-moray", title: dict.trips.maras },
-              { id: "artisan-markets", title: dict.trips.artisan },
-              { id: "machu-picchu-day", title: dict.trips.machupicchu },
+              { id: "classic-sacred-valley", title: dict.trips.classic, image: "/images/boleto/pisac-ruins.jpg" },
+              { id: "coffee-cacao-route", title: dict.trips.coffeecacao, image: "/images/dummy/mil.jpg" },
+              { id: "cusco-city-tour", title: dict.trips.cusco, image: "/images/boleto/sacsayhuaman.jpg" },
+              { id: "ultimate-inca-ruins", title: dict.trips.ruins, image: "/images/boleto/ollantaytambo-ruins.jpg" },
+              { id: "top-7-culinary-route", title: dict.trips.culinary, image: "/images/dummy/ceviche.jpg" },
+              { id: "maras-moray", title: dict.trips.maras, image: "/images/boleto/moray.jpg" },
+              { id: "artisan-markets", title: dict.trips.artisan, image: "/images/boleto/chinchero-ruins.jpg" },
+              { id: "machu-picchu-day", title: dict.trips.machupicchu, image: "/images/dummy/aguas-calientes.jpg" },
             ].map(trip => (
-              <button
+              <div
                 key={trip.id}
-                type="button"
-                onClick={() => router.push(`${langPrefix}/explore?trip=${trip.id}`)}
-                className="bg-white border border-rose-200 text-slate-800 px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-medium hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition-all shadow-sm flex items-center gap-1.5 md:gap-2"
+                className="min-w-[260px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0"
               >
-                <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
-                {trip.title}
-              </button>
+                <div className="h-32 bg-slate-100 rounded-xl mb-4 relative overflow-hidden">
+                  <Image
+                    src={trip.image}
+                    alt={trip.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 260px, 260px"
+                  />
+                </div>
+                <h3 className="font-bold text-lg mb-4 text-slate-900 line-clamp-1">{trip.title}</h3>
+                <div className="flex gap-2 mt-auto">
+                  <button
+                    onClick={() => router.push(`${langPrefix}/explore?trip=${trip.id}`)}
+                    className="flex-1 bg-white border border-rose-200 text-rose-600 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-50 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Map
+                  </button>
+                  <button
+                    onClick={() => router.push(`${langPrefix}/guides/${trip.id}`)}
+                    className="flex-1 bg-rose-600 text-white px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Bot className="w-4 h-4" />
+                    AI Guide
+                  </button>
+                </div>
+              </div>
             ))}
-          </div>
+          </ScrollCarousel>
         </div>
 
         {/* Quick search pills */}
