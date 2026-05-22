@@ -34,9 +34,16 @@ export async function generateStaticParams() {
   const combinations = await prisma.business.groupBy({
     by: ['locationSlug'],
   })
-  return combinations
+  
+  const params: { location: string, lang: string }[] = []
+  combinations
     .filter(c => c.locationSlug)
-    .map(c => ({ location: c.locationSlug }))
+    .forEach(c => {
+      params.push({ location: c.locationSlug as string, lang: 'en' })
+      params.push({ location: c.locationSlug as string, lang: 'es' })
+    })
+    
+  return params
 }
 
 export async function generateMetadata({

@@ -16,11 +16,11 @@ interface ToolRendererProps {
 export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
   // Map AI SDK v6 or v3 tools
   // v6 uses parts, v3 uses toolInvocations (deprecated but may exist in some older parts)
-  const partsTools = (message.parts || []).filter((p) => p.type === 'tool-invocation' || p.type === 'dynamic-tool');
-  
+  const partsTools = (message.parts || []).filter((p) => p.type.startsWith('tool-') || p.type === 'dynamic-tool');
+
   // Backwards compatibility for toolInvocations if present
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const invocationsTools = ((message as any).toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({
+  const invocationsTools = ((message as any).toolInvocations || []).map((ti: any) => ({
     type: 'tool-invocation',
     toolInvocation: ti,
     state: ti?.state === 'result' ? 'output-available' : undefined,
@@ -29,22 +29,28 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
     toolCallId: ti?.toolCallId,
     toolName: ti?.toolName
   }));
-  
+
   const tools = partsTools.length > 0 ? partsTools : invocationsTools;
 
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {tools.map((part: any, idx: number) => {
-        const isToolPart = part?.type === 'tool-invocation' || part?.type === 'dynamic-tool';
+        const isToolPart = part?.type?.startsWith('tool-') || part?.type === 'dynamic-tool';
         if (!part || !isToolPart) return null;
         
         const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
         const toolInvocation = part.toolInvocation || part;
         const toolName = part.toolName || toolInvocation.toolName || part.type.replace(/^tool-/, '');
-        // In v6 UIMessage, state is 'output-available' for completed tools
-        const isDone = part?.state === 'output-available' || toolInvocation?.state === 'result';
-        const output = toolInvocation.result || part.output;
+        
+        // In v6 UIMessage, state is 'output-available' for completed tools.
+        // In some SDK versions it's 'result'. Check both the wrapper and the inner invocation.
+        const isCompleted = part?.state === 'output-available' || part?.state === 'result' || toolInvocation?.state === 'result';
+        const isError = part?.state === 'output-error' || part?.state === 'error' || toolInvocation?.state === 'error';
+        const isDone = isCompleted || isError;
+        
+        // Prefer the actual result or output object
+        const output = toolInvocation.result || toolInvocation.output || part.output || part.result;
         const input = toolInvocation.args || part.input;
 
         if (!isDone) {
@@ -68,8 +74,8 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
           return null;
         }
 
-        if (output?.error || typeof output === 'string') {
-          const errMsg = typeof output === 'string' ? 'Tool failed to execute.' : 'I ran into a snag — try rephrasing?';
+        if (isError || output?.error || typeof output === 'string') {
+          const errMsg = part?.errorText || toolInvocation?.errorText || (typeof output === 'string' ? 'Tool failed to execute.' : 'I ran into a snag — try rephrasing?');
           return <ToolErrorCard key={key} message={errMsg} />;
         }
 

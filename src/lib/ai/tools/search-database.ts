@@ -53,7 +53,7 @@ export const searchDatabase = tool({
     }
 
     // Attempt to map category or first keyword to DB category
-    const searchString = [category, ...(searchKeywords || [])].join(" ");
+    const searchString = [category, query, ...(searchKeywords || [])].join(" ");
     const dbCategories = new Set<string>();
     for (const [keywords, cat] of DB_CATEGORY_MAP) {
       for (const kw of keywords) {
@@ -69,7 +69,7 @@ export const searchDatabase = tool({
     }
 
     // Cache key based on basic parameters (we don't cache fuzzy keyword expansions to allow for varied results)
-    const cacheKey = `unlockcusco:search:v8:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
+    const cacheKey = `unlockcusco:search:v9:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
     
     const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
       ? Redis.fromEnv()

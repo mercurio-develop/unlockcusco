@@ -38,9 +38,13 @@ export function useChatAutoPrompt(
       params.delete("ai_prompt");
       params.delete("data");
       const newSearch = params.toString();
-      router.replace(newSearch ? `${pathname}?${newSearch}` : pathname, { scroll: false });
+      const newUrl = newSearch ? `${pathname}?${newSearch}` : pathname;
+      
+      // Use window.history.replaceState instead of router.replace to avoid triggering
+      // a full Next.js route transition that could unmount this component
+      window.history.replaceState({}, '', newUrl);
     }
-  }, [searchParams, pathname, router, setIsChatOpen]);
+  }, [searchParams, pathname, setIsChatOpen]); // removed router from deps
 
   // 2. Deterministic Execution: Send message when chat is actually ready
   useEffect(() => {
