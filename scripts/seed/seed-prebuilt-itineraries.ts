@@ -159,6 +159,19 @@ async function main() {
           getWp('huayna-picchu')
         ]
       }
+    },
+    {
+      shortId: 'coffee-cacao-route',
+      state: {
+        title: 'The Route of Coffee and Cacao',
+        startAnchor: { lat: -13.5168, lng: -71.9781, title: "Cusco City (Depart)", type: "CUSTOM" },
+        endAnchor: { lat: -13.5168, lng: -71.9781, title: "Cusco City (Return)", type: "CUSTOM" },
+        waypoints: [
+          { id: 'pisonay', title: 'Pisonay Coffee Roasters', lat: -13.3333, lng: -71.9500, category: 'Dining', rating: 4.8, locationStr: 'calca' },
+          { id: 'arbol', title: 'Arbol de la Vida', lat: -13.3400, lng: -72.0500, category: 'Dining', rating: 4.9, locationStr: 'huayoccari' },
+          { id: 'choco', title: 'Artisan Chocolate Workshop', lat: -13.5168, lng: -71.9781, category: 'Culture', rating: 4.9, locationStr: 'cusco' }
+        ]
+      }
     }
   ];
 
