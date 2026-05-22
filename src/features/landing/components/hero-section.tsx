@@ -142,9 +142,31 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
           </AnimatePresence>
         </div>
 
+        {/* Quick search pills */}
+        <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 max-w-4xl px-2">
+          {[
+            { icon: <Utensils className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.dining },
+            { icon: <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.stays },
+            { icon: <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.wellness },
+            { icon: <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.spiritual },
+            { icon: <Palette className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.artisan },
+            { icon: <Compass className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.tours },
+          ].map(({ icon, text }, index) => (
+            <button
+              key={text}
+              type="button"
+              disabled={isSearching}
+              onClick={() => handleSearch(undefined, text)}
+              className={`bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 ${index >= 4 ? 'max-md:hidden' : ''}`}
+            >
+              {icon} <span>{text}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Popular Itineraries */}
-        <div className="mt-8 w-full max-w-5xl px-2">
-          <p className="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3 md:mb-4">{dict.popularItineraries}</p>
+        <div className="mt-12 w-full max-w-5xl px-2">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">{dict.popularItineraries}</h2>
           <ScrollCarousel className="pb-4">
             {[
               { id: "classic-sacred-valley", title: dict.trips.classic, image: "/images/boleto/pisac-ruins.jpg" },
@@ -179,7 +201,7 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
                     Map
                   </button>
                   <button
-                    onClick={() => router.push(`${langPrefix}/guides/${trip.id}`)}
+                    onClick={() => router.push(`${langPrefix}/itinerary/${trip.id}`)}
                     className="flex-1 bg-rose-600 text-white px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Bot className="w-4 h-4" />
@@ -191,33 +213,39 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
           </ScrollCarousel>
         </div>
 
-        {/* Quick search pills */}
-        <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-2 max-w-4xl px-2">
-          {[
-            { icon: <Utensils className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.dining },
-            { icon: <Bed className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.stays },
-            { icon: <Leaf className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.wellness },
-            { icon: <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.spiritual },
-            { icon: <Palette className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.artisan },
-            { icon: <Compass className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />, text: dict.pills.tours },
-          ].map(({ icon, text }, index) => (
-            <button
-              key={text}
-              type="button"
-              disabled={isSearching}
-              onClick={() => handleSearch(undefined, text)}
-              className={`bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 ${index >= 4 ? 'max-md:hidden' : ''}`}
-            >
-              {icon} <span>{text}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => router.push(`${langPrefix}/guides`)}
-            className="bg-slate-900 backdrop-blur-sm border border-slate-900 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm hover:bg-slate-800 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
-          >
-            📚 <span>Read Travel Guides</span>
-          </button>
+        {/* Travel Guides Carousel */}
+        <div className="mt-8 w-full max-w-5xl px-2">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">Essential Travel Guides</h2>
+          <ScrollCarousel className="pb-4">
+            {[
+              { slug: "acclimating-altitude", title: "How to Acclimate to Altitude", image: "/images/dummy/generic.jpg" },
+              { slug: "packing-sacred-valley", title: "Packing List for the Sacred Valley", image: "/images/dummy/tambo.jpg" },
+              { slug: "boleto-turistico-explained", title: "Understanding the Boleto Turistico", image: "/images/dummy/qolqas.jpg" },
+              { slug: "best-time-machu-picchu", title: "Best Time to Visit Machu Picchu", image: "/images/dummy/huerto.jpg" },
+            ].map(guide => (
+              <div
+                key={guide.slug}
+                className="min-w-[240px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0 cursor-pointer hover:shadow-md transition-all"
+                onClick={() => router.push(`${langPrefix}/guides/${guide.slug}`)}
+              >
+                <div className="h-28 bg-slate-100 rounded-xl mb-4 relative overflow-hidden">
+                  <Image
+                    src={guide.image}
+                    alt={guide.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 240px, 240px"
+                  />
+                </div>
+                <h3 className="font-bold text-md mb-2 text-slate-900 line-clamp-2">{guide.title}</h3>
+                <div className="flex gap-2 mt-auto pt-2">
+                  <span className="text-rose-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    Read Guide <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </ScrollCarousel>
         </div>
       </motion.div>
     </div>
