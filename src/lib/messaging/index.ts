@@ -1,4 +1,4 @@
-import twilio from 'twilio';
+import twilio, { Twilio } from 'twilio';
 import { ghostPhoneFetch } from '@/lib/config/services';
 
 type MessagePayload = {
@@ -15,7 +15,7 @@ type AvailabilityPayload = {
 
 export class MessagingService {
   private static instance: MessagingService;
-  private twilioClient: any;
+  private twilioClient: Twilio | null = null;
 
   private constructor() {
     const accountSid = process.env.TWILIO_ACCOUNT_SID;

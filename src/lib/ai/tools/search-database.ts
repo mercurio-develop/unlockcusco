@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { universalSearch } from '@/features/discovery/queries/universal-search';
 import { Redis } from '@upstash/redis';
 import { calculateDistance } from '@/lib/utils/geo';
 import { normalizeLocation } from '@/lib/ai/utils/location-normalizer';
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
+import type { Business } from "@prisma/client";
 
 const DB_CATEGORY_MAP: Array<[string[], string]> = [
   [['dining','restaurant','food','eat','lunch','dinner','breakfast','coffee','cafe','ceviche','pizza','vegan','vegetarian','bar','drink','menu','gastro','comida','almuerzo','cena','eats','meal','supper','bistro'],
@@ -30,7 +33,8 @@ const payloadSchema = z.object({
   category: z.string().optional().describe("The category to search for, e.g. DINING, STAYS, WELLNESS, TRANSPORT, ADVENTURE, CULTURE, TEXTILES, AGENCY"),
   location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
   userLat: z.number().optional(),
-  userLng: z.number().optional()
+  userLng: z.number().optional(),
+  intent: z.enum(['SET_START', 'SET_END', 'ADD_WAYPOINT', 'GENERAL']).optional().describe("Contextual intent for the search, determines UI buttons rendered for results.")
 });
 
 type Payload = z.infer<typeof payloadSchema>;
@@ -38,7 +42,7 @@ type Payload = z.infer<typeof payloadSchema>;
 export const searchDatabase = tool({
   description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries. Supports Spatial RAG by calculating real-world distances if coordinates are provided.',
   parameters: payloadSchema,
-  execute: async ({ query, searchKeywords, category, location, userLat, userLng }: Payload) => {
+  execute: async ({ query, searchKeywords, category, location, userLat, userLng, intent }: Payload) => {
     let dbCategory: string | undefined = undefined;
     
     // Normalize location using the fuzzy matcher
@@ -71,10 +75,10 @@ export const searchDatabase = tool({
       ? Redis.fromEnv()
       : null;
 
-    let results: Record<string, unknown>[] | undefined;
+    let results: Business[] | undefined;
     try {
       if (redis) {
-        const cached = await redis.get<Record<string, unknown>[]>(cacheKey);
+        const cached = await redis.get<Business[]>(cacheKey);
         if (cached) results = cached;
       }
     } catch (e) {
@@ -87,12 +91,12 @@ export const searchDatabase = tool({
         // Construct a semantic query by combining provided query and keywords
         const semanticQuery = [query, ...(searchKeywords || [])].filter(Boolean).join(" ");
 
-        results = (await universalSearch({ 
+        results = await universalSearch({ 
           query: semanticQuery,
           category: dbCategory,
           location: searchLocation || undefined, 
           limit: 30 // Smaller limit since it's already ranked semantically
-        })) as unknown as Record<string, unknown>[];
+        });
       } catch (e) {
         console.error("universalSearch failed:", e);
         results = [];
@@ -108,23 +112,23 @@ export const searchDatabase = tool({
     }
 
     // Strict Filter: Only return businesses with valid ratings (> 0)
-    results = results.filter((b: any) => typeof b.rating === 'number' && b.rating > 0);
+    results = results.filter((b) => typeof b.rating === 'number' && b.rating > 0);
 
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
     if (userLat && userLng) {
-      const withDistance = results.map((b: any) => {
-        let distanceKm = null;
+      const withDistance = results.map((b) => {
+        let distanceKm: number | null = null;
         if (b.lat && b.lng) {
-          distanceKm = calculateDistance(userLat, userLng, b.lat as number, b.lng as number);
+          distanceKm = calculateDistance(userLat, userLng, b.lat, b.lng);
         }
         return { ...b, distanceKm };
       });
 
-      withDistance.sort((a: { distanceKm?: number | null; isAsociado?: boolean; rating?: number | null }, b: { distanceKm?: number | null; isAsociado?: boolean; rating?: number | null }) => {
+      withDistance.sort((a, b) => {
         if (a.distanceKm !== null && b.distanceKm === null) return -1;
         if (a.distanceKm === null && b.distanceKm !== null) return 1;
         
-        if (a.distanceKm !== null && a.distanceKm !== undefined && b.distanceKm !== null && b.distanceKm !== undefined) {
+        if (a.distanceKm !== null && b.distanceKm !== null) {
           const scoreA = (a.rating ?? -1) * 2 - a.distanceKm + (a.isAsociado ? 10 : 0);
           const scoreB = (b.rating ?? -1) * 2 - b.distanceKm + (b.isAsociado ? 10 : 0);
           return scoreB - scoreA;
@@ -134,7 +138,33 @@ export const searchDatabase = tool({
         return (b.rating ?? -1) - (a.rating ?? -1);
       });
 
-      return withDistance.slice(0, 10).map((b: Record<string, unknown>) => ({
+      return sanitizeToolOutput({
+        intent,
+        results: withDistance.slice(0, 10).map((b) => ({
+          id: b.id,
+          name: b.name,
+          category: b.category,
+          rating: b.rating,
+          lat: b.lat,
+          lng: b.lng,
+          isAsociado: b.isAsociado,
+          priceTier: b.priceTier,
+          distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
+          whatsapp: b.whatsapp,
+          tagline: b.tagline,
+          description: b.description,
+          descriptionEs: b.descriptionEs,
+          imageUrl: b.imageUrl,
+          slug: b.slug,
+          recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
+        }))
+      });
+    }
+    
+    // Return compressed view to save LLM tokens if no coords
+    return sanitizeToolOutput({
+      intent,
+      results: results.slice(0, 10).map((b) => ({
         id: b.id,
         name: b.name,
         category: b.category,
@@ -143,35 +173,16 @@ export const searchDatabase = tool({
         lng: b.lng,
         isAsociado: b.isAsociado,
         priceTier: b.priceTier,
-        distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
+        locationSlug: b.locationSlug,
         tagline: b.tagline,
         description: b.description,
         descriptionEs: b.descriptionEs,
         imageUrl: b.imageUrl,
         slug: b.slug,
         recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
-      }));
-    }
-    
-    // Return compressed view to save LLM tokens if no coords
-    return results.slice(0, 10).map((b: Record<string, unknown>) => ({
-      id: b.id,
-      name: b.name,
-      category: b.category,
-      rating: b.rating,
-      lat: b.lat,
-      lng: b.lng,
-      isAsociado: b.isAsociado,
-      priceTier: b.priceTier,
-      whatsapp: b.whatsapp,
-      locationSlug: b.locationSlug,
-      tagline: b.tagline,
-      description: b.description,
-      descriptionEs: b.descriptionEs,
-      imageUrl: b.imageUrl,
-      slug: b.slug,
-      recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
-    }));
+      }))
+    });
   }
+     
 } as any);

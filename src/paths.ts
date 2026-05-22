@@ -9,12 +9,6 @@ export const exploreCategoryPath = (locationSlug: string, category: string) =>
 export const businessPath = (businessId: string) => 
   `/business/${businessId}`;
 
-export const claimPath = (businessId: string) => 
-  `/claim/${businessId}`;
-
-export const checkoutPath = (businessId: string) => 
-  `/claim/${businessId}/checkout`;
-
 export const dashboardPath = () => "/dashboard";
 
 export const agencyPath = (slug: string) => `/services/agencies/${slug}`;

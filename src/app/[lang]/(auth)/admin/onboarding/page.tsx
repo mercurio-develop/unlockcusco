@@ -43,8 +43,9 @@ export default function OnboardingPage() {
       } else {
         setStatus({ type: 'error', message: res.message })
       }
-    } catch (err: any) {
-      setStatus({ type: 'error', message: err.message || "Failed to submit" })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to submit";
+      setStatus({ type: 'error', message })
     } finally {
       setLoading(false)
     }

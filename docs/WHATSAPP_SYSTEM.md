@@ -132,7 +132,7 @@ const isVerified = business.isClaimed || business.isAsociado
     {isAsociado ? 'Book via WhatsApp' : 'Contact via WhatsApp'}
   </a>
 ) : (
-  <Link href={`/claim/${business.id}`}>Check Availability</Link>
+  <Link href={`/business/${business.slug}`}>Check Availability</Link>
 )}
 ```
 

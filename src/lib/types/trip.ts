@@ -1,5 +1,3 @@
-export type FullTrip = any;
-
 import { Business } from "@prisma/client"
 
 export type EntityType = 'BUSINESS' | 'TRANSPORT' | 'PACKAGE' | 'THERAPIST' | 'AGENCY';
@@ -95,9 +93,11 @@ export interface UniversalTrip {
   endDate: Date;
   paxCount: number;
   days: TripDay[];
-  travelers?: any[];
+  travelers?: unknown[];
   status: 'DRAFT' | 'PROPOSED' | 'CONFIRMED';
   shareToken?: string;
   clientNotes?: string;
   internalNotes?: string;
 }
+
+export type FullTrip = UniversalTrip;

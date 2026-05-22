@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Car, MapPin, Clock, DollarSign, CreditCard, CheckCircle2, Navigation, Map, ArrowRight } from "lucide-react";
+import { Car, Clock, DollarSign, CreditCard, CheckCircle2, Navigation, Map, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { useUiStore } from "@/lib/store/use-ui-store";
@@ -178,7 +177,7 @@ export function TaxiFareCard({ data }: TaxiFareCardProps) {
                 <CheckCircle2 className="w-5 h-5" /> Ride Confirmed!
               </div>
               <p className="text-xs text-center px-4 font-medium">
-                Payment successful. We've dispatched {data.taxi?.name || "a driver"} to your location. They will contact you shortly.
+                Payment successful. We&apos;ve dispatched {data.taxi?.name || "a driver"} to your location. They will contact you shortly.
               </p>
             </motion.div>
           )}

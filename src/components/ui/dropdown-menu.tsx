@@ -12,10 +12,6 @@ function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
   return <MenuPrimitive.Trigger {...props} />
 }
 
-function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
-  return <MenuPrimitive.Portal {...props} />
-}
-
 function DropdownMenuContent({
   className,
   ...props

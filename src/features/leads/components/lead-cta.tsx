@@ -7,18 +7,15 @@ import type { Lead } from "@prisma/client"
 
 interface LeadCTAProps {
   businessName: string
-  businessWhatsapp?: string | null
+  _businessWhatsapp?: string | null
   lead: Lead
 }
 
-export function LeadCTA({ businessName, businessWhatsapp, lead }: LeadCTAProps) {
+export function LeadCTA({ businessName, lead }: LeadCTAProps) {
   const [open, setOpen] = useState(false)
 
-  const whatsappReply = businessWhatsapp
-    ? `https://wa.me/51${businessWhatsapp}?text=${encodeURIComponent(`Hi ${businessName}! We have a new booking from ${lead.touristName} for ${new Date(lead.date).toLocaleDateString()}. His/her contact is ${lead.touristPhone || lead.touristEmail}.`)}`
-    : null
-
   const displayDate = new Date(lead.date).toLocaleDateString('en-US', {
+
     month: 'long',
     day: 'numeric',
     year: 'numeric'

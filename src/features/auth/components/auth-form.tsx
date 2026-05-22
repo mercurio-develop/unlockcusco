@@ -8,7 +8,8 @@ interface AuthFormProps {
   type: "login" | "register"
   lang: string
   redirectPath?: string
-  dict: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict: Record<string, any>
 }
 
 export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
@@ -46,8 +47,8 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
       )}
       
       {!isLogin && (
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-2 flex-1">
+        <>
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500" htmlFor="firstName">
               {dict.firstName || 'First Name'}
             </label>
@@ -57,10 +58,10 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
               type="text"
               required
               disabled={isLoading}
-              className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
             />
           </div>
-          <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500" htmlFor="lastName">
               {dict.lastName || 'Last Name'}
             </label>
@@ -70,10 +71,10 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
               type="text"
               required
               disabled={isLoading}
-              className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
             />
           </div>
-        </div>
+        </>
       )}
 
       <div className="flex flex-col gap-2">
@@ -87,7 +88,7 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
           autoComplete="email"
           required
           disabled={isLoading}
-          className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
+          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
         />
       </div>
 
@@ -102,7 +103,7 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
           autoComplete={isLogin ? "current-password" : "new-password"}
           required
           disabled={isLoading}
-          className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
+          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all text-sm font-medium text-slate-900"
         />
       </div>
 

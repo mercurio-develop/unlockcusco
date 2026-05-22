@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { microDaySchema } from '../schemas/planner-schema';
 import { COORDS_MAP } from '@/lib/constants';
@@ -14,22 +15,27 @@ function lookupCoords(name: string): { lat: number; lng: number } | null {
   return null;
 }
 
-function normalizeAnchor(anchor: any): any {
+type Payload = z.infer<typeof microDaySchema>;
+type Anchor = Payload['startAnchor'] | Payload['endAnchor'];
+
+function normalizeAnchor<T extends Anchor>(anchor: T): T {
   if (!anchor) return anchor;
   // Fill missing coords
-  let result = anchor;
+  const result = { ...anchor };
   if (!result.lat || !result.lng) {
+
     const c = lookupCoords(result.locationStr || result.title);
-    if (c) result = { ...result, ...c };
+    if (c) {
+        result.lat = c.lat;
+        result.lng = c.lng;
+    }
   }
   // Fill empty title from locationStr (Gemini sometimes returns title:"")
   if (!result.title?.trim() && result.locationStr?.trim()) {
-    result = { ...result, title: result.locationStr };
+    result.title = result.locationStr;
   }
   return result;
 }
-
-type Payload = z.infer<typeof microDaySchema>;
 
 export const buildItinerary = tool({
   description: `Generates a full daily itinerary using the Journey Skeleton. Use this to plan a specific day with start/end anchors, waypoints, and transit.
@@ -39,7 +45,7 @@ You can include 'pax' (number of passengers) to estimate per-person costs. Ensur
   execute: async (payload: Payload) => {
     payload.startAnchor = normalizeAnchor(payload.startAnchor);
     payload.endAnchor = normalizeAnchor(payload.endAnchor);
-    payload.waypoints = (payload.waypoints ?? []).map((wp: any) => {
+    payload.waypoints = (payload.waypoints ?? []).map((wp) => {
       if (wp.lat && wp.lng) return wp;
       const c = lookupCoords(wp.locationStr || wp.title);
       return c ? { ...wp, ...c } : wp;
@@ -52,4 +58,5 @@ You can include 'pax' (number of passengers) to estimate per-person costs. Ensur
     }
     return payload;
   }
+     
 } as any);

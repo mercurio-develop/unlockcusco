@@ -4,10 +4,11 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, ChevronDown, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass } from "lucide-react"
+import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 
-export function HeroSection({ dict }: { dict: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function HeroSection({ dict }: { dict: Record<string, any> }) {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [isFocused, setIsFocused] = useState(false)

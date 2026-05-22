@@ -1,18 +1,17 @@
-import { getLocalizedField } from "@/lib/utils/localization"
 import { Utensils, Clock, Flame } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface GastronomicTemplateProps {
   business: Business & { services: BusinessService[] }
-  dict?: any
-  lang: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>
 }
 import { DICTIONARIES } from "../../constants"
 
-export function GastronomicTemplate({ business, dict , lang }: GastronomicTemplateProps) {
+export function GastronomicTemplate({ business, dict }: GastronomicTemplateProps) {
   const menuItems = business.services || []
 
-  const t = dict?.gastronomicTemplate || DICTIONARIES.gastronomicTemplate
+  const t = dict?.templates?.gastronomic || DICTIONARIES.gastronomicTemplate
 
   return (
     <div className="space-y-12">
@@ -37,7 +36,7 @@ export function GastronomicTemplate({ business, dict , lang }: GastronomicTempla
                       {item.title}
                     </h3>
                     <p className="text-white/60 text-sm leading-relaxed mb-4">
-                      {getLocalizedField(item, 'description', lang)}
+                      {item.description}
                     </p>
                     <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-white/40">
                       <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg">

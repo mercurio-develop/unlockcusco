@@ -3,13 +3,14 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Home, Map, Sparkles, Bot, Route, Settings2, MessageSquareText, ChevronDown, HelpCircle, Languages } from "lucide-react"
-import { homePath, explorePath, dashboardPath } from "@/paths"
+import { Compass, Map, Sparkles, Bot, Route, Settings2, ChevronDown, HelpCircle } from "lucide-react"
+import { explorePath } from "@/paths"
 import { useUiStore } from "@/lib/store/use-ui-store"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import type { User } from "@prisma/client"
 
 import { AuthButton } from "@/features/auth/components/auth-button"
 
@@ -24,7 +25,11 @@ const LOCATIONS = [
   { id: "calca", name: "Calca" },
 ]
 
-export function Navbar({ dict, user }: { dict?: any, user?: any | null }) {
+export function Navbar({ dict, user }: { 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>, 
+  user?: User | null 
+}) {
   const pathname = usePathname() || '/'
   const isChatOpen = useUiStore(s => s.isChatOpen)
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
@@ -178,7 +183,8 @@ export function Navbar({ dict, user }: { dict?: any, user?: any | null }) {
         
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <AuthButton user={user} lang={locale} dict={(dict as any)?.auth || {}} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <AuthButton user={user ?? null} lang={locale} dict={(dict as any)?.auth || {}} />
           
           <div className="flex items-center bg-slate-100/80 p-1 rounded-full border border-slate-200/60 shadow-inner" title={t.changeLanguage}>
             <button
@@ -310,8 +316,8 @@ export function Navbar({ dict, user }: { dict?: any, user?: any | null }) {
                       <div className="flex flex-col sm:flex-row gap-2 w-full">
                         {[
                           { id: 1, label: t.intensities['1'].label, desc: t.intensities['1'].desc, theme: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100', active: 'bg-green-600 text-white border-green-600 shadow-md' },
-                          { id: 2, label: t.intensities['2'].label, desc: t.intensities['2'].desc, theme: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', active: 'bg-amber-600 text-white border-amber-600 shadow-md' },
-                          { id: 3, label: t.intensities['3'].label, desc: t.intensities['3'].desc, theme: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100', active: 'bg-red-600 text-white border-red-600 shadow-md' }
+                          { id: 2, label: t.intensities['2'].label, desc: t.intensities['2'].desc, theme: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', active: 'bg-green-600 text-white border-green-600 shadow-md' },
+                          { id: 3, label: t.intensities['3'].label, desc: t.intensities['3'].desc, theme: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100', active: 'bg-green-600 text-white border-green-600 shadow-md' }
                         ].map(i => (
                           <button
                             key={i.id}

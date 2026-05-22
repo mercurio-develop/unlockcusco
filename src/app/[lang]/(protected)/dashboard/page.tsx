@@ -39,7 +39,7 @@ export default async function DashboardPage(props: {
           
           {dbUser?.savedItineraries.length === 0 ? (
             <div className="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center space-y-4">
-              <p className="text-slate-500 font-medium">You haven't saved any itineraries yet.</p>
+              <p className="text-slate-500 font-medium">You haven&apos;t saved any itineraries yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -50,7 +50,7 @@ export default async function DashboardPage(props: {
                     Saved on {new Date(itin.createdAt).toLocaleDateString()}
                   </p>
                   <div className="text-rose-600 text-xs font-bold uppercase tracking-wider">
-                    View Details &rarr;
+                    View Details →
                   </div>
                 </div>
               ))}

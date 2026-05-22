@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { tool } from "ai";
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 export const BOLETO_DATA = {
   all: {
@@ -51,10 +53,11 @@ export const showBoletoInfo = tool({
   description: "Displays information, prices, and maps for the Boleto Turístico del Cusco (Cusco Tourist Ticket) and its different circuits.",
   parameters: payloadSchema,
   execute: async ({ circuit, message }: Payload) => {
-    return {
+    return sanitizeToolOutput({
       circuit,
       message,
       data: BOLETO_DATA[circuit as keyof typeof BOLETO_DATA]
-    };
+    });
   }
+     
 } as any);

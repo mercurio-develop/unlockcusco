@@ -3,21 +3,23 @@
 import Link from "next/link"
 import { LogOut, User as UserIcon } from "lucide-react"
 import { logout } from "../actions/auth-actions"
+import type { User } from "@prisma/client"
 
 interface AuthButtonProps {
-  user: any | null
+  user?: User | null
   lang: string
-  dict: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict: Record<string, any>
 }
 
 export function AuthButton({ user, lang, dict }: AuthButtonProps) {
   if (!user) {
     return (
       <Link
-        href={`/${lang}/login`}
+        href={`/${lang}/register`}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border bg-slate-900 text-white border-transparent shadow-sm hover:scale-105"
       >
-        <span>{dict.login || 'Log In'}</span>
+        <span>{dict.signup || 'Sign Up'}</span>
       </Link>
     )
   }

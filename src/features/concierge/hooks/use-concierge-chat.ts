@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useChat } from '@ai-sdk/react';
@@ -9,6 +10,7 @@ import { buildChatPayload, formatItineraryState } from "../utils/chat-payload";
 import { useChatLocation } from "./use-chat-location";
 import { useChatAutoPrompt } from "./use-chat-auto-prompt";
 import { useChatToolSync } from "./use-chat-tool-sync";
+import type { UIMessage } from "@ai-sdk/react";
 
 export function useConciergeChat() {
   const isChatOpen = useUiStore(s => s.isChatOpen);
@@ -17,6 +19,8 @@ export function useConciergeChat() {
   const travelIntensity = useUiStore(s => s.travelIntensity);
   const targetDate = useUiStore(s => s.targetDate);
   const setConciergeSendMessage = useUiStore(s => s.setConciergeSendMessage);
+  const selectedId = useUiStore(s => s.selectedId);
+  const interactionHistory = useUiStore(s => s.interactionHistory);
   const activeItinerary = useItineraryStore(s => s.activeItinerary);
   const pathname = usePathname();
 
@@ -26,33 +30,42 @@ export function useConciergeChat() {
   const [input, setInput] = useState("");
 
   const chat = useChat({
-    api: '/api/chat',
-    messages: initialMessages as any,
+    messages: initialMessages as UIMessage[],
     body: {
-      // NOTE: Initial coords are not provided until useChatLocation shares them.
       archetype: travelVibe,
       intensity: travelIntensity,
-      itineraryState: formatItineraryState(activeItinerary)
+      itineraryState: formatItineraryState(activeItinerary),
+      interactionHistory,
+      currentlyViewing: interactionHistory.find(h => h.id === selectedId)?.name || selectedId
     }
+   
   } as any);
 
   const messages = chat.messages || [];
-  const status = (chat as any).status || 'ready';
+  const status = chat.status || 'ready';
   const isLoading = status === 'submitted' || status === 'streaming';
 
   const { userCoords, handleShareLocation } = useChatLocation(
-    (chat as any).sendMessage, 
+     
+    (msg: any, opts: any) => chat.sendMessage(msg, opts), 
     targetDate, 
     activeItinerary
   );
 
   const sendMessage = useMemo(() => (msg: { text: string }) => {
-    (chat as any).sendMessage({ text: msg.text }, {
+    chat.sendMessage({ text: msg.text }, {
       body: buildChatPayload({
-        userCoords, travelVibe, travelIntensity, targetDate, activeItinerary
+        userCoords, 
+        travelVibe, 
+        travelIntensity, 
+        targetDate, 
+        activeItinerary,
+        interactionHistory,
+        currentlyViewing: interactionHistory.find(h => h.id === selectedId)?.name || selectedId
       })
-    });
-  }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary]);
+     
+    } as any);
+  }, [chat, userCoords, travelVibe, travelIntensity, targetDate, activeItinerary, interactionHistory, selectedId]);
 
   // Register the sendMessage function globally so other components can trigger it synchronously
   useEffect(() => {

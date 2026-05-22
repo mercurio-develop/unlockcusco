@@ -1,20 +1,26 @@
-import { X } from "lucide-react";
+"use client";
+
 import { ToolErrorCard, ActionSuccessCard, LocationRequestCard, MacroTripCard, SaveLinkCard } from "./tool-cards";
 import { PendingAvailability } from "./pending-availability";
 import { ItinerarySummaryCard } from "./itinerary-summary-card";
 import { SearchResultsCard } from "./search-results-card";
 import { BoletoInfoCard } from "./boleto-info-card";
 import { TaxiFareCard } from "./taxi-fare-card";
+import type { UIMessage } from "@ai-sdk/react";
 
 interface ToolRendererProps {
-  message: any;
+  message: UIMessage;
   onShareLocation: () => void;
 }
 
 export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
   // Map AI SDK v6 or v3 tools
-  const partsTools = (message.parts || []).filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool');
-  const invocationsTools = (message.toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({
+  // v6 uses parts, v3 uses toolInvocations (deprecated but may exist in some older parts)
+  const partsTools = (message.parts || []).filter((p) => p.type === 'tool-invocation' || p.type === 'dynamic-tool');
+  
+  // Backwards compatibility for toolInvocations if present
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const invocationsTools = ((message as any).toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({
     type: 'tool-invocation',
     toolInvocation: ti,
     state: ti?.state === 'result' ? 'output-available' : undefined,
@@ -28,13 +34,15 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
 
   return (
     <>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {tools.map((part: any, idx: number) => {
-        const isToolPart = part?.type?.startsWith('tool-') || part?.type === 'dynamic-tool';
+        const isToolPart = part?.type === 'tool-invocation' || part?.type === 'dynamic-tool';
         if (!part || !isToolPart) return null;
         
         const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
         const toolInvocation = part.toolInvocation || part;
         const toolName = part.toolName || toolInvocation.toolName || part.type.replace(/^tool-/, '');
+        // In v6 UIMessage, state is 'output-available' for completed tools
         const isDone = part?.state === 'output-available' || toolInvocation?.state === 'result';
         const output = toolInvocation.result || part.output;
         const input = toolInvocation.args || part.input;
@@ -73,7 +81,8 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
           case 'buildMacroTrip':
             return <MacroTripCard key={key} title={output?.title} daysCount={output?.days?.length} />
           case 'searchDatabase':
-            return <SearchResultsCard key={key} businesses={output} messageId={message.id} input={input} />
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return <SearchResultsCard key={key} intent={output?.intent} businesses={output?.results || []} messageId={message.id} input={input as any} />
           case 'askAvailability':
             return <PendingAvailability key={key} message={output?.message} />
           case 'showBoletoInfo':

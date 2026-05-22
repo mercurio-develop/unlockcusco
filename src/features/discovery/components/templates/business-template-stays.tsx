@@ -1,19 +1,18 @@
-import { getLocalizedField } from "@/lib/utils/localization"
 import { Bed, Wifi, Coffee, MapPin, Wind, Sparkles } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface StaysTemplateProps {
   business: Business & { services: BusinessService[] }
-  dict?: any
-  lang: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>
 }
 
 import { DICTIONARIES } from "../../constants"
 
-export function StaysTemplate({ business, dict , lang }: StaysTemplateProps) {
+export function StaysTemplate({ business, dict }: StaysTemplateProps) {
   const rooms = business.services || []
 
-  const t = dict?.staysTemplate || DICTIONARIES.staysTemplate
+  const t = dict?.templates?.stays || DICTIONARIES.staysTemplate
 
   return (
     <div className="space-y-12">

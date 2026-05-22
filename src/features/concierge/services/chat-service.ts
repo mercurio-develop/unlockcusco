@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { streamText, stepCountIs, convertToModelMessages } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { toolsRegistry } from '@/lib/ai/tools/registry';
@@ -8,12 +9,14 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+ 
 export type ChatMessagePart = { type: 'text'; text: string } | any;
 export interface ChatMessage {
   id?: string;
   role: 'user' | 'assistant' | 'system' | 'data' | 'tool';
   content?: string;
   parts?: ChatMessagePart[];
+   
   [key: string]: any;
 }
 
@@ -27,6 +30,8 @@ export interface ChatRequestData {
   itineraryStartTitle?: string;
   itineraryEndTitle?: string;
   itineraryState?: string;
+  currentlyViewing?: string;
+  interactionHistory?: { type: string, id: string, name?: string, timestamp: number }[];
   activeFilters?: {
     location?: string;
     category?: string;
@@ -34,7 +39,7 @@ export interface ChatRequestData {
 }
 
 export async function processChatStream(messages: ChatMessage[], bodyData: ChatRequestData) {
-  const { userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, activeFilters } = bodyData;
+  const { userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, currentlyViewing, interactionHistory, activeFilters } = bodyData;
 
   const hasGPS = userLat != null && userLng != null;
   const gpsStatus = hasGPS ? 'CONFIRMED GPS' : 'TOURIST HAS NOT SHARED LOCATION YET';
@@ -45,6 +50,15 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
     .replace('{userLat}', hasGPS ? String(userLat) : 'NOT_SHARED')
     .replace('{userLng}', hasGPS ? String(userLng) : 'NOT_SHARED')
     .replace('{gpsStatus}', gpsStatus);
+
+  if (currentlyViewing) {
+    systemInstruction += `\n\n<CURRENTLY_VIEWING>\nThe user is currently looking at or has selected this business in the UI: "${currentlyViewing}". If they use pronouns like "this place" or "it", they are referring to this business.\n</CURRENTLY_VIEWING>`;
+  }
+
+  if (interactionHistory && interactionHistory.length > 0) {
+    const historyStr = interactionHistory.map(h => `- ${h.name || h.id} (${h.type})`).join('\n');
+    systemInstruction += `\n\n<RECENTLY_VIEWED>\nThe user recently interacted with these businesses in the UI (newest first):\n${historyStr}\nIf they mention "those places" or ask for a comparison, reference this list.\n</RECENTLY_VIEWED>`;
+  }
 
   if (activeFilters?.location || activeFilters?.category) {
     systemInstruction += `\n\n<ACTIVE_FILTERS>\nThe user is currently filtering the map by Location: ${activeFilters.location || 'Any'}, Category: ${activeFilters.category || 'Any'}.\nTake this into account if they ask to search or "show me in the map". You can use multiple locations/categories separated by commas when calling searchDatabase.</ACTIVE_FILTERS>`;
@@ -65,7 +79,9 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
       return { ...msg, parts: [{ type: 'text', text: msg.content }] };
     }
     if (msg.role === 'user' && msg.parts) {
+       
       const textPart = msg.parts.find((p: any) => p.type === 'text');
+
       if (textPart?.text?.startsWith('I just added') && textPart.text.includes('to my itinerary.')) {
         const hasStart = !!itineraryStartTitle;
         const hasEnd = !!itineraryEndTitle;
@@ -81,8 +97,10 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
         }
         return {
           ...msg,
+           
           parts: msg.parts.map((p: any) =>
             p.type === 'text'
+
               ? { ...p, text: p.text + '\n\n' + instruction }
               : p
           )

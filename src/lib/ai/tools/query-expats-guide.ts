@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { EXPATS_KNOWLEDGE_BASE } from '../knowledge/expats-guide';
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 const payloadSchema = z.object({
   query: z.string().describe('The topic or question to search the guide for, e.g. "altitude sickness", "colectivo", "safety".'),
@@ -17,9 +19,10 @@ export const queryExpatsGuide = tool({
     // But since it's a tool, the LLM will just read what we return.
     
     // We'll just return the full text for the model to read contextually.
-    return {
+    return sanitizeToolOutput({
       knowledgeBase: EXPATS_KNOWLEDGE_BASE,
       message: `Here is the comprehensive guide. Please extract the answer for '${query}' from this text.`
-    };
+    });
   }
+     
 } as any);

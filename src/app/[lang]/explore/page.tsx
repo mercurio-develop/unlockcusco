@@ -6,6 +6,7 @@ import { getItinerary } from "@/features/itinerary/queries/get-itinerary"
 import { Loader2 } from "lucide-react"
 import { StoreInitializer } from "@/lib/store/store-initializer"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
+import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema"
 
 export default async function ExplorePage({ 
   params, 
@@ -33,7 +34,7 @@ export default async function ExplorePage({
   ])
 
   const initialItinerary = initialItineraryData?.success && initialItineraryData?.state 
-    ? { ...(initialItineraryData.state as any), shortId: parsedParams.trip } 
+    ? { ...(initialItineraryData.state as unknown as OptimizedPlan), shortId: parsedParams.trip } 
     : null
 
   return (

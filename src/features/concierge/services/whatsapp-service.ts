@@ -18,6 +18,7 @@ function buildExploreUrl(business: { name: string; locationSlug: string | null; 
   return `https://unlockcusco.com/explore/${loc}/${cat}?q=${encodeURIComponent(business.name)}`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleIncomingWhatsAppMessage(body: any) {
   const rawPhone: string = body.from || body.phone || '';
   const phone = rawPhone.replace(/^\+?51/, '').replace(/\D/g, '');

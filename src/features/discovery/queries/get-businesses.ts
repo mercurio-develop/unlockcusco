@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { Business } from "@prisma/client"
+import { Business, Prisma } from "@prisma/client"
 import { COORDS_MAP } from "@/lib/constants"
 import { unstable_cache } from "next/cache"
 import { revalidateTag } from "next/cache"
@@ -12,15 +12,15 @@ export async function revalidateBusinesses() {
 }
 
 // Helper to interleave categories while maintaining relative rating sort
-function interleaveCategories(sortedBusinesses: any[]) {
-  const byCategory: Record<string, any[]> = {}
+function interleaveCategories(sortedBusinesses: Business[]) {
+  const byCategory: Record<string, Business[]> = {}
   sortedBusinesses.forEach((b) => {
     const cat = b.category || 'EXPERIENCE'
     if (!byCategory[cat]) byCategory[cat] = []
     byCategory[cat].push(b)
   })
 
-  const interleaved = []
+  const interleaved: Business[] = []
   const categories = Object.keys(byCategory)
   let hasMore = true
 
@@ -100,7 +100,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
     else if (qLower.includes("textile") || qLower.includes("tejido") || qLower.includes("weaving") || qLower.includes("artesanía") || qLower.includes("artisan") || qLower.includes("tejedoras")) { 
       targetCategory = "Textiles"; isHeuristicMatch = true; 
     }
-    else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile") || qLower.includes("ruins")) { 
+    else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile") || qLower.includes("ruins") || qLower.includes("attraction")) { 
       targetCategory = "Culture"; isHeuristicMatch = true; 
     }
     else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport") || qLower.includes("driver") || qLower.includes("shuttle") || qLower.includes("transfer")) { 
@@ -108,7 +108,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
     }
   }
 
-  const whereClause: Record<string, any> = {
+  const whereClause: Prisma.BusinessWhereInput = {
     category: { notIn: ['AGENCY', 'Agency', 'agency'] }
   }
 
@@ -145,6 +145,14 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
           expandedCategories.add('EXPERIENCE');
           expandedCategories.add('experience');
         }
+        if (cat.toUpperCase() === 'CULTURE' || cat.toUpperCase() === 'ATTRACTIONS') {
+          expandedCategories.add('Culture');
+          expandedCategories.add('CULTURE');
+          expandedCategories.add('culture');
+          expandedCategories.add('Attractions');
+          expandedCategories.add('ATTRACTIONS');
+          expandedCategories.add('attractions');
+        }
       }
       if (expandedCategories.size > 0) {
         whereClause.category = { in: Array.from(expandedCategories), notIn: ['AGENCY', 'Agency', 'agency'] };
@@ -163,8 +171,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
   }
 
   // Combine OR queries
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const orConditions: any[] = []
+  const orConditions: Prisma.BusinessWhereInput[] = []
 
   if (q && !isHeuristicMatch) {
      const titleCase = q.charAt(0).toUpperCase() + q.slice(1).toLowerCase();
@@ -182,7 +189,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
     whereClause.OR = orConditions
   }
 
-  let businesses: any[] = await prisma.business.findMany({
+  let businesses: Business[] = await prisma.business.findMany({
     where: whereClause,
   })
 
@@ -214,7 +221,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
       const ratingB = b.rating || 0
       if (ratingA !== ratingB) return ratingB - ratingA
       // Fallback to reviews count
-      return b.reviewsCount - a.reviewsCount
+      return (b.reviewsCount || 0) - (a.reviewsCount || 0)
     } else if (sort === "price_asc") {
       const priceA = PRICE_TIER_VALUE[a.priceTier] || 2
       const priceB = PRICE_TIER_VALUE[b.priceTier] || 2
@@ -258,7 +265,8 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
   const categoryCounts: Record<string, number> = {}
   counts.forEach(c => {
     if (c.category) {
-      const key = c.category.toUpperCase()
+      let key = c.category.toUpperCase()
+      if (key === 'ATTRACTIONS') key = 'CULTURE'
       categoryCounts[key] = (categoryCounts[key] || 0) + c._count._all
     }
   })

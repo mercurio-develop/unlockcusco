@@ -1,19 +1,16 @@
-import { getLocalizedField } from "@/lib/utils/localization"
 import { Palette, Users, History, Sparkles } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
-
+import { DICTIONARIES } from "../../constants"
 interface CultureTemplateProps {
   business: Business & { services: BusinessService[] }
-  dict?: any
-  lang: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>
 }
 
-import { DICTIONARIES } from "../../constants"
-
-export function CultureTemplate({ business, dict , lang }: CultureTemplateProps) {
+export function CultureTemplate({ business, dict }: CultureTemplateProps) {
   const workshops = business.services || []
 
-  const t = dict?.cultureTemplate || DICTIONARIES.cultureTemplate
+  const t = dict?.templates?.culture || DICTIONARIES.cultureTemplate
 
   return (
     <div className="space-y-12">

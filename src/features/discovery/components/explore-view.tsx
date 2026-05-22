@@ -1,3 +1,4 @@
+ 
 "use client"
 
 import { useEffect, useMemo } from "react"
@@ -26,15 +27,14 @@ interface ExploreViewProps {
   initialHasMore: boolean
   initialQuery: string
   initialSelectedId?: string | null
-  initialItinerary?: any
-  dict?: any
+  initialItinerary?: unknown
+  dict?: Record<string, unknown>
 }
 
 const ExploreMap = dynamic(() => import("@/features/discovery/components/explore-map"), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-50 animate-pulse" />
 })
-
 export function ExploreView({ 
   initialBusinesses, 
   initialMapBusinesses,
@@ -42,9 +42,9 @@ export function ExploreView({
   initialHasMore, 
   initialQuery, 
   initialSelectedId,
-  initialItinerary,
   dict
 }: ExploreViewProps) {
+
   const {
     businesses,
     mapBusinesses,
@@ -76,8 +76,6 @@ export function ExploreView({
 
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
-  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
 
   const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
   const isSearchActive = !!initialQuery;

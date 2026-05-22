@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { calculateDistance } from '@/lib/utils/geo';
@@ -59,7 +60,9 @@ export const estimateTaxiFare = tool({
          dLat = dest.lat;
          dLng = dest.lng;
        } else if (townMatch) {
-         [, { lat: dLat, lng: dLng }] = townMatch;
+         const [, coords] = townMatch;
+         dLat = coords.lat;
+         dLng = coords.lng;
          finalDestinationName = townMatch[0].charAt(0).toUpperCase() + townMatch[0].slice(1);
        }
      }
@@ -136,8 +139,8 @@ export const estimateTaxiFare = tool({
          name: recommendedTaxi.name,
          whatsapp: recommendedTaxi.whatsapp,
          rating: recommendedTaxi.rating
-       } : undefined
+       } : null
      };
   }
+     
 } as any);
-

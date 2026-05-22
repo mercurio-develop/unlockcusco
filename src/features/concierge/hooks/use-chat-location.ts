@@ -3,11 +3,13 @@ import { useSearchParams } from "next/navigation";
 import { useUiStore } from "@/lib/store/use-ui-store";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { buildChatPayload } from "../utils/chat-payload";
+import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 
 export function useChatLocation(
-  chatSendMessage: (message: any, chatRequestOptions?: any) => void,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  chatSendMessage: (message: { text: string }, options?: { body: any }) => void,
   targetDate: Date | null,
-  activeItinerary: any
+  activeItinerary: OptimizedPlan | null
 ) {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const searchParams = useSearchParams();

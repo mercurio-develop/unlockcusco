@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, Component, type ReactNode } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useUiStore } from "@/lib/store/use-ui-store"
 import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 import { useMapboxRoute, type RouteData } from "@/features/discovery/hooks/use-mapbox-route"
@@ -9,9 +10,8 @@ import { useCallback } from "react"
 import { saveItineraryAction } from "@/features/itinerary/actions/save-itinerary";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/end-point-picker";
-import { Navigation, MapPin, Bed, Plane, ArrowRight, X, ChevronDown, ChevronUp, GripVertical, Trash2, ArrowUp, ArrowDown, Car, Footprints, MessageCircle, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, X, ChevronDown, Trash2, ArrowUp, ArrowDown, Car, Footprints, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
 import { BusinessCard } from "./business-card";
-import { Reorder } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +26,10 @@ import { Button } from "@/components/ui/button"
 import { DICTIONARIES } from "../constants";
 import { Input } from "@/components/ui/input";
 import type { TransportProfile } from "@/lib/store/use-itinerary-store";
+import type { Business } from "@prisma/client";
 
 function TransitEdge({ index, routeData, transportProfile, setTransportProfile, t }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile; setTransportProfile: (index: number, p: TransportProfile) => void; t?: any }) {
+
   const leg = routeData?.legs?.[index];
   if (!leg) return (
     <div className="relative h-12 w-full flex items-center">
@@ -91,7 +93,10 @@ class ItineraryErrorBoundary extends Component<{ children: ReactNode }, { error:
   }
 }
 
-export function ItineraryPanel({ dict }: { dict?: any }) {
+export function ItineraryPanel({ dict }: {
+   
+  dict?: any
+}) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
@@ -100,27 +105,20 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const removeWaypoint = useItineraryStore(s => s.removeWaypoint);
   const moveWaypoint = useItineraryStore(s => s.moveWaypoint);
-  const setWaypoints = useItineraryStore(s => s.setWaypoints);
   const clearStartAnchor = useItineraryStore(s => s.clearStartAnchor);
   const clearEndAnchor = useItineraryStore(s => s.clearEndAnchor);
   const transportProfiles = useItineraryStore(s => s.transportProfiles);
   const setLegTransportProfile = useItineraryStore(s => s.setLegTransportProfile);
 
-  const panelMode = useUiStore(s => s.panelMode);
   const setPanelMode = useUiStore(s => s.setPanelMode);
   const selectedId = useUiStore(s => s.selectedId);
   const setSelectedId = useUiStore(s => s.setSelectedId);
-  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
   const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
-  const isExchangingStart = useUiStore(s => s.isExchangingStart);
   const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
-  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
   const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
-  const isAddingStop = useUiStore(s => s.isAddingStop);
   const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
   const mapClickMode = useUiStore(s => s.mapClickMode);
   const setMapClickMode = useUiStore(s => s.setMapClickMode);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
 
   const { routeData } = useMapboxRoute();
@@ -140,11 +138,11 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
     }
     return null;
   }, [activeItinerary]);
-  const router = useRouter();
+
   const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';
 
-  const t = dict?.itineraryPanel || (isEs ? DICTIONARIES.itineraryPanelEs : DICTIONARIES.itineraryPanel);
+  const t = (dict?.itineraryPanel || (isEs ? DICTIONARIES.itineraryPanelEs : DICTIONARIES.itineraryPanel));
 
   // Cascade stop times: startAnchor time + legs travel + waypoint durations
   const stopTimes = (() => {
@@ -160,7 +158,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     };
     let cur = parseTime(activeItinerary.startAnchor?.time);
-    return (activeItinerary.waypoints || []).map((wp: any, i: number) => {
+    return (activeItinerary.waypoints || []).map((wp, i) => {
       const travelMins = routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration / 60) : 0;
       cur += travelMins;
       const arrival = fmt(cur);
@@ -256,10 +254,10 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                     if (navigator.geolocation) {
                       navigator.geolocation.getCurrentPosition((pos) => {
                         setStartAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
-                        if (conciergeSendMessage) {
-                          conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
+                        if (useUiStore.getState().conciergeSendMessage) {
+                          useUiStore.getState().conciergeSendMessage!({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
                         }
-                      }, (err) => {
+                      }, () => {
                         alert("Could not access your location. Please check browser permissions.");
                       });
                     } else {
@@ -313,10 +311,10 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
             </div>
           </div>
           {/* Expandable detail — inside border container, mirrors waypoint card */}
-          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor.service as Business) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
-              {(activeItinerary.startAnchor as any)?.service && (
-                <BusinessCard business={(activeItinerary.startAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+              {(activeItinerary.startAnchor.service as Business) && (
+                <BusinessCard business={(activeItinerary.startAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
               )}
             </div>
           </div>
@@ -359,7 +357,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                         )}
                       </div>
                     </div>
-                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{isEs && waypoint.service?.nameEs ? waypoint.service.nameEs : waypoint.title}</p>
+                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{isEs && (waypoint.service as Business)?.nameEs ? (waypoint.service as Business).nameEs : waypoint.title}</p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {waypoint.locationStr}</p>
                   </div>
 
@@ -426,7 +424,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                       <button
                         onClick={e => {
                           e.stopPropagation();
-                          updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title, waypoint.service);
+                          updateEndAnchorLocation(waypoint.lat!, waypoint.lng!, waypoint.title, waypoint.service as Business);
                           if (conciergeSendMessage) {
                             conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${waypoint.title}.` });
                           }
@@ -454,10 +452,11 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                   className={`grid transition-all duration-300 ease-in-out ${selectedId === waypoint.id ? "grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}
                 >
                   <div className="overflow-hidden">
-                    {waypoint.service && (
-                      <BusinessCard business={waypoint.service} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+                    {(waypoint.service as Business | null) && (
+                      <BusinessCard business={(waypoint.service as Business)} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
                     )}
                   </div>
+
                 </div>
               </div>
             </div>
@@ -543,7 +542,7 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                   const lastStopMins = (() => {
                     const parseTime = (t: string | undefined) => { if (!t) return 9*60; const [h,m]=t.split(':').map(Number); return (h||0)*60+(m||0); };
                     let cur = parseTime(activeItinerary.startAnchor?.time);
-                    waypoints.forEach((wp: any, i: number) => {
+                    waypoints.forEach((wp, i: number) => {
                       cur += routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration/60) : 0;
                       cur += wp.durationMins || 60;
                     });
@@ -552,17 +551,17 @@ export function ItineraryPanel({ dict }: { dict?: any }) {
                     const h = Math.floor(cur/60)%24; const m = cur%60;
                     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
                   })();
-                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ {t.arrives} ~{lastStopMins}</p>;
+                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ {(t as any).arrives} ~{lastStopMins}</p>;
                 }
                 return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
               })()}
             </div>
             </div>
             {/* Expandable detail — inside border container, mirrors waypoint card */}
-            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor as any)?.service ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor.service as Business) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
-                {(activeItinerary.endAnchor as any)?.service && (
-                  <BusinessCard business={(activeItinerary.endAnchor as any).service} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} dict={dict} />
+                {(activeItinerary.endAnchor.service as Business) && (
+                  <BusinessCard business={(activeItinerary.endAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} dict={dict} />
                 )}
               </div>
             </div>

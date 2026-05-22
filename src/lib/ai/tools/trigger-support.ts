@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 const payloadSchema = z.object({
   message: z.string().describe('A detailed explanation of the user\'s issue, including any relevant context from the conversation.'),
@@ -17,9 +19,10 @@ export const triggerSupportAlert = tool({
     console.log(`📝 Message: ${message}`);
     console.log(`🚨 =========================================\n`);
 
-    return {
+    return sanitizeToolOutput({
       success: true,
       statusMessage: "Support alert successfully sent to local human operators."
-    };
+    });
   }
+     
 } as any);

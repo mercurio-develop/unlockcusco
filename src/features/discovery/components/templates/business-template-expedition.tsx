@@ -1,18 +1,17 @@
-import { getLocalizedField } from "@/lib/utils/localization"
-import { Map, Calendar, Gauge, CheckCircle2 } from "lucide-react"
-import type { Business } from "@prisma/client"
-
-interface ExpeditionTemplateProps {
-  business: Business & { tourPackages?: any[] }
-  dict?: any
-  lang: string
-}
+import { Map, CheckCircle2 } from "lucide-react"
+import type { Business, BusinessService, TourPackage } from "@prisma/client"
 import { DICTIONARIES } from "../../constants"
 
-export function ExpeditionTemplate({ business, dict , lang }: ExpeditionTemplateProps) {
+interface ExpeditionTemplateProps {
+  business: Business & { services: BusinessService[]; tourPackages?: TourPackage[] }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>
+}
+
+export function ExpeditionTemplate({ business, dict }: ExpeditionTemplateProps) {
   const packages = business.tourPackages || []
 
-  const t = dict?.expeditionTemplate || DICTIONARIES.expeditionTemplate
+  const t = dict?.templates?.expedition || DICTIONARIES.expeditionTemplate
 
   return (
     <div className="space-y-12">
@@ -44,12 +43,12 @@ export function ExpeditionTemplate({ business, dict , lang }: ExpeditionTemplate
                            </span>
                            <span className="text-white/40 text-xs uppercase tracking-widest">• {pkg.durationDays} {t.days}</span>
                         </div>
-                        <h3 className="text-2xl font-serif text-white mb-2">{getLocalizedField(pkg, 'title', lang)}</h3>
-                        <p className="text-white/60 text-sm italic">{getLocalizedField(pkg, 'tagline', lang)}</p>
+                        <h3 className="text-2xl font-serif text-white mb-2">{pkg.title}</h3>
+                        <p className="text-white/60 text-sm italic">{pkg.tagline}</p>
                       </div>
 
                       <p className="text-white/70 text-sm leading-relaxed">
-                        {getLocalizedField(pkg, 'description', lang)}
+                        {pkg.description}
                       </p>
 
                       <div className="grid grid-cols-2 gap-4">

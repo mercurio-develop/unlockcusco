@@ -6,9 +6,13 @@ export type TransportProfile = "driving" | "walking";
 
 export interface ItineraryState {
   activeItinerary: OptimizedPlan | null;
+  pastItineraries: (OptimizedPlan | null)[];
+  futureItineraries: (OptimizedPlan | null)[];
   transportProfiles: Record<number, TransportProfile>;
   
   setActiveItinerary: (itinerary: OptimizedPlan | null | ((prev: OptimizedPlan | null) => OptimizedPlan | null)) => void;
+  undoItinerary: () => void;
+  redoItinerary: () => void;
   setStartAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
   clearStartAnchor: () => void;
   updateEndAnchorLocation: (lat: number, lng: number, title?: string, service?: Business) => void;
@@ -21,17 +25,52 @@ export interface ItineraryState {
   setLegTransportProfile: (index: number, profile: TransportProfile) => void;
 }
 
+const MAX_HISTORY = 10;
+
 export const useItineraryStore = create<ItineraryState>((set) => ({
   activeItinerary: null,
+  pastItineraries: [],
+  futureItineraries: [],
   transportProfiles: {},
 
-  setActiveItinerary: (itinerary) => set((state) => ({
-    activeItinerary: typeof itinerary === 'function' ? itinerary(state.activeItinerary) : itinerary
-  })),
+  setActiveItinerary: (itinerary) => set((state) => {
+    const nextItinerary = typeof itinerary === 'function' ? itinerary(state.activeItinerary) : itinerary;
+    const newPast = [...state.pastItineraries, state.activeItinerary].slice(-MAX_HISTORY);
+    return {
+      activeItinerary: nextItinerary,
+      pastItineraries: newPast,
+      futureItineraries: []
+    };
+  }),
+
+  undoItinerary: () => set((state) => {
+    if (state.pastItineraries.length === 0) return state;
+    const previous = state.pastItineraries[state.pastItineraries.length - 1];
+    const newPast = state.pastItineraries.slice(0, -1);
+    const newFuture = [state.activeItinerary, ...state.futureItineraries].slice(0, MAX_HISTORY);
+    return {
+      activeItinerary: previous,
+      pastItineraries: newPast,
+      futureItineraries: newFuture
+    };
+  }),
+
+  redoItinerary: () => set((state) => {
+    if (state.futureItineraries.length === 0) return state;
+    const next = state.futureItineraries[0];
+    const newFuture = state.futureItineraries.slice(1);
+    const newPast = [...state.pastItineraries, state.activeItinerary].slice(-MAX_HISTORY);
+    return {
+      activeItinerary: next,
+      pastItineraries: newPast,
+      futureItineraries: newFuture
+    };
+  }),
 
   setStartAnchorLocation: (lat, lng, title = "Current Location", service) => {
     set((state) => {
       const prev = state.activeItinerary;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       const base = prev ?? {
         title: undefined,
         startAnchor: { title, locationStr: title, type: 'GENERIC_TOWN' as const, lat, lng, time: '09:00', service },
@@ -42,7 +81,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
         activeItinerary: {
           ...base,
           startAnchor: { ...base.startAnchor, lat, lng, locationStr: title, title, service }
-        }
+        },
+        pastItineraries: newPast,
+        futureItineraries: []
       };
     });
   },
@@ -51,6 +92,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     set((state) => {
       const prev = state.activeItinerary;
       if (!prev) return state;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       return {
         activeItinerary: {
           ...prev,
@@ -63,7 +105,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
             time: '09:00',
             service: undefined
           }
-        }
+        },
+        pastItineraries: newPast,
+        futureItineraries: []
       };
     });
   },
@@ -71,6 +115,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
   updateEndAnchorLocation: (lat, lng, title = "Custom End Location", service) => {
     set((state) => {
       const prev = state.activeItinerary;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       const base = prev ?? {
         title: undefined,
         startAnchor: { title: 'Current Location', locationStr: 'Current Location', type: 'GENERIC_TOWN' as const, lat: -13.5226, lng: -71.9673, time: '09:00' },
@@ -88,7 +133,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
             title: title,
             ...(service !== undefined ? { service } : {}),
           }
-        }
+        },
+        pastItineraries: newPast,
+        futureItineraries: []
       };
     });
   },
@@ -97,6 +144,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     set((state) => {
       const prev = state.activeItinerary;
       if (!prev) return state;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       return {
         activeItinerary: {
           ...prev,
@@ -108,7 +156,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
             lng: -72.1167,
             service: undefined,
           }
-        }
+        },
+        pastItineraries: newPast,
+        futureItineraries: []
       };
     });
   },
@@ -117,6 +167,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     let result = false;
     set((state) => {
       const prev = state.activeItinerary;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       const newWaypoint = {
         id: service.id,
         category: service.category || 'General',
@@ -148,7 +199,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
             transitEdges: [],
             needsAccommodationUpsell: false,
             totalCost: 0
-          } as OptimizedPlan
+          } as OptimizedPlan,
+          pastItineraries: newPast,
+          futureItineraries: []
         };
       }
 
@@ -157,7 +210,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
         activeItinerary: {
           ...prev,
           waypoints: [...prev.waypoints, newWaypoint]
-        }
+        },
+        pastItineraries: newPast,
+        futureItineraries: []
       };
     });
     return result;
@@ -167,6 +222,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     set((state) => {
       const prev = state.activeItinerary;
       if (!prev) return state;
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       
       if (targetId === 'itin-start' && prev.startAnchor) {
         return {
@@ -180,7 +236,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
               lng: newService.lng || prev.startAnchor.lng,
               service: newService
             }
-          }
+          },
+          pastItineraries: newPast,
+          futureItineraries: []
         };
       }
       
@@ -196,7 +254,9 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
               lng: newService.lng || prev.endAnchor.lng,
               service: newService
             }
-          }
+          },
+          pastItineraries: newPast,
+          futureItineraries: []
         };
       }
 
@@ -213,7 +273,11 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
           service: newService
         } : w
       );
-      return { activeItinerary: { ...prev, waypoints: updatedWaypoints } };
+      return { 
+        activeItinerary: { ...prev, waypoints: updatedWaypoints },
+        pastItineraries: newPast,
+        futureItineraries: []
+      };
     });
   },
 
@@ -221,7 +285,12 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     set((state) => {
       const prev = state.activeItinerary;
       if (!prev) return state;
-      return { activeItinerary: { ...prev, waypoints: prev.waypoints.filter(w => w.id !== id) } };
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
+      return { 
+        activeItinerary: { ...prev, waypoints: prev.waypoints.filter(w => w.id !== id) },
+        pastItineraries: newPast,
+        futureItineraries: []
+      };
     });
   },
 
@@ -236,6 +305,7 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
       );
       if (index < 0) return state;
       
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
       const newWaypoints = [...prev.waypoints];
       if (direction === "up" && index > 0) {
         [newWaypoints[index - 1], newWaypoints[index]] = [newWaypoints[index], newWaypoints[index - 1]];
@@ -244,7 +314,11 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
       } else {
         return state;
       }
-      return { activeItinerary: { ...prev, waypoints: newWaypoints } };
+      return { 
+        activeItinerary: { ...prev, waypoints: newWaypoints },
+        pastItineraries: newPast,
+        futureItineraries: []
+      };
     });
   },
 
@@ -252,7 +326,12 @@ export const useItineraryStore = create<ItineraryState>((set) => ({
     set((state) => {
       const prev = state.activeItinerary;
       if (!prev) return state;
-      return { activeItinerary: { ...prev, waypoints } };
+      const newPast = [...state.pastItineraries, prev].slice(-MAX_HISTORY);
+      return { 
+        activeItinerary: { ...prev, waypoints },
+        pastItineraries: newPast,
+        futureItineraries: []
+      };
     });
   },
 

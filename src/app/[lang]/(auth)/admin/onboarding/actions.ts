@@ -79,8 +79,9 @@ export async function submitPremiumOnboarding(formData: FormData) {
     revalidatePath(`/business/${data.slug}`);
     
     return { success: true, message: `Successfully created premium profile for ${data.name}` };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Submission Error:", error);
-    return { success: false, message: error.message || "Something went wrong" };
+    const message = error instanceof Error ? error.message : "Something went wrong";
+    return { success: false, message };
   }
 }

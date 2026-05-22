@@ -8,11 +8,36 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { scrapeMachuPicchuTickets } from "@/features/discovery/actions/scrape-tickets";
 
+interface MachuPicchuTicket {
+  type: string;
+  circuit: string;
+  available: number;
+  price: string;
+  time: string;
+}
+
+interface MachuPicchuTrain {
+  company: string;
+  type: string;
+  route: string;
+  departure: string;
+  arrival: string;
+  available: boolean;
+  price: string;
+}
+
+interface MachuPicchuResults {
+  date: string;
+  tickets: MachuPicchuTicket[];
+  trains: MachuPicchuTrain[];
+  source: string;
+}
+
 export default function MachuPicchuPage() {
   const router = useRouter();
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<MachuPicchuResults | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +47,11 @@ export default function MachuPicchuPage() {
 
     try {
       const data = await scrapeMachuPicchuTickets(date);
-      setResults(data);
-    } catch (err: any) {
+      setResults(data as MachuPicchuResults);
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || "Error checking availability.");
+      const message = err instanceof Error ? err.message : "Error checking availability.";
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -100,7 +126,7 @@ export default function MachuPicchuPage() {
                 Llaqta Entrance Tickets
               </h3>
               <div className="grid gap-3">
-                {results.tickets.map((ticket: any, idx: number) => (
+                {results.tickets.map((ticket, idx: number) => (
                   <Card key={idx} className={`p-4 flex items-center justify-between border-l-4 ${ticket.available > 0 ? "border-l-emerald-500" : "border-l-rose-500 bg-rose-50/50"}`}>
                     <div>
                       <h4 className="font-semibold">{ticket.type}</h4>
@@ -124,7 +150,7 @@ export default function MachuPicchuPage() {
                 Trains (Ollantaytambo)
               </h3>
               <div className="grid gap-3">
-                {results.trains.map((train: any, idx: number) => (
+                {results.trains.map((train, idx: number) => (
                   <Card key={idx} className={`p-4 flex items-center justify-between border-l-4 ${train.available ? "border-l-blue-500" : "border-l-rose-500 bg-rose-50/50"}`}>
                     <div>
                       <h4 className="font-semibold">{train.company} - {train.type}</h4>

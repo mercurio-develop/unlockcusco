@@ -2,7 +2,8 @@
 
 import { Map, Link, MapPin, Bot, Waypoints, MessageSquare } from "lucide-react"
 
-export function FeaturesSection({ dict }: { dict: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function FeaturesSection({ dict }: { dict: Record<string, any> }) {
   return (
     <div id="features-section" className="bg-slate-50 py-24 sm:py-32 border-t border-gray-100">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">

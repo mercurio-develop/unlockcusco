@@ -44,12 +44,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <MessageSquare className="w-5 h-5" />
               Leads & Messages
             </Link>
-            {business && (
-              <Link href={`/claim/${business.id}`} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                <Building2 className="w-5 h-5" />
-                My Profile
-              </Link>
-            )}
             <Link href="/explore" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
               <Settings className="w-5 h-5" />
               Settings
@@ -115,7 +109,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   </p>
                   <LeadCTA
                     businessName={business?.name ?? "your business"}
-                    businessWhatsapp={business?.whatsapp}
+                    _businessWhatsapp={business?.whatsapp}
                     lead={latestLead}
                   />
                 </div>

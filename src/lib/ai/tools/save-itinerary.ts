@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { saveItineraryAction } from '@/features/itinerary/actions/save-itinerary';
@@ -19,12 +20,13 @@ export const generateSaveLink = tool({
       const data = await saveItineraryAction(stateObj);
       
       if (data.success && data.shortId) {
-        return { success: true, url: `${host}/explore?trip=${data.shortId}` };
+        return { success: true, url: `${host}/explore?trip=${data.shortId}`, error: null };
       }
-      return { success: false, error: data.error || 'Failed to save' };
+      return { success: false, url: null, error: data.error || 'Failed to save' };
     } catch (e) {
       console.error('generateSaveLink error:', e);
-      return { success: false, error: 'Internal error generating link' };
+      return { success: false, url: null, error: 'Internal error generating link' };
     }
   }
+     
 } as any);

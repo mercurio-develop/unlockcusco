@@ -6,4 +6,3 @@ export { ExpeditionTemplate } from './components/templates/business-template-exp
 export { SanctuaryTemplate } from './components/templates/business-template-sanctuary';
 export { StaysTemplate } from './components/templates/business-template-stays';
 export { CultureTemplate } from './components/templates/business-template-culture';
-export { BasicTemplate } from './components/templates/business-template-basic';

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { macroTripSchema } from '../schemas/planner-schema';
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 type Payload = z.infer<typeof macroTripSchema>;
 
@@ -11,6 +13,7 @@ This establishes the "macro-skeleton" (sleep towns, narrative arc) before drilli
   parameters: macroTripSchema,
   execute: async (payload: Payload) => {
     // Return the generated macro trip payload so it can be rendered by the UI
-    return payload;
+    return sanitizeToolOutput(payload);
   }
+     
 } as any);

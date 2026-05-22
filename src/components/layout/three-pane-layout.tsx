@@ -86,7 +86,7 @@ export function ThreePaneLayout({
       window.removeEventListener('drawer-snap-half', handleSnap)
       window.removeEventListener('switch-to-map-view', handleSnap)
     }
-  }, [])
+  }, [setMobileViewMode])
 
   return (
     <div ref={containerRef} className={cn("h-[calc(100dvh-48px)] md:h-[calc(100vh-48px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>

@@ -1,18 +1,17 @@
-import { getLocalizedField } from "@/lib/utils/localization"
 import { HeartPulse, Sparkles, Wind } from "lucide-react"
 import type { Business, BusinessService } from "@prisma/client"
 
 interface SanctuaryTemplateProps {
   business: Business & { services: BusinessService[] }
-  dict?: any
-  lang: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dict?: Record<string, any>
 }
 import { DICTIONARIES } from "../../constants"
 
-export function SanctuaryTemplate({ business, dict , lang }: SanctuaryTemplateProps) {
+export function SanctuaryTemplate({ business, dict }: SanctuaryTemplateProps) {
   const treatments = business.services || []
 
-  const t = dict?.sanctuaryTemplate || DICTIONARIES.sanctuaryTemplate
+  const t = dict?.templates?.sanctuary || DICTIONARIES.sanctuaryTemplate
 
   return (
     <div className="space-y-16">
@@ -42,7 +41,7 @@ export function SanctuaryTemplate({ business, dict , lang }: SanctuaryTemplatePr
                   {item.title}
                 </h3>
                 <p className="text-white/60 text-sm leading-relaxed mb-8">
-                  {getLocalizedField(item, 'description', lang)}
+                  {item.description}
                 </p>
 
                 <div className="flex items-center justify-between pt-6 border-t border-white/5">

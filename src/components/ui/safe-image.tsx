@@ -54,7 +54,7 @@ export function SafeImageWrapper({
           setIsLoading(false);
           if (onLoad) onLoad();
         }}
-        onError={(e) => {
+        onError={() => {
           if (!hasError && fallbackSrc) {
             setHasError(true);
             setIsLoading(true); // reset loading state for fallback

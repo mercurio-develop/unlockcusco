@@ -1,6 +1,7 @@
 import { DEFAULT_ANCHOR_TITLES } from '../constants';
+import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 
-export const formatItineraryState = (activeItinerary: any) => {
+export const formatItineraryState = (activeItinerary: OptimizedPlan | null) => {
   if (!activeItinerary) return null;
   
   return JSON.stringify({
@@ -20,7 +21,7 @@ export const formatItineraryState = (activeItinerary: any) => {
           lng: activeItinerary.endAnchor.lng 
         } 
       : null,
-    waypoints: activeItinerary.waypoints?.map((w: any) => ({ 
+    waypoints: activeItinerary.waypoints?.map((w) => ({ 
       id: w.id, 
       title: w.title, 
       startTime: w.startTime, 
@@ -35,10 +36,12 @@ export const buildChatPayload = (params: {
   travelVibe: string | null;
   travelIntensity: number | null;
   targetDate: Date | null;
-  activeItinerary: any;
+  activeItinerary: OptimizedPlan | null;
   activeFilters?: { location: string | null; category: string | null };
+  currentlyViewing?: string | null;
+  interactionHistory?: { type: string, id: string, name?: string, timestamp: number }[];
 }) => {
-  const { userCoords, travelVibe, travelIntensity, targetDate, activeItinerary, activeFilters } = params;
+  const { userCoords, travelVibe, travelIntensity, targetDate, activeItinerary, activeFilters, currentlyViewing, interactionHistory } = params;
   
   const sTitle = activeItinerary?.startAnchor?.title;
   const eTitle = activeItinerary?.endAnchor?.title;
@@ -51,6 +54,8 @@ export const buildChatPayload = (params: {
     archetype: travelVibe,
     intensity: travelIntensity,
     activeFilters,
+    currentlyViewing,
+    interactionHistory,
     itineraryStartTitle: sTitle && !DEFAULT_ANCHOR_TITLES.includes(sTitle) ? sTitle : null,
     itineraryEndTitle: eTitle && !DEFAULT_ANCHOR_TITLES.includes(eTitle) ? eTitle : null,
     itineraryState: formatItineraryState(activeItinerary)

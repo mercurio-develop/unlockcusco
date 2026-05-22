@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -15,7 +16,7 @@ interface InteractiveListProps {
   locationSlug: string
   category?: string
   initialBusinesses: Business[]
-  dict?: any
+  dict?: Record<string, unknown>
 }
 
 const SORT_OPTIONS = [
@@ -31,7 +32,8 @@ export function BusinessList({ locationSlug, category, initialBusinesses, dict }
   const pathname = usePathname()
   const isEs = pathname?.split('/')[1] === 'es'
 
-  const t = dict?.explore?.interactiveList || (isEs ? DICTIONARIES.interactiveListEs : DICTIONARIES.interactiveList)
+   
+  const t = ((dict as any)?.explore)?.interactiveList || (isEs ? DICTIONARIES.interactiveListEs : DICTIONARIES.interactiveList)
   
   // Debounce the query for SWR key
   const [debouncedQuery, setDebouncedQuery] = useState(query)

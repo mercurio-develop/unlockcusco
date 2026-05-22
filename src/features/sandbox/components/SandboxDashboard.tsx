@@ -2,8 +2,14 @@
 
 import { useState } from "react"
 import { simulateDriverAccept, simulateDriverMessage, simulateRideComplete } from "@/features/sandbox/actions/simulate-webhooks"
+import type { RideBooking, Driver, RideMessage } from "@prisma/client"
 
-export function SandboxDashboard({ rides }: { rides: any[] }) {
+type RideWithDetails = RideBooking & { 
+  driver: Driver | null; 
+  messages: RideMessage[]; 
+}
+
+export function SandboxDashboard({ rides }: { rides: RideWithDetails[] }) {
   const [loading, setLoading] = useState(false)
 
   const handleAccept = async (id: string) => {
@@ -60,7 +66,7 @@ export function SandboxDashboard({ rides }: { rides: any[] }) {
               {/* Chat Log Preview */}
               {ride.messages.length > 0 && (
                 <div className="mb-4 space-y-2 max-h-32 overflow-y-auto border border-gray-100 p-2 rounded-lg bg-gray-50 text-sm">
-                  {ride.messages.map((m: any) => (
+                  {ride.messages.map((m: RideMessage) => (
                     <div key={m.id}>
                       <span className="font-bold">{m.sender}:</span> {m.text}
                     </div>

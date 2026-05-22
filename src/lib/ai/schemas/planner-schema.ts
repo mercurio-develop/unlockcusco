@@ -11,7 +11,7 @@ export const microDaySchema = z.object({
     type: z.enum(['AIRPORT', 'HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
-    service: z.any().optional(),
+    service: z.unknown().optional(),
   }),
   endAnchor: z.object({
     title: z.string().min(1).describe('The real location name, e.g. "Ollantaytambo" or "Pisac". Never empty.'),
@@ -20,7 +20,7 @@ export const microDaySchema = z.object({
     type: z.enum(['HOTEL', 'GENERIC_TOWN']),
     lat: z.number().optional(),
     lng: z.number().optional(),
-    service: z.any().optional(),
+    service: z.unknown().optional(),
   }),
   waypoints: z.array(
     z.object({
@@ -35,8 +35,8 @@ export const microDaySchema = z.object({
       rating: z.number().optional(),
       startTime: z.string().optional(),
       endTime: z.string().optional(),
-      alternatives: z.array(z.any()).optional(),
-      service: z.any().optional(),
+      alternatives: z.array(z.unknown()).optional(),
+      service: z.unknown().optional(),
     })
   ),
   transitEdges: z.array(

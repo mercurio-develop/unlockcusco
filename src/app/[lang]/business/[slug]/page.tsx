@@ -1,16 +1,81 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
-import { Star, MapPin, Zap, ArrowLeft, MessageCircle, Clock, ShieldCheck, Heart } from "lucide-react"
-import { AsociadoBadge, GastronomicTemplate, ExpeditionTemplate, SanctuaryTemplate } from "@/features/discovery"
+import { Star, MessageCircle, Clock, ShieldCheck } from "lucide-react"
+import { 
+  AsociadoBadge, 
+  GastronomicTemplate, 
+  ExpeditionTemplate, 
+  SanctuaryTemplate,
+  StaysTemplate,
+  CultureTemplate,
+} from "@/features/discovery"
 import { siteConfig } from "@/lib/config/site"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { BackButton } from "@/components/ui/back-button"
 import { getDictionary, Locale } from "@/lib/dictionaries"
+import { Business, Review, BusinessService, TourPackage, BusinessPremiumProfile, BusinessPillar } from "@prisma/client"
+
+interface SocialLink {
+  platform?: string
+  url: string
+}
+
+interface BusinessWithRelations extends Business {
+  reviews: Review[]
+  services: BusinessService[]
+  premiumProfile: (BusinessPremiumProfile & {
+    pillars: BusinessPillar[]
+  }) | null
+  tourPackages: TourPackage[]
+}
+
+interface JsonLdReview {
+  "@type": "Review"
+  reviewRating: {
+    "@type": "Rating"
+    ratingValue: number
+  }
+  author: {
+    "@type": "Person"
+    name: string
+  }
+  reviewBody: string
+  datePublished: string
+}
+
+interface JsonLd {
+  "@context": "https://schema.org"
+  "@type": string
+  name: string
+  image?: string[]
+  description: string
+  url: string
+  telephone?: string
+  priceRange: string
+  sameAs?: string[]
+  address: {
+    "@type": "PostalAddress"
+    addressLocality: string
+    addressRegion: string
+    addressCountry: string
+  }
+  geo?: {
+    "@type": "GeoCoordinates"
+    latitude: number
+    longitude: number
+  }
+  aggregateRating?: {
+    "@type": "AggregateRating"
+    ratingValue: number
+    reviewCount: number
+  }
+  review?: JsonLdReview[]
+}
 
 interface BusinessPageProps {
   params: Promise<{ slug: string, lang: string }>
@@ -41,7 +106,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   const title = bSeoMetaTitle || `${bName} — ${categoryName} ${isEs ? 'en' : 'in'} ${locationName}`
   const description = bSeoMetaDesc || bTagline || (isEs ? `Lee reseñas, mira fotos y contacta a ${bName} directamente. Calificación: ${business.rating?.toFixed(1) || 'Nuevo'} estrellas.` : `Read reviews, view photos, and contact ${bName} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`)
 
-  const ogImage = business.premiumProfile?.coverPhotoUrl || business.premiumProfile?.logoUrl || `/api/og?title=${encodeURIComponent(bName)}&description=${encodeURIComponent(categoryName + (isEs ? ' en ' : ' in ') + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`
+  const ogImage = business.premiumProfile?.coverPhotoUrl || business.premiumProfile?.logoUrl || `/api/og?title=${encodeURIComponent(bName || 'UnlockCusco')}&description=${encodeURIComponent((categoryName || '') + (isEs ? ' en ' : ' in ') + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`
 
   return {
     title,
@@ -95,7 +160,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       },
       tourPackages: true
     },
-  })
+  }) as BusinessWithRelations | null
 
   if (!business) return notFound()
 
@@ -153,7 +218,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   const otherExperiences = await prisma.business.findMany({
     where: {
       locationSlug: business.locationSlug,
-      category: { not: business.category },
+      category: { not: business.category || '' },
       rating: { not: null },
     },
     orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
@@ -183,8 +248,8 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   )
 
   const isAsociado = business.isAsociado || false
-  const isVerified = business.isClaimed || isAsociado
-
+   
+   
   const schemaTypeMap: Record<string, string> = {
     'DINING': 'Restaurant',
     'AGENCY': 'TravelAgency',
@@ -192,42 +257,46 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     'STAYS': 'LodgingBusiness',
     'CULTURE': 'TouristAttraction',
   }
-  const businessType = schemaTypeMap[business.category] || 'LocalBusiness'
+  const businessType = schemaTypeMap[business.category || ''] || 'LocalBusiness'
 
-  let socialLinks: any[] = []
+  let socialLinks: SocialLink[] = []
   try {
     const parsed = business.socialLinks ? JSON.parse(business.socialLinks) : []
     socialLinks = Array.isArray(parsed) ? parsed : []
-  } catch(e) {}
+  } catch(e) {
+      console.warn("Failed to parse social links", e)
+  }
   
-  const sameAsLinks = socialLinks.map((s: any) => s.url).filter(Boolean)
+  const sameAsLinks = socialLinks.map((s) => s.url).filter(Boolean)
   if (business.instagramHandle) {
     sameAsLinks.push(`https://instagram.com/${business.instagramHandle.replace('@', '')}`)
   }
 
-  let images = [business.imageUrl].filter(Boolean)
+  let images = [business.imageUrl].filter(Boolean) as string[]
   if (business.premiumProfile?.coverPhotoUrl) images.push(business.premiumProfile.coverPhotoUrl)
   try {
     const heroImages = business.heroImages ? JSON.parse(business.heroImages) : []
     if (Array.isArray(heroImages)) {
       images = [...images, ...heroImages]
     }
-  } catch(e) {}
+  } catch(e) {
+      console.warn("Failed to parse hero images", e)
+  }
 
   // JSON-LD Structured Data
-  const jsonLd: any = {
+  const jsonLd: JsonLd = {
     "@context": "https://schema.org",
     "@type": businessType,
-    "name": business.name,
+    "name": business.name || 'Business',
     "image": images.length > 0 ? images : undefined,
-    "description": business.description || business.tagline,
+    "description": business.description || business.tagline || '',
     "url": `${siteConfig.url}/${lang}/business/${business.slug}`,
     "telephone": business.whatsapp ? `+51${business.whatsapp.replace(/\D/g, '')}` : undefined,
     "priceRange": business.priceTier || "$$",
     "sameAs": sameAsLinks.length > 0 ? sameAsLinks : undefined,
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": locationName,
+      "addressLocality": locationName || '',
       "addressRegion": "Cusco",
       "addressCountry": "PE"
     },
@@ -244,7 +313,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   };
 
   if (business.reviews && business.reviews.length > 0) {
-    jsonLd.review = business.reviews.slice(0, 5).map((review: any) => ({
+    jsonLd.review = business.reviews.slice(0, 5).map((review) => ({
       "@type": "Review",
       "reviewRating": {
         "@type": "Rating",
@@ -254,7 +323,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         "@type": "Person",
         "name": review.author || "UnlockCusco User"
       },
-      "reviewBody": review.text,
+      "reviewBody": review.text || '',
       "datePublished": new Date().toISOString().split('T')[0]
     }));
   }
@@ -285,7 +354,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         "@type": "ListItem",
         "position": 4,
         "name": categoryName,
-        "item": `${siteConfig.url}/${lang}/explore/${business.locationSlug || 'sacred-valley'}/${business.category.toLowerCase()}`
+        "item": `${siteConfig.url}/${lang}/explore/${business.locationSlug || 'sacred-valley'}/${business.category?.toLowerCase() || 'general'}`
       },
       {
         "@type": "ListItem",
@@ -295,9 +364,6 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       }
     ]
   }
-
-  const primaryColor = business.premiumProfile?.primaryColor || "#09090B";
-  const accentColor = business.premiumProfile?.accentColor || "#D4AF37";
 
   return (
     <div className="min-h-screen font-sans pb-24 bg-white">
@@ -359,7 +425,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
       <div className="max-w-6xl mx-auto px-6 mb-16">
         <SafeImageWrapper
           src={business.premiumProfile?.coverPhotoUrl || business.imageUrl || ""}
-          alt={business.name}
+          alt={business.name || 'Hero'}
           priority={true}
           wrapperClassName="relative h-[40vh] md:h-[60vh] w-full rounded-[2rem] overflow-hidden bg-slate-100"
           imgClassName="w-full h-full object-cover"
@@ -374,9 +440,11 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           
           {/* Dynamic Template Content */}
           <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-             {business.category === 'DINING' && <GastronomicTemplate business={business as any} dict={dict.templates?.gastronomic} lang={lang} />}
-             {business.category === 'AGENCY' && <ExpeditionTemplate business={business as any} dict={dict.templates?.expedition} lang={lang} />}
-             {business.category === 'WELLNESS' && <SanctuaryTemplate business={business as any} dict={dict.templates?.sanctuary} lang={lang} />}
+             {business.category === 'DINING' && <GastronomicTemplate business={business} dict={dict} />}
+             {business.category === 'AGENCY' && <ExpeditionTemplate business={business} dict={dict} />}
+             {business.category === 'WELLNESS' && <SanctuaryTemplate business={business} dict={dict} />}
+             {business.category === 'STAYS' && <StaysTemplate business={business} dict={dict} />}
+             {business.category === 'CULTURE' && <CultureTemplate business={business} dict={dict} />}
           </section>
 
           {/* About Section */}
@@ -390,7 +458,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </p>
             {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {business.premiumProfile.pillars.map((pillar: any) => (
+                {business.premiumProfile.pillars.map((pillar) => (
                   <div key={pillar.id} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
                     <h3 className="font-bold mb-2 text-slate-900">{pillar.title}</h3>
                     <p className="text-slate-500 text-sm">{pillar.description}</p>
@@ -408,12 +476,12 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {business.reviews.map((review: any) => (
+                {business.reviews.map((review) => (
                   <div key={review.id} className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col h-full transition-all hover:shadow-md">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-serif text-lg">
-                          {review.author.charAt(0)}
+                          {review.author?.charAt(0) || 'U'}
                         </div>
                         <div>
                           <p className="text-slate-900 font-medium text-sm">{review.author}</p>
@@ -424,12 +492,12 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star 
                             key={i} 
-                            className={`w-3 h-3 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'fill-slate-100 text-slate-100'}`} 
+                            className={`w-3 h-3 ${(review.rating || 0) > i ? 'fill-amber-400 text-amber-400' : 'fill-slate-100 text-slate-100'}`} 
                           />
                         ))}
                       </div>
                     </div>
-                    <ExpandableText text={review.text} maxLength={180} />
+                    <ExpandableText text={review.text || ''} maxLength={180} />
                   </div>
                 ))}
               </div>
@@ -513,8 +581,8 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest">
               {dict.business.moreIn} {categoryName} {isEs ? 'en' : 'in'} {locationName}
             </h2>
-            <Link href={`/${lang}/explore/${business.locationSlug || 'sacred-valley'}/${business.category.toLowerCase()}`} className="text-sm font-medium text-rose-600 hover:text-rose-700 underline decoration-rose-300 hover:decoration-rose-600 transition-colors">
-              {isEs ? `Ver todos ${categoryName} &rarr;` : `Browse all ${categoryName} &rarr;`}
+            <Link href={`/${lang}/explore/${business.locationSlug || 'sacred-valley'}/${business.category?.toLowerCase() || 'general'}`} className="text-sm font-medium text-rose-600 hover:text-rose-700 underline decoration-rose-300 hover:decoration-rose-600 transition-colors">
+              {isEs ? `Ver todos ${categoryName} →` : `Browse all ${categoryName} →`}
             </Link>
           </div>
           <ScrollCarousel>
@@ -528,7 +596,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                 {b.imageUrl && (
                   <SafeImageWrapper
                     src={b.imageUrl}
-                    alt={isEs && b.nameEs ? b.nameEs : b.name}
+                    alt={(isEs && b.nameEs ? b.nameEs : b.name) || 'Business'}
                     wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
                     imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -561,7 +629,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
                 {b.imageUrl && (
                   <SafeImageWrapper
                     src={b.imageUrl}
-                    alt={isEs && b.nameEs ? b.nameEs : b.name}
+                    alt={(isEs && b.nameEs ? b.nameEs : b.name) || 'Business'}
                     wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
                     imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -586,7 +654,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           {TOWNS.map(town => (
             <Link 
               key={town.slug}
-              href={`/${lang}/explore/${town.slug}/${business.category.toLowerCase()}`}
+              href={`/${lang}/explore/${town.slug}/${business.category?.toLowerCase() || 'general'}`}
               className="px-6 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full text-slate-700 hover:text-rose-700 transition-colors font-medium text-sm shadow-sm hover:shadow-md"
             >
               {town.name}

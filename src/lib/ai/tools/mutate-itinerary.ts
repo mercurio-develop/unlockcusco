@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { COORDS_MAP } from '@/lib/constants';
+import { universalSearch } from '@/features/discovery/queries/universal-search';
+import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 function lookupCoords(name: string): { lat: number; lng: number } | null {
   if (!name) return null;
@@ -24,7 +27,9 @@ const payloadSchema = z.object({
     'MOVE_WAYPOINT',
     'CLEAR_START',
     'CLEAR_END',
-    'SET_TRANSPORT_PROFILE'
+    'SET_TRANSPORT_PROFILE',
+    'UNDO',
+    'REDO'
   ]),
   targetId: z.string().optional().describe('The ID of the waypoint to modify (e.g. itin-start, itin-arrival, or an existing waypoint ID)'),
   businessId: z.string().optional().describe('The ID of the business to insert/swap (must be an exact ID from searchDatabase)'),
@@ -42,7 +47,20 @@ export const mutateItinerary = tool({
   description: 'Surgically edits the user\'s current day plan (activeItinerary). Use this when the user asks to add/remove stops, reorder waypoints, clear start/end locations, or change transport modes (driving/walking) for specific legs.',
   parameters: payloadSchema,
   execute: async (payload: Payload) => {
-    let resolvedBusiness = null;
+    let resolvedBusiness: {
+      id: string;
+      name: string;
+      category: string | null;
+      lat: number | null;
+      lng: number | null;
+      rating: number | null;
+      slug: string;
+      imageUrl: string | null;
+      tagline: string | null;
+      description: string | null;
+      priceTier: string | null;
+      reviewsCount: number | null;
+    } | null = null;
     
     if (payload.businessId) {
       resolvedBusiness = await prisma.business.findUnique({
@@ -72,30 +90,33 @@ export const mutateItinerary = tool({
     }
 
     if (!resolvedBusiness && resolvedLocation && !resolvedCoords) {
-      resolvedBusiness = await prisma.business.findFirst({
-        where: {
-          name: {
-            contains: resolvedLocation,
-            mode: 'insensitive'
+      try {
+        const results = await universalSearch({ 
+          query: resolvedLocation,
+          limit: 1
+        });
+        if (results && results.length > 0) {
+          const r = results[0];
+          resolvedBusiness = {
+            id: r.id,
+            name: r.name,
+            category: r.category,
+            lat: r.lat,
+            lng: r.lng,
+            rating: r.rating,
+            slug: r.slug,
+            imageUrl: r.imageUrl,
+            tagline: r.tagline,
+            description: r.description,
+            priceTier: r.priceTier,
+            reviewsCount: r.reviewsCount
+          };
+          if (resolvedBusiness.lat && resolvedBusiness.lng) {
+            resolvedCoords = { lat: resolvedBusiness.lat, lng: resolvedBusiness.lng };
           }
-        },
-        select: {
-          id: true,
-          name: true,
-          category: true,
-          lat: true,
-          lng: true,
-          rating: true,
-          slug: true,
-          imageUrl: true,
-          tagline: true,
-          description: true,
-          priceTier: true,
-          reviewsCount: true
         }
-      });
-      if (resolvedBusiness && resolvedBusiness.lat && resolvedBusiness.lng) {
-        resolvedCoords = { lat: resolvedBusiness.lat, lng: resolvedBusiness.lng };
+      } catch (e) {
+        console.error("universalSearch failed in mutateItinerary:", e);
       }
     }
 
@@ -103,12 +124,13 @@ export const mutateItinerary = tool({
         resolvedLocation = payload.businessId;
     }
 
-    return {
+    return sanitizeToolOutput({
       success: true,
       ...payload,
-      coords: resolvedCoords,
+      coords: resolvedCoords || undefined,
       resolvedBusiness,
       resolvedLocation
-    };
+    });
   }
+     
 } as any);

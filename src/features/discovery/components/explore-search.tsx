@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useQueryStates } from "nuqs"
@@ -6,7 +7,7 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, X, SlidersHorizontal, Navigation, MapPin, ChevronDown } from "lucide-react"
 import posthog from 'posthog-js'
 import { motion, AnimatePresence } from "framer-motion"
-import { CATEGORIES, LOCATIONS, SORT_OPTIONS, RADIUS_MARKS, getCategoryData, DICTIONARIES } from "../constants"
+import { CATEGORIES, LOCATIONS, RADIUS_MARKS, DICTIONARIES } from "../constants"
 import { getCategoryColor } from "@/lib/utils/category-style"
 import { cn } from "@/lib/utils"
 
@@ -15,7 +16,7 @@ interface ExploreSearchProps {
   isDrawerOpen: boolean // Re-using this prop name for internal consistency in ExploreView
   setIsDrawerOpen: (v: boolean) => void
   categoryCounts?: Record<string, number>
-  dict?: any
+  dict?: Record<string, unknown>
 }
 
 export function ExploreSearch({ 
@@ -42,17 +43,14 @@ export function ExploreSearch({
   const [showCategories, setShowCategories] = useState(false)
   const [showLocations, setShowLocations] = useState(false)
 
-  const t = dict?.explore || DICTIONARIES.explore
+  const t = ((dict as any)?.explore) || DICTIONARIES.explore
 
   const currentCats = useMemo(() => {
     return currentCatStr ? currentCatStr.split(',').filter(Boolean) : []
   }, [currentCatStr])
 
-  const totalCount = useMemo(() => {
-    return Object.values(categoryCounts).reduce((acc, curr) => acc + curr, 0)
-  }, [categoryCounts])
-
   useEffect(() => {
+
     setValue(params.q || "")
   }, [params.q])
 

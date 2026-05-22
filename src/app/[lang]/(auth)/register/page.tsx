@@ -1,6 +1,6 @@
+ 
 import { AuthForm } from "@/features/auth/components/auth-form"
 import { getDictionary, Locale } from "@/lib/dictionaries"
-import Link from "next/link"
 
 export default async function RegisterPage(props: {
   params: Promise<{ lang: string }>
@@ -19,14 +19,8 @@ export default async function RegisterPage(props: {
           <p className="text-sm font-medium text-slate-500">Join UnlockCusco to save itineraries and book experiences.</p>
         </div>
         
-        <AuthForm type="register" lang={lang} redirectPath={redirectPath} dict={(dict as any).auth || {}} />
-        
-        <div className="text-center text-sm font-medium text-slate-500">
-          Already have an account?{" "}
-          <Link href={`/${lang}/login${redirectPath ? `?redirect=${redirectPath}` : ''}`} className="text-rose-600 hover:text-rose-700 font-bold transition-colors">
-            Sign in
-          </Link>
-        </div>
+        <AuthForm type="register" lang={lang} redirectPath={redirectPath} 
+          dict={(dict as Record<string, unknown>).auth as Record<string, unknown> || {}} />
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ export const WELCOME_TEXT_EN = "Welcome to UnlockCusco. ✨ I'm your local guide
 
 export const getWelcomeText = (isEs: boolean) => isEs ? WELCOME_TEXT_ES : WELCOME_TEXT_EN;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getInitialMessages = (isEs: boolean): any[] => {
   const welcomeText = getWelcomeText(isEs);
   return [
@@ -11,7 +12,6 @@ export const getInitialMessages = (isEs: boolean): any[] => {
       id: "1",
       role: "assistant",
       content: welcomeText,
-      // @ts-ignore - The parts array is specific to how the AI SDK handles UI rendering
       parts: [{ type: 'text', text: welcomeText }],
     }
   ];

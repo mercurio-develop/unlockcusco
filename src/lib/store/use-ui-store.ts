@@ -1,4 +1,12 @@
 import { create } from 'zustand';
+import { Business } from '@prisma/client';
+
+export interface InteractionRecord {
+  type: 'view' | 'map_click';
+  id: string;
+  name?: string;
+  timestamp: number;
+}
 
 export interface UiState {
   isChatOpen: boolean;
@@ -23,16 +31,17 @@ export interface UiState {
   setIsExchangingStart: (v: boolean) => void;
   isExchangingEnd: boolean;
   setIsExchangingEnd: (v: boolean) => void;
+  isAuthRoute?: boolean; // Added to match possible usage if needed, though not in original
   isAddingStop: boolean;
   setIsAddingStop: (v: boolean) => void;
   mapClickMode: 'start' | 'end' | null;
   setMapClickMode: (v: 'start' | 'end' | null) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapSearchResults: any[] | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setMapSearchResults: (v: any[] | null) => void;
+  mapSearchResults: Business[] | null;
+  setMapSearchResults: (v: Business[] | null) => void;
   aiPromptToTrigger: string | null;
   setAiPromptToTrigger: (v: string | null) => void;
+  interactionHistory: InteractionRecord[];
+  addInteraction: (record: Omit<InteractionRecord, 'timestamp'>) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -66,4 +75,10 @@ export const useUiStore = create<UiState>((set) => ({
   setMapSearchResults: (v) => set({ mapSearchResults: v }),
   aiPromptToTrigger: null,
   setAiPromptToTrigger: (v) => set({ aiPromptToTrigger: v }),
+  interactionHistory: [],
+  addInteraction: (record) => set((state) => {
+    const newRecord = { ...record, timestamp: Date.now() };
+    const history = [newRecord, ...state.interactionHistory].slice(0, 10);
+    return { interactionHistory: history };
+  }),
 }));

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -19,6 +20,7 @@ interface DiscoverPanelProps {
   hasMore?: boolean
   isLoadingMore?: boolean
   onLoadMore?: () => void
+   
   dict?: any
 }
 
@@ -89,7 +91,7 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
     setIsSortOpen(false)
   }
 
-  const t = dict?.discoverPanel || {
+  const t = (dict?.discoverPanel || {
     places: "Places",
     sort: "Sort:",
     recommended: "Recommended",
@@ -108,7 +110,7 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
     pickEnd: "Pick a new end destination",
     swapPlace: "Select a place to swap",
     addStop: "Browse and click 'Add' on a place to add it as a stop"
-  }
+  })
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6 bg-gray-50/50 relative" data-vaul-no-drag>
@@ -188,7 +190,7 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
             <div className="flex flex-wrap items-center gap-2 w-full">
               {q && (
                 <button onClick={() => removeFilter("q")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
-                  <span>"{q}"</span>
+                  <span>&quot;{q}&quot;</span>
                   <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
                 </button>
               )}

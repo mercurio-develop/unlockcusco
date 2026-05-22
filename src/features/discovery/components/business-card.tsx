@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -8,12 +9,10 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, Phone, Users, MapPin, Briefcase, MoreHorizontal, ExternalLink, MessageCircle, Calendar, Utensils, Repeat, Landmark, Ticket, Bed, Navigation } from "lucide-react"
+import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, Repeat, Bed, Navigation } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
@@ -45,6 +44,8 @@ interface BusinessCardProps {
   showMap?: boolean
   showDetails?: boolean
   mapTargetId?: string
+  intent?: string
+   
   dict?: any
   onDoubleClick?: () => void
 }
@@ -57,11 +58,13 @@ export function BusinessCard({
   onImageLoad,
   showActions = true,
   showItineraryAdd = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showItineraryEnd = true,
   showContact = true,
   showMap = true,
   showDetails = true,
   mapTargetId,
+  intent,
   dict,
   onDoubleClick
 }: BusinessCardProps) {
@@ -74,7 +77,6 @@ export function BusinessCard({
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
 
-  const panelMode = useUiStore(s => s.panelMode);
   const setPanelMode = useUiStore(s => s.setPanelMode);
   const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
   const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
@@ -83,8 +85,10 @@ export function BusinessCard({
   const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
   const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
   const setSelectedId = useUiStore(s => s.setSelectedId);
+  const addInteraction = useUiStore(s => s.addInteraction);
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   const router = useRouter()
   const pathname = usePathname()
@@ -97,6 +101,7 @@ export function BusinessCard({
   const hasProfile = (business.category === 'AGENCY' || business.category === 'WELLNESS') && !!business.tagline
   const isAlreadyInItinerary = activeItinerary?.waypoints?.some(w => w.id === business.id) || false;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const bName = getLocalizedField(business, 'name', locale)
   const bDesc = getLocalizedField(business, 'description', locale)
 
@@ -161,7 +166,11 @@ export function BusinessCard({
                 </DropdownMenuItem>
               )}
               {business.whatsapp && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleBookNow(e as any); }} className="text-[#25D366] font-medium">
+                <DropdownMenuItem onClick={(e) => { 
+                  e.stopPropagation(); 
+                   
+                  handleBookNow(e as any); 
+                }} className="text-[#25D366] font-medium">
                   <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                 </DropdownMenuItem>
               )}
@@ -212,7 +221,7 @@ export function BusinessCard({
           {isClaimed && (
             <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md flex items-center gap-1 ml-auto">
               <Zap className="w-3 h-3 fill-rose-600 text-rose-600" />
-              <span className={isHorizontal ? "hidden sm:inline" : ""}>{t.verified}</span>
+              <span className={isHorizontal ? "hidden sm:inline" : ""}>{t.verified || "Verified"}</span>
             </span>
           )}
         </div>
@@ -347,15 +356,61 @@ export function BusinessCard({
         {/* Action Row */}
         {showActions && (
           <div className={cn(isHorizontal ? "mt-2" : "mt-2", "flex flex-wrap gap-2")}>
-            {showItineraryAdd && (
+            {showItineraryAdd && intent === 'SET_START' ? (
+              <Button
+                onClick={e => {
+                  e.stopPropagation();
+                  setStartAnchorLocation(business.lat || 0, business.lng || 0, business.name, business as any);
+                  setPanelMode('itinerary' as any);
+                  setSelectedId('itin-start');
+                  if (pathname !== '/explore') {
+                    router.push('/explore');
+                  }
+                  if (conciergeSendMessage) {
+                    conciergeSendMessage({ text: `[INTERNAL] I just set my start location to ${business.name}.` });
+                  }
+                }}
+                className={cn(
+                  "flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                  isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
+                )}
+              >
+                <Navigation className="w-3 h-3" />
+                <span className="hidden sm:inline">Set as Start</span>
+              </Button>
+            ) : showItineraryAdd && intent === 'SET_END' ? (
+              <Button
+                onClick={e => {
+                  e.stopPropagation();
+                  updateEndAnchorLocation(business.lat || 0, business.lng || 0, business.name, business as any);
+                  setPanelMode('itinerary' as any);
+                  setSelectedId('itin-arrival');
+                  if (pathname !== '/explore') {
+                    router.push('/explore');
+                  }
+                  if (conciergeSendMessage) {
+                    conciergeSendMessage({ text: `[INTERNAL] I just set my end location to ${business.name}.` });
+                  }
+                }}
+                className={cn(
+                  "flex-1 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full transition-all flex items-center justify-center gap-1.5 shadow-sm",
+                  isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
+                )}
+              >
+                <Bed className="w-3 h-3" />
+                <span className="hidden sm:inline">{t.setEnd || "Set as End"}</span>
+              </Button>
+            ) : showItineraryAdd && (
               <>
                 {isExchangingStart && business.lat != null && business.lng != null ? (
                   <Button
                     onClick={e => {
                       e.stopPropagation();
+                       
                       setStartAnchorLocation(business.lat!, business.lng!, business.name, business as any);
                       setIsExchangingStart(false);
-                      setPanelMode('itinerary');
+                       
+                      setPanelMode('itinerary' as any);
                       if (conciergeSendMessage) {
                         conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to ${business.name}.` });
                       }
@@ -372,9 +427,11 @@ export function BusinessCard({
                   <Button
                     onClick={e => {
                       e.stopPropagation();
+                       
                       updateEndAnchorLocation(business.lat!, business.lng!, business.name, business as any);
                       setIsExchangingEnd(false);
-                      setPanelMode('itinerary');
+                       
+                      setPanelMode('itinerary' as any);
                       if (conciergeSendMessage) {
                         conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${business.name}.` });
                       }
@@ -385,7 +442,7 @@ export function BusinessCard({
                     )}
                   >
                     <Bed className="w-3 h-3" />
-                    <span className="hidden sm:inline">Set as End</span>
+                    <span className="hidden sm:inline">{t.setEnd || "Set as End"}</span>
                   </Button>
                 ) : exchangeTargetId ? (
                   exchangeTargetId === business.id ? (
@@ -419,7 +476,12 @@ export function BusinessCard({
                   )
                 ) : isAlreadyInItinerary ? (
                   <Button
-                    onClick={(e) => { e.stopPropagation(); setExchangeTargetId(business.id); setPanelMode('discover'); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setExchangeTargetId(business.id); 
+                       
+                      setPanelMode('discover' as any); 
+                    }}
                     className={cn(
                       "flex-1 bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 font-medium rounded-full transition-all flex items-center justify-center gap-1.5",
                       isHorizontal ? "h-6 sm:h-8 px-2 sm:px-3 text-[8px] sm:text-[10px] uppercase tracking-widest" : "h-8 sm:h-10 px-3 sm:px-4 text-[9px] sm:text-[11px] uppercase tracking-widest"
@@ -434,7 +496,8 @@ export function BusinessCard({
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         insertWaypoint(business);
-                        setPanelMode('itinerary');
+                         
+                        setPanelMode('itinerary' as any);
                         if (conciergeSendMessage) {
                           conciergeSendMessage({ text: `[INTERNAL] I just added ${business.name || "this location"} to my itinerary.` });
                         }
@@ -460,6 +523,7 @@ export function BusinessCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  addInteraction({ type: 'map_click', id: business.id, name: business.name });
                   setIsChatOpen(false); // Close the chat overlay to show the map
                   if (pathname === '/explore') {
                     setSelectedId(mapTargetId || business.id);
@@ -496,6 +560,7 @@ export function BusinessCard({
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
+                   
                   handleBookNow(e as any);
                 }}
                 className={cn(
@@ -513,5 +578,3 @@ export function BusinessCard({
     </div>
   )
 }
-
-

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MapPin, Zap, Loader2 } from "lucide-react";
 import { COORDS_MAP } from "@/lib/constants";
 import { getCategoryColor } from "@/lib/utils/category-style";
+import type { Business } from "@prisma/client";
 
 import { getBusinesses } from "@/features/discovery";
 
@@ -14,7 +15,7 @@ const QUICK_HUBS = [
   { name: "Machu Picchu",  lat: -13.1547, lng: -72.5252 },
 ];
 
-interface PickResult { lat: number; lng: number; name: string; service?: any; }
+interface PickResult { lat: number; lng: number; name: string; service?: Business; }
 
 interface EndPointPickerProps {
   value?: string;
@@ -41,7 +42,7 @@ function searchTowns(q: string, max = 5): PickResult[] {
 export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [bizResults, setBizResults] = useState<any[]>([]);
+  const [bizResults, setBizResults] = useState<Business[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,7 +64,7 @@ export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerP
       setLoading(true);
       try {
         const data = await getBusinesses({ query: q, limit: 5 });
-        setBizResults((data.businesses || []).filter((b: any) => b.lat && b.lng));
+        setBizResults((data.businesses || []).filter((b) => b.lat && b.lng));
       } catch { setBizResults([]); }
       finally { setLoading(false); }
     }, 300);
@@ -137,12 +138,12 @@ export function EndPointPicker({ value, onSelect, placeholder }: EndPointPickerP
                 <p className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Experiences</p>
                 {loading && <Loader2 className="w-3 h-3 text-slate-300 animate-spin" />}
               </div>
-              {bizResults.map((b: any) => (
+              {bizResults.map((b) => (
                 <button
                   key={b.id}
                   onMouseDown={e => {
                     e.preventDefault();
-                    confirm({ lat: b.lat, lng: b.lng, name: b.name, service: b });
+                    confirm({ lat: b.lat!, lng: b.lng!, name: b.name, service: b });
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
                 >

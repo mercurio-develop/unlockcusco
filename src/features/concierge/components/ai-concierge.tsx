@@ -1,5 +1,4 @@
 "use client"
-import { Business } from "@prisma/client";
 
 import { useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -14,6 +13,7 @@ import { ChatMessage } from "./chat-message"
 import { ChatMessageText } from "./chat-message-text"
 import { ToolRenderer } from "./tool-renderer"
 import { getSuggestions } from "../utils/suggestions"
+import type { UIMessage } from "@ai-sdk/react"
 
 export function AiConcierge() {
   const {
@@ -101,8 +101,14 @@ export function AiConcierge() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white text-slate-900">
-                {messages.map((msg: any, index: number) => {
-                  const content = (msg as any).content || (msg as any).parts?.map((p: any) => p.type === 'text' ? p.text : '').join('');
+                {(messages as UIMessage[]).map((msg, index: number) => {
+                  // Get text content from message parts
+                  const content = (msg.parts || [])
+                    .filter(p => p.type === 'text')
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .map(p => (p as any).text)
+                    .join('\n');
+
                   if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
 
                   return (
