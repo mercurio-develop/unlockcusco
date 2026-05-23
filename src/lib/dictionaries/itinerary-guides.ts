@@ -12,7 +12,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "Classic Sacred Valley Full Day",
       intro: "The definitive route covering the absolute must-see highlights of the Sacred Valley. Perfect for those looking to maximize a single day before heading to Machu Picchu.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/pisac-ruins.jpg",
       sections: [
         { title: "Morning: Alpacas & Ancient Markets", desc: "Start the day meeting Andean camelids at Awana Kancha, followed by a dive into the vibrant colors and traditions of the Pisac Artisan Market and its towering ruins." },
         { title: "Afternoon: The Living Inca Town", desc: "After a hearty lunch in Urubamba, explore the massive stone fortress of Ollantaytambo, standing exactly as it did during the Inca empire." }
@@ -21,7 +21,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "Valle Sagrado Clásico (Día Completo)",
       intro: "La ruta definitiva que cubre lo mejor del Valle Sagrado. Perfecto para quienes buscan maximizar un solo día antes de dirigirse a Machu Picchu.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/pisac-ruins.jpg",
       sections: [
         { title: "Mañana: Alpacas y Mercados", desc: "Comienza el día conociendo camélidos andinos en Awana Kancha, seguido de una inmersión en los colores del Mercado Artesanal de Pisac y sus ruinas." },
         { title: "Tarde: El Pueblo Inca Viviente", desc: "Después de un almuerzo en Urubamba, explora la enorme fortaleza de piedra de Ollantaytambo, que se mantiene exactamente como en la época inca." }
@@ -32,7 +32,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "Cusco Classic City Tour",
       intro: "Uncover the layers of history in the imperial city, where Inca foundations seamlessly blend with colonial architecture.",
-      image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/sacsayhuaman.jpg",
       sections: [
         { title: "The Imperial Core", desc: "Walk through the historic Plaza de Armas and visit the Qorikancha, once the richest temple in the Inca empire, clad entirely in gold." },
         { title: "The Megalithic Outskirts", desc: "Head just outside the city to witness the sheer engineering scale of Sacsayhuaman and the mystical labyrinth of Q'enqo." }
@@ -41,7 +41,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "City Tour Cusco Clásico",
       intro: "Descubre las capas de historia de la ciudad imperial, donde los cimientos incas se mezclan a la perfección con la arquitectura colonial.",
-      image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/sacsayhuaman.jpg",
       sections: [
         { title: "El Núcleo Imperial", desc: "Camina por la Plaza de Armas y visita el Qorikancha, que alguna vez fue el templo más rico del imperio Inca." },
         { title: "Las Afueras Megalíticas", desc: "Sal de la ciudad para presenciar la asombrosa ingeniería de Sacsayhuaman y el laberinto de Q'enqo." }
@@ -52,7 +52,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "Maras, Moray & Chinchero",
       intro: "An off-the-beaten-path adventure showcasing the incredible agricultural science of the Incas and the timeless weaving traditions of the Andes.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/moray.jpg",
       sections: [
         { title: "Textiles and Terraces", desc: "Watch master weavers in Chinchero create intricate textiles before descending into the mysterious circular terraces of Moray." },
         { title: "The Salt of the Earth", desc: "Marvel at the thousands of cascading salt pools at Maras, harvested by local families exactly as they have been for centuries." }
@@ -61,7 +61,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "Maras, Moray y Chinchero",
       intro: "Una aventura fuera de lo común que muestra la increíble ciencia agrícola de los Incas y las tradiciones textiles de los Andes.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/moray.jpg",
       sections: [
         { title: "Textiles y Terrazas", desc: "Observa a las maestras tejedoras en Chinchero antes de descender a las misteriosas terrazas circulares de Moray." },
         { title: "La Sal de la Tierra", desc: "Maravíllate con las miles de pozas de sal en cascada en Maras, cosechadas por familias locales como hace siglos." }
@@ -112,7 +112,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "The Ultimate Inca Ruins Tour",
       intro: "A deep dive into the megalithic architecture and history of the Inca Empire's most impressive remaining structures.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/ollantaytambo-ruins.jpg",
       sections: [
         { title: "Sacred Megaliths", desc: "Explore the towering stones of Sacsayhuaman and the intricate water temples of Tambomachay." },
         { title: "Living History", desc: "Walk the original Inca streets of Ollantaytambo and climb the formidable fortress defending the valley." }
@@ -121,7 +121,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "El Tour Definitivo de Ruinas Incas",
       intro: "Una inmersión profunda en la arquitectura megalítica y la historia de las estructuras más impresionantes que quedan del Imperio Inca.",
-      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/ollantaytambo-ruins.jpg",
       sections: [
         { title: "Megalitos Sagrados", desc: "Explora las imponentes piedras de Sacsayhuaman y los intrincados templos de agua de Tambomachay." },
         { title: "Historia Viva", desc: "Camina por las calles incas originales de Ollantaytambo y sube a la formidable fortaleza que defiende el valle." }
@@ -152,7 +152,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "Best Artisan Markets",
       intro: "Discover the vibrant colors, intricate textiles, and traditional crafts of the Sacred Valley's most famous markets.",
-      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/chinchero-ruins.jpg",
       sections: [
         { title: "The Colors of Pisac", desc: "Wander through the bustling stalls of Pisac, finding everything from hand-painted ceramics to silver jewelry." },
         { title: "Weavers of Chinchero", desc: "Meet the master weavers of Chinchero and learn about the ancient backstrap loom techniques and natural dyes." }
@@ -161,7 +161,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "Mejores Mercados Artesanales",
       intro: "Descubre los colores vibrantes, los textiles intrincados y las artesanías tradicionales de los mercados más famosos del Valle Sagrado.",
-      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/boleto/chinchero-ruins.jpg",
       sections: [
         { title: "Los Colores de Pisac", desc: "Pasea por los bulliciosos puestos de Pisac, encontrando desde cerámica pintada a mano hasta joyas de plata." },
         { title: "Tejedoras de Chinchero", desc: "Conoce a las maestras tejedoras de Chinchero y aprende sobre las antiguas técnicas de telar de cintura y tintes naturales." }
