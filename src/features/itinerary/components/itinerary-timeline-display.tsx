@@ -1,47 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
-import { useMapboxRoute, type RouteData } from "@/features/discovery/hooks/use-mapbox-route";
+import { useMapboxRoute } from "@/features/discovery/hooks/use-mapbox-route";
 import { BusinessCard } from "@/features/discovery/components/business-card";
 import { getCategoryColor } from "@/lib/utils/category-style";
-import { MapPin, Navigation, Clock, Bed, ChevronDown } from "lucide-react";
-import type { TransportProfile } from "@/lib/store/use-itinerary-store";
+import { Navigation, Clock, Bed } from "lucide-react";
 import type { Business } from "@prisma/client";
-
-// Reusable edge component from ItineraryPanel
-function TransitEdge({ index, routeData, transportProfile }: { index: number; routeData: RouteData | null; transportProfile: TransportProfile }) {
-  const leg = routeData?.legs?.[index];
-  if (!leg) return (
-    <div className="relative h-8 w-full flex items-center">
-      <div className="absolute left-[19px] top-0 bottom-0 w-[2px] bg-slate-200" />
-    </div>
-  );
-  
-  const durationMin = Math.round(leg.duration / 60);
-  const distanceKm = +(leg.distance / 1000).toFixed(1);
-
-  return (
-    <div className="relative py-2 w-full flex items-center">
-      <div className="absolute left-[19px] top-0 bottom-0 w-[2px] bg-slate-200" />
-      <div className="ml-[40px] bg-white border border-slate-200 shadow-sm rounded-lg p-1.5 flex items-center gap-3 z-10 relative">
-        <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><Clock className="w-3 h-3" /> {durationMin} min</span>
-        <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><Navigation className="w-3 h-3" /> {distanceKm} km</span>
-      </div>
-    </div>
-  );
-}
 
 export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
   const activeItinerary = useItineraryStore(s => s.activeItinerary);
-  const transportProfiles = useItineraryStore(s => s.transportProfiles);
   const { routeData } = useMapboxRoute();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  if (!activeItinerary) return null;
 
   // Calculate cascade stop times
-  const stopTimes = (() => {
+  const stopTimes = useMemo(() => {
     const parseTime = (t: string | undefined): number => {
       if (!t) return 9 * 60; // default 09:00
       const [h, m] = t.split(':').map(Number);
@@ -52,99 +24,138 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
       const m = mins % 60;
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     };
-    let cur = parseTime(activeItinerary.startAnchor?.time);
-    return (activeItinerary.waypoints || []).map((wp, i) => {
+    let cur = parseTime(activeItinerary?.startAnchor?.time);
+    const times: string[] = [];
+    (activeItinerary?.waypoints || []).forEach((wp, i) => {
       const travelMins = routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration / 60) : 0;
       cur += travelMins;
-      const arrival = fmt(cur);
+      times.push(fmt(cur));
       cur += wp.durationMins || 60;
-      return arrival;
     });
-  })();
+    return times;
+  }, [activeItinerary, routeData]);
+
+  if (!activeItinerary) return null;
 
   const waypoints = activeItinerary.waypoints || [];
 
   return (
-    <div className="space-y-0 w-full relative">
+    <div className="relative w-full max-w-5xl mx-auto py-12">
+      {/* Central Spine */}
+      <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] bg-slate-200 -translate-x-px" />
+
       {/* Start Anchor */}
       {activeItinerary.startAnchor && (
-        <div className="relative">
-          <div className="flex gap-4 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm z-10 relative">
-            <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
-              <Navigation className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">{isEs ? "Punto de Partida" : "Start Point"}</p>
-              <p className="text-sm font-semibold text-slate-900 truncate">{activeItinerary.startAnchor.title || "Current Location"}</p>
-            </div>
+        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-center mb-16 md:mb-24 group">
+          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-slate-900 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white">
+            <Navigation className="w-5 h-5" />
           </div>
+          <div className="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right pt-2 md:pt-0">
+            <p className="text-xs font-bold tracking-widest text-slate-500 uppercase mb-2">{isEs ? "Punto de Partida" : "Start Point"}</p>
+            <h3 className="text-2xl font-serif font-bold text-slate-900">{activeItinerary.startAnchor.title || "Current Location"}</h3>
+          </div>
+          <div className="hidden md:block md:w-1/2 md:pl-16" />
         </div>
       )}
 
       {/* Waypoints */}
-      {waypoints.map((waypoint, idx) => (
-        <div key={`${waypoint.id}-${idx}`} className="relative">
-          <TransitEdge index={idx} routeData={routeData} transportProfile={transportProfiles[idx] || 'driving'} />
-          
-          <div
-            className={`flex flex-col p-4 rounded-2xl border-l-4 border mb-2 border-l-[var(--step-color)] transition-all ${selectedId === waypoint.id ? 'bg-white shadow-lg ring-1 ring-[var(--step-color)] scale-[1.01]' : 'bg-white shadow-sm border-slate-200/60 hover:shadow-md'}`}
-            style={{ '--step-color': getCategoryColor(waypoint.category) } as React.CSSProperties}
-          >
-            <div className="flex gap-3 items-start cursor-pointer select-none" onClick={() => setSelectedId(selectedId === waypoint.id ? null : waypoint.id)}>
-              <div
-                className="w-10 h-10 rounded-full text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md"
-                style={{ backgroundColor: getCategoryColor(waypoint.category) }}
+      {waypoints.map((waypoint, idx) => {
+        const isEven = idx % 2 === 0; // Even idx -> Left side on desktop, Odd -> Right side
+        const leg = routeData?.legs?.[idx];
+        const durationMin = leg ? Math.round(leg.duration / 60) : 0;
+        const stopColor = getCategoryColor(waypoint.category);
+
+        return (
+          <div key={`${waypoint.id}-${idx}`} className="relative mb-16 md:mb-24">
+            
+            {/* Travel Time Pill (Rendered above the node) */}
+            {durationMin > 0 && (
+              <div className="absolute left-8 md:left-1/2 -top-10 md:-top-12 -translate-x-1/2 z-10 bg-white border border-slate-200 shadow-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-slate-400" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{durationMin} min</span>
+              </div>
+            )}
+
+            <div className={`relative flex flex-col md:flex-row items-start md:items-center w-full ${isEven ? 'md:flex-row-reverse' : ''}`}>
+              
+              {/* Central Node */}
+              <div 
+                className="absolute left-8 md:left-1/2 w-14 h-14 rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white text-white font-serif text-xl font-bold"
+                style={{ backgroundColor: stopColor }}
               >
                 {idx + 1}
               </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">{waypoint.category}</p>
-                  <div className="flex items-center gap-1.5">
-                    {stopTimes[idx] && (
-                      <span className="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-full">
+
+              {/* Card Container - OPEN STORYBOOK */}
+              <div className={`ml-20 md:ml-0 md:w-1/2 pt-2 md:pt-0 ${isEven ? 'md:pl-16' : 'md:pr-16'}`}>
+                <div className="relative">
+                  {stopTimes[idx] && (
+                    <div className={`absolute -top-4 ${isEven ? 'left-4' : 'right-4'} z-20`}>
+                      <span className="text-xs font-bold text-slate-600 bg-white border border-slate-200 shadow-md px-3 py-1.5 rounded-full">
                         ⏱ {stopTimes[idx]}
                       </span>
+                    </div>
+                  )}
+                  <div 
+                    className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden"
+                    style={{ '--tw-ring-color': stopColor } as React.CSSProperties}
+                  >
+                    {(waypoint.service as Business | null) ? (
+                      <BusinessCard 
+                        business={(waypoint.service as Business)} 
+                        orientation="vertical" 
+                        showItineraryAdd={false} 
+                        showItineraryEnd={false} 
+                        showActions={true}
+                      />
+                    ) : (
+                      <div className="p-8">
+                        <p className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: stopColor }}>
+                          {waypoint.category}
+                        </p>
+                        <h4 className="font-serif text-2xl font-bold text-slate-900 leading-tight mb-2">
+                          {waypoint.title}
+                        </h4>
+                        <p className="text-sm text-slate-500 italic">Description not available.</p>
+                      </div>
                     )}
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-slate-900 mt-0.5">{isEs && (waypoint.service as Business)?.nameEs ? (waypoint.service as Business).nameEs : waypoint.title}</p>
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {waypoint.locationStr}</p>
               </div>
 
-              <div className="shrink-0 flex items-center justify-center text-slate-400 h-10 w-8">
-                <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${selectedId === waypoint.id ? 'rotate-180' : ''}`} />
-              </div>
-            </div>
-
-            {/* Expandable Section */}
-            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === waypoint.id ? "grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="overflow-hidden">
-                {(waypoint.service as Business | null) ? (
-                  <BusinessCard business={(waypoint.service as Business)} orientation="vertical" showItineraryAdd={false} showItineraryEnd={false} />
-                ) : (
-                  <p className="text-sm text-slate-500 italic px-2">Description not available.</p>
-                )}
-              </div>
+              {/* Empty Space for the other side */}
+              <div className="hidden md:block md:w-1/2" />
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* End Anchor */}
       {activeItinerary.endAnchor && (
-        <div className="relative">
-          <TransitEdge index={waypoints.length} routeData={routeData} transportProfile={transportProfiles[waypoints.length] || 'driving'} />
-          <div className="flex gap-4 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm z-10 relative border-l-4 border-l-rose-600">
-            <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
-              <Bed className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">{isEs ? "Punto Final" : "End Point"}</p>
-              <p className="text-sm font-semibold text-slate-900 truncate">{activeItinerary.endAnchor.title || "Destination"}</p>
-            </div>
+        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-center mt-16 md:mt-24 group">
+           {/* Final Travel Time Pill */}
+           {(() => {
+              const lastLeg = routeData?.legs?.[waypoints.length];
+              const durationMin = lastLeg ? Math.round(lastLeg.duration / 60) : 0;
+              if (durationMin > 0) {
+                return (
+                  <div className="absolute left-8 md:left-1/2 -top-10 md:-top-12 -translate-x-1/2 z-10 bg-white border border-slate-200 shadow-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{durationMin} min</span>
+                  </div>
+                )
+              }
+              return null;
+           })()}
+
+          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-rose-600 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white">
+            <Bed className="w-5 h-5" />
           </div>
+          <div className="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right pt-2 md:pt-0">
+            <p className="text-xs font-bold tracking-widest text-rose-500 uppercase mb-2">{isEs ? "Punto Final" : "End Point"}</p>
+            <h3 className="text-2xl font-serif font-bold text-slate-900">{activeItinerary.endAnchor.title || "Destination"}</h3>
+          </div>
+          <div className="hidden md:block md:w-1/2 md:pl-16" />
         </div>
       )}
     </div>
