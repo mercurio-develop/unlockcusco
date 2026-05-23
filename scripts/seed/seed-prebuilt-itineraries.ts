@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 const attractions = [
   // CUSCO
-  { slug: 'qorikancha', name: 'Qorikancha (Temple of the Sun)', loc: 'cusco', lat: -13.5204, lng: -71.9749, cat: 'Culture', tagline: 'The most important temple in the Inca Empire', imageUrl: 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop' },
+  { slug: 'qorikancha', name: 'Qorikancha (Temple of the Sun)', loc: 'cusco', lat: -13.5204, lng: -71.9749, cat: 'Culture', tagline: 'The most important temple in the Inca Empire', imageUrl: 'https://images.unsplash.com/photo-1590050752117-23a9d7fc6f8a?q=80&w=1000&auto=format&fit=crop' },
   { slug: 'sacsayhuaman', name: 'Sacsayhuaman', loc: 'cusco', lat: -13.5097, lng: -71.9817, cat: 'Culture', tagline: 'Massive megalithic Inca fortress', imageUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop' },
   { slug: 'qenqo', name: 'Q\'enqo', loc: 'cusco', lat: -13.5064, lng: -71.9750, cat: 'Culture', tagline: 'Inca ceremonial site and labyrinth', imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop' },
   { slug: 'puka-pukara', name: 'Puka Pukara', loc: 'cusco', lat: -13.4842, lng: -71.9619, cat: 'Culture', tagline: 'The Red Fortress of the Incas', imageUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop' },
@@ -60,7 +60,7 @@ async function main() {
     } else {
       const b = await prisma.business.update({
         where: { slug: p.slug },
-        data: { lat: p.lat, lng: p.lng, tagline: p.tagline, imageUrl: p.imageUrl }
+        data: { lat: p.lat, lng: p.lng, tagline: p.tagline, imageUrl: p.imageUrl, category: p.cat as any }
       });
       createdBusinesses.set(p.slug, b);
       console.log(`* Updated: ${p.name}`);
