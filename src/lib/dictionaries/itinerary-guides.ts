@@ -107,5 +107,65 @@ export const ITINERARY_GUIDES: GuideDictionary = {
         { title: "Tarde: Taller de Chocolate Artesanal", desc: "Regresa a Cusco para un taller práctico sobre el Cacao Chuncho y elabora tu propio chocolate." }
       ]
     }
+  },
+  "ultimate-inca-ruins": {
+    en: {
+      title: "The Ultimate Inca Ruins Tour",
+      intro: "A deep dive into the megalithic architecture and history of the Inca Empire's most impressive remaining structures.",
+      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "Sacred Megaliths", desc: "Explore the towering stones of Sacsayhuaman and the intricate water temples of Tambomachay." },
+        { title: "Living History", desc: "Walk the original Inca streets of Ollantaytambo and climb the formidable fortress defending the valley." }
+      ]
+    },
+    es: {
+      title: "El Tour Definitivo de Ruinas Incas",
+      intro: "Una inmersión profunda en la arquitectura megalítica y la historia de las estructuras más impresionantes que quedan del Imperio Inca.",
+      image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "Megalitos Sagrados", desc: "Explora las imponentes piedras de Sacsayhuaman y los intrincados templos de agua de Tambomachay." },
+        { title: "Historia Viva", desc: "Camina por las calles incas originales de Ollantaytambo y sube a la formidable fortaleza que defiende el valle." }
+      ]
+    }
+  },
+  "top-7-culinary-route": {
+    en: {
+      title: "7 Best Restaurants Route",
+      intro: "A gastronomic journey through the Andes, from high-altitude tasting menus to the best local sourdough bakeries.",
+      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "Valley Flavors", desc: "Discover farm-to-table concepts in Urubamba and Moray, including the world-renowned MIL Centro." },
+        { title: "Cusco Dining", desc: "Experience the vibrant culinary scene of the imperial city, featuring modern Novo-Andean cuisine." }
+      ]
+    },
+    es: {
+      title: "Ruta de los 7 Mejores Restaurantes",
+      intro: "Un viaje gastronómico por los Andes, desde menús de degustación de altura hasta las mejores panaderías locales de masa madre.",
+      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "Sabores del Valle", desc: "Descubre conceptos de la granja a la mesa en Urubamba y Moray, incluyendo el mundialmente famoso MIL Centro." },
+        { title: "Gastronomía en Cusco", desc: "Experimenta la vibrante escena culinaria de la ciudad imperial, con la moderna cocina Novo-Andina." }
+      ]
+    }
+  },
+  "artisan-markets": {
+    en: {
+      title: "Best Artisan Markets",
+      intro: "Discover the vibrant colors, intricate textiles, and traditional crafts of the Sacred Valley's most famous markets.",
+      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "The Colors of Pisac", desc: "Wander through the bustling stalls of Pisac, finding everything from hand-painted ceramics to silver jewelry." },
+        { title: "Weavers of Chinchero", desc: "Meet the master weavers of Chinchero and learn about the ancient backstrap loom techniques and natural dyes." }
+      ]
+    },
+    es: {
+      title: "Mejores Mercados Artesanales",
+      intro: "Descubre los colores vibrantes, los textiles intrincados y las artesanías tradicionales de los mercados más famosos del Valle Sagrado.",
+      image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1000&auto=format&fit=crop",
+      sections: [
+        { title: "Los Colores de Pisac", desc: "Pasea por los bulliciosos puestos de Pisac, encontrando desde cerámica pintada a mano hasta joyas de plata." },
+        { title: "Tejedoras de Chinchero", desc: "Conoce a las maestras tejedoras de Chinchero y aprende sobre las antiguas técnicas de telar de cintura y tintes naturales." }
+      ]
+    }
   }
 };
