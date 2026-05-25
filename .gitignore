@@ -103,3 +103,4 @@ agents/
 pipelines/
 mcp-configs/
 playwright.config.ts
+.devtools

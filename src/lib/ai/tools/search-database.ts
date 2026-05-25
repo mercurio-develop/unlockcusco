@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { universalSearch } from '@/features/discovery/queries/universal-search';
 import { Redis } from '@upstash/redis';
 import { calculateDistance } from '@/lib/utils/geo';
-import { normalizeLocation } from '@/lib/ai/utils/location-normalizer';
+import { normalizeLocation, SACRED_VALLEY_LOCATIONS } from '@/lib/ai/utils/location-normalizer';
 import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 import type { Business } from "@prisma/client";
 
@@ -48,6 +48,17 @@ export const searchDatabase = tool({
     // Normalize location using the fuzzy matcher
     let searchLocation = location ? normalizeLocation(location) : null;
     
+    // If the LLM forgot to put the location in the parameter, check the query
+    if (!searchLocation && query) {
+      const qLower = query.toLowerCase();
+      for (const town of SACRED_VALLEY_LOCATIONS) {
+        if (qLower.includes(town)) {
+          searchLocation = town;
+          break;
+        }
+      }
+    }
+
     if (searchLocation === 'machupicchu' || searchLocation === 'aguas-calientes') {
       searchLocation = 'machu-picchu';
     }
@@ -69,7 +80,7 @@ export const searchDatabase = tool({
     }
 
     // Cache key based on basic parameters (we don't cache fuzzy keyword expansions to allow for varied results)
-    const cacheKey = `unlockcusco:search:v9:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
+    const cacheKey = `unlockcusco:search:v10:q_${query ?? 'none'}:cat_${dbCategory ?? 'any'}:loc_${searchLocation ?? 'any'}`;
     
     const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
       ? Redis.fromEnv()
@@ -114,6 +125,25 @@ export const searchDatabase = tool({
     // Strict Filter: Only return businesses with valid ratings (> 0)
     results = results.filter((b) => typeof b.rating === 'number' && b.rating > 0);
 
+    let isFallback = false;
+    
+    if (results.length === 0 && searchLocation) {
+      try {
+        const semanticQuery = [query, ...(searchKeywords || [])].filter(Boolean).join(" ");
+        results = await universalSearch({
+          query: semanticQuery,
+          category: dbCategory,
+          limit: 30
+        });
+        results = results.filter((b) => typeof b.rating === 'number' && b.rating > 0);
+        if (results.length > 0) {
+          isFallback = true;
+        }
+      } catch(e) {
+        console.error("universalSearch fallback failed:", e);
+      }
+    }
+
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
     if (userLat && userLng) {
       const withDistance = results.map((b) => {
@@ -138,33 +168,7 @@ export const searchDatabase = tool({
         return (b.rating ?? -1) - (a.rating ?? -1);
       });
 
-      return sanitizeToolOutput({
-        intent,
-        results: withDistance.slice(0, 10).map((b) => ({
-          id: b.id,
-          name: b.name,
-          category: b.category,
-          rating: b.rating,
-          lat: b.lat,
-          lng: b.lng,
-          isAsociado: b.isAsociado,
-          priceTier: b.priceTier,
-          distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
-          whatsapp: b.whatsapp,
-          tagline: b.tagline,
-          description: b.description,
-          descriptionEs: b.descriptionEs,
-          imageUrl: b.imageUrl,
-          slug: b.slug,
-          recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
-        }))
-      });
-    }
-    
-    // Return compressed view to save LLM tokens if no coords
-    return sanitizeToolOutput({
-      intent,
-      results: results.slice(0, 10).map((b) => ({
+      const mappedResults = withDistance.slice(0, 10).map((b) => ({
         id: b.id,
         name: b.name,
         category: b.category,
@@ -173,15 +177,46 @@ export const searchDatabase = tool({
         lng: b.lng,
         isAsociado: b.isAsociado,
         priceTier: b.priceTier,
+        distanceKm: b.distanceKm ? Number(b.distanceKm).toFixed(1) + ' km away' : 'Distance unknown',
         whatsapp: b.whatsapp,
-        locationSlug: b.locationSlug,
         tagline: b.tagline,
         description: b.description,
         descriptionEs: b.descriptionEs,
         imageUrl: b.imageUrl,
         slug: b.slug,
+        locationSlug: b.locationSlug,
         recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
-      }))
+      }));
+
+      return sanitizeToolOutput({
+        intent,
+        results: isFallback ? { alternatives: mappedResults, requestedLocation: searchLocation } : mappedResults
+      });
+    }
+    
+    // Return compressed view to save LLM tokens if no coords
+    const mappedResults = results.slice(0, 10).map((b) => ({
+      id: b.id,
+      name: b.name,
+      category: b.category,
+      rating: b.rating,
+      lat: b.lat,
+      lng: b.lng,
+      isAsociado: b.isAsociado,
+      priceTier: b.priceTier,
+      whatsapp: b.whatsapp,
+      locationSlug: b.locationSlug,
+      tagline: b.tagline,
+      description: b.description,
+      descriptionEs: b.descriptionEs,
+      imageUrl: b.imageUrl,
+      slug: b.slug,
+      recommendationNote: b.isAsociado ? "UnlockCusco Preferred Partner - Highly Recommended" : undefined
+    }));
+
+    return sanitizeToolOutput({
+      intent,
+      results: mappedResults
     });
   }
      

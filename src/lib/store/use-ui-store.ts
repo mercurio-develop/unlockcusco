@@ -45,7 +45,7 @@ export interface UiState {
 }
 
 export const useUiStore = create<UiState>((set) => ({
-  isChatOpen: false,
+  isChatOpen: true,
   setIsChatOpen: (v) => set({ isChatOpen: v }),
   mobileViewMode: 'list',
   setMobileViewMode: (v) => set({ mobileViewMode: v }),

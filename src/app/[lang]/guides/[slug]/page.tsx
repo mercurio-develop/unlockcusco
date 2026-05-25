@@ -45,7 +45,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "top-7-culinary-route": {
     title: "The Top 7 Culinary Route",
     desc: "An AI-curated guide to the best flavors in the Andes.",
-    image: "https://images.unsplash.com/photo-1511690656492-c00349325535?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/dummy/ceviche.jpg",
     sections: [
       { h2: "Andean Gastronomy", p: "The Sacred Valley is a food lover's paradise. The unique microclimates allow for the cultivation of hundreds of varieties of potatoes, corn, and quinoa." },
       { h2: "From Pachamanca to Haute Cuisine", p: "You can experience everything from a traditional Pachamanca (meat and potatoes cooked under the earth using hot stones) to world-class tasting menus at restaurants like MIL, located right next to the Moray ruins." }
@@ -72,7 +72,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "machu-picchu-day": {
     title: "Machu Picchu in a Day",
     desc: "Logistics and tips for a whirlwind one-day trip to the Wonder of the World.",
-    image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/dummy/generic.jpg",
     sections: [
       { h2: "The Logistics", p: "Doing Machu Picchu in a single day from Cusco requires an early start. You'll need to catch a 4:00 AM bus to Ollantaytambo, board an early train to Aguas Calientes, and then take the 30-minute shuttle bus up to the ruins." },
       { h2: "Maximize Your Time", p: "Because time is tight, we highly recommend hiring a private guide to ensure you see the most important sectors (like the Temple of the Sun and the Intihuatana) without feeling rushed." }
@@ -81,7 +81,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "acclimating-altitude": {
     title: "How to Acclimate to Altitude",
     desc: "Essential medical and practical tips for beating Soroche (altitude sickness).",
-    image: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/sacsayhuaman.jpg",
     sections: [
       { h2: "Understanding Soroche", p: "Cusco sits at an elevation of 3,399 meters (11,152 feet). The air is noticeably thinner, which can cause headaches, nausea, and shortness of breath." },
       { h2: "The Golden Rules", p: "Take it easy on your first day. Hydrate constantly. Avoid heavy meals and alcohol for the first 24 hours. Drink coca tea, a traditional Andean remedy that helps improve blood oxygenation." },
@@ -91,7 +91,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "packing-sacred-valley": {
     title: "Packing List for the Sacred Valley",
     desc: "What to bring for the dramatic temperature swings of the Andes.",
-    image: "https://images.unsplash.com/photo-1439246854758-f686a415d9da?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/moray.jpg",
     sections: [
       { h2: "Layers are Everything", p: "The Andes are famous for having 'four seasons in a single day'. When the sun is out, it's intense and hot. As soon as the sun drops behind the mountains, temperatures plummet toward freezing." },
       { h2: "The Essentials", p: "Pack a good sun hat, strong sunscreen (the UV index at this altitude is extreme), a lightweight rain jacket, a warm fleece or down layer, and comfortable, broken-in walking shoes." }
@@ -100,7 +100,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "boleto-turistico-explained": {
     title: "Understanding the Boleto Turistico",
     desc: "Don't get confused at the gate. Here is exactly what the Cusco Tourist Ticket covers.",
-    image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/cosituc-ticket-office.jpg",
     sections: [
       { h2: "What is it?", p: "The Boleto Turistico del Cusco (BTC) is a mandatory ticket that grants you access to 16 of the most important archaeological sites and museums in and around Cusco and the Sacred Valley. You cannot pay individual entrance fees at most of these sites." },
       { h2: "Partial vs. Full", p: "You can buy a partial ticket (valid for 1-2 days, covering a specific circuit of sites) or the full ticket (valid for 10 days, covering everything). If you plan to see the Sacred Valley and Cusco City ruins, the full ticket is always the best value." }
@@ -109,7 +109,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "best-time-machu-picchu": {
     title: "Best Time to Visit Machu Picchu",
     desc: "Weather, crowds, and the optimal months for your trip.",
-    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/dummy/aguas-calientes.jpg",
     sections: [
       { h2: "Dry Season vs. Wet Season", p: "The dry season runs from May to October, offering clear blue skies and cold nights. The wet season is from November to April, bringing warmer nights but heavy afternoon downpours." },
       { h2: "The Sweet Spot", p: "The absolute best times to visit are the 'shoulder months' of May and September/October. You'll enjoy the lush green landscapes left over from the rains, but with mostly dry, clear days and smaller crowds than the peak months of July and August." }
@@ -145,7 +145,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "top-7-culinary-route": {
     title: "La Ruta Culinaria del Valle",
     desc: "Una guía seleccionada por IA con los mejores sabores de los Andes.",
-    image: "https://images.unsplash.com/photo-1511690656492-c00349325535?q=80&w=1000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?q=80&w=1000&auto=format&fit=crop",
     sections: [
       { h2: "Gastronomía Andina", p: "El Valle Sagrado es un paraíso. Los microclimas permiten el cultivo de cientos de variedades de papas, maíz y quinua." }
     ]
@@ -169,7 +169,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "machu-picchu-day": {
     title: "Machu Picchu en un Día",
     desc: "Logística y consejos para un viaje relámpago a la Maravilla del Mundo.",
-    image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/dummy/generic.jpg",
     sections: [
       { h2: "La Logística", p: "Hacerlo en un solo día desde Cusco requiere empezar a las 4:00 AM. Tomarás un bus, tren y otro bus hasta las ruinas." }
     ]
@@ -177,7 +177,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "acclimating-altitude": {
     title: "Cómo Aclimatarse a la Altura",
     desc: "Consejos médicos y prácticos para vencer el Soroche.",
-    image: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/sacsayhuaman.jpg",
     sections: [
       { h2: "Entendiendo el Soroche", p: "Cusco está a 3,399 metros. El aire es más fino, lo que puede causar dolores de cabeza y náuseas." },
       { h2: "Las Reglas de Oro", p: "Tómatelo con calma el primer día. Hidrátate. Evita comidas pesadas. Bebe mate de coca." }
@@ -186,7 +186,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "packing-sacred-valley": {
     title: "Qué Empacar para el Valle Sagrado",
     desc: "Lo esencial para los cambios bruscos de temperatura de los Andes.",
-    image: "https://images.unsplash.com/photo-1439246854758-f686a415d9da?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/moray.jpg",
     sections: [
       { h2: "Las Capas lo son Todo", p: "Los Andes tienen 'cuatro estaciones en un día'. Empaca un buen bloqueador, chaqueta para lluvia y algo abrigador para la noche." }
     ]
@@ -194,7 +194,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "boleto-turistico-explained": {
     title: "Entendiendo el Boleto Turístico",
     desc: "Qué es y qué cubre exactamente el Boleto Turístico del Cusco.",
-    image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/boleto/cosituc-ticket-office.jpg",
     sections: [
       { h2: "¿Qué es?", p: "Es un boleto obligatorio que te da acceso a 16 sitios arqueológicos y museos. No puedes pagar entradas individuales en la mayoría de estos sitios." }
     ]
@@ -202,7 +202,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "best-time-machu-picchu": {
     title: "Mejor Época para Visitar Machu Picchu",
     desc: "Clima, multitudes y los meses óptimos para tu viaje.",
-    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1000&auto=format&fit=crop",
+    image: "/images/dummy/aguas-calientes.jpg",
     sections: [
       { h2: "El Punto Exacto", p: "Los mejores meses son mayo y septiembre/octubre. Disfrutarás de paisajes verdes, días secos y menos multitudes que en julio." }
     ]

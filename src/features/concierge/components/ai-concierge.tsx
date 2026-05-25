@@ -40,11 +40,12 @@ export function AiConcierge() {
     const scrollContainer = messagesEndRef.current.parentElement;
     if (!scrollContainer) return;
 
-    let isScrolledToBottom = true;
+    let isScrolledToBottom = false;
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
       isScrolledToBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
     };
+    handleScroll();
     scrollContainer.addEventListener('scroll', handleScroll);
 
     const resizeObserver = new ResizeObserver(() => {
@@ -59,10 +60,11 @@ export function AiConcierge() {
   }, []);
 
   useEffect(() => {
+    if (messages.length <= 1) return;
     scrollToBottom("smooth");
   }, [messages.length, isLoading])
 
-  if (!pathname?.includes("/explore") && !pathname?.includes("/pro")) {
+  if (!pathname?.includes("/explore")) {
     return null;
   }
 
@@ -86,7 +88,9 @@ export function AiConcierge() {
                     <Sparkles className="w-4 h-4 text-rose-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm sm:text-base text-slate-900 tracking-wide">UnlockCusco Concierge</h3>
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-900 tracking-wide uppercase">
+                      UNLOCK<span className="text-rose-500">CUSCO</span> <span className="capitalize">Concierge</span>
+                    </h3>
                     <p className="text-[10px] sm:text-xs text-slate-500 font-medium">AI Travel Assistant</p>
                   </div>
                 </div>
@@ -147,9 +151,9 @@ export function AiConcierge() {
                     onClick={() => { 
                       sendMessage({ text: suggestion.label });
                     }}
-                    className={`whitespace-nowrap px-2.5 py-1 border text-[11px] font-bold rounded-full transition-all shadow-sm flex items-center gap-1.5 ${suggestion.theme}`}
+                    className="whitespace-nowrap bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
                   >
-                    <span>{suggestion.icon}</span> {suggestion.label}
+                    {suggestion.icon} <span>{suggestion.label}</span>
                   </button>
                 ))}
               </div>

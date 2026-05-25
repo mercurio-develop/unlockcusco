@@ -30,6 +30,38 @@ export async function universalSearch({
 
   if (queryLower) {
     try {
+      // 1. First, fetch explicit name matches to guarantee they appear at the top
+      const nameMatches = await prisma.business.findMany({
+        where: {
+          AND: [
+            { name: { contains: queryLower, mode: 'insensitive' as const } },
+            ...(locLower ? [{
+              OR: locLower.split(',').flatMap(l => {
+                const locPart = l.trim();
+                return [
+                  { locationSlug: { contains: locPart, mode: 'insensitive' as const } },
+                  { serviceZones: { contains: locPart, mode: 'insensitive' as const } },
+                ];
+              })
+            }] : []),
+            ...(category ? [{
+              OR: category.split(',').map(c => {
+                const catStr = c.trim();
+                const upper = catStr.toUpperCase();
+                const matches = [catStr];
+                if (upper === 'DINING') matches.push('Meal', 'MEAL', 'meal');
+                if (upper === 'STAYS') matches.push('Stay', 'STAY', 'stay');
+                if (upper === 'ADVENTURE' || upper === 'AGENCY') matches.push('Experience', 'EXPERIENCE', 'experience');
+                if (upper === 'BOLETO') matches.push('Tourist Ticket', 'TOURIST TICKET', 'tourist ticket');
+                return { category: { in: matches, mode: 'insensitive' as const } };
+              })
+            }] : [])
+          ]
+        },
+        take: 5
+      });
+
+      // 2. Then do the semantic vector search
       const { embedding } = await embed({
         model: google.textEmbeddingModel('gemini-embedding-2'),
         value: queryLower,
@@ -45,43 +77,59 @@ export async function universalSearch({
         LIMIT 100
       `;
 
-      if (rawResults.length > 0) {
+      if (rawResults.length > 0 || nameMatches.length > 0) {
         const businessIds = rawResults.map(r => r.id);
 
-        const businesses = await prisma.business.findMany({
-          where: {
-            id: { in: businessIds },
-            ...(locLower ? {
-              OR: locLower.split(',').flatMap(l => {
-                const locPart = l.trim();
-                return [
-                  { locationSlug: { contains: locPart, mode: 'insensitive' as const } },
-                  { serviceZones: { contains: locPart, mode: 'insensitive' as const } },
-                ];
-              })
-            } : {}),
-            ...(category ? {
-              OR: category.split(',').map(c => {
-                const catStr = c.trim();
-                const upper = catStr.toUpperCase();
-                const matches = [catStr];
-                if (upper === 'DINING') matches.push('Meal', 'MEAL', 'meal');
-                if (upper === 'STAYS') matches.push('Stay', 'STAY', 'stay');
-                if (upper === 'ADVENTURE' || upper === 'AGENCY') matches.push('Experience', 'EXPERIENCE', 'experience');
-                if (upper === 'BOLETO') matches.push('Tourist Ticket', 'TOURIST TICKET', 'tourist ticket');
-                return { category: { in: matches, mode: 'insensitive' as const } };
-              })
-            } : {})
-          },
+        let businesses: Business[] = [];
+        if (businessIds.length > 0) {
+          businesses = await prisma.business.findMany({
+            where: {
+              AND: [
+                { id: { in: businessIds } },
+                ...(locLower ? [{
+                  OR: locLower.split(',').flatMap(l => {
+                    const locPart = l.trim();
+                    return [
+                      { locationSlug: { contains: locPart, mode: 'insensitive' as const } },
+                      { serviceZones: { contains: locPart, mode: 'insensitive' as const } },
+                    ];
+                  })
+                }] : []),
+                ...(category ? [{
+                  OR: category.split(',').map(c => {
+                    const catStr = c.trim();
+                    const upper = catStr.toUpperCase();
+                    const matches = [catStr];
+                    if (upper === 'DINING') matches.push('Meal', 'MEAL', 'meal');
+                    if (upper === 'STAYS') matches.push('Stay', 'STAY', 'stay');
+                    if (upper === 'ADVENTURE' || upper === 'AGENCY') matches.push('Experience', 'EXPERIENCE', 'experience');
+                    if (upper === 'BOLETO') matches.push('Tourist Ticket', 'TOURIST TICKET', 'tourist ticket');
+                    return { category: { in: matches, mode: 'insensitive' as const } };
+                  })
+                }] : [])
+              ]
+            },
+          });
+        }
+
+        // Re-sort in memory to maintain semantic distance order
+        const semanticBusinesses = businessIds
+          .map(id => businesses.find(b => b.id === id))
+          .filter((b): b is Business => b !== undefined);
+
+        // Combine name matches and semantic matches, filtering duplicates
+        const combinedMap = new Map<string, Business>();
+        
+        nameMatches.forEach(b => combinedMap.set(b.id, b));
+        semanticBusinesses.forEach(b => {
+          if (!combinedMap.has(b.id)) {
+            combinedMap.set(b.id, b);
+          }
         });
 
-        // Re-sort in memory to maintain semantic distance order and apply limit
-        const sortedBusinesses = businessIds
-          .map(id => businesses.find(b => b.id === id))
-          .filter((b): b is Business => b !== undefined)
-          .slice(0, limit);
+        const finalResults = Array.from(combinedMap.values()).slice(0, limit);
 
-        if (sortedBusinesses.length > 0) return sortedBusinesses;
+        if (finalResults.length > 0) return finalResults;
       }
     } catch (e) {
       console.error("Vector search failed, falling back to lexical:", e);

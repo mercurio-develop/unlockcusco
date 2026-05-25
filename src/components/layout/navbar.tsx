@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Compass, Map, Sparkles, Bot, Route, Settings2, ChevronDown, HelpCircle } from "lucide-react"
+import { Compass, Map, Sparkles, Bot, Route, Settings2, ChevronDown, HelpCircle, Menu } from "lucide-react"
 import { explorePath } from "@/paths"
 import { useUiStore } from "@/lib/store/use-ui-store"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -105,8 +105,8 @@ export function Navbar({ dict, user }: {
         {/* Brand/Logo */}
         <Link href={langPrefix} className="flex items-center gap-2 group shrink-0">
           <Bot className="w-4 h-4 text-rose-600" />
-          <span className="text-slate-900 font-bold text-sm tracking-wide">
-            UnlockCusco
+          <span className="text-slate-900 font-bold text-sm tracking-wide uppercase">
+            UNLOCK<span className="text-rose-500">CUSCO</span>
           </span>
         </Link>
 
@@ -145,40 +145,6 @@ export function Navbar({ dict, user }: {
           </DropdownMenu>
         </div>
 
-        {/* Mobile Links */}
-        <div className="flex md:hidden items-center gap-5">
-          {navItems.map((item) => {
-            const fullHref = `${langPrefix}${item.href}`
-            const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
-            return (
-              <Link
-                key={item.href}
-                href={fullHref}
-                className={`text-xs font-semibold tracking-wide transition-colors ${
-                  isActive ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 focus:outline-none">
-              {t.towns} <ChevronDown className="w-3 h-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110] mr-4">
-              {LOCATIONS.map((loc) => (
-                <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
-                  <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
-                    {loc.name}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           
@@ -203,7 +169,7 @@ export function Navbar({ dict, user }: {
             </button>
           </div>
 
-          {(pathname === "/en/explore" || pathname === "/es/explore" || pathname === "/explore") && (
+          {pathname?.includes("/explore") && (
             <>
               <button 
                 onClick={() => setIsChatOpen(!isChatOpen)}
@@ -215,7 +181,7 @@ export function Navbar({ dict, user }: {
 
               <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
                 <DialogTrigger render={
-                  <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title={t.helpInstructions}>
+                  <button className="hidden md:flex p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title={t.helpInstructions}>
                     <HelpCircle className="w-4 h-4" />
                   </button>
                 } />
@@ -273,7 +239,7 @@ export function Navbar({ dict, user }: {
 
               <Dialog open={isPrefsOpen} onOpenChange={setIsPrefsOpen}>
                 <DialogTrigger render={
-                  <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title={t.travelPreferences}>
+                  <button className="hidden md:flex p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title={t.travelPreferences}>
                     <Settings2 className="w-4 h-4" />
                   </button>
                 } />
@@ -338,6 +304,47 @@ export function Navbar({ dict, user }: {
               </Dialog>
             </>
           )}
+
+          {/* Mobile Links */}
+          <div className="flex md:hidden items-center ml-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors focus:outline-none">
+                <Menu className="w-5 h-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110] mr-4">
+                {navItems.map((item) => {
+                  const fullHref = `${langPrefix}${item.href}`
+                  const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
+                  return (
+                    <DropdownMenuItem key={item.href} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0 mb-1">
+                      <Link
+                        href={fullHref}
+                        className={cn("w-full h-full px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2", isActive ? "text-slate-900 font-bold" : "text-slate-700")}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  )
+                })}
+                
+                <div className="h-px bg-slate-100 my-2 mx-1" />
+                <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <Map className="w-3.5 h-3.5" />
+                  {t.towns}
+                </div>
+                
+                {LOCATIONS.map((loc) => (
+                  <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
+                    <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
+                      {loc.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
         </div>
 
       </div>

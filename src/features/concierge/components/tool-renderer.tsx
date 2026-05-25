@@ -100,6 +100,9 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
             if (output?.url) return <SaveLinkCard key={key} url={output.url} />
             return null;
           case 'mutateItinerary':
+            if (output?.success === false) {
+              return <ToolErrorCard key={key} message={output.message || "Failed to update itinerary."} />;
+            }
             return <ActionSuccessCard key={key} message="Itinerary Updated" />
           default:
             return null;

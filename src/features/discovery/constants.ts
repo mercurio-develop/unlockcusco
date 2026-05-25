@@ -1,4 +1,4 @@
-  import { Utensils, Sprout, Mountain as MountainIcon, Bed, Ticket, Car, Scissors, Library, Sparkles, MapPin, Compass, Landmark } from "lucide-react"
+  import { Utensils, Sprout, Mountain as MountainIcon, Bed, Ticket, Car, Scissors, Library, Sparkles, MapPin, Compass, Landmark, User } from "lucide-react"
 
 export const DEFAULT_CATEGORY_THEME = "bg-rose-50 text-rose-600 border-rose-100/50";
 export const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";
@@ -15,6 +15,7 @@ export const CATEGORIES = [
   { label: "Stays", value: "Stays", icon: Bed, theme: "bg-blue-50 text-blue-700 border-blue-200/50", fallbackImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600&auto=format&fit=crop" },
   { label: "Transport", value: "Transport", icon: Car, theme: "bg-slate-50 text-slate-700 border-slate-200/50", fallbackImage: DEFAULT_CATEGORY_IMAGE },
   { label: "Agency", value: "Agency", icon: Compass, theme: "bg-orange-50 text-orange-700 border-orange-200/50", fallbackImage: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop" },
+  { label: "Guide", value: "Guide", icon: User, theme: "bg-cyan-50 text-cyan-700 border-cyan-200/50", fallbackImage: "https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=600&auto=format&fit=crop" },
 ]
 
 export function getCategoryData(categoryValue: string | undefined | null) {
@@ -34,6 +35,21 @@ export const LOCATIONS = [
   { label: "Cusco", value: "cusco" },
   { label: "Machu Picchu", value: "machu-picchu" },
 ]
+
+export const TOWN_COORDS: Record<string, { lat: number; lng: number }> = {
+  pisac: { lat: -13.422, lng: -71.848 },
+  urubamba: { lat: -13.304, lng: -72.115 },
+  calca: { lat: -13.332, lng: -71.954 },
+  cusco: { lat: -13.522, lng: -71.967 },
+  huaran: { lat: -13.315, lng: -72.036 },
+  arin: { lat: -13.317, lng: -72.052 },
+  yucay: { lat: -13.319, lng: -72.088 },
+  huayoccari: { lat: -13.328, lng: -72.062 },
+  maras: { lat: -13.333, lng: -72.155 },
+  ollantaytambo: { lat: -13.258, lng: -72.263 },
+  chinchero: { lat: -13.398, lng: -72.045 },
+  "machu-picchu": { lat: -13.163, lng: -72.545 },
+};
 
 export const SORT_OPTIONS = [
   { label: "Recommended", value: "recommended" },

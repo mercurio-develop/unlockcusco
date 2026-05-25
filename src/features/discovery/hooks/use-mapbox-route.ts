@@ -26,6 +26,19 @@ export interface RouteData {
   duration?: number;
 }
 
+// Haversine formula
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  return R * c;
+}
+
 export function useMapboxRoute() {
   const activeItinerary = useItineraryStore(s => s.activeItinerary);
   const transportProfiles = useItineraryStore(s => s.transportProfiles);
@@ -36,6 +49,8 @@ export function useMapboxRoute() {
   const mapboxCacheRef = useRef<Map<string, MapboxRoute>>(new Map());
 
   useEffect(() => {
+    let isCancelled = false;
+
     if (!activeItinerary) {
       setRouteData(null);
       return;
@@ -57,6 +72,18 @@ export function useMapboxRoute() {
       return;
     }
 
+    // Determine default profile based on bounding box
+    let minLat = pts[0][1], maxLat = pts[0][1];
+    let minLng = pts[0][0], maxLng = pts[0][0];
+    for (const p of pts) {
+      if (p[1] < minLat) minLat = p[1];
+      if (p[1] > maxLat) maxLat = p[1];
+      if (p[0] < minLng) minLng = p[0];
+      if (p[0] > maxLng) maxLng = p[0];
+    }
+    const maxDist = getDistanceKm(minLat, minLng, maxLat, maxLng);
+    const defaultProfile = maxDist < 4 ? "walking" : "driving";
+
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) return;
 
@@ -66,7 +93,13 @@ export function useMapboxRoute() {
         return mapboxCacheRef.current.get(cacheKey) || null;
       }
 
-      const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${p1[0]},${p1[1]};${p2[0]},${p2[1]}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
+      // Fallback to walking for very short segments even if driving is selected, mapbox sometimes fails or loops wildly
+      let effectiveProfile = profile;
+      if (profile === 'driving' && getDistanceKm(p1[1], p1[0], p2[1], p2[0]) < 0.3) {
+        effectiveProfile = 'walking';
+      }
+
+      const url = `https://api.mapbox.com/directions/v5/mapbox/${effectiveProfile}/${p1[0]},${p1[1]};${p2[0]},${p2[1]}?geometries=geojson&overview=full&steps=true&access_token=${token}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.routes && data.routes[0]) {
@@ -78,8 +111,8 @@ export function useMapboxRoute() {
 
     const legPromises: Promise<MapboxRoute | null>[] = [];
     for (let i = 0; i < pts.length - 1; i++) {
-      const profile = transportProfiles[i] || "driving";
-      legPromises.push(fetchLeg(pts[i], pts[i + 1], profile));
+      const profile = transportProfiles[i] || defaultProfile;
+      legPromises.push(fetchLeg(pts[i], pts[i + 1], profile as TransportProfile));
     }
 
     Promise.all(legPromises)
@@ -117,7 +150,7 @@ export function useMapboxRoute() {
           });
         });
 
-        if (allLegs.length > 0) {
+        if (allLegs.length > 0 && !isCancelled) {
           setRouteData({
             geometry: {
               type: 'LineString',
@@ -131,6 +164,10 @@ export function useMapboxRoute() {
         }
       })
       .catch(err => console.error("Mapbox routing error:", err));
+
+    return () => {
+      isCancelled = true;
+    };
   }, [activeItinerary, transportProfiles]);
 
   return { routeData };

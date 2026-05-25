@@ -91,25 +91,55 @@ export const mutateItinerary = tool({
 
     if (!resolvedBusiness && resolvedLocation && !resolvedCoords) {
       try {
-        const results = await universalSearch({ 
-          query: resolvedLocation,
-          limit: 1
+        const nameMatches = await prisma.business.findMany({
+          where: { name: { contains: resolvedLocation, mode: 'insensitive' } },
+          take: 5
         });
-        if (results && results.length > 0) {
-          const r = results[0];
+        
+        const exactMatch = nameMatches.find(b => b.name.toLowerCase() === resolvedLocation!.toLowerCase());
+        let matchedRawBusiness = null;
+        
+        if (exactMatch) {
+          matchedRawBusiness = exactMatch;
+        } else if (nameMatches.length === 1) {
+          matchedRawBusiness = nameMatches[0];
+        } else if (nameMatches.length > 1) {
+          return sanitizeToolOutput({
+            success: false,
+            message: `Found multiple options. Please ask the user to clarify which one they mean using these options:`,
+            options: nameMatches.map(b => b.name)
+          });
+        } else {
+          // 0 matches. Fallback to universalSearch for suggestions
+          const suggestions = await universalSearch({ query: resolvedLocation, limit: 3 });
+          if (suggestions && suggestions.length > 0) {
+            return sanitizeToolOutput({
+              success: false,
+              message: `I was not able to find "${resolvedLocation}". Maybe you mean one of these? Please tell the user you couldn't find it, and suggest these alternatives:`,
+              options: suggestions.map(b => b.name)
+            });
+          } else {
+            return sanitizeToolOutput({
+              success: false,
+              message: `I was not able to find "${resolvedLocation}" and have no suggestions. Ask the user to clarify.`
+            });
+          }
+        }
+        
+        if (matchedRawBusiness) {
           resolvedBusiness = {
-            id: r.id,
-            name: r.name,
-            category: r.category,
-            lat: r.lat,
-            lng: r.lng,
-            rating: r.rating,
-            slug: r.slug,
-            imageUrl: r.imageUrl,
-            tagline: r.tagline,
-            description: r.description,
-            priceTier: r.priceTier,
-            reviewsCount: r.reviewsCount
+            id: matchedRawBusiness.id,
+            name: matchedRawBusiness.name,
+            category: matchedRawBusiness.category,
+            lat: matchedRawBusiness.lat,
+            lng: matchedRawBusiness.lng,
+            rating: matchedRawBusiness.rating,
+            slug: matchedRawBusiness.slug,
+            imageUrl: matchedRawBusiness.imageUrl,
+            tagline: matchedRawBusiness.tagline,
+            description: matchedRawBusiness.description,
+            priceTier: matchedRawBusiness.priceTier,
+            reviewsCount: matchedRawBusiness.reviewsCount
           };
           if (resolvedBusiness.lat && resolvedBusiness.lng) {
             resolvedCoords = { lat: resolvedBusiness.lat, lng: resolvedBusiness.lng };

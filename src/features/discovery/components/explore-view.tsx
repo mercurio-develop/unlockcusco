@@ -1,7 +1,7 @@
  
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useQueryStates } from "nuqs"
@@ -47,6 +47,8 @@ export function ExploreView({
   dict
 }: ExploreViewProps) {
 
+  const [mapLoaded, setMapLoaded] = useState(false)
+
   const {
     businesses,
     mapBusinesses,
@@ -62,6 +64,13 @@ export function ExploreView({
     initialCategoryCounts,
     initialHasMore
   })
+
+  // Set mapLoaded to true when we get our first set of mapBounds
+  useEffect(() => {
+    if (mapBounds && !mapLoaded) {
+      setMapLoaded(true)
+    }
+  }, [mapBounds, mapLoaded])
   
   const [params, setParams] = useQueryStates(searchParamsParsers)
   const router = useRouter()
@@ -90,6 +99,8 @@ export function ExploreView({
     return getEffectiveMapBusinesses(mapBusinesses, mapSearchResults)
   }, [mapBusinesses, mapSearchResults])
   
+  const isDefaultView = !params.q && !params.loc && !params.cat && !params.trip && !params.id && !initialItinerary;
+
   const isDrawerOpen = params.filter === "open"
   const setIsDrawerOpen = (open: boolean) => {
     setParams({ filter: open ? "open" : null })
@@ -105,6 +116,8 @@ export function ExploreView({
   useEffect(() => {
     if (initialTripId) {
       setPanelMode("itinerary");
+    } else {
+      setPanelMode("discover");
     }
   }, [initialTripId, setPanelMode]);
 
@@ -133,7 +146,6 @@ export function ExploreView({
       </div>
     </div>
   )
-
   const content = (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden text-slate-900">
       {panelMode === "discover" ? (
@@ -144,7 +156,7 @@ export function ExploreView({
           setSelectedId={setSelectedId}          
           onReset={() => router.push('/explore')}
           hasMore={hasMore}
-          isLoadingMore={isLoadingMore || (!mapBounds && !isSearchActive)}
+          isLoadingMore={!mapLoaded || isLoadingMore}
           onLoadMore={loadMore}
           dict={dict}
         />
@@ -160,7 +172,7 @@ export function ExploreView({
     <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""} onSelectBusiness={(id) => {
+      map={<ExploreMap isDefaultView={isDefaultView} businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""} onSelectBusiness={(id) => {
         setSelectedId(id);
         window.dispatchEvent(new CustomEvent('drawer-snap-half'));
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 

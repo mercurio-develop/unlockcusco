@@ -169,14 +169,10 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">{dict.popularItineraries}</h2>
           <ScrollCarousel className="pb-4">
             {[
-              { id: "classic-sacred-valley", title: dict.trips.classic, image: "/images/boleto/pisac-ruins.jpg" },
-              { id: "coffee-cacao-route", title: dict.trips.coffeecacao, image: "/images/dummy/mil.jpg" },
               { id: "cusco-city-tour", title: dict.trips.cusco, image: "/images/boleto/sacsayhuaman.jpg" },
               { id: "ultimate-inca-ruins", title: dict.trips.ruins, image: "/images/boleto/ollantaytambo-ruins.jpg" },
               { id: "top-7-culinary-route", title: dict.trips.culinary, image: "/images/dummy/ceviche.jpg" },
               { id: "maras-moray", title: dict.trips.maras, image: "/images/boleto/moray.jpg" },
-              { id: "artisan-markets", title: dict.trips.artisan, image: "/images/boleto/chinchero-ruins.jpg" },
-              { id: "machu-picchu-day", title: dict.trips.machupicchu, image: "/images/dummy/aguas-calientes.jpg" },
             ].map(trip => (
               <div
                 key={trip.id}
@@ -218,24 +214,18 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">Essential Travel Guides</h2>
           <ScrollCarousel className="pb-4">
             {[
-              { slug: "acclimating-altitude", title: "How to Acclimate to Altitude", image: "/images/dummy/generic.jpg" },
-              { slug: "packing-sacred-valley", title: "Packing List for the Sacred Valley", image: "/images/dummy/tambo.jpg" },
-              { slug: "boleto-turistico-explained", title: "Understanding the Boleto Turistico", image: "/images/dummy/qolqas.jpg" },
-              { slug: "best-time-machu-picchu", title: "Best Time to Visit Machu Picchu", image: "/images/dummy/huerto.jpg" },
+              { slug: "acclimating-altitude", title: "How to Acclimate to Altitude", image: "/images/boleto/sacsayhuaman.jpg" },
+              { slug: "packing-sacred-valley", title: "Packing List for the Sacred Valley", image: "/images/boleto/moray.jpg" },
+              { slug: "boleto-turistico-explained", title: "Understanding the Boleto Turistico", image: "/images/boleto/cosituc-ticket-office.jpg" },
+              { slug: "best-time-machu-picchu", title: "Best Time to Visit Machu Picchu", image: "/images/dummy/aguas-calientes.jpg" },
             ].map(guide => (
               <div
                 key={guide.slug}
                 className="min-w-[240px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0 cursor-pointer hover:shadow-md transition-all"
                 onClick={() => router.push(`${langPrefix}/guides/${guide.slug}`)}
               >
-                <div className="h-28 bg-slate-100 rounded-xl mb-4 relative overflow-hidden">
-                  <Image
-                    src={guide.image}
-                    alt={guide.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 240px, 240px"
-                  />
+                <div className="h-28 bg-slate-50 border border-slate-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
+                  <Compass className="w-10 h-10 text-slate-300" />
                 </div>
                 <h3 className="font-bold text-md mb-2 text-slate-900 line-clamp-2">{guide.title}</h3>
                 <div className="flex gap-2 mt-auto pt-2">

@@ -1,9 +1,17 @@
+"use client"
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { CATEGORIES, LOCATIONS } from '@/features/discovery/constants'
 import { siteConfig } from '@/lib/config/site'
 
 export function Footer({ lang }: { lang: string }) {
   const isEs = lang === 'es'
+  const pathname = usePathname() || ''
+
+  if (pathname.includes('/explore')) {
+    return null;
+  }
 
   return (
     <footer className="bg-slate-900 text-slate-300 py-16 px-6 border-t border-slate-800">
@@ -46,7 +54,7 @@ export function Footer({ lang }: { lang: string }) {
             {isEs ? "Categorías" : "Categories"}
           </h3>
           <ul className="grid grid-cols-2 gap-y-3 gap-x-4">
-            {CATEGORIES.filter(c => c.value !== 'Template').map((cat) => (
+            {CATEGORIES.filter(c => (c.value !== 'Template' && c.value !== 'Guide')).map((cat) => (
               <li key={cat.value}>
                 <Link 
                   href={`/${lang}/explore?cat=${cat.value.toLowerCase()}`}
@@ -68,11 +76,6 @@ export function Footer({ lang }: { lang: string }) {
             <li>
               <Link href={`/${lang}/guides`} className="text-sm hover:text-rose-400 transition-colors">
                 {isEs ? "Guías de Viaje" : "Travel Guides"}
-              </Link>
-            </li>
-            <li>
-              <Link href={`/${lang}/machu-picchu-tickets`} className="text-sm hover:text-rose-400 transition-colors">
-                {isEs ? "Boletos Machu Picchu" : "Machu Picchu Tickets"}
               </Link>
             </li>
             <li>

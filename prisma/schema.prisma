@@ -61,7 +61,7 @@ model Business {
   priceLevel             String?
   website                String?
   bookingType            String                  @default("INSTANT")
-  embedding              Unsupported("vector(3072)")?
+  embedding              Unsupported("vector")?
   minAdvanceHours        Int                     @default(0)
   premiumProfile         BusinessPremiumProfile?
   services               BusinessService[]

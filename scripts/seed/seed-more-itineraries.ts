@@ -50,15 +50,6 @@ async function main() {
         endAnchor: { lat: -13.1547, lng: -72.5253, title: "Aguas Calientes", type: "CUSTOM" },
         waypoints: waypointsRuins
       }
-    },
-    {
-      shortId: 'artisan-markets',
-      state: {
-        title: 'Best Artisan Markets & Weavers',
-        startAnchor: { lat: -13.5168, lng: -71.9781, title: "Cusco", type: "CUSTOM" },
-        endAnchor: { lat: -13.5168, lng: -71.9781, title: "Cusco", type: "CUSTOM" },
-        waypoints: waypointsArtisans
-      }
     }
   ];
 

@@ -68,7 +68,7 @@ export function ExploreSearch({
       lng: lng ? parseFloat(lng) : null,
       sort: sort && sort !== "recommended" ? sort : null,
       filter: showFilters ? "open" : null,
-    })
+    }, { shallow: false })
   }
 
   const handleSearchChange = (newVal: string) => {

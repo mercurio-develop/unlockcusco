@@ -51,7 +51,7 @@ async function main() {
         if (b.reviews.length > a.reviews.length) return 1;
         
         // 3. Fallback to older created date
-        return a.createdAt.getTime() - b.createdAt.getTime();
+        return ((a as any).createdAt?.getTime() || 0) - ((b as any).createdAt?.getTime() || 0);
       });
 
       const [keep, ...rest] = duplicates;

@@ -6,10 +6,11 @@ import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, Utensils, Lan
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import { useUiStore } from "@/lib/store/use-ui-store"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { SORT_OPTIONS, CATEGORIES, LOCATIONS } from "@/features/discovery/constants"
+import { Footer } from "@/components/layout/footer"
 
 interface DiscoverPanelProps {
   businesses: Business[]
@@ -28,6 +29,8 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
+  const lang = pathname?.split('/')[1] || 'en'
   
   const currentSort = searchParams.get("sort") || "recommended"
   const q = searchParams.get("q") || ""
@@ -227,24 +230,31 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
         </div>
       )}
       {businesses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 px-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-rose-100 rounded-full blur-2xl opacity-50 scale-150 animate-pulse" />
-            <div className="relative bg-white p-6 rounded-full shadow-sm border border-slate-50">
-              <Search className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
-            </div>
+        isLoadingMore ? (
+          <div className="flex flex-col items-center justify-center py-24 px-4 text-center animate-in fade-in duration-500">
+            <Loader2 className="w-8 h-8 text-rose-600 animate-spin mb-4" />
+            <p className="text-slate-500 text-sm font-medium tracking-wide">Loading places...</p>
           </div>
-          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">{t.emptyTitle}</h3>
-          <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-            {t.emptyDesc}
-          </p>
-          <button 
-            onClick={onReset}
-            className="bg-slate-900 text-white px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
-          >
-            {t.resetFilters}
-          </button>
-        </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 px-4 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-rose-100 rounded-full blur-2xl opacity-50 scale-150 animate-pulse" />
+              <div className="relative bg-white p-6 rounded-full shadow-sm border border-slate-50">
+                <Search className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">{t.emptyTitle}</h3>
+            <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
+              {t.emptyDesc}
+            </p>
+            <button 
+              onClick={onReset}
+              className="bg-slate-900 text-white px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+            >
+              {t.resetFilters}
+            </button>
+          </div>
+        )
       ) : (
         <div className={cn("pb-20", viewMode === "grid" ? "grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6" : "flex flex-col gap-4")}>
            {businesses.map(e => (
@@ -269,6 +279,7 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
            )}
         </div>
       )}
+      <Footer lang={lang} />
     </div>
   )
 }

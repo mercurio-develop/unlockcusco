@@ -4,7 +4,7 @@
 import { useEffect, useRef, useMemo, useState, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { CATEGORIES, LOCATIONS, DICTIONARIES } from "../constants"
+import { CATEGORIES, LOCATIONS, DICTIONARIES, TOWN_COORDS } from "../constants"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl, useControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -262,12 +262,11 @@ interface ExploreMapProps {
   categoryCounts?: Record<string, number>
   currentLoc?: string
   onBoundsChange?: (bounds: [number, number, number, number] | null) => void
-   
+  isDefaultView?: boolean
   dict?: any
 }
 
-export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange, dict }: ExploreMapProps) {
-  const mapRef = useRef<MapRef>(null)
+export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange, isDefaultView = false, dict }: ExploreMapProps) {  const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
   const locale = pathname?.split('/')[1] || 'en'
@@ -512,6 +511,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     const shouldRefit = businessSignature !== prevSignature;
     if (shouldRefit) {
       setPrevSignature(businessSignature);
+      
+      if (isDefaultView && !selectedId) return;
       if (selectedId && validBusinesses.some(b => b.id === selectedId)) return;
       let minLng = validBusinesses[0].lng, maxLng = validBusinesses[0].lng;
       let minLat = validBusinesses[0].lat, maxLat = validBusinesses[0].lat;
@@ -529,6 +530,53 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       }
     }
   }, [validBusinesses, businessSignature, prevSignature, selectedId]);
+
+  // Explicitly fit bounds for the active itinerary when panel mode is 'itinerary'
+  useEffect(() => {
+    if (panelMode === "itinerary" && activeItinerary && mapRef.current) {
+      if (selectedId && activeItinerary.waypoints?.some(b => b.id === selectedId)) return;
+      const pts: { lat: number, lng: number }[] = [];
+      if (activeItinerary.startAnchor?.lat != null && activeItinerary.startAnchor?.lng != null) {
+        pts.push({ lat: activeItinerary.startAnchor.lat, lng: activeItinerary.startAnchor.lng });
+      }
+      if (activeItinerary.endAnchor?.lat != null && activeItinerary.endAnchor?.lng != null) {
+        pts.push({ lat: activeItinerary.endAnchor.lat, lng: activeItinerary.endAnchor.lng });
+      }
+      (activeItinerary.waypoints || []).forEach(w => {
+        if (w.lat != null && w.lng != null) {
+          pts.push({ lat: w.lat, lng: w.lng });
+        }
+      });
+
+      if (pts.length > 0) {
+        let minLng = pts[0].lng, maxLng = pts[0].lng;
+        let minLat = pts[0].lat, maxLat = pts[0].lat;
+        for (const p of pts) {
+          if (p.lng < minLng) minLng = p.lng;
+          if (p.lng > maxLng) maxLng = p.lng;
+          if (p.lat < minLat) minLat = p.lat;
+          if (p.lat > maxLat) maxLat = p.lat;
+        }
+        if (minLng !== maxLng || minLat !== maxLat) {
+          mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1200, maxZoom: 15 });
+        } else {
+          mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14, duration: 1200 });
+        }
+      }
+    }
+  }, [panelMode, activeItinerary, selectedId]);
+
+  // Explicitly fly to the location when currentLoc changes to ensure a zoom happens even if
+  // bounds haven't changed drastically or if the user clicks the footer link.
+  useEffect(() => {
+    if (currentLoc && TOWN_COORDS[currentLoc] && mapRef.current) {
+      const coords = TOWN_COORDS[currentLoc];
+      // Only fly if we aren't currently selecting a specific business
+      if (!selectedId) {
+        mapRef.current.flyTo({ center: [coords.lng, coords.lat], zoom: 14, duration: 1500 });
+      }
+    }
+  }, [currentLoc, selectedId]);
 
   const center: [number, number] = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]
@@ -650,9 +698,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
                   </DropdownMenuItem>
                   {availableMapCategories.filter(c => c !== "ALL").map(cat => {
                     const count = categoryCounts[cat] || 0;
+                    const { bg, icon: IconComponent } = getCategoryStyle(cat);
                     return (
                       <DropdownMenuItem key={cat} onClick={(e) => toggleCategory(cat, e as any)} className="justify-between cursor-pointer">
                         <div className="flex items-center gap-2">
+                          <div 
+                            className="flex items-center justify-center w-5 h-5 rounded-full shrink-0" 
+                            style={{ backgroundColor: bg }}
+                          >
+                            <IconComponent className="w-3 h-3 text-white" />
+                          </div>
                           <span>{cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
                           {count > 0 && <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-medium">{count}</span>}
                         </div>

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { streamText, stepCountIs, convertToModelMessages } from 'ai';
+import { streamText, stepCountIs, convertToModelMessages, wrapLanguageModel } from 'ai';
+import { devToolsMiddleware } from '@ai-sdk/devtools';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { toolsRegistry } from '@/lib/ai/tools/registry';
 import { SYSTEM_PROMPT_CONCIERGE, PLANNING_PROMPT, RESEARCH_PROMPT, SUPPORT_PROMPT, CONVERSATION_FLOW_PROMPT } from '@/lib/ai/prompts';
@@ -8,6 +9,17 @@ import { PSYCHOGRAPHIC_MATRIX } from '@/lib/trip/psychographic-matrix';
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
+
+function getBaseModel() {
+  const base = google('gemini-2.5-flash');
+  if (process.env.NODE_ENV === "development") {
+    return wrapLanguageModel({
+      model: base,
+      middleware: devToolsMiddleware(),
+    });
+  }
+  return base;
+}
 
  
 export type ChatMessagePart = { type: 'text'; text: string } | any;
@@ -113,7 +125,7 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
   const modelMessages = await convertToModelMessages(normalizedMessages as Parameters<typeof convertToModelMessages>[0]);
 
   const result = streamText({
-    model: google('gemini-2.5-flash'),
+    model: getBaseModel(),
     system: systemInstruction,
     messages: modelMessages,
     onError: ({ error }) => {
