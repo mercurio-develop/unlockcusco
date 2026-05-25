@@ -281,6 +281,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const [isMobile, setIsMobile] = useState(true)
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false)
+  const [isMapLoaded, setIsMapLoaded] = useState(false)
+  const mobileViewMode = useUiStore(s => s.mobileViewMode);
 
   const t = dict?.exploreMap || DICTIONARIES.exploreMap
 
@@ -509,8 +511,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
     const shouldRefit = businessSignature !== prevSignature;
-    if (shouldRefit) {
-      setPrevSignature(businessSignature);
+    
+    // Always run the bounds check if mobile view mode changes to 'map'
+    if (shouldRefit || mobileViewMode === 'map') {
+      if (shouldRefit) setPrevSignature(businessSignature);
       
       if (isDefaultView && !selectedId) return;
       if (selectedId && validBusinesses.some(b => b.id === selectedId)) return;
@@ -523,13 +527,19 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         if (b.lat < minLat) minLat = b.lat;
         if (b.lat > maxLat) maxLat = b.lat;
       }
-      if (minLng !== maxLng || minLat !== maxLat) {
-        mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1200, maxZoom: 15 });
-      } else {
-        mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14, duration: 1200 });
-      }
+      
+      const timer = setTimeout(() => {
+        if (!mapRef.current) return;
+        if (minLng !== maxLng || minLat !== maxLat) {
+          mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1200, maxZoom: 15 });
+        } else {
+          mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14, duration: 1200 });
+        }
+      }, 350);
+      
+      return () => clearTimeout(timer);
     }
-  }, [validBusinesses, businessSignature, prevSignature, selectedId]);
+  }, [validBusinesses, businessSignature, prevSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode]);
 
   // Explicitly fit bounds for the active itinerary when panel mode is 'itinerary'
   useEffect(() => {
@@ -549,22 +559,17 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       });
 
       if (pts.length > 0) {
-        let minLng = pts[0].lng, maxLng = pts[0].lng;
-        let minLat = pts[0].lat, maxLat = pts[0].lat;
-        for (const p of pts) {
-          if (p.lng < minLng) minLng = p.lng;
-          if (p.lng > maxLng) maxLng = p.lng;
-          if (p.lat < minLat) minLat = p.lat;
-          if (p.lat > maxLat) maxLat = p.lat;
-        }
-        if (minLng !== maxLng || minLat !== maxLat) {
-          mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1200, maxZoom: 15 });
-        } else {
-          mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14, duration: 1200 });
-        }
+        const firstStep = pts[0];
+        
+        const timer = setTimeout(() => {
+          if (!mapRef.current) return;
+          mapRef.current.flyTo({ center: [firstStep.lng, firstStep.lat], zoom: 15, duration: 1200, essential: true });
+        }, 350);
+        
+        return () => clearTimeout(timer);
       }
     }
-  }, [panelMode, activeItinerary, selectedId]);
+  }, [panelMode, activeItinerary, selectedId, isMapLoaded, mobileViewMode]);
 
   // Explicitly fly to the location when currentLoc changes to ensure a zoom happens even if
   // bounds haven't changed drastically or if the user clicks the footer link.
@@ -737,6 +742,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         onClick={(e) => { if (mapClickMode && onMapAnchorPick) onMapAnchorPick(e.lngLat.lat, e.lngLat.lng); else setPopupBusiness(null); }}
         onMoveEnd={updateMapBounds} onZoomEnd={updateMapBounds}
         onLoad={() => {
+          setIsMapLoaded(true);
+          if (isDefaultView && !selectedId) {
+            mapRef.current?.flyTo({ center: [-71.9675, -13.5226], zoom: 13, duration: 1500, essential: true });
+          }
           const mapBounds = mapRef.current?.getMap().getBounds();
           if (mapBounds) {
             const boundsArr: [number, number, number, number] = [mapBounds.getWest(), mapBounds.getSouth(), mapBounds.getEast(), mapBounds.getNorth()];

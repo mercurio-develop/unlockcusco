@@ -113,21 +113,22 @@ export function ExploreView({
   }, [initialSelectedId, setSelectedId])
 
   const initialTripId = (initialItinerary as (OptimizedPlan & { shortId?: string }) | undefined)?.shortId;
+  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
+  
   useEffect(() => {
     if (initialTripId) {
       setPanelMode("itinerary");
+      setMobileViewMode("map");
     } else {
       setPanelMode("discover");
     }
-  }, [initialTripId, setPanelMode]);
+  }, [initialTripId, setPanelMode, setMobileViewMode]);
 
   const d = DICTIONARIES.exploreView
 
   const sidebar = (
     <div className="px-6 pt-5 pb-4 bg-white border-b border-gray-100 flex flex-col gap-4 shadow-sm transition-all duration-300">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-serif tracking-tight text-slate-900">{d.exploreUnlockCusco}</h1>
-      </div>
+
 
       <div className="hidden md:flex w-full justify-start overflow-x-auto scrollbar-hide gap-2 pb-1 px-0">
         <button title={d.discover} onClick={() => { setPanelMode("discover"); }} className={`shrink-0 flex items-center justify-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:py-2 md:px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest rounded-full transition-all border ${panelMode === "discover" ? "bg-slate-900 text-white border-slate-900 shadow-sm" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 shadow-sm"}`}><LayoutGrid className="w-3 h-3 md:w-4 md:h-4" /> <span>{d.discover}</span></button>

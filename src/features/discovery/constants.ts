@@ -251,7 +251,7 @@ export const DICTIONARIES = {
     close: "Cerrar"
   },
   exploreView: {
-    exploreUnlockCusco: "Explore UnlockCusco",
+    exploreUnlockCusco: "Explore",
     discover: "Discover",
     concierge: "Concierge",
     itinerary: "Itinerary",

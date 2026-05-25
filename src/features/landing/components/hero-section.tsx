@@ -176,7 +176,8 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
             ].map(trip => (
               <div
                 key={trip.id}
-                className="min-w-[260px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0"
+                onClick={() => router.push(`${langPrefix}/itinerary/${trip.id}`)}
+                className="min-w-[260px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0 cursor-pointer hover:shadow-md transition-all"
               >
                 <div className="h-32 bg-slate-100 rounded-xl mb-4 relative overflow-hidden">
                   <Image
@@ -190,14 +191,14 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
                 <h3 className="font-bold text-lg mb-4 text-slate-900 line-clamp-1">{trip.title}</h3>
                 <div className="flex gap-2 mt-auto">
                   <button
-                    onClick={() => router.push(`${langPrefix}/explore?trip=${trip.id}`)}
+                    onClick={(e) => { e.stopPropagation(); router.push(`${langPrefix}/explore?trip=${trip.id}`); }}
                     className="flex-1 bg-white border border-rose-200 text-rose-600 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-50 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <MapPin className="w-4 h-4" />
                     Map
                   </button>
                   <button
-                    onClick={() => router.push(`${langPrefix}/itinerary/${trip.id}`)}
+                    onClick={(e) => { e.stopPropagation(); router.push(`${langPrefix}/itinerary/${trip.id}`); }}
                     className="flex-1 bg-rose-600 text-white px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Bot className="w-4 h-4" />

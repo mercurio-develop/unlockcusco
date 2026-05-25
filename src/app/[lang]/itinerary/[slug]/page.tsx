@@ -5,6 +5,7 @@ import { Sparkles, Map } from "lucide-react";
 import { getItinerary } from "@/features/itinerary/queries/get-itinerary";
 import { ITINERARY_GUIDES } from "@/lib/dictionaries/itinerary-guides";
 import { ItineraryTimelineDisplay } from "@/features/itinerary/components/itinerary-timeline-display";
+import { ItineraryMapPreview } from "@/features/itinerary/components/itinerary-map-preview";
 import { StoreInitializer } from "@/lib/store/store-initializer";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { Metadata } from 'next';
@@ -64,7 +65,7 @@ export default async function DynamicItineraryPage(props: { params: Promise<{ la
 
       <div className="max-w-5xl mx-auto px-4 mt-16 md:mt-24">
         {/* The Story */}
-        <div className="space-y-12 text-center mb-24">
+        <div className="space-y-12 text-center mb-16">
           <p className="text-2xl md:text-3xl text-slate-600 font-light leading-relaxed max-w-3xl mx-auto">
             &ldquo;{content.intro}&rdquo;
           </p>
@@ -78,7 +79,12 @@ export default async function DynamicItineraryPage(props: { params: Promise<{ la
             ))}
           </div>
         </div>
+      </div>
 
+      {/* Map Preview Call to Action (Full Width) */}
+      <ItineraryMapPreview slug={slug} lang={lang} isEs={isEs} />
+
+      <div className="max-w-5xl mx-auto px-4">
         {/* Timeline Header */}
         <div className="text-center mb-8">
           <h3 className="font-serif text-4xl font-bold text-slate-900 mb-4">
@@ -91,28 +97,6 @@ export default async function DynamicItineraryPage(props: { params: Promise<{ la
 
         {/* The New Serpentine Timeline */}
         <ItineraryTimelineDisplay isEs={isEs} />
-
-        {/* Call to Action */}
-        <div className="bg-white rounded-3xl p-10 md:p-16 shadow-xl border border-rose-100 mt-24 text-center max-w-2xl mx-auto relative overflow-hidden">
-          <div className="absolute inset-0 bg-rose-50/50" />
-          <div className="relative z-10">
-            <Map className="w-12 h-12 text-rose-600 mx-auto mb-6" />
-            <h3 className="font-serif font-bold text-3xl text-slate-900 mb-4">
-              {isEs ? "Personaliza esta Ruta" : "Customize this Route"}
-            </h3>
-            <p className="text-slate-600 mb-10 text-lg">
-              {isEs 
-                ? "Abre esta ruta en nuestro mapa interactivo y haz que nuestro conserje de IA la adapte a tus necesidades."
-                : "Open this route in our interactive map and have our AI concierge tailor it to your needs."}
-            </p>
-            <Link 
-              href={`/${lang}/explore?trip=${slug}`}
-              className="inline-flex items-center justify-center gap-3 bg-rose-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-rose-700 transition-transform hover:scale-105 shadow-xl shadow-rose-600/30 w-full md:w-auto"
-            >
-              {isEs ? "Abrir en Mapa Interactivo" : "Open Interactive Map"} <Sparkles className="w-5 h-5 text-rose-400" />
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );
