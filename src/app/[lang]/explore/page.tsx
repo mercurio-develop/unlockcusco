@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react"
 import { StoreInitializer } from "@/lib/store/store-initializer"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema"
+import { SeoDirectory } from "@/components/ui/seo-directory"
 
 export default async function ExplorePage({ 
   params, 
@@ -59,6 +60,7 @@ export default async function ExplorePage({
           />
         </NuqsAdapter>
       </Suspense>
+      <SeoDirectory />
     </div>
   )
 }

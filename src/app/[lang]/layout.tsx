@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: "UNLOCKCUSCO | Cusco, Sacred Valley & Machu Picchu Itinerary Guide",
     description: siteConfig.description,

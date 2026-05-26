@@ -2,6 +2,7 @@ import { HeroSection, FeaturesSection } from "@/features/landing"
 import { siteConfig } from "@/lib/config/site"
 import type { Metadata } from "next"
 import { getDictionary, Locale } from "@/lib/dictionaries"
+import { SeoDirectory } from "@/components/ui/seo-directory"
 
 interface PageProps {
   params: Promise<{ lang: string }>
@@ -57,6 +58,7 @@ export default async function HomePage({ params }: PageProps) {
       />
       <HeroSection dict={dict.home} />
       <FeaturesSection dict={dict.home} />
+      <SeoDirectory />
     </div>
   )
 }
