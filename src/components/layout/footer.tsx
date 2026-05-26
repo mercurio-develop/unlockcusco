@@ -38,7 +38,7 @@ export function Footer({ lang }: { lang: string }) {
             {LOCATIONS.map((loc) => (
               <li key={loc.value}>
                 <Link 
-                  href={`/${lang}/explore?loc=${loc.value}`}
+                  href={`/${lang}/explore/${loc.value}`}
                   className="text-sm hover:text-rose-400 transition-colors capitalize"
                 >
                   {loc.label}

@@ -50,7 +50,7 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
       {/* Sacred Valley background — visible but light-theme friendly */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=3000&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1600&auto=format&fit=crop"
           className="object-cover object-center"
           alt="Sacred Valley, Andes Mountains"
           fill

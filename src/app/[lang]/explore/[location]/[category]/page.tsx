@@ -5,7 +5,7 @@ import { SafeImageWrapper } from '@/components/ui/safe-image'
 import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
-import { SeoDirectory } from '@/components/ui/seo-directory'
+
 import { BusinessList } from "@/features/discovery/components/business-list"
 import { getCategoryData } from '@/features/discovery/constants'
 import { getDictionary, Locale } from '@/lib/dictionaries'

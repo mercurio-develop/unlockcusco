@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
-import { SeoDirectory } from '@/components/ui/seo-directory'
+
 import { BusinessList } from "@/features/discovery/components/business-list"
 import { getCategoryData } from '@/features/discovery/constants'
 import { getDictionary, Locale } from '@/lib/dictionaries'
