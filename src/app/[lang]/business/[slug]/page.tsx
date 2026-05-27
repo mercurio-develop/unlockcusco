@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
-import { Star, MessageCircle, Clock, ShieldCheck } from "lucide-react"
+import { Star, MessageCircle, Clock, ShieldCheck, MapPin } from "lucide-react"
 import { 
   AsociadoBadge, 
   GastronomicTemplate, 
@@ -104,7 +104,7 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   const categoryName = bCategory ? bCategory.charAt(0).toUpperCase() + bCategory.slice(1).toLowerCase() : bCategory
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : (isEs ? "el Valle Sagrado" : "the Sacred Valley")
   const title = bSeoMetaTitle || `${bName} — ${categoryName} ${isEs ? 'en' : 'in'} ${locationName}`
-  const description = bSeoMetaDesc || bTagline || (isEs ? `Lee reseñas, mira fotos y contacta a ${bName} directamente. Calificación: ${business.rating?.toFixed(1) || 'Nuevo'} estrellas.` : `Read reviews, view photos, and contact ${bName} directly. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`)
+  const description = bSeoMetaDesc || bTagline || (isEs ? `Lee reseñas, mira fotos y contacta a ${bName} directamente. Calificación: ${business.rating?.toFixed(1) || 'Nuevo'} estrellas.` : `Read reviews, view photos, and contact ${bName} directamente. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`)
 
   const ogImage = business.premiumProfile?.coverPhotoUrl || business.premiumProfile?.logoUrl || `/api/og?title=${encodeURIComponent(bName || 'UnlockCusco')}&description=${encodeURIComponent((categoryName || '') + (isEs ? ' en ' : ' in ') + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`
 
@@ -201,44 +201,9 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     }
   }
 
-  // Nearby businesses in same location + category (for SEO + UX)
-  const nearby = await prisma.business.findMany({
-    where: {
-      locationSlug: business.locationSlug,
-      category: business.category,
-      slug: { not: slug },
-      rating: { not: null },
-    },
-    orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
-    take: 10,
-    select: { id: true, name: true, nameEs: true, slug: true, category: true, categoryEs: true, rating: true, tagline: true, taglineEs: true, imageUrl: true, locationSlug: true }
-  })
-
-  // Other experiences in same location but DIFFERENT category
-  const otherExperiences = await prisma.business.findMany({
-    where: {
-      locationSlug: business.locationSlug,
-      category: { not: business.category || '' },
-      rating: { not: null },
-    },
-    orderBy: [{ isAsociado: 'desc' }, { rating: 'desc' }],
-    take: 10,
-    select: { id: true, name: true, nameEs: true, slug: true, category: true, categoryEs: true, rating: true, tagline: true, taglineEs: true, imageUrl: true, locationSlug: true }
-  })
-
-  const TOWNS = [
-    { slug: 'urubamba', name: 'Urubamba' },
-    { slug: 'pisac', name: 'Pisac' },
-    { slug: 'ollantaytambo', name: 'Ollantaytambo' },
-    { slug: 'chinchero', name: 'Chinchero' },
-    { slug: 'maras', name: 'Maras' },
-    { slug: 'yucay', name: 'Yucay' },
-    { slug: 'calca', name: 'Calca' },
-    { slug: 'cusco', name: 'Cusco' },
-  ].filter(t => t.slug !== business.locationSlug)
-
   const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : (isEs ? "el Valle Sagrado" : "the Sacred Valley")
+  const bName = isEs && business.nameEs ? business.nameEs : business.name
 
   // Format WhatsApp message
   const whatsappMsg = encodeURIComponent(
@@ -248,7 +213,6 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   )
 
   const isAsociado = business.isAsociado || false
-   
    
   const schemaTypeMap: Record<string, string> = {
     'DINING': 'Restaurant',
@@ -366,7 +330,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   }
 
   return (
-    <div className="min-h-screen font-sans pb-24 bg-white">
+    <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -376,293 +340,184 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+
+      <div className="absolute top-4 left-4 lg:left-auto lg:right-[calc(50%+24rem+1rem)] z-50">
+        <BackButton className="bg-white/80 backdrop-blur-md shadow-sm" />
+      </div>
       
-      {/* Top Navigation */}
-      <div className="p-6 max-w-6xl mx-auto flex justify-between items-center">
-        <BackButton label={dict.common.back} />
-        
-        <div className="flex gap-2">
-          {isAsociado && <AsociadoBadge className="bg-white text-slate-900 shadow-sm border border-slate-200" />}
-        </div>
-      </div>
-
-      {/* Mobile Floating Back Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <BackButton 
-          label={dict.common.back} 
-          className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-slate-900 px-3 py-2 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.15)] font-bold text-[11px] uppercase tracking-widest border border-slate-200 active:scale-95 transition-transform" 
-        />
-      </div>
-
-      {/* Header Info */}
-      <div className="max-w-6xl mx-auto px-6 pt-4 pb-8">
-        <h1 className="text-4xl md:text-5xl font-serif text-slate-900 tracking-tight leading-tight mb-4">
-          {business.name}
-        </h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          {business.rating !== null && (
-            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-              <Star className="h-4 w-4 fill-slate-900 text-slate-900" />
-              <span>{business.rating}</span>
-              <span className="text-slate-500 font-normal underline decoration-slate-300 hover:decoration-slate-900 cursor-pointer">({business.reviewsCount} {dict.business.reviews.split(' ')[0].toLowerCase()})</span>
+      {/* 1. Hero Image Carousel */}
+      <section className="relative w-full h-[40vh] min-h-[300px] lg:h-[50vh] lg:max-w-6xl lg:mx-auto lg:rounded-b-3xl overflow-hidden bg-slate-200 shadow-sm">
+        <ScrollCarousel className="w-full h-full [&>div]:snap-start">
+          {images.map((url, i) => (
+            <div key={i} className="relative w-screen lg:w-full h-[40vh] min-h-[300px] lg:h-[50vh] flex-shrink-0">
+               <SafeImageWrapper 
+                  src={url} 
+                  alt={bName || ''} 
+                  wrapperClassName="w-full h-full"
+                  imgClassName="w-full h-full object-cover"
+                  priority={i === 0}
+                />
             </div>
-          )}
-          <span className="text-slate-300">•</span>
-          <span className="text-rose-600 font-bold uppercase tracking-widest text-[10px]">{categoryName}</span>
-          <span className="text-slate-300">•</span>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${business.lat},${business.lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 underline decoration-slate-300 hover:decoration-slate-900 transition-colors font-medium"
-          >
-            {locationName}
-          </a>
-        </div>
-      </div>
-
-      {/* Hero Image Gallery */}
-      <div className="max-w-6xl mx-auto px-6 mb-16">
-        <SafeImageWrapper
-          src={business.premiumProfile?.coverPhotoUrl || business.imageUrl || ""}
-          alt={business.name || 'Hero'}
-          priority={true}
-          wrapperClassName="relative h-[40vh] md:h-[60vh] w-full rounded-[2rem] overflow-hidden bg-slate-100"
-          imgClassName="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
+          ))}
+        </ScrollCarousel>
         
-        {/* Left Column: Experience Details & Reviews */}
-        <div className="lg:col-span-2 space-y-20">
-          
-          {/* Dynamic Template Content */}
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-             {business.category === 'DINING' && <GastronomicTemplate business={business} dict={dict} />}
-             {business.category === 'AGENCY' && <ExpeditionTemplate business={business} dict={dict} />}
-             {business.category === 'WELLNESS' && <SanctuaryTemplate business={business} dict={dict} />}
-             {business.category === 'STAYS' && <StaysTemplate business={business} dict={dict} />}
-             {business.category === 'CULTURE' && <CultureTemplate business={business} dict={dict} />}
-          </section>
+        {/* Trust Signal Overlay */}
+        <div className="absolute -bottom-4 right-4 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
+           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+           <span className="font-medium text-sm text-slate-900">{business.rating?.toFixed(1) || 'New'}</span>
+           <span className="text-xs text-slate-500 ml-1">({business.reviewsCount || 0})</span>
+        </div>
+      </section>
 
-          {/* About Section */}
-          <section>
-            <h2 className="text-2xl font-serif text-slate-900 mb-6">{dict.business.about} {business.name}</h2>
-            {business.premiumProfile?.visionStatement && (
-              <p className="text-xl italic text-slate-700 mb-8 border-l-2 border-rose-300 pl-4">&quot;{business.premiumProfile.visionStatement}&quot;</p>
-            )}
-            <p className="text-slate-600 leading-relaxed text-lg font-light whitespace-pre-wrap">
-               {business.description || (isEs ? "Descubre una experiencia auténtica en el corazón del Valle Sagrado. Cada detalle está diseñado para ofrecerte lo mejor de nuestra cultura local y hospitalidad." : "Discover an authentic experience in the heart of the Sacred Valley. Every detail is designed to offer you the best of our local culture and hospitality.")}
-            </p>
-            {business.premiumProfile?.pillars && business.premiumProfile.pillars.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {business.premiumProfile.pillars.map((pillar) => (
-                  <div key={pillar.id} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
-                    <h3 className="font-bold mb-2 text-slate-900">{pillar.title}</h3>
-                    <p className="text-slate-500 text-sm">{pillar.description}</p>
-                  </div>
-                ))}
+      {/* Main Grid Layout */}
+      <div className="lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12">
+        
+        {/* Left Column (Main Content) */}
+        <div className="lg:col-span-2">
+          {/* 2. Header Section */}
+          <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-3xl lg:text-4xl font-serif text-slate-900 leading-tight">
+                {bName}
+              </h1>
+              {business.isAsociado && <AsociadoBadge className="mt-1 flex-shrink-0" />}
+            </div>
+            
+            {/* Quick Info Strip */}
+            <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-slate-600 mb-6">
+              <span className="px-2.5 py-1 bg-slate-100 rounded-md font-medium text-slate-700">{categoryName}</span>
+              <span>•</span>
+              <span className="font-medium">{business.priceTier || '$$'}</span>
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                 <MapPin className="w-3.5 h-3.5" />
+                 <span>{locationName}</span>
+              </div>
+            </div>
+
+            {/* Business Description */}
+            {business.description && (
+              <div className="mt-4">
+                <ExpandableText text={business.description} maxLength={180} />
               </div>
             )}
           </section>
-          
-          {/* Reviews Section */}
-          {business.reviews.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-serif text-slate-900 mb-8 flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-amber-500" /> {dict.business.reviews}
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {business.reviews.map((review) => (
-                  <div key={review.id} className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col h-full transition-all hover:shadow-md">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-serif text-lg">
+
+          {/* 3. Category-Specific Body */}
+          <div className="bg-white lg:bg-transparent">
+            {(business.category?.toLowerCase() === 'dining') && (
+              <GastronomicTemplate business={business as any} dict={dict} />
+            )}
+            {(business.category?.toLowerCase() === 'agency' || business.category?.toLowerCase() === 'adventure') && (
+              <ExpeditionTemplate business={business as any} dict={dict} />
+            )}
+            {(business.category?.toLowerCase() === 'wellness') && (
+              <SanctuaryTemplate business={business as any} dict={dict} />
+            )}
+            {(business.category?.toLowerCase() === 'stays') && (
+              <StaysTemplate business={business as any} dict={dict} />
+            )}
+            {(business.category?.toLowerCase() === 'culture' || business.category?.toLowerCase() === 'shopping' || business.category?.toLowerCase() === 'boleto') && (
+              <CultureTemplate business={business as any} dict={dict} />
+            )}
+          </div>
+
+          {/* 4. Reviews Section */}
+          {business.reviews && business.reviews.length > 0 && (
+             <section className="px-4 lg:px-0 py-8 bg-slate-50 lg:bg-transparent">
+                <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{dict.business.reviews}</h2>
+                <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+                  {business.reviews.map((review) => (
+                    <div key={review.id} className="w-[280px] lg:w-[320px] flex-shrink-0 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">
                           {review.author?.charAt(0) || 'U'}
                         </div>
                         <div>
-                          <p className="text-slate-900 font-medium text-sm">{review.author}</p>
-                          <p className="text-slate-400 text-[10px] uppercase tracking-widest mt-0.5">{dict.business.verifiedReview}</p>
+                          <p className="font-bold text-sm text-slate-900">{review.author}</p>
+                          <div className="flex mt-0.5">
+                            {[...Array(review.rating || 5)].map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-3 h-3 ${(review.rating || 0) > i ? 'fill-amber-400 text-amber-400' : 'fill-slate-100 text-slate-100'}`} 
-                          />
-                        ))}
-                      </div>
+                      <ExpandableText text={review.text || ''} maxLength={180} />
                     </div>
-                    <ExpandableText text={review.text || ''} maxLength={180} />
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </ScrollCarousel>
+             </section>
           )}
-
         </div>
 
-        {/* Right Column: Sticky Booking Widget */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24 space-y-6">
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-xl overflow-hidden relative">
-              {/* Subtle light effect for Premium businesses */}
-              {isAsociado && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-600/5 blur-[60px] pointer-events-none" />
-              )}
-              
-              <h3 className="font-serif text-2xl text-slate-900 mb-2">{dict.business.connectDirectly}</h3>
-              <p className="text-slate-500 text-sm mb-8 font-light leading-relaxed">
-                {isEs 
-                  ? `Envía un mensaje directamente a ${business.name} para consultar disponibilidad y reservar tu visita.`
-                  : `Send a message directly to ${business.name} to check their current availability and book your visit.`
-                }
-              </p>
-
-              <div className="space-y-6">
-                <div className="space-y-3">
-                   <div className="flex items-center gap-3 text-slate-600 text-sm">
-                      <Clock className="w-4 h-4 text-amber-500" /> {dict.business.replyTime}
-                   </div>
-                   <div className="flex items-center gap-3 text-slate-600 text-sm">
-                      <ShieldCheck className="w-4 h-4 text-emerald-500" /> {dict.business.verifiedLocal}
-                   </div>
-                </div>
-
-                {business.whatsapp ? (
-                  <a
-                    href={`https://wa.me/51${business.whatsapp}?text=${whatsappMsg}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"
-                  >
-                    <MessageCircle className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
-                    {dict.business.checkAvailability}
-                  </a>
-                ) : (
-                  <div className="space-y-4">
-                    <a
-                      href={`https://wa.me/51940989011?text=${encodeURIComponent(isEs ? `Hola UnlockCusco Concierge, me gustaría consultar la disponibilidad de ${business.name}.` : `Hello UnlockCusco Concierge, I'd like to check availability for ${business.name}.`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_-5px_rgba(37,211,102,0.4)] hover:shadow-[0_15px_40px_-5px_rgba(37,211,102,0.6)] group"
-                    >
-                      <MessageCircle className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
-                      {dict.business.checkAvailability}
-                    </a>
-                    <p className="text-center text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold mt-2">
-                      {dict.business.operatedBy}
-                    </p>
-                  </div>
-                )}
+        {/* Right Column (Sticky Action Card) - DESKTOP ONLY */}
+        <div className="hidden lg:block lg:col-span-1">
+          <div className="sticky top-24 bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            {/* Trust Signal */}
+            <div className="flex flex-col items-center justify-center mb-6 pb-6 border-b border-slate-100">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
+                <span className="font-bold text-2xl text-slate-900">{business.rating?.toFixed(1) || 'New'}</span>
               </div>
+              <span className="text-sm font-medium text-slate-500 underline decoration-slate-200 cursor-pointer hover:text-slate-900 transition-colors">
+                {business.reviewsCount || 0} {dict.business.reviews}
+              </span>
             </div>
 
-            {/* Price Tier Info */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-500">
-                  <span>{dict.business.priceRange}</span>
-                  <span className="text-emerald-600 font-bold">{business.priceTier || "$$"}</span>
-               </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Nearby section */}
-      {nearby.length > 0 && (
-        <div className="max-w-5xl mx-auto px-4 pb-8 mt-12 border-t border-slate-100 pt-12">
-          <div className="flex justify-between items-end mb-5">
-            <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest">
-              {dict.business.moreIn} {categoryName} {isEs ? 'en' : 'in'} {locationName}
-            </h2>
-            <Link href={`/${lang}/explore/${business.locationSlug || 'sacred-valley'}/${business.category?.toLowerCase() || 'general'}`} className="text-sm font-medium text-rose-600 hover:text-rose-700 underline decoration-rose-300 hover:decoration-rose-600 transition-colors">
-              {isEs ? `Ver todos ${categoryName} →` : `Browse all ${categoryName} →`}
-            </Link>
-          </div>
-          <ScrollCarousel>
-            {nearby.map(b => (
-              <Link
-                key={b.id}
-                href={`/${lang}/business/${b.slug}`}
-                draggable={false}
-                className="snap-start shrink-0 w-64 group bg-white hover:bg-slate-50 shadow-sm hover:shadow-md border border-slate-200 rounded-2xl p-4 transition-all"
+            {/* Desktop CTA */}
+            {business.whatsapp ? (
+              <a
+                href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                style={{ 
+                  backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
+                }}
               >
-                {b.imageUrl && (
-                  <SafeImageWrapper
-                    src={b.imageUrl}
-                    alt={(isEs && b.nameEs ? b.nameEs : b.name) || 'Business'}
-                    wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
-                    imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500 mb-1 pointer-events-none">{isEs && b.categoryEs ? b.categoryEs : b.category}</p>
-                <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-2 pointer-events-none">{isEs && b.nameEs ? b.nameEs : b.name}</p>
-                {b.rating && (
-                  <p className="text-xs text-slate-500 mt-1 pointer-events-none">★ {b.rating.toFixed(1)}</p>
-                )}
-              </Link>
-            ))}
-          </ScrollCarousel>
-        </div>
-      )}
-
-      {/* Other Experiences */}
-      {otherExperiences.length > 0 && (
-        <div className="max-w-5xl mx-auto px-4 pb-16 mt-10">
-          <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest mb-5">
-            {dict.business.otherExperiences} {locationName}
-          </h2>
-          <ScrollCarousel>
-            {otherExperiences.map(b => (
-              <Link
-                key={b.id}
-                href={`/${lang}/business/${b.slug}`}
-                draggable={false}
-                className="snap-start shrink-0 w-64 group bg-white hover:bg-slate-50 shadow-sm hover:shadow-md border border-slate-200 rounded-2xl p-4 transition-all"
+                <MessageCircle className="w-5 h-5 mr-2" />
+                {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+              </a>
+            ) : (
+              <button 
+                disabled
+                className="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-[15px]"
               >
-                {b.imageUrl && (
-                  <SafeImageWrapper
-                    src={b.imageUrl}
-                    alt={(isEs && b.nameEs ? b.nameEs : b.name) || 'Business'}
-                    wrapperClassName="relative w-full aspect-video rounded-xl overflow-hidden mb-3 pointer-events-none"
-                    imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1 pointer-events-none">{isEs && b.categoryEs ? b.categoryEs : b.category}</p>
-                <p className="text-sm font-semibold text-slate-900 leading-tight line-clamp-2 pointer-events-none">{isEs && b.nameEs ? b.nameEs : b.name}</p>
-                {b.rating && (
-                  <p className="text-xs text-slate-500 mt-1 pointer-events-none">★ {b.rating.toFixed(1)}</p>
-                )}
-              </Link>
-            ))}
-          </ScrollCarousel>
-        </div>
-      )}
-
-      {/* Explore Nearby Towns */}
-      <div className="max-w-5xl mx-auto px-4 pb-24 border-t border-slate-100 pt-16">
-        <h2 className="text-xl font-serif text-slate-900 mb-6 text-center">
-          {dict.business.exploreNearby}
-        </h2>
-        <div className="flex flex-wrap justify-center gap-3">
-          {TOWNS.map(town => (
-            <Link 
-              key={town.slug}
-              href={`/${lang}/explore/${town.slug}/${business.category?.toLowerCase() || 'general'}`}
-              className="px-6 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-full text-slate-700 hover:text-rose-700 transition-colors font-medium text-sm shadow-sm hover:shadow-md"
-            >
-              {town.name}
-            </Link>
-          ))}
+                Contact Not Available
+              </button>
+            )}
+            
+            <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
+              {dict.business.replyTime || "Usually replies within 1 hour"}
+            </p>
+          </div>
         </div>
       </div>
 
-    </div>
+      {/* 5. Sticky Action Bar - MOBILE ONLY */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-safe">
+        {business.whatsapp ? (
+          <a
+            href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-white font-medium text-[15px] shadow-sm transition-transform active:scale-[0.98]"
+            style={{ 
+              backgroundColor: business.premiumProfile?.primaryColor || '#10b981' // WhatsApp Green default
+            }}
+          >
+            <MessageCircle className="w-5 h-5 mr-2" />
+            {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+          </a>
+        ) : (
+          <button 
+            disabled
+            className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-medium text-[15px]"
+          >
+            Contact Not Available
+          </button>
+        )}
+      </div>
+    </main>
   )
 }
