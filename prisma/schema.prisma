@@ -28,6 +28,8 @@ model Business {
   locationSlug           String                  @default("")
   tagline                String                  @default("")
   description            String                  @default("")
+  longDescription        String?
+  longDescriptionEs      String?
   contactEmail           String                  @default("")
   socialLinks            String                  @default("{}")
   instagramHandle        String?
