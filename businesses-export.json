@@ -1,0 +1,4826 @@
+[
+  {
+    "id": "cmp1qesev0029ml2ieqcl3zhk",
+    "name": "Machu Picchu Peru Hike",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qxgil0020ml5x7c2zobca",
+    "name": "Historic Sanctuary of Machu Picchu",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qwzxf003aml2imqoy8xz5",
+    "name": "Machu Picchu Footpath",
+    "category": "adventure",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1tqafr00aoml2i71n0shlr",
+    "name": "Ollantaytambo Museum",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1sgisd0082ml2id7a2ix2o",
+    "name": "Ollantaytambo Archaeological Site",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xhg002vml2unyywjz5i",
+    "name": "Ollantaytambo Ruins",
+    "category": "boleto",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "038dbf42-bf0c-4488-9db0-ced60c12aa31",
+    "name": "Sacsayhuaman",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sg64b007yml2i95skkunf",
+    "name": "Moray Archaeological Zone",
+    "category": "boleto",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp239xhk002xml2uo77t9f05",
+    "name": "Moray",
+    "category": "boleto",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "b0d92ac2-b64f-4b17-b01b-ab6a34d07e49",
+    "name": "KUSYKAY Peruvian Craft Food",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xhe002uml2u7talh6c8",
+    "name": "Pisac Ruins",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ri572004pml2i14g8bu2r",
+    "name": "Pisac Archaeological Park",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "f695a251-0601-438a-aba3-b0d61b6a560f",
+    "name": "Inkan Milky Way",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xha002sml2ugxehd4ns",
+    "name": "Q'enqo",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1prfbr0012ml2iun9gfret",
+    "name": "Q'enqo Archaeological Complex",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qdfht000fml5xuyw41a46",
+    "name": "Mapacho Craft Beer Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1sg1n9007wml2itcsyywl4",
+    "name": "Chinchero Archaeological Center",
+    "category": "boleto",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xhi002wml2u21lhykl1",
+    "name": "Chinchero Ruins",
+    "category": "boleto",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xea001fml2u6zi27m9q",
+    "name": "Alpaca Expeditions",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "8ac798b6-b7b0-490a-be9a-4981b6cb74c4",
+    "name": "PACHAPAPA cocina cusqueña y más",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "3beda5cd-7259-4d34-95cf-20c17cd3385e",
+    "name": "Yaku Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qdmnk000gml5xcwjbene1",
+    "name": "Chullos Restaurant Machupicchu",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "0e20f258-9a52-4a1e-afcc-3f31baf8fe38",
+    "name": "Ofrenda Peruvian Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bn6zi000tml8gkrgcuhua",
+    "name": "Palacio del Inka, Hotel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1opsbm000omllqoi26kek5",
+    "name": "República del Pisco",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xdi0012ml2umzjkg9r9",
+    "name": "Organika Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bh3m4000hml8g25so31kz",
+    "name": "\"La Cusqueñita\"",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "9b6f9b36-8be8-4d8c-8e68-1aedcf64bb28",
+    "name": "Tambomachay",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oj69t000fmllqxy44xbsw",
+    "name": "Morena Peruvian Kitchen",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pode0000lml2i1hcocf2m",
+    "name": "Cusco Art and Culture - Courses and Services",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "ad6cc2a8-3501-4d8f-bbc3-73e9c2137464",
+    "name": "Centro Qosqo de Arte Nativo",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qdq0x000hml5xgo1ehr84",
+    "name": "Chef House Restaurant - Machu Picchu",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1odq7r0007mllqawhyuz5f",
+    "name": "Wild Rover",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1prcx70011ml2i1hryke2u",
+    "name": "Puka Pukara Archaeological Center",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xhc002tml2u56d2a3yo",
+    "name": "Puka Pukara",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "9179df32-6656-4762-968a-69f7c6d277c9",
+    "name": "Green Point Vegan Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xh7002rml2uj1prmowq",
+    "name": "Veggie Food",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qcznm000bml5xfvwzbosw",
+    "name": "Ponchos Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp2becev000cml8g3u7xwyh5",
+    "name": "Jack's Café",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bdjn40009ml8g727svszw",
+    "name": "Organika Bakery & Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "5f59f926-9694-4505-848a-98e5e47d0115",
+    "name": "Monumento a Pachacutec",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "140cc7a0-c0b5-4f1b-ac7c-3a636b489e47",
+    "name": "Cusco Spa Massage – Wellness Center",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rlyyv004vml2ivsorj9ou",
+    "name": "KANTU SPA - Therapeutic Massage Center in Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tsk4y00azml2i7gkwf88t",
+    "name": "Main Square of Ollantaytambo",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "0148ae17-c19f-46a2-a297-55c1e36606cb",
+    "name": "Chull's Peruvian Cuisine & Craft Beer",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oq410000pmllq70qgbhg0",
+    "name": "Nuna Raymi",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rmo2q0051ml2iycqtqoh3",
+    "name": "Rumi Ancestral Spa | Best Massage Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bnjhe000uml8g2wnj2as3",
+    "name": "JW Marriott El Convento Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oep6i000amllq5g4u4i4p",
+    "name": "Traveler Cusco Hostel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pquoo000xml2ipgrqzhxh",
+    "name": "Pikillacta Archaeological Park",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xhp002zml2ulgar5c5h",
+    "name": "Pikillaqta",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1r79ft0040ml2ich2ux1c9",
+    "name": "Black Llama Hostel, Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "db575c43-7c6b-4729-808c-8e0009f9a3de",
+    "name": "Pisac Market",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1s3l9c006bml2igr7gnysi",
+    "name": "Tunupa Sacred Valley",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xb20000ml2u91zi4ya6",
+    "name": "Tunupa Restaurant Valle Sagrado",
+    "category": "Dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xe8001eml2ujxubdvgj",
+    "name": "SAM TRAVEL PERU",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pzfbc001uml2i3hwr1fsz",
+    "name": "MASSAGE CUSCO | MYSTICAL TERRA SPA",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rsf65005hml2iltkgj04n",
+    "name": "Cochahuasi Animal Sanctuary",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xc5000fml2udurcav05",
+    "name": "Aranwa Sacred Valley Hotel & Wellness",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp2bc1qc0002ml8grw0ymlwn",
+    "name": "LLAMA CAFÉ I",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bcu5h0006ml8goy925k3q",
+    "name": "Three Monkeys Coffee Cusco",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e7dacfa8-319a-4741-89b9-d6ae9c7563a2",
+    "name": "Museo de Sitio de Qorikancha",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "387200f6-ef7a-4578-b8e4-1e16a5477cad",
+    "name": "Salt Mine of Maras",
+    "category": "culture",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp239xc0000dml2up6jtmsym",
+    "name": "Tambo del Inka, a Luxury Collection Resort & Spa, Valle Sagrado",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "a55e2fad-6df9-4ae2-9ff0-5bad4c3e6276",
+    "name": "Museo Historico Regional",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1ffa974c-7e69-46d4-b77f-c82f8fdc9c93",
+    "name": "LOCAL Restaurante",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bluhc000pml8gj0gd71j6",
+    "name": "Monasterio, A Belmond Hotel, Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xes001nml2uccpyx1vj",
+    "name": "CHIA VEGAN RESTAURANT",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qd2y1000cml5xbwiif0jw",
+    "name": "Old Town Machupicchu Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qfv0o000jml5xgv78bnjj",
+    "name": "MAGGUIS GRILL CRAFT BEER",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "06333e7b-5a45-41b3-8eba-192999a32ea9",
+    "name": "Sonesta Hotel Posadas del Inca Yucay",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1qdaab000eml5xs2ndhubm",
+    "name": "Green House Restaurant in Machu Picchu",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp2bmufc000sml8gjjk11mad",
+    "name": "Novotel Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xhn002yml2ulj5odhnw",
+    "name": "Tipon",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1pqk6s000uml2ijztpa4fk",
+    "name": "Tipón Archaeological Park",
+    "category": "boleto",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp2bcmye0005ml8gzr7doqrk",
+    "name": "Café Dwasi peruvian coffee 2.0",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1omadi000kmllqu896go82",
+    "name": "Café D´wasi Peruvian Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a129e98a-fd27-4dd0-b4cc-3c15d193a796",
+    "name": "Florencia y Fortunata Specialty Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "62133e52-f5da-4b49-a560-7fa3fa74f65d",
+    "name": "Museo de Arte Popular",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "01a3fd67-df5e-4c5d-8232-48f9a1c0640e",
+    "name": "Cervecería Del Valle Sagrado - Centro Histórico",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oievf000emllqhupnyi0j",
+    "name": "Hanz",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bl9zi000nml8gdz5u4udh",
+    "name": "Casa Andina Premium Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2b9cgi0001ml8gyv6b24vn",
+    "name": "Panzotis Ítalo Peruano Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "20d7b2bb-7727-43dc-ade1-7344dff38912",
+    "name": "Huaraca Grill",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "7cfc0084-6f6e-434b-90c6-f080b255f835",
+    "name": "Casa Cusqueña Restaurante",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1u6pwa00c9ml2izcrt9f9w",
+    "name": "Native Peruvian Restaurant - Sacred Valley of the Incas",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "76ae4f60-ffb7-48bf-94e1-5c19c3261847",
+    "name": "El Jardin",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "4c5a0f0f-32fa-489b-b4ff-18044a002c00",
+    "name": "Casa Andina Premium Valle Sagrado Hotel & Villas",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1pz0v4001qml2i3hy2mrc0",
+    "name": "QUILLA SPA CUSCO",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bgoh0000gml8ghknv1u2x",
+    "name": "PICANTERIA",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bhhqd000jml8g76zafzwv",
+    "name": "Cusqueñísima Picantería",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qmbke000wml5xa59z5rfl",
+    "name": "Ayahuasca Grill",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "680f97e7-8cb0-4dc0-84e8-dd18e72e194f",
+    "name": "Inkazuela",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h2kmn000emlqqg1931f05",
+    "name": "MORAY Restaurant",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1pxybp001iml2ic5cy2fe1",
+    "name": "New Energy Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1q9rx90003ml5xbhfld0oc",
+    "name": "Supertramp Hostel",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1t18ps0099ml2iolu32dx8",
+    "name": "Inkariy Museum",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1qac0o0004ml5x6tgqhv2y",
+    "name": "Belmond Sanctuary Lodge",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "29c29b18-0095-4656-8be0-1953a67ac3e3",
+    "name": "Apu Verónica Restaurant",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xc3000eml2usj4wfnhr",
+    "name": "Rio Sagrado, A Belmond Hotel, Sacred Valley",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1tsr5g00b1ml2ixet92fp3",
+    "name": "Temple of the Sun",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1tysnq00biml2ik1k40iry",
+    "name": "Intipunku - Sun Gate",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1ok685000imllq1yrqgxcv",
+    "name": "Mare Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bd2gi0007ml8gdufefqp5",
+    "name": "Cappuccino Cusco Cafe",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "b892173f-6eba-411f-a8eb-5196bc82e3b7",
+    "name": "Museo de Arte Contemporaneo",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bg1fd000eml8g1nysewvc",
+    "name": "La Nueva Chomba Picanteria",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h1ro0000cmlqqe8thvq6w",
+    "name": "MARDU BISTRO - ITALIAN RESTAURANT",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1ou92i000wmllqis3f0g3e",
+    "name": "Awana Kancha",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qthfg001kml5xm35z2be8",
+    "name": "Andean Hands Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp2bftlb000dml8g6ryktf36",
+    "name": "La Quinta Cocina Peruana",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qxa7z003cml2ivj4rb3xm",
+    "name": "Plaza Pueblo Machu Picchu",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1svyk10092ml2inonosni4",
+    "name": "Sacred Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xej001jml2ul9n5kivn",
+    "name": "TreXperience",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tscsz00axml2io6pqnffa",
+    "name": "Pinkuylluna Archaeological Site",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp4h0ye50009mlqqn2jqygao",
+    "name": "Morchella",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "a7e97731-9c73-4666-849d-bf1bb8c914ad",
+    "name": "Restaurant Casa Carbajal",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pzaiz001tml2ivaw2gbei",
+    "name": "Namaste Massages Spa Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xbd0003ml2uv7l4hwwq",
+    "name": "El Huacatay",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp2bdqln000aml8gzydomt7y",
+    "name": "JC's Cafe Cusco",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "65ea3319-2b51-4067-b431-8d556217537d",
+    "name": "Kampu",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xb80001ml2uqagn6pgo",
+    "name": "Organika La Huerta - Peruvian Restaurant",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "363aabf4-291c-45e0-99b5-0bee9cd42b6f",
+    "name": "Veggie Saludable",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1okftq000jmllq3vdm9xzw",
+    "name": "il Olivo Italian Peruvian Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "634747c8-0210-474b-837b-32160bd936af",
+    "name": "Vida vegan bistro",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "896bdc50-7ca9-4ceb-910a-26ebdfd213a5",
+    "name": "Salkantay Trekking",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2blgii000oml8gdmwrht4r",
+    "name": "Hotel Aranwa Cusco Boutique",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qifwe000pml5x6v2xxnwo",
+    "name": "Ollantay Café",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1u70kd00caml2is2q4plt8",
+    "name": "Tiles and Stones Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1uarpu00cmml2iag8oso9b",
+    "name": "Stones and Coal Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tlvle00ahml2iqv8anlha",
+    "name": "CHUNCHO",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1ul2n100dtml2iggb788dc",
+    "name": "Tierra Spa Massage Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xcc000iml2uih1n3xbi",
+    "name": "Namaste Valley Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pyx52001pml2it09fodzp",
+    "name": "Namaste Plaza Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4gykj60002mlqqd5sgi4ah",
+    "name": "Piedra & Sal Restaurante",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "bfbab13a-4aa3-46b9-9cd6-95de3dfef164",
+    "name": "Machu Picchu Team",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1uke8w00dpml2ievsfhbb1",
+    "name": "MASSAGE CUSCO - Relaxing Time Massage",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ojucm000hmllqfxdsrcvz",
+    "name": "Micaela Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "2a60ea24-9d6b-4558-8a13-555a1bf7a4cf",
+    "name": "Soqa",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xbr0009ml2uswrtm6xe",
+    "name": "Tierra Viva Valle Sagrado Urubamba",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1pyh95001mml2i9a5dha1w",
+    "name": "Best Massage",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pzi2c001vml2i9u8qiysb",
+    "name": "OASIS SPA - MASSAGE CUSCO - Best Massage Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "6e24aaf1-eea3-4fe2-9f3f-dc4c8dba8b0c",
+    "name": "Chullpi Restaurant",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "7a983080-456c-4507-88e2-bf6c547613e5",
+    "name": "El Albergue",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "48aaf9e2-26ff-4b2a-a86d-2692c2bba927",
+    "name": "Parada Vegana Restaurant",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pyl9g001nml2igsr0r0my",
+    "name": "Mary's Massage Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "76300a53-86dd-4709-a99b-e0b5d3196ccc",
+    "name": "COSITUC Ticket Office",
+    "category": "boleto",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bl35n000mml8g3sikeu0t",
+    "name": "Hotel Hacienda Cusco Centro Historico",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4gy5y30000mlqq53j1pvvd",
+    "name": "Pisco Peruvian Restaurant",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1qo43i0013ml5x3o2sztj7",
+    "name": "Artisan Museum",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp2bm6km000qml8gj6nj8747",
+    "name": "Cusco Plaza Hostel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qhxme002nml2igiy3wwub",
+    "name": "Cusco ATVs",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "d03d4a4c-2447-4b7a-9efd-51cad79c4fe5",
+    "name": "Agencia de viajes en",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xf0001rml2ud8ejitnr",
+    "name": "ATV",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xhz0034ml2ugs9383of",
+    "name": "Campo Cocina Andina",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qiujc000tml5xxzg7tn84",
+    "name": "Parisian Creperie Machupicchu - Coffee & Gelato",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "4a2f854d-816a-4152-b098-a02687acfd00",
+    "name": "Inka Nato Restaurante",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "8e08895f-b695-4100-be9d-64d0182bcf90",
+    "name": "Latente specialty coffee",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1onsig000nmllq1u8tuuuu",
+    "name": "Brew Brothers Specialty Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xi80038ml2u9wpzogvz",
+    "name": "El Albergue Ollantaytambo Hotel & Restaurant",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xe2001bml2uo8qx5uf5",
+    "name": "El Albergue Restaurant",
+    "category": "Dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "e1264581-f1ef-4f32-9a4d-df2ba216c7d3",
+    "name": "Evolution Treks",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1r1eap003lml2i7ppmz2m1",
+    "name": "Samay Massage Center by Zen Thai Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "5a5e0b41-263c-4db2-83d1-0be1ce569650",
+    "name": "Bloody Bueno",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qne1y002uml2i1s5mcbg2",
+    "name": "Rock Rivers Hotel | Machu Picchu",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1oqt2h000rmllqbvf9r6z7",
+    "name": "La Perla Criolla",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xbw000bml2ueg4qu0rg",
+    "name": "Taypikala Valle Sagrado Deluxe",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xby000cml2ua4byus1o",
+    "name": "Valle Sagrado",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1s9uxk006yml2ix44syg3i",
+    "name": "Yucay Living Culture Museum",
+    "category": "culture",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "fe791cf7-6e65-4914-a2c6-0146ea047924",
+    "name": "Sabor Magico Grill Restaurante - Pizzeria",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1s41o2006gml2i9fuadsm5",
+    "name": "Tierra Artisan Kitchen / Urubamba",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "7069961f-64f9-4b15-8a6b-9c7da0397beb",
+    "name": "Buho Tours",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "43f15cc6-e772-4e10-bc68-b5b168b56e39",
+    "name": "Restaurante en Cusco - Jardin Organiko",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "5ebe03a1-b917-4249-aeb0-2c9835a9c9c2",
+    "name": "Amanto - Comida Sagrada",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xdc000zml2uxqa20483",
+    "name": "Willka T'ika Essential Wellness",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "332a3f4e-5c41-40c1-8e44-82c7f5e87c70",
+    "name": "TERRITORIO cocina peruana",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "65565424-4999-49fc-8eb8-013875659180",
+    "name": "Sunshine Cafe",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp4h2wbe000fmlqq2xcjva9r",
+    "name": "LA PORTADA RESTAURANTE - MARAS",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1rs2m2005dml2iko9xqo69",
+    "name": "Taray Viewpoint",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ra8fh0047ml2i7xetu4ff",
+    "name": "La Ruta - Gourmet Restaurant Pisac",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ud2gy00csml2i7eev4v0m",
+    "name": "PERÚ ARTE",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xg50029ml2u4a4g7k6v",
+    "name": "Center for Traditional Textiles of Cusco",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1f748def-ef57-4cce-a18a-4dc2cc50ea29",
+    "name": "Machu Picchu Expeditions",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1py9vv001lml2isci3hizh",
+    "name": "Golden Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qi32l002oml2isqu5zffr",
+    "name": "Peru Moto Tours (Motorcycle Rentals & ATV Tours)",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xgd002dml2unzac9p82",
+    "name": "LR ALPACA FASHION",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xgf002eml2u205nbo9e",
+    "name": "Alpaca Tamon Studio® | Alpaca Factory Store",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qtsux001oml5x719rhu90",
+    "name": "Inti Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "5877d999-db2c-4fa1-8c7b-1bdc9997d6ff",
+    "name": "Antica Osteria Pisac - Tratoria Pizzeria",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ujspn00dkml2iwmmokoop",
+    "name": "Muña Ancestral Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1138e1c3-4f26-4c27-8af7-7e3ec213b67a",
+    "name": "Pakakuna Restaurante",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1qr1ar001eml5x4y1aqk61",
+    "name": "Vida Spa Machupicchu",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qckk30007ml5xl2d5dku1",
+    "name": "Missky Machu Picchu",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "144d63d3-c745-45e4-91e3-e9f294d26008",
+    "name": "Migas del Valle",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "1de19668-3c76-44b7-85cb-b95692e6a24f",
+    "name": "The Vegan Temple by Prasada",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xbu000aml2uhf0rpyfr",
+    "name": "Inkaterra Hacienda Urubamba",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp4hakna000tmlqqdanhot8z",
+    "name": "ReEnergize Cusco –Altitude & Recovery Studio",
+    "category": "wellness",
+    "locationSlug": ""
+  },
+  {
+    "id": "1f603ce4-231a-4a9a-b7c8-d68e0f0ff28f",
+    "name": "Monkey Coffee Coworking",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1p15p90015mllqvbpbw8o7",
+    "name": "EKEKOS - Art & Colors",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1s3ttp006eml2iuo2g5yr9",
+    "name": "AMA Restaurant Urubamba",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "439d7729-b043-428c-a228-b14bc24a754c",
+    "name": "Mawic Restaurant",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "f6e99f66-6829-4a2c-acae-74e108c32a8b",
+    "name": "Ceramicas Seminario",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h78m1000lmlqqc7reldg8",
+    "name": "Sol y Luna - Relais & Chateaux",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp2bgctq000fml8ghsiuic31",
+    "name": "Bisonte Plaza de Armas",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bmglz000rml8ge9km3rmy",
+    "name": "Abittare Hotel - Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1deca2e9-14b1-4b6a-9bdf-ceb2025c200f",
+    "name": "Sofra Culinary Cafe",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xi60037ml2utyh7e4nk",
+    "name": "Restaurant Bar cafe Koricancha",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "48dee5c3-587d-4ab3-81ec-7aa8714b5b21",
+    "name": "Peru Grand Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e45b2d98-2f1d-4816-8e24-2874b9dbb377",
+    "name": "Tour Guides",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "03af2836-d443-4257-8120-3283ac0dd455",
+    "name": "Tours in",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmpkr5dsh0000mlmklbsgez7j",
+    "name": "Centro de Textiles Tradicionales de Chinchero",
+    "category": "Culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1qijar000qml5xl3m71s2i",
+    "name": "La Rivera Coffee Center",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "7e64eb95-5818-43fa-99d9-192472a92b77",
+    "name": "Free Tour",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qcog90008ml5xacy6b8ji",
+    "name": "Quinua Machupicchu Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "b6160889-82bf-4005-86a6-39b9e48592ab",
+    "name": "Inti Punku Valle Sagrado Hotel - Signature Collection",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "3b032eb1-ed3f-42e4-8ab6-582f875f1b9a",
+    "name": "CuscoPeru.com",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qdtif000iml5xp5v02a21",
+    "name": "Sacha Andino Peruvian Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp239xda000yml2ukfmdoudq",
+    "name": "Mercado chinchero",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1odb9d0006mllqfqktmfba",
+    "name": "Chelito's Backpacker",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bd98y0008ml8gfdgru0tn",
+    "name": "The Meeting Place Cafe Cusco",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "6095dea7-314c-4f4e-a0f5-d12f84b11777",
+    "name": "QUMAS peruvian cuisine restaurant",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp4haqc8000umlqqemhz5ixw",
+    "name": "SARUMI SPA",
+    "category": "wellness",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1oty9j000vmllq9hqxamyg",
+    "name": "Maximo Laura Museum",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h6u2e000kmlqqgm2mudb6",
+    "name": "Wifala Harmony Hotel",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1rww1e005uml2ijebgi9v8",
+    "name": "Lizzy Wasi Urubamba",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1r196r003kml2iywluwnbn",
+    "name": "Tambo Inka Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qeatf0026ml2ir35ktqs0",
+    "name": "Big Trail Cusco - Scooters & Motorbikes - Tours & Rental",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qmi64000yml5xuo646fxa",
+    "name": "Cuy Chef",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "2cd7107a-7a58-4f25-88c3-a2bbfe62c6df",
+    "name": "Nina del Valle",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1qptbg0016ml5xkyjazka7",
+    "name": "Sacred Rock at Machu Picchu",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1rmzjc0054ml2ipp2m3rsw",
+    "name": "Brisa Massage Spa / Sauna",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bkr5e000lml8g9nom2igl",
+    "name": "El Balcón Cusco Hotel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp201cmc0005mlpo0qxuwihz",
+    "name": "Paramatma Healing Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "50ca0001-2274-40e4-917e-72043d609e0b",
+    "name": "Kula Cafe and Restaurant",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmpkq1qoy0002mlubvp997psy",
+    "name": "Pachapapa",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmphox0uq0004mlbitgz8lv51",
+    "name": "MIL Centro",
+    "category": "Dining",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmphownne0002mlbic01vwu94",
+    "name": "Iskay",
+    "category": "Dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qme8t000xml5xjbo48z28",
+    "name": "INKA TAMBO Restaurant",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmpkq1rw30003mlub5nulazms",
+    "name": "Uchu Peruvian Steakhouse",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmpkq1oaq0001mlub5s6reg9z",
+    "name": "MAP Café",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmphowewa0000mlbipfz0hn0m",
+    "name": "Chicha por Gastón Acurio",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmphowj8d0001mlbix01itdie",
+    "name": "Limbus Resto Bar",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmpkq1n3e0000mlubmgjm5l85",
+    "name": "Cicciolina",
+    "category": "Dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmphowrnm0003mlbi0isqacqk",
+    "name": "Cervecería del Valle Sagrado",
+    "category": "Dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "b45a0c26-c578-43ee-a439-d010983d3a19",
+    "name": "Buscando Nombre Specialty Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xcv000rml2ujo1qd7l1",
+    "name": "La Serranita Restaurant",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1s3n6h006cml2iyapoad0t",
+    "name": "Pachay Sacred Valley Restaurant",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "8dc6afc2-48d9-492e-b45c-d1033149cae1",
+    "name": "Local Trekkers",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tj1a400afml2ic3wyjr41",
+    "name": "Hotel Tierra Inka Sacred Valley | Ollantaytambo | Sacred Valley Cusco",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "302a3488-4ae8-48da-be97-439fb8df1529",
+    "name": "Mochilas y ropa de trekking",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tjo1900agml2i1tbzhz73",
+    "name": "Las Qolqas EcoResort Ollantaytambo",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1sspkw0090ml2iq1pvlef3",
+    "name": "Inkasaire Boutique Lodge",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp4h1fka000bmlqqzzhhl52a",
+    "name": "RESTAURANT INKASAL",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "283787a1-1e32-472d-882c-5eb63112e017",
+    "name": "Hotel Hacienda del Valle",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp239xcx000sml2uxzg5qwug",
+    "name": "Del Pilar Ollantaytambo",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "463c9e42-89c9-453e-b5e9-4f419cc7b8ae",
+    "name": "Apu Ausangate Restaurant",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xih003cml2unl0ezc74",
+    "name": "Inca Ruins View Boutique Lodge",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1py6kj001kml2i4wsy56gm",
+    "name": "Wellness Inka Massage",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qj3bw000vml5x3b17fmq8",
+    "name": "Peru Cafe Machu Picchu",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp239xiq003gml2uwkcee91m",
+    "name": "Andean Wellness Spa",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ufpem00d7ml2i7c9uvtpy",
+    "name": "Chinchero Site Museum",
+    "category": "boleto",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1r9o180043ml2ionqatlb2",
+    "name": "SolSeed - School & Cafe, Pisac",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1sdggt007iml2isynjbb2a",
+    "name": "The Stable, Art Courtyard",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h0flt0006mlqq8l47mjrn",
+    "name": "MIL - Food Lab and Interpretation Center",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xiu003iml2u41oaoq6h",
+    "name": "Cusco City Tours",
+    "category": "guide",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1tyw9700bjml2ifjx0vwxb",
+    "name": "Perolniyoc Waterfall",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "1454415d-313d-4f0e-974d-9b01988c6185",
+    "name": "Salineras Ranch",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp2bcfbu0004ml8gyiaaolgd",
+    "name": "Época Cusco - CAFE BRUNCH",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "d31e915e-81d6-434c-9fbd-d4fa0daeea4e",
+    "name": "Explora",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1rwsnm005tml2itsavwq3o",
+    "name": "Hotel Villa Urubamba",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1qixam000uml5x35pf0he4",
+    "name": "Coffee Bike - Roasters",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1tlz0i00aiml2i0jnpegmv",
+    "name": "Andean Organica Ollantaytambo",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "77ebdb6b-3e83-4857-baf3-7cab86a26afd",
+    "name": "Kallpaymy Equipo De Camping",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1obrlw0003mllqd1kb0vb8",
+    "name": "Magar Hostel Bar",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1r6sot003wml2ib9vopwdh",
+    "name": "Xplora Hostel Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qj6ou002sml2io7tp73gx",
+    "name": "VERTIKAL ZIPLINE",
+    "category": "adventure",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "78712ea8-d042-465e-92ef-5bd3e052bb33",
+    "name": "Shanti Hotel",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1smv7r008gml2i9wdb0u46",
+    "name": "Inca Trail",
+    "category": "adventure",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1rm9e3004xml2i8rxw26bj",
+    "name": "Mosoq Rikchary Spa & Massage",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "449d9b1a-f243-4b65-aa7a-b12d23884aa4",
+    "name": "Pisac Inn",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "02870b35-d7af-4886-9b11-1dcf1cc31001",
+    "name": "Taxi Cusco Vip Ausangate",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tv79p00baml2im95hpobn",
+    "name": "Spa Aromas Ollantay - Boutique",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "015373e1-0e22-4279-b1c4-f91fc9170561",
+    "name": "Pisonay Coffee Roasters",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1tort200amml2ihdh614it",
+    "name": "Coffee Time Ollantaytambo",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "8cedac22-a1c2-4d64-b3bc-9c9265c9cc36",
+    "name": "Las Manos",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "a02e5830-31e4-496b-8b0a-4bf15e37b171",
+    "name": "Taxi urubamba moray-salineras",
+    "category": "transport",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cbc1bd29-dea0-4bc6-817d-c0936820b1fc",
+    "name": "Transporte Urubamba Munakuy tours",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1pi5a80003ml2ip8vyvk2w",
+    "name": "Dolci dolci - Cusco COFFEE - BRUNCH",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tyz4h00bkml2i96rzxep8",
+    "name": "Pumamarka Archaeological Site",
+    "category": "boleto",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "174e1d3d-a59f-4ab6-971d-1200d7f5cb31",
+    "name": "El Encuentro",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h7j2p000mmlqqpn7qzed2",
+    "name": "Andean Wings Valley",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1og6zf000bml1o5b2j9kqy",
+    "name": "Saska Boutique Hotel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1u7odz00cgml2i41t1pzqb",
+    "name": "Merienda Restaurant",
+    "category": "dining",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp208d54000nmlpoylehr85m",
+    "name": "Arkana Spiritual Center",
+    "category": "spiritual",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "044ffbf7-19b2-42bd-87c3-eb5b3ad3a849",
+    "name": "Viva Peru Cafe Bistro",
+    "category": "dining",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1t2sfp009aml2io5asi8ni",
+    "name": "Sulca Textile Museum",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "346e47df-34f3-4c4f-b764-04b5f75617f6",
+    "name": "Mamacocha kitchen",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "c59c3d90-b6ad-43bd-8652-73bfdce05d5b",
+    "name": "Om Asían Restobar",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h6gep000imlqqxhgpe5sh",
+    "name": "AVA Valle Sagrado Spot",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "5729c905-b7de-44ab-b951-3af9e002014f",
+    "name": "Ollantaytambo Restaurant - Pizzería - Craft Beer",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1ofhoz0009ml1oz2yeka6i",
+    "name": "Cooper Hotel Boutique",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tv8yq00bbml2ijhzydbns",
+    "name": "Ada Spa Massages",
+    "category": "wellness",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xhv0032ml2u61jkkuth",
+    "name": "Calca",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1sj5ay0085ml2i4az8kh58",
+    "name": "Rumi Maky Spa Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1tiiu600acml2i3euduxyg",
+    "name": "El Viajero Hostel in Ollantaytambo",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp95cygw000gml4ysruwdtax",
+    "name": "Huayna Picchu Mountain",
+    "category": "Culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp95cowe0009ml4ym8jmjred",
+    "name": "Pisac Archaeological Park",
+    "category": "Culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp95ckja0006ml4yqz2x96wt",
+    "name": "San Pedro Market",
+    "category": "Culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp95cq7t000aml4yfrit37z2",
+    "name": "Centro Textil Chinchero",
+    "category": "Culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp95cn5y0008ml4yczybtmel",
+    "name": "Pisac Artisan Market",
+    "category": "Culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp95cj7z0005ml4yiro1a8nn",
+    "name": "Plaza de Armas",
+    "category": "Culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp95ccn60000ml4y587upxek",
+    "name": "Qorikancha (Temple of the Sun)",
+    "category": "Culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp95cswq000cml4y6g6sgrlr",
+    "name": "Salineras de Maras",
+    "category": "Culture",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp95cx55000fml4yvywfs16e",
+    "name": "Machu Picchu Citadel",
+    "category": "Culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "9474949d-1008-468d-ad13-3b420337fd39",
+    "name": "El Café Feliz",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qfaer002dml2i8hd6ndvs",
+    "name": "Inka Trail Backpacker",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qtqf7001nml5xphlfl8f2",
+    "name": "Rouus Serenity Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1pqelg000sml2iuneajhjf",
+    "name": "Inkilltambo Archaeological Center or Inca Prison",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e5dadc40-9f3c-4523-9cd4-4e106c550bf9",
+    "name": "StarDome",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp2bc82z0003ml8gg2jzelkm",
+    "name": "Waykiss cafe",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qtwbr001pml5xkj477pn1",
+    "name": "Inka Massage Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1sja6g0086ml2i94ui7amz",
+    "name": "Sacred Valley Spa - Massage",
+    "category": "wellness",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1tuojp00b4ml2itzihdamr",
+    "name": "Natural Wellness Therapeutic Massages",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "a079c2fa-7503-4c97-80dd-c11337187217",
+    "name": "Hotel Samanapaq",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1ss52o008xml2in65lodey",
+    "name": "Sky Dome Peru",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xic003aml2u0el9yb6b",
+    "name": "Luxury Dome in the Mountains",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "0d689dec-7bc1-40c3-b189-b9778b667c09",
+    "name": "Sacred Sushi Restocafé",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "d6bd8bdc-2741-437e-8992-63906410ad62",
+    "name": "Exclusive",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "aa3cc48d-e07f-49f0-b5a5-362ada6e9f4f",
+    "name": "Textiles chaska andina",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "dc38b4ad-bab8-4986-9da8-4e674491fe1b",
+    "name": "Machu Picchu Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "331a94ad-e4ab-4b30-ba50-762bd71f6463",
+    "name": "La Feria",
+    "category": "dining",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "bc15f263-6ad6-46e2-80c8-cac661204ac4",
+    "name": "Tikarisun Restaurant buffet",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "99eaa80d-b415-4471-989f-c0bc440c372b",
+    "name": "Masa mamita",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1zyi4z0000mlpoxh47weuk",
+    "name": "Ayahuasca Cusco",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmos3bm6q0000ml27gjjcwgk0",
+    "name": "Alma Sanadora",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "333bb906-b9a6-4fd9-a68e-8224fb5515ed",
+    "name": "Apu Lodge",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1rp9zq0059ml2ilzabzpnh",
+    "name": "Ayahuasca Spiritual Center Cusco",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "95eda889-098f-4b48-bac4-2a8a4ceb184c",
+    "name": "BALCÓN del INKA:Centro de Textilería Artesanal",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xba0002ml2uvvy5mhnp",
+    "name": "Hawa Restaurant",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp2b952n0000ml8gf1swgf47",
+    "name": "OQRE",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cf0efbb3-ed0b-4889-b22e-02fe2d018273",
+    "name": "Timoteo's",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "b8b8c278-559f-418d-800e-544d3b714a97",
+    "name": "Adventure Cusco Tours",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xft0024ml2ufuxvxea9",
+    "name": "Peru Cusco Tours - Cusco Adventure",
+    "category": "transport",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp239xcz000tml2ucspc1cz3",
+    "name": "Adventure Peru Tours",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e60a1c00-3d4b-4953-b8e0-8be3465a539d",
+    "name": "El HornitoRinco Café",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "f7505ff9-4607-4c63-b733-ac3ca8640a44",
+    "name": "Restaurant Qori illari",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1py335001jml2ii8a2way2",
+    "name": "Zen Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1s3pn0006dml2i0w14857y",
+    "name": "Sukha Urubamba Restaurant",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xim003eml2uu1z32oyu",
+    "name": "Inka Trail Experts",
+    "category": "guide",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "9328824e-ee9d-4cf9-a6ed-1126616712cf",
+    "name": "ollantaytambo tours travel",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "2bcefae4-ae74-41a5-9ae5-480486230bab",
+    "name": "Intimo",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "24ada226-f120-4620-8f24-11b24b207cbb",
+    "name": "Horseback Riding In Cusco Gabriel´s Ranch",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a3cbc4d7-ad40-4340-a1eb-1deff4d2c93f",
+    "name": "Munay Sonqo Retreat and Yoga Center",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp4h154t000amlqq8gqocgd9",
+    "name": "Mauka",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "325e6808-5643-4a4a-a85a-2a46e3a3c33d",
+    "name": "Escapate Slow Tourism",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "223cdc85-d7f6-4fff-8c7c-e865660d441c",
+    "name": "Orange Nation Peru Travel Agency - Inca Trail - Lares Trek",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "4eb08f3e-3f50-41a6-82ee-26acf49275de",
+    "name": "Los Bacos",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "f8cc3694-5363-439e-a989-fb380f32c908",
+    "name": "WATYA - Cocina de Territorio",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1tir8l00aeml2idjbibcuw",
+    "name": "Chaska Wasi Hostel",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "024ef7cd-def5-4057-b9f4-e4da62a099d1",
+    "name": "Ollanta Andino Tours",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "8d2e78ce-8304-448a-8ed4-1540ece5e338",
+    "name": "Maria Milanesa",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1s0sg70062ml2i9wll010k",
+    "name": "Via Monte Ecolodge Lucmabamba",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1sfv6b007uml2ic1ui7whl",
+    "name": "Urco Archaeological Site",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "4a548c27-39bd-4e40-8b78-66da4f266abd",
+    "name": "La Paila",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1r9qls0044ml2iiw0l65ea",
+    "name": "Apu Organic Nativo - Pisac Vegan Restaurant",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "5b54628e-607e-43e1-bf44-f4c862e5efb1",
+    "name": "la frontera to eat",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1q4c8i001yml2ik0mqgw55",
+    "name": "Raices Inkas Retreat Center",
+    "category": "stays",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1rlwh9004uml2iojnuox4i",
+    "name": "Munaychas Salon & Spa Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "68f9bcfa-79fc-44ea-99e3-991bf7548693",
+    "name": "Ccapac Inka Ollanta Boutique Hotel",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1u7tno00ciml2if9gmiwrm",
+    "name": "Antawara Restaurant",
+    "category": "dining",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1tiah500aaml2iyhg51gym",
+    "name": "PERU QUECHUAS LODGE OLLANTAYTAMBO",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "aac30580-7485-4153-a95b-f4c59a0e85b5",
+    "name": "Restaurante y Museo Casa de Cuyes",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xel001kml2ugdxc64y6",
+    "name": "Antipode agence de voyages au Pérou",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1t7ezl009sml2iympo3ci6",
+    "name": "Huachuma Wasi",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1ukxpq00dsml2i1g7v51yf",
+    "name": "Shiori Spa Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "01424206-6464-447a-bdb5-b16e3e0506e7",
+    "name": "Su Laurent",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cb2963c7-dda1-4f67-b752-32912d9e1690",
+    "name": "El Sabor",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "fa1458a6-6bd1-4218-8e45-f318b24301d1",
+    "name": "Hotel Pisac Inca Guest House",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp4h7oup000nmlqqrzjvcud8",
+    "name": "Sacred dreams lodge",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1qid7e000oml5xojy7o6de",
+    "name": "Birds Coffe Roasters",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qt9nb001iml5xx89peqpe",
+    "name": "Wonderful Hands Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1r9z520045ml2ivnzlo87i",
+    "name": "ALTAR - Pisac Restaurant",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "142a1c52-0347-46f7-9608-7f9ee403da85",
+    "name": "Peru Treks",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "475fe1c6-dbef-41ee-8c13-5e5d1db37bee",
+    "name": "La Ventanita Café",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1tpw5a00anml2iaqmhtmfl",
+    "name": "Doña Eva Restaurant & Rotisserie",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp4gybp90001mlqq4197cn85",
+    "name": "UNU restaurante Maras",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1tvgcd00bdml2iv7g1f08r",
+    "name": "Vida Spa Massages",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "b3b4a16f-b006-4484-b4a6-d9fed19b8f31",
+    "name": "Parwa Restaurant",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1t0pe80097ml2ij7febdfn",
+    "name": "La Clave Del Sabor 2",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xif003bml2uz5azbuhg",
+    "name": "Sacred Valley Treehouse Retreat",
+    "category": "stays",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp239xgu002lml2ukosabw0b",
+    "name": "La Placita de Písac",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1sjce50087ml2i9w8le7xb",
+    "name": "SUMAQ Health & Beauty Massage - Urubamba",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1rms0m0052ml2iu9kkk05p",
+    "name": "Incas Hands Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1fd62ebf-812e-4e98-9240-ee4d3b7a0da6",
+    "name": "Kawsay Spa & Yoga",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1sjf6u0088ml2idh9gm73q",
+    "name": "Sumaq Maki Massage & Saunas (Sacred Valley Urubamba)",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1sz25w0094ml2imdvwq9f9",
+    "name": "PERUVIAN COFFEE COMMUNITY - CUSCO",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e18200c4-b0dc-481f-9ded-fd9a257e8df4",
+    "name": "AMANTANI Alpaca Knitwear - Middle Street",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "df692be7-5351-4304-8ff1-ed468d52e0c8",
+    "name": "Samadhi",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "0f2673c7-6c3a-4503-b114-e736fed79932",
+    "name": "Ayawasi Healing & Retreats",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "f649db96-3059-4a74-bc04-e6ca08b30f7d",
+    "name": "Gustos Y Sabores Restaurant",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "96fd1ee1-417f-4027-be8d-245e28e7a2f1",
+    "name": "El Zorro de Arriba · Café",
+    "category": "dining",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp239xio003fml2u8pjl8m19",
+    "name": "Sacred Valley Guides",
+    "category": "guide",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1toogx00alml2ilcymld0d",
+    "name": "Emiliano's Café",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1s12r30064ml2i7nvnsena",
+    "name": "MAMA GREEN HOSTAL - Eco Andean Experience and Permaculture Farm - Vegetarian Breakfast",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1obaev0002mllqyrxalqnf",
+    "name": "Gaia House Hostel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qiqjn000sml5xkxtmk9s0",
+    "name": "APUSKI COFFEE SHOP, BREAKFAST & BRUNCH",
+    "category": "dining",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "00a9481c-db88-4425-bed7-a420ccb57e8b",
+    "name": "Camping Equipment El Viajero",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "fa87f4a5-b5f8-4e96-b9f1-83eb95050497",
+    "name": "ATV Rainbow Mountain",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "d84d81a5-a97c-4a76-a6a0-280177dbbdb6",
+    "name": "Luna’s Horses",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xhx0033ml2um2a8zlyp",
+    "name": "Calca cusco",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1sfh2w007qml2ihqly15xu",
+    "name": "Huamanmarka Archaeological Complex",
+    "category": "culture",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "f3dc64d1-2dcd-4899-8043-1af710f11352",
+    "name": "Hacienda del Chalán",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "3fd18c83-dc6a-466f-901e-8f1ecb8953a0",
+    "name": "Healing Tree Center",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "0b4c18dc-6731-45a2-a289-13e3df0c68dd",
+    "name": "Alto",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1puzs8001hml2inmua6by4",
+    "name": "ViveYoga",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xgq002jml2umitfk2au",
+    "name": "Ccaccaccollo Women's Weaving Cooperative",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1rtrql005nml2ile3n8ym2",
+    "name": "Cusco Maras Quad Bike Rentals",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "4c4bcac1-9c98-40bf-b37b-07f35f15821c",
+    "name": "Zoe nails & spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1ss27d008wml2igzqa323r",
+    "name": "Florez de la Villa Collection - Sacred Valley Boutique Hotel",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "67f61fdf-a750-42f3-b58a-817cd16c976d",
+    "name": "Mystic by Prasada",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp20gmxj0014mlpotib6qr07",
+    "name": "Hanan Pacha Ashram Transpersonal",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp4gzn8u0005mlqqcbakod61",
+    "name": "Restaurant Misky Unu Maras",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp4h82tj000omlqqd90vs4gw",
+    "name": "Spirit of the River Lodge",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "31e55367-47f8-4d74-bccb-ba3ce5a56224",
+    "name": "Amazon Trip",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "b7088e84-8288-4bc2-b6c9-56f78594d1c1",
+    "name": "Cusco Local Friend",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "7f43cb56-7517-4a56-bfd2-8a4967c57df8",
+    "name": "Qhaly Kay Centro de bienestar y masajes terapéuticos",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "482d4b49-67d4-450a-9d9f-ca582989b32b",
+    "name": "Psychic Garden Center",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1sro7b008uml2i21of47no",
+    "name": "Casita Huarán",
+    "category": "culture",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1q3tsv001wml2i8k9m9hl5",
+    "name": "WAMAN WELLNESS CENTER",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bk8mn000kml8g0yeqj94c",
+    "name": "Katari at Plaza de Armas Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pudp0001cml2ichweuv64",
+    "name": "Bhakti Yoga School and Ashram",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1rmv590053ml2iwevwf4gx",
+    "name": "Ñustas Wasi Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h8opv000rmlqql7nvkewe",
+    "name": "Refugio Maras",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "ed873999-59d2-4165-873c-b3776a7696cd",
+    "name": "In Magic",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xi40036ml2ueanw1tbe",
+    "name": "Maca café",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1u9w8k00ckml2ii5dhmsyq",
+    "name": "D'llaqta Cafe",
+    "category": "dining",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xe6001dml2u221298dk",
+    "name": "View - Signature Travels",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "20e7029f-01cc-4bc6-9a49-01fe407d6a7c",
+    "name": "Cusco Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "7820c566-f5b3-4f9f-8770-90a7d7b39680",
+    "name": "Taxi Tours",
+    "category": "transport",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xis003hml2u2386ti8t",
+    "name": "Pachamama Massage Therapy",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qj9ry002tml2ia3f7wavb",
+    "name": "Sam's Zipline Cusco",
+    "category": "adventure",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1od75j0004ml1olbg8f5sd",
+    "name": "Inkantari Boutique Hotel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "79ba9b37-fd25-4ad2-a258-e125c6861b7a",
+    "name": "Eco Tour",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xg00027ml2uxnt4syb5",
+    "name": "Eco Tour Machu Picchu",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a317b593-7908-4165-8e51-90083702303c",
+    "name": "Peru VIP Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oay640001mllq8webk789",
+    "name": "Auquis Hostel",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "dc1c8bdf-1474-4aa0-a1ba-de71e4286423",
+    "name": "Inti Sun Trek Peru Tour Operator",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sbpzx007bml2ik8gt3znw",
+    "name": "La Maison Samaï - The Gallery",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1qtdnp001jml5x3pd1pm80",
+    "name": "Yaku SPA",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "75a14004-15cd-49e2-944f-992bd205fe74",
+    "name": "Tumi Del Inka craft beer & peruvian cuisine",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1pur1z001fml2ibgf973mv",
+    "name": "Exhala Yoga",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xij003dml2um8nwi3y8",
+    "name": "Rustic Alpaca Farm Stay",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "ca592750-fca7-40a0-a55a-0a494b8ecc9e",
+    "name": "Del Campo Mercado",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "bd11d250-feb1-4c7e-8678-89bce7d9e0ec",
+    "name": "Samay Salón & Spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1pkb8s0007ml2ix1hol00j",
+    "name": "Museum of the Monastery of Santa Catalina De Siena",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "53e225ea-a0ee-4a91-8111-c20b9f002f92",
+    "name": "Cusco Travel Agency",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "f0dda427-2e5d-40f5-b1d7-1045da437a9e",
+    "name": "Taco & Rock",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "25c7afdd-29d5-448e-9285-6ac7e38d5a5e",
+    "name": "Travel to Machu Picchu Cusco & Perú - Andean Top Expeditions.",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "91c32185-59f1-47dc-b868-8500e2f36825",
+    "name": "Ñusta Restobar",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xgk002gml2ujbybu33q",
+    "name": "Feria Artesanal De Productores El Marquez San Francisco",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1u2h2500c0ml2ih0dyymz4",
+    "name": "Hotel Chinchero Boutique & Tours",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "acf93ea5-c3a2-4a4f-89cd-a26eba3c3bd2",
+    "name": "La Case Cafe",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h25o9000dmlqq5isyoqiu",
+    "name": "ANCESTRAL - MARAS",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xen001lml2up8rxoqgp",
+    "name": "Machu Picchu Tours Cusco | Luxury Travel and Trips in Peru",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1puvkt001gml2isndgcckd",
+    "name": "Alma Vibra - Yoga Studio",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1thzmx00a8ml2i97ps6sa8",
+    "name": "Ayllu B&B Ollantaytambo",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "c3852103-560e-4b0f-bc18-ce6da5715c41",
+    "name": "Ayra Hotel Boutique",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xef001hml2u0376pklq",
+    "name": "Private Tours Machupichu",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "f9e04239-b35f-4876-b18c-a74f9805e32c",
+    "name": "Cocina Turca",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp239xew001pml2uorud0u7u",
+    "name": "Amazonas Explorer",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "6139f429-edfd-4297-a458-441764a2f42d",
+    "name": "Peru Travel Specialist",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qu5cj001rml5xyi60d2pu",
+    "name": "Eden Spa Massage MachuPicchu",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qtk6z001lml5xtrh2tr64",
+    "name": "Organic Spa Machupicchu",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1q4voa0020ml2id3y9pdy4",
+    "name": "El Verde Retreat Space – Sacred Valley",
+    "category": "spiritual",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "a6804ccf-0f2c-4381-8f9d-d985f31a7f9b",
+    "name": "Andean Experiences - Horseback Riding",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1r6y61003xml2id0lxafdf",
+    "name": "Big Vacation Peru",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "3c9902d8-e141-4813-ac2e-579c06c86d37",
+    "name": "Machu Picchu Amazon",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "e2e883bd-534f-49e2-a96b-31186fa97955",
+    "name": "The Tranquility Hotel",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ssvxe0091ml2igboeh1fx",
+    "name": "CasaRaíz The Handmade Hotel",
+    "category": "stays",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "4662cd1c-2051-4db2-9407-2ccc702c7971",
+    "name": "Chacras Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "3f6d459f-bdb6-4475-b04c-efb96004818f",
+    "name": "Miski Samay Domo Boutique",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xf7001uml2ua5ny1nhw",
+    "name": "Machu Travel Peru | Luxury travel agency US",
+    "category": "adventure",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1ujnbw00djml2i255lz2cv",
+    "name": "Dema Spa Therapeutic Massage Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xed001gml2uz9soaatl",
+    "name": "MACHU TRAVEL PERU",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1s1lds0068ml2izlpbc9py",
+    "name": "EColodge Ccatan",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xeu001oml2u6711m4sy",
+    "name": "Gurú Verde - Raw Vegan Desserts",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1s5n0l006kml2i7vpfga8c",
+    "name": "Esencia - Boutique Cafe",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h6mgm000jmlqq0mf4g0y4",
+    "name": "Hotel Pisonay Pueblo",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "dcb51719-89d8-4937-8065-c9219b9c1d82",
+    "name": "Magic Experiences",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "b1a92544-37a5-4337-89ce-8f2d26adeb4f",
+    "name": "Peru Summit Adventures",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ta4fx009wml2i5izg7hp4",
+    "name": "Magic Hikes",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1smkym008eml2itoepn8om",
+    "name": "Vertigo Sacred Valley",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1uk7k800doml2iwwfj0pgs",
+    "name": "Semka Spa - Massage Cusco",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "7c7e21a5-0cb9-4163-93fc-95ac9a4d5fe1",
+    "name": "Inca Experience",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1t2z5g009cml2iq1al8uat",
+    "name": "augusta.espacio",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qagfe0005ml5xdlftkmvk",
+    "name": "Machu Picchu EcoLodge & Restaurant",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "7964a40e-16f1-4e44-8da2-d41ee8689ba3",
+    "name": "Spiritual Tours Cusco & Sacred Valley – Peru Alive",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "d01c1841-5d04-4dc3-a206-42a270dcf5d3",
+    "name": "Bar Restaurant Templo Del Sol",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "498505be-18fd-4a2b-9aa2-5a4946a48b7f",
+    "name": "Marisa café",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp4h0sag0008mlqqi53oj07e",
+    "name": "RESTAURANTE MAMA MECHA",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "2b60e5e6-0e59-4fc3-816e-b2054b7d9afd",
+    "name": "Memorable Sacred Experience",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1r7v5b0041ml2ikshzjiiq",
+    "name": "Allpawasi Pisac Country House",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "b56fc758-8a78-4e09-b6d7-a70ef3793983",
+    "name": "Horseback Riding",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xf9001vml2uhhql1i2m",
+    "name": "Horseback Riding Tours Cusco",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "aeb2ca85-b526-4c35-af91-ad40cb04997f",
+    "name": "Saphi Kuna Retreat and Yoga Center",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "8f2f473c-b1dc-4ab7-a6c3-7e484001d97a",
+    "name": "Peru Spirit Adventure",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "48e5da7c-4e7a-4a38-ab4e-519e9dfb0681",
+    "name": "Ollantaytambo explorer",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1s0o0q0061ml2ikvnsr9hh",
+    "name": "Starlodge Adventure Suites",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp4habl5000smlqqhml3oepn",
+    "name": "Massages Inka Wellness",
+    "category": "wellness",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1qxekh001zml5xxw0h7ljw",
+    "name": "Quad Bike Peru - ATV Tours",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "dc7f2729-4829-4349-9e7c-9b50dd697604",
+    "name": "Saqra’s Cafe-Bar",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1u7qva00chml2iy9ko8hom",
+    "name": "Muya 27 Restaurant",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1u0pxs00bsml2i7scvp71x",
+    "name": "Sacred Valley ATV Adventures",
+    "category": "agency",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1upn0t00e6ml2iwlwdned4",
+    "name": "ATV Tours Cusco | ATV Cusco Adventure",
+    "category": "agency",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "ca905e7f-59e8-4250-bb5c-40c50590156b",
+    "name": "Santu Tour Operador – Sacred Valley & Machu Picchu Tours",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp207bk3000lmlpos6e9yv02",
+    "name": "Sapan Inka Ayahuasca Retreat Center",
+    "category": "spiritual",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cddda2fd-f67f-4343-ba3b-09b6fbcf269f",
+    "name": "Tejidos Andinos Kallpa",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1shgld0084ml2isvka06ds",
+    "name": "The Yoga Home",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "a5a34190-13ce-4e3c-b38a-4ea409b05b45",
+    "name": "Qosqo Pacha Free Walking Tour",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1u48mu00c3ml2ij0srsu20",
+    "name": "The Sleepy Mouse Hostel",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sz7650095ml2ikt52f7j0",
+    "name": "PARAD3RO",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp239xe0001aml2urydybhoo",
+    "name": "Tantraya | Ayahuasca Retreats",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "f0e6d8f0-3e94-459f-831b-d8edcc375b06",
+    "name": "La Canelita",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1q4hmj001zml2i9yw7ruvi",
+    "name": "Ayaterra Center | Ayahuasca | San Pedro Healing Retreats",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rjmkc004rml2ii6ha66m0",
+    "name": "Yoga Mandala Sacred Valley",
+    "category": "wellness",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1of1p80008ml1o5s2px70i",
+    "name": "Cusco Lodge Hotel Boutique",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ujvdd00dlml2i8dfxjrli",
+    "name": "Aluna Beauty Spa & Massage Cusco",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ti2eg00a9ml2i2z9qdavu",
+    "name": "Hotel Kiswar Lodge Ollantaytambo",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "d651facd-e16b-4773-902d-4d0f6c8e8952",
+    "name": "Proceso Specialty Coffee",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "303dcd98-4738-4022-9c3b-a842b3eed691",
+    "name": "Florencio casa hacienda",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "9a6e77ad-f47c-491f-9ffb-4d0048ace3dd",
+    "name": "Las Arrieras . Frontierlab - Horseback Riding - Cabalgatas & Unique Expeditions",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1pun2h001eml2imd32t6w8",
+    "name": "Saqina - Andean Wisdom & Yoga Studio",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1srwkp008vml2imhdh7c4d",
+    "name": "Sierra Sacred Valley",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "06768a20-a611-4c38-b0f4-81d386f3c43b",
+    "name": "Taxi URUBAMBA MAVITOURS",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "11cb63b7-19fd-43dd-92c5-22961469bcb7",
+    "name": "Alternative Bike",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "3aa8be12-f35c-4e0b-a86a-0bf6aaea13f9",
+    "name": "South Adventure Peru Tours",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "63f2dcee-bf62-487a-9918-d170be894b27",
+    "name": "Lya spa express",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "dabaec53-4738-4fe0-9e59-d37033492675",
+    "name": "Servicio de taxi",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xh1002oml2utl9h5k3g",
+    "name": "Cafe Organico",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xdv0018ml2ussxl247q",
+    "name": "Servicio de taxi urubamba - valle sagrado",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1r59zf003vml2i9otmtt56",
+    "name": "Hotel Inka Pisac",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cc60da5a-db7c-4fa7-9550-c09acff2f89c",
+    "name": "Pie Experiences",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1r1t0b003pml2itvv4ajac",
+    "name": "Spa Bamboo Machupicchu Cusco",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1qhf4n002jml2i3i1dgeji",
+    "name": "ATV Quad Bike Cusco (Base)",
+    "category": "agency",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1qedd40027ml2imh8hn50q",
+    "name": "Inca Trail Trekking Company",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "6870f345-f220-4dc7-bb6f-fa5ef2d9ed8b",
+    "name": "Sacred Expeditions Perú – Agencia de Viajes en",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xdx0019ml2uvqa2dpqy",
+    "name": "Shambhala. event venue. yoga. music & events",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "6378f1a2-6152-49ff-8569-0591be78610f",
+    "name": "Michi Hampi Medicine Community - Ayahuasca Retreat",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "f00d8498-b524-4fb2-b68c-37bbc9f40a09",
+    "name": "Yuri Taxi",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "49f83e5f-e74e-4cd5-85db-342c8c2547bc",
+    "name": "Inka Food",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1s9ajk006sml2ihma7lg3b",
+    "name": "Puca Marka Site Museum (Scotiabank)",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "afe1ed54-e0e0-4edb-9f50-2c3c6963f41d",
+    "name": "Sacred Loom",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1tv2t100b9ml2i14s3yrpv",
+    "name": "Kusy Ccoyllor Spa and Massage",
+    "category": "wellness",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "a05a688e-e7a8-4a00-9994-acde0949c97d",
+    "name": "The Combi Brewbar Coffee",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "5a08b4a1-e9f3-4200-87e4-e045b5089f25",
+    "name": "Casa Holística Retreat & Wellness Center by Amanda Heals",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1rhz4h004nml2ivhq0gn4k",
+    "name": "Carcajadas Cultural Educational Center",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1udas500cvml2i5x2h3kmp",
+    "name": "Quechua Traces",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xd5000wml2uwwbqbind",
+    "name": "las Aventuras con kizza",
+    "category": "adventure",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "174850f9-6e46-4780-bee6-9f571c8c3d9c",
+    "name": "Rumi Lodge",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "e0b75314-58a6-4c8c-a708-9a9a32311f48",
+    "name": "Taxi machupicchu",
+    "category": "transport",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1ruxv8005rml2ikdipnmtl",
+    "name": "River Explorers Peru - Tours and Adventures",
+    "category": "adventure",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "877348b7-cebf-44c7-8f21-dcdc70b91afa",
+    "name": "Maras Moray Tours",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a1fd7f3c-8702-4fc3-9a5b-d4501adee2c4",
+    "name": "Yana Alpaca Boutique",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xgx002mml2uvgksren8",
+    "name": "Las Margaritas Picantería Tradicional",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "f46f51f2-b628-4d7c-aebe-0dabdb80cd69",
+    "name": "Agencia De Viajes A Peru Machupicchu Eco Tours",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "87188d05-0eaa-47ef-bd74-964539850e70",
+    "name": "Centro Holístico Qosqo Mantra",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1rx0cp005vml2ivws6lm1v",
+    "name": "Kutimuy Lodge",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1uk3at00dnml2i8i7m20g2",
+    "name": "Cala Spa Cusco",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1puid8001dml2izbkbo4qj",
+    "name": "Allin Yoga - Body, Breath, and Consciousness",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1qf23y002cml2i4o7mern2",
+    "name": "Inca Trail Specialist",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1eac4f2b-bcb3-4424-ab6e-2b8ada5196bf",
+    "name": "E3 Center",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xdl0013ml2uu20qkypz",
+    "name": "Explorandes",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "202f59f0-47a1-402e-831f-a9bf71270ce8",
+    "name": "Inca Highlands",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "4eeabe1b-7f34-4dc3-a44b-adcff33b515a",
+    "name": "Q'ente Salon & Spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1qt4f3001hml5xe2lzdbqu",
+    "name": "Cori Maky Spa",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1ra5eh0046ml2ivkca0j8l",
+    "name": "Lili’s Restaurant Pisac",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1pm0870009ml2ifjdc6szc",
+    "name": "Totemiq|Art Gallery Workshop in",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ofn8j000bmllqdm7c1tz7",
+    "name": "Pedregal Ecolodge",
+    "category": "stays",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1pu4i20019ml2ixbh2q6z0",
+    "name": "YogaWasi",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "bd6ba8ab-94da-4d1a-bad6-8c98dad4cc39",
+    "name": "Peru Shamans personalized healing center",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "ea734859-4036-42b4-83b2-5407f7a62fe7",
+    "name": "agencia urubamba urutravel",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "c246cd43-975e-4a3e-bc35-0c7a76d87ac5",
+    "name": "Nature Travel",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a111d893-f91e-4555-8b9e-ba3f8896989e",
+    "name": "Café del inka traín stop",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "1a0d6b3f-0f2a-4247-b567-9f31e424696e",
+    "name": "Mundo Alpaca",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "3873775b-c71f-4c1a-84bb-a5d74888fa73",
+    "name": "Thani Ayahuasca Retreat",
+    "category": "spiritual",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "f2ee8b24-b3df-41ec-b689-330a228bfaee",
+    "name": "Q'ueuñas Restauran Pumamarka Ruins",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xh3002pml2u1m6skewk",
+    "name": "SANTU CAFÉ",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "70f8292b-fd91-4c71-a6fc-08a389354185",
+    "name": "ATV Top Andean Travel",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "47d5481a-2835-46e2-834c-33810710ac5f",
+    "name": "Etno Alpaca",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1unswq00e0ml2ipkdc8q34",
+    "name": "Inca Trail Chinchero - Urquillos",
+    "category": "boleto",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1sn0mo008iml2imm2v5cq8",
+    "name": "Queroqancha Archaeological Site",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1u434w00c2ml2ixqrsh6cr",
+    "name": "Cusco Dorms – Budget Hostel in Cusco",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "f0d353dc-4ea1-4512-88e5-6523430f791a",
+    "name": "Ganesha Wasi",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qsscu001fml5xugn9uubf",
+    "name": "Sacred Rocks SPA Massages",
+    "category": "wellness",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp1p1fyf0016mllqso3za09l",
+    "name": "Cusco Art Gallery",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp201nhg0008mlpolasufkay",
+    "name": "Holistic Energy Healing",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1tr1by00aqml2i8fb37lnq",
+    "name": "FINE ART Cusco - Studio Gallery - Jaime Ataucusi",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "4999b0ca-8698-43af-bcdd-9a11a995d9de",
+    "name": "Centro textil Inkari",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp203k6j000cmlpo1nshzm72",
+    "name": "Ayankuraka",
+    "category": "spiritual",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1qh9u1002iml2i88285o40",
+    "name": "Cusco Peru Quad Bike",
+    "category": "agency",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "a192dada-3420-4dcc-ab26-4e9aaac3debd",
+    "name": "La Rosa Wellness Lodge",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1u4dfe00c4ml2i94tnyekx",
+    "name": "Hotel Inka House Chinchero",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "88cf6d0a-e467-4d49-9249-04bcbb0f6059",
+    "name": "Taxi urubamba discovery",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "78c8c5bc-be1e-4b39-9881-f65796bef004",
+    "name": "Apu Kuntur Alpaca - Calle Heladeros",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4h8bbq000pmlqq45c2b7gr",
+    "name": "Casa Takiy",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "fc3e1849-3781-435d-8d31-20ca4740633a",
+    "name": "Peru Private Tours",
+    "category": "agency",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1qfjis002eml2if99w8fgs",
+    "name": "Peru Hike",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp20dh5j000ymlpomdbdsa2c",
+    "name": "Seiya Solar",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "76d7f918-b458-483c-8199-d302fbcfe6b5",
+    "name": "Anaya Horseback Riding",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "60c6493e-24be-45a3-9554-395be7c26ffc",
+    "name": "Cusco Private Transport",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "fd1c46fe-a33d-4449-9db5-878327c9b6ce",
+    "name": "Condor Wings Travel",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "14aedfa0-4fea-4d09-a0a5-6fe573db2ce8",
+    "name": "Picanteria Tradicional \"El Mirador\"",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "72298b47-a251-432e-b008-ed09f28a4514",
+    "name": "Tours Cusqueño Informales",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ogfi2000dmllqgofuj9u9",
+    "name": "Ecoterra Inka Lodge",
+    "category": "stays",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "cmp239xia0039ml2uf0pdtxw8",
+    "name": "La Principal",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "d1e18e53-ce97-422c-bfa3-dd4c39d75430",
+    "name": "Valley Deli",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "461b5697-d61c-4ec3-a256-cc9fe3b90874",
+    "name": "Meditation Retreat",
+    "category": "agency",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1sb5j90074ml2i5vx7xtai",
+    "name": "VIGIL GONZALES",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xep001mml2ukwda0rz3",
+    "name": "Andean Culture - Tours a Machu Picchu",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1q41i3001xml2i6qssa0se",
+    "name": "Pachānanda Retreat Center",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1oyat20010mllqzvg48fon",
+    "name": "ISKAY, Art Boutique, Chacón Huari",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "270c7552-753e-4a6a-97fe-1eccd57b07c3",
+    "name": "Agencia de Ecoturismo Eco Peru Tours E.I.R.L",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "52dcc6fa-8e28-4165-865e-bfd03e6485c9",
+    "name": "Alpaca Wool",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "a7b6ea44-c430-4eac-b0fc-165fba773c94",
+    "name": "🌄 Árbol de la Vida - 𝗜𝗻𝘁𝗲𝗴𝗿𝗮𝘁𝗶𝘃𝗲 𝗪𝗲𝗹𝗹𝗻𝗲𝘀𝘀",
+    "category": "wellness",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "f7551b71-b1ef-4558-8d59-c35a3e85955f",
+    "name": "Museo y Taller de Plata Illapu",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "28446c2a-5edd-4a6c-8c70-8abda1bd90cc",
+    "name": "Rainbow Spirit Shop",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp2088gs000mmlposlz2r13u",
+    "name": "Seven Retreats",
+    "category": "spiritual",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1pu7wq001aml2iotrmr6c9",
+    "name": "GabYoga flow",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "c7fa33d0-404a-46c0-8f40-78d49975dda4",
+    "name": "Tupay Andean Textile Center",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "a1c12b76-63db-417d-a789-d0c482ec375b",
+    "name": "Textiles Tikary Chaska",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "b6594def-106f-4f18-8fe6-6d2cbd33ace6",
+    "name": "Casa Eva Hotel Boutique",
+    "category": "stays",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "6ef4631d-e6e1-4f3a-8c25-882d0a581a10",
+    "name": "La Pecosa",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xgz002nml2uda0ti5jt",
+    "name": "Inka Llaqta Restaurant Picanteria Tradicional",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1timxx00adml2i6w6sg8vl",
+    "name": "Raymi Hostel",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xco000oml2up4xj4hbi",
+    "name": "Colectivos to Cusco",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xfr0023ml2uht32gq4l",
+    "name": "Private Tour Guide Cusco - Cusco Private Tours - Machu Picchu tour guides",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ptr6c0016ml2iety135ce",
+    "name": "Sowing Seeds with Yoga",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "e2cf9816-244c-466f-bed1-989da6164bca",
+    "name": "Andes Peru Tour and Adventure",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1s1i1d0067ml2ir6qj7678",
+    "name": "Urubamba Cabins Ecolodge",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "bfcc4f08-b7af-4fbb-a875-be22e6a4a841",
+    "name": "Sacred Valley Bike Tours",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "18535dd9-e632-4d61-bec5-05615ada6b62",
+    "name": "Rutas Huallata",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1sa0330070ml2ishiby8is",
+    "name": "Chicheria YOLA - Chicha Museum and Salt Museum",
+    "category": "culture",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "214559c6-e5a8-4f98-a42c-ae0b497f233e",
+    "name": "Karinawasi",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "2d485f22-4d46-44ff-854d-29490b85f05b",
+    "name": "Perú Mountain Life.S.A.C. - Base",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "348175e3-92ad-4116-bd20-c01a5c4be0d4",
+    "name": "Luxury Peru Expeditions",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "b5e118d7-a23c-4489-a7d5-c99faa8f8aea",
+    "name": "Juma Inka Tours",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "2a1649ed-fd73-468b-a1cc-fc73f6b3dd15",
+    "name": "Retreat Center SamanaWasi",
+    "category": "stays",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "690786fe-9009-4e60-9fea-767ef59fbe36",
+    "name": "Peru Eco Expeditions",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sz9an0096ml2ir3etueuo",
+    "name": "Sawasiray Cafe",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "af0b5be2-a83d-4ab7-aa57-c21ec9600d7b",
+    "name": "Picanteria Tradicional Cusco Picante",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp2bhaii000iml8glbp6bbt1",
+    "name": "Picanteria Cusco Picante",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xdt0017ml2u0nbqdlx6",
+    "name": "Taxi Sacred Valley",
+    "category": "transport",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1t3ilv009kml2if0x1xyol",
+    "name": "Coanqui Art Museum & Gallery",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "f61fcb7f-a5c5-4353-bf7c-c9e761e27fc7",
+    "name": "Ausangate Trek",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "32bff901-17ed-42b4-bc32-c49a6cccd2db",
+    "name": "Bull House Tour Operator",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "b0ab16db-f01c-45fd-80b1-4888aa78f78a",
+    "name": "Sagrado Masaje",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1twczo00bfml2iiiw4jfo7",
+    "name": "Retreat Center Peru - Mystic Travel",
+    "category": "spiritual",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1tv0ps00b8ml2iy1f5tziw",
+    "name": "Inca Massage Spa",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xg20028ml2utdi4dahb",
+    "name": "Treks in Cusco",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "35907668-915d-4fed-87f5-47b27be1afc1",
+    "name": "Ortiz Adventure",
+    "category": "adventure",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cae4840a-ee11-4999-91c4-c165ae9c56e7",
+    "name": "Taxi Urubamba kusikuy",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1rn8e50056ml2imm5hja0j",
+    "name": "Here & Now",
+    "category": "wellness",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xdg0011ml2u5w5apxru",
+    "name": "Reverie Wellness Center",
+    "category": "wellness",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp1qj2lk002rml2ioj2obmus",
+    "name": "Cusco ZipLine Base",
+    "category": "agency",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1qflo3002fml2i8hngxg0h",
+    "name": "Cusco Andean Hike - Official Inca Trail Tour Operator",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "9f2e44a3-dc24-4ebd-8c52-d9a1ec71b226",
+    "name": "Centro artesanal - textil munaypata intiqhawarina",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1s9s03006xml2ieyt7xt4w",
+    "name": "Fundamentos Museum",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "339e2e31-06c7-41db-be28-943bb11992f3",
+    "name": "Apu Viktoria Tour Путешествия и Туры",
+    "category": "agency",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "af83773a-e9af-4c03-8a00-8ac30ed8d532",
+    "name": "Artesanias awac ayllu",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "a1a6f4f7-310d-4257-ad86-8788b19bf663",
+    "name": "Andean Local Guides",
+    "category": "agency",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "f223c986-58d9-4481-bfd5-4486cb81012c",
+    "name": "Peru Hiking Tours",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "8f70c56a-fa65-4128-a2b6-58f955e05eb8",
+    "name": "Aypa Spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "f2c3be2d-3c68-409a-9820-70ad5cb22e23",
+    "name": "Taxi ollantaytambo kuyay tours",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1s9or4006wml2i3d1g23vb",
+    "name": "Paccha Museum",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4h0mkj0007mlqqdkl0swab",
+    "name": "Sal de Maras",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "f80f0e15-eafe-46d2-9577-1c832f244497",
+    "name": "Puma Path",
+    "category": "adventure",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1qv9qx001uml5x34vxchj1",
+    "name": "Colors from Peru Handicrafts",
+    "category": "textiles",
+    "locationSlug": "machu-picchu"
+  },
+  {
+    "id": "6e2bd0f6-1514-4617-8e93-3f8c916b320c",
+    "name": "Sacred Valley Mountain Bike",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xg7002aml2uovegmgs5",
+    "name": "Artisan Textiles and Embroideries",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "6c1bc8c8-bcce-4b7e-8050-c0594a6f615c",
+    "name": "La Urqueñita Picanteria Exclusivo",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "5cc75a3a-644b-4f0a-a7fa-61668854d6ef",
+    "name": "Picanteria la Chomba Calqueña",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1sdnud007kml2ijx3wkwe1",
+    "name": "Yanahuara Plaza Convention Center",
+    "category": "culture",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "403c6517-d3a1-4c37-b386-05af7b291c99",
+    "name": "Picanteria Tradicional \" La Gata\".",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rme00004yml2ij9p4emdn",
+    "name": "Munexa Spa Cusco - Massage & Spa",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp20dcdx000xmlpoyp33ljbb",
+    "name": "AYNI Sanctuary",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cc05da67-819d-4ebb-be1d-ac0bf00e370c",
+    "name": "Killa Artesanias",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "1d8dec66-326b-47f1-84b5-10db89717b4a",
+    "name": "Unu samay spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xdr0016ml2urnma4d90",
+    "name": "Servicio de taxi urubamba",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "9f383028-7679-449f-a090-7e16abf196a8",
+    "name": "The Luxury Peru Travel Company",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xfk0020ml2uvgyna2yj",
+    "name": "LUXURY EXPEDITIONS & TRAVEL- PERU",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp201k6s0007mlpotfin1aw1",
+    "name": "The Healing House of Incas Cusco",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "d293aab0-5d8a-4a83-8d6b-13d24937110a",
+    "name": "Perú mountain bike Cusco Maras & Moray - Sacred Valley - Ausangate Rainbow mountain - XC - Downhill and Enduro",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pmjjw000fml2ik4ennhox",
+    "name": "Chauca Art Gallery",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xdn0014ml2ussspepmo",
+    "name": "Travel Free Cusco – Cusco Travel Agency - Machu Picchu Tours & Sacred Valley Tours",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "1959ec50-5d88-4a14-810f-4868e4e7659a",
+    "name": "Apupacha Ranch",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp1sm2i60089ml2i71cpaxf0",
+    "name": "Llama Trekking",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "936e2c48-2df1-4ab1-bd51-a15675a7dee1",
+    "name": "Centro Textil Chinchero Manos Andinas",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xde0010ml2u0lh0tmkb",
+    "name": "SOULAB Creative Healing Center",
+    "category": "wellness",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "50d418b9-bdf2-4648-8824-21fef2720a94",
+    "name": "Cafetería \"Mountain Coffee\" . Cafés, postres, Comida vegetariana",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "5659dd58-5fe3-4f51-b54e-b031f5ace538",
+    "name": "Inkas Luxury",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "28d8000e-1b30-46d3-978f-93ba7a40fe27",
+    "name": "Agencia de Viajes Machupicchu Luxury",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "9ffb2eb9-4795-42e8-8361-98a41ac686d7",
+    "name": "Pucara lodge",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xi10035ml2u0drlzxze",
+    "name": "Valleinca",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp239xfc001wml2u86xb63kt",
+    "name": "Toursmerma horsesback riding in cusco",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xfn0021ml2ugkwkcwtt",
+    "name": "Luxury Cusco Tours | Agencia de Viajes en Peru | Tours para Machupicchu",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xfp0022ml2u5zldf8t0",
+    "name": "Peru Luxury Travel",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ufhjo00d5ml2ive8ebrny",
+    "name": "K'intu Cultural Interpretation Center",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp4hc7st000ymlqq7ls46hug",
+    "name": "KillaWaki Restaurante",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xce000jml2ubmuxbs9s",
+    "name": "UNNO SPA Valle Sagrado",
+    "category": "wellness",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "37c1ebff-a781-46c2-ba05-0fa5ffca1343",
+    "name": "Rumiwasi Inn",
+    "category": "stays",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "35faf6c2-19bc-427a-8654-712f55aa638c",
+    "name": "sacred valley taxi",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xh5002qml2u825i7knr",
+    "name": "Ayahuasca arte cafe",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ucyfu00crml2i05mry52q",
+    "name": "Cyrus Gallery Art",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xd8000xml2u01k0apny",
+    "name": "Centro Textil \"WIÑAY AWAQ\"",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp4h66i7000hmlqq5scz01nr",
+    "name": "NUNA - Andean Luxury Villas & Cottages",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xbp0008ml2u0vlcphvy",
+    "name": "Willka Maki Sacred Expeditions",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xht0031ml2u45nry1j4",
+    "name": "Perú Vida",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1u7ffb00cfml2ims8c8h5t",
+    "name": "Kukuli Restaurant",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1rdky7004cml2i5pq8pqla",
+    "name": "RAIZ ANDINA RESTAURANT",
+    "category": "dining",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1u6ejn00c7ml2ihgdui8p5",
+    "name": "Burgers ALVA",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1zze5c0002mlpo3pmvw9wf",
+    "name": "Travel and Healing",
+    "category": "spiritual",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xfw0025ml2u8snnrdox",
+    "name": "Manu Tours",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sba9m0076ml2i8z157bsc",
+    "name": "Tater Vera Ceramics",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "a73a7a70-c5f7-4c8e-b5e4-8197d8876746",
+    "name": "Picanteria Tradicional La Ch'aska Rabona",
+    "category": "dining",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "668b5500-dc40-4cdf-b855-cb067e97ca4d",
+    "name": "Ocampo Café & Cacao",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "0e94e443-f10c-4363-990b-11a7e8897e3a",
+    "name": "Kintu Masajes y Bienestar",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "e8c13268-e849-49de-a4fc-e8e296259859",
+    "name": "Textiles Qeuña",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1og3cc000cmllql40yhcch",
+    "name": "Ecolucerna Lodge",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp4hby9w000xmlqq7fb6w8fl",
+    "name": "Quinta Restaurant Caporal",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "709db23b-f268-4555-8fe1-cb14e5417036",
+    "name": "Warmi's Restaurant",
+    "category": "dining",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1uflw800d6ml2iyodxqo0b",
+    "name": "Chinchero Cultural Experience House of the Chullo",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp1u790p00cdml2iwm2k8xmm",
+    "name": "KAIPY",
+    "category": "dining",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xgb002cml2u0e0l9jjy",
+    "name": "Wiñay Alpaca Cusco",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sd8ab007fml2idpb69a64",
+    "name": "La Valija",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xgm002hml2upytdt2zq",
+    "name": "Central Market",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1s9d0w006tml2iuoz4vk1y",
+    "name": "Takinuna",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1shc740083ml2i4m6xkxj3",
+    "name": "Yoga in Yucay",
+    "category": "wellness",
+    "locationSlug": "yucay"
+  },
+  {
+    "id": "cmp239xfe001xml2uadf1qhy1",
+    "name": "Luxury Express Peru",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1pobat000kml2i2y89h17c",
+    "name": "San Blas Cultural House",
+    "category": "stays",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ts9xe00awml2irfrtxzbv",
+    "name": "Ollantaytambo Adventure Center",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "b8fdaf41-d95a-47c8-adc3-211c09d91a38",
+    "name": "Taller de tejido Q'aytu",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "e8d2c2c4-248e-4d43-a7fa-a568d6a271cd",
+    "name": "Muju Café",
+    "category": "dining",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1u4va500c5ml2ie6z4ie1y",
+    "name": "Eco Lodge Laguna Piuray",
+    "category": "stays",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "6e515551-3107-4031-8174-1afb15ce4c9d",
+    "name": "Paqari Wasi",
+    "category": "wellness",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xck000mml2u1gcy58dj",
+    "name": "Gv travel agency",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1tol3j00akml2iyiuo9w8q",
+    "name": "COFFEE ESSENCE by sofia",
+    "category": "dining",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1t33gp009eml2i5kzij6du",
+    "name": "Antarki - Art and Sublimation",
+    "category": "culture",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp239xfy0026ml2uax9eob8l",
+    "name": "Sacred Valley Experiences",
+    "category": "adventure",
+    "locationSlug": "maras"
+  },
+  {
+    "id": "cmp4hcce5000zmlqqacreey6u",
+    "name": "Mantay Restaurant",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xfg001yml2u123mhznq",
+    "name": "Machu Picchu Luxury Tours",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xdp0015ml2u0qe7rh0b",
+    "name": "Sacred Valley Adventures",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sb8530075ml2i7thohsr1",
+    "name": "Jade Rivera",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "ce1c61fe-12c9-41b2-a388-407ff2b10930",
+    "name": "Artesanías Huamanpita",
+    "category": "textiles",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "5986e1c3-003f-40de-b56b-1a379f5150c1",
+    "name": "Amara Del Valle",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xcr000pml2uhqn4oc6e",
+    "name": "Epic trails cusco expeditions",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xbf0004ml2u1prm11r9",
+    "name": "Perú sipas travel",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1udkyq00czml2ikn8kgbcz",
+    "name": "Art Gallery Virgin of Guadalupe",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "82a3794a-d392-4a31-85db-49bf14d0ff72",
+    "name": "Centro Textil \"LLICLLA\"",
+    "category": "textiles",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "3041ef7d-8473-4869-95e8-fb7497c96041",
+    "name": "Alpacas Rural",
+    "category": "textiles",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ud7kl00cuml2i46617i1c",
+    "name": "ÑAUPA Jewelry",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xbn0007ml2uy1d506zd",
+    "name": "Qhapaq Ñan Tours Transporte y Turismo",
+    "category": "transport",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1udrbc00d1ml2i7ye9pxkw",
+    "name": "Chincherino Gallery and Workshop",
+    "category": "culture",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp239xgs002kml2u334efupy",
+    "name": "Mural Cooperativa Artesanal Originarios Ollantaytambo",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1u73mv00cbml2i3szv8aab",
+    "name": "Brosteria Kion Restaurant",
+    "category": "dining",
+    "locationSlug": "chinchero"
+  },
+  {
+    "id": "cmp4h8j4m000qmlqqiyjqoccd",
+    "name": "Hotel Villa Maras",
+    "category": "stays",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1tuwgy00b6ml2ia2zep5c1",
+    "name": "Nuna Spa-Massage",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xci000lml2u0i3b46u9",
+    "name": "Parwa Adventures Peru",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmpheuvh10000mld4vgqwo4n7",
+    "name": "Unlock Cusco Experiences",
+    "category": "AGENCY",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp4h3dke000gmlqqtnidfl3n",
+    "name": "Maras",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xcm000nml2uo67wyoba",
+    "name": "Tour valle sagrado pisac",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp1ptt2d0017ml2ixfgntf6o",
+    "name": "Solar Yoga and Wellness",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ttsp700b3ml2iq0p9ygs8",
+    "name": "Apu Inspired Yoga",
+    "category": "wellness",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xd1000uml2um27n7iyj",
+    "name": "LEADERSHIP adventure",
+    "category": "adventure",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1pua2j001bml2ig93i5zrp",
+    "name": "Jñanakanda Cusco Yoga Cultural Center",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1rhs4c004lml2i30wl5v6a",
+    "name": "Territorial Library",
+    "category": "culture",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xgo002iml2uyxlftsol",
+    "name": "Feria de artesanos productores",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1sm5qr008aml2imvwdsg0l",
+    "name": "Inca Trail Treks to Machu Picchu",
+    "category": "agency",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp4gza370004mlqqsajum8hw",
+    "name": "Maras District",
+    "category": "culture",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp239xeh001iml2uiwlhdcry",
+    "name": "Day Hikes and Self Guided Tours Peru EIRL",
+    "category": "transport",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1se2e6007pml2igatl3q8x",
+    "name": "Luz de Luna Cultural Center",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1rs7j8005fml2irz8jvbaj",
+    "name": "INCA TRAIL EXPLORE - Machupicchu Official Tour Operator 2026",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xg9002bml2ut7tz9l39",
+    "name": "Sol Alpaca",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xgh002fml2u41ql0mau",
+    "name": "Artesanias Cisccop",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1pti9l0014ml2i154fqyai",
+    "name": "Open Heart Yoga",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xd3000vml2ucux3fwt4",
+    "name": "Incas Adventures",
+    "category": "adventure",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp239xfi001zml2u111sme0q",
+    "name": "Agencias en cusco Cusco Inside Luxury Travel",
+    "category": "adventure",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1ptk340015ml2i4wero52p",
+    "name": "Yogayoc",
+    "category": "wellness",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp1r7xnl0042ml2in5wcg6ud",
+    "name": "La Casona Ecolodge",
+    "category": "stays",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp239xc7000gml2upp79pq9g",
+    "name": "Mayu Willka Spa",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1sduco007mml2i89sq62kb",
+    "name": "Maldito Cultural",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xf5001tml2ugeuyqg1v",
+    "name": "Go Peru Now",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xbh0005ml2ucsx9qfqw",
+    "name": "Travel Agency Enjoy Cusco (S.A.C)",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1t9svu009uml2iqobcg2so",
+    "name": "Inka Trail Perú Treks",
+    "category": "agency",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp239xcg000kml2usot66n16",
+    "name": "Hippie Trips Peru",
+    "category": "adventure",
+    "locationSlug": "pisac"
+  },
+  {
+    "id": "cmp4hblpx000vmlqqfdz2yfdd",
+    "name": "Peruanisches Restaurant",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1tr3b000arml2ipe55c4fl",
+    "name": "Andean Art Gallery",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp1tuy6900b7ml2ildvye3n0",
+    "name": "SPA ANDINO // Andean Spa",
+    "category": "culture",
+    "locationSlug": "ollantaytambo"
+  },
+  {
+    "id": "cmp4hbsgi000wmlqqmmljy0r8",
+    "name": "Restaurante Hotel La Casa de Barro",
+    "category": "dining",
+    "locationSlug": ""
+  },
+  {
+    "id": "cmp1sdawd007gml2i5qgowalg",
+    "name": "Espacio 8",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xc9000hml2uicwi3s8f",
+    "name": "Azimut Spa Urubamba",
+    "category": "wellness",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp239xbk0006ml2uxzj48uyb",
+    "name": "Sacred Valley Experts",
+    "category": "adventure",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1sbev90078ml2iwz9oed5d",
+    "name": "MUNAY Cultural Courtyard Urubamba",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  },
+  {
+    "id": "cmp1pofil000mml2ij18fao2l",
+    "name": "Historic Center",
+    "category": "culture",
+    "locationSlug": "cusco"
+  },
+  {
+    "id": "cmp20gfsy0012mlpoktcl2r1b",
+    "name": "3 Hands Shaman",
+    "category": "spiritual",
+    "locationSlug": "calca"
+  },
+  {
+    "id": "cmp1sb0jk0072ml2ir7kn9o5x",
+    "name": "Metal Art and Forgings \"LARITA\"",
+    "category": "culture",
+    "locationSlug": "urubamba"
+  }
+]
