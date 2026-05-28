@@ -15,6 +15,9 @@ import { ToolRenderer } from "./tool-renderer"
 import { getSuggestions } from "../utils/suggestions"
 import type { UIMessage } from "@ai-sdk/react"
 
+import { ConciergeWelcome } from "./concierge-welcome"
+import { ConciergeSuggestions } from "./concierge-suggestions"
+
 export function AiConcierge() {
   const {
     isChatOpen, setIsChatOpen, pathname,
@@ -23,6 +26,8 @@ export function AiConcierge() {
   } = useConciergeChat();
 
   const travelVibe = useUiStore(s => s.travelVibe)
+  const panelMode = useUiStore(s => s.panelMode)
+  const mobileViewMode = useUiStore(s => s.mobileViewMode)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const sidebarOffset = "0px"
@@ -68,7 +73,10 @@ export function AiConcierge() {
     return null;
   }
 
-  const suggestions = getSuggestions(travelVibe || "", isEs);
+  const suggestions = getSuggestions(travelVibe || "", isEs, panelMode, mobileViewMode);
+  
+  const userMessages = messages.filter(m => m.role === 'user');
+  const showZeroState = userMessages.length === 0 && !isLoading;
 
   return (
     <>
@@ -105,28 +113,30 @@ export function AiConcierge() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide flex flex-col bg-white text-slate-900">
-                {(messages as UIMessage[]).map((msg, index: number) => {
-                  // Get text content from message parts
-                  const content = (msg.parts || [])
-                    .filter(p => p.type === 'text')
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .map(p => (p as any).text)
-                    .join('\n');
+                {showZeroState ? (
+                  <ConciergeWelcome isEs={isEs} sendMessage={sendMessage} />
+                ) : (
+                  (messages as UIMessage[]).map((msg, index: number) => {
+                    const content = (msg.parts || [])
+                      .filter(p => p.type === 'text')
+                      .map(p => (p as any).text)
+                      .join('\n');
 
-                  if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
+                    if (msg.role === "user" && content?.startsWith("[INTERNAL]")) return null;
 
-                  return (
-                    <div key={`${msg.id}-${index}`} className="flex flex-col gap-2">
-                      {content && (
-                        <ChatMessage id={msg.id} role={msg.role}>
-                          <ChatMessageText content={content} />
-                        </ChatMessage>
-                      )}
-                      <ToolRenderer message={msg} onShareLocation={handleShareLocation} />
-                    </div>
-                  )
-                })}
-                
+                    return (
+                      <div key={`${msg.id}-${index}`} className="flex flex-col gap-2">
+                        {content && (
+                          <ChatMessage id={msg.id} role={msg.role}>
+                            <ChatMessageText content={content} />
+                          </ChatMessage>
+                        )}
+                        <ToolRenderer message={msg} onShareLocation={handleShareLocation} />
+                      </div>
+                    )
+                  })
+                )}
+
                 {isLoading && (
                   <div className="flex flex-col gap-2 max-w-[85%] mr-auto">
                     <div className="flex gap-3">
@@ -144,19 +154,7 @@ export function AiConcierge() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="px-4 pt-3 pb-3 flex gap-2 overflow-x-auto scrollbar-hide bg-white shrink-0">
-                {suggestions.map(suggestion => (
-                  <button
-                    key={suggestion.label}
-                    onClick={() => { 
-                      sendMessage({ text: suggestion.label });
-                    }}
-                    className="whitespace-nowrap bg-white/80 backdrop-blur-sm border border-gray-200 text-slate-700 px-3 py-1.5 rounded-full text-xs font-medium hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
-                  >
-                    {suggestion.icon} <span>{suggestion.label}</span>
-                  </button>
-                ))}
-              </div>
+              <ConciergeSuggestions suggestions={suggestions} sendMessage={sendMessage} />
 
               <div className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-2 bg-white shrink-0">
                 <form onSubmit={handleSubmit} className="flex gap-2">

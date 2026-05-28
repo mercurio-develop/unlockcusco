@@ -1,8 +1,28 @@
-import { Compass, MapPin, ShoppingBag, Car, Utensils, Leaf, Wine, Sparkles, Map, Lightbulb, Bed } from "lucide-react";
+import { Compass, MapPin, ShoppingBag, Car, Utensils, Leaf, Wine, Sparkles, Map, Lightbulb, Bed, Route } from "lucide-react";
 
-export function getSuggestions(travelVibe: string, isEs: boolean) {
+export function getSuggestions(travelVibe: string, isEs: boolean, panelMode?: "discover" | "itinerary", mobileViewMode?: "list" | "map") {
   const iconClass = "w-3.5 h-3.5 text-rose-500";
 
+  // Context-aware suggestions based on current UI state
+  if (panelMode === 'itinerary') {
+    return [
+      { label: isEs ? "Optimizar mi ruta" : "Optimize my route", icon: <Route className={iconClass} /> },
+      { label: isEs ? "Añadir parada para cenar" : "Add a dinner spot", icon: <Utensils className={iconClass} /> },
+      { label: isEs ? "Añadir parada de descanso" : "Add a rest stop", icon: <Bed className={iconClass} /> },
+      { label: isEs ? "Taxi para esta ruta" : "Taxi for this route", icon: <Car className={iconClass} /> }
+    ];
+  }
+
+  if (mobileViewMode === 'map' || panelMode === 'discover') {
+    return [
+      { label: isEs ? "¿Qué hay cerca de mí?" : "What's good near me?", icon: <MapPin className={iconClass} /> },
+      { label: isEs ? "Mejores restaurantes aquí" : "Top dining around here", icon: <Utensils className={iconClass} /> },
+      { label: isEs ? "Atracciones cercanas" : "Nearby attractions", icon: <Compass className={iconClass} /> },
+      { label: isEs ? "Llamar un taxi aquí" : "Call a taxi here", icon: <Car className={iconClass} /> }
+    ];
+  }
+
+  // Fallback to vibe-based suggestions
   switch (travelVibe) {
     case 'Explorer':
       return [
