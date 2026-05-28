@@ -9,6 +9,8 @@ interface SanctuaryTemplateProps {
 import { DICTIONARIES } from "../../constants"
 
 export function SanctuaryTemplate({ business, dict }: SanctuaryTemplateProps) {
+  if (!business.isAsociado) return null
+
   const treatments = business.services || []
 
   const t = dict?.templates?.sanctuary || DICTIONARIES.sanctuaryTemplate

@@ -9,6 +9,8 @@ interface GastronomicTemplateProps {
 import { DICTIONARIES } from "../../constants"
 
 export function GastronomicTemplate({ business, dict }: GastronomicTemplateProps) {
+  if (!business.isAsociado) return null
+
   const menuItems = business.services || []
 
   const t = dict?.templates?.gastronomic || DICTIONARIES.gastronomicTemplate

@@ -9,6 +9,8 @@ interface ExpeditionTemplateProps {
 }
 
 export function ExpeditionTemplate({ business, dict }: ExpeditionTemplateProps) {
+  if (!business.isAsociado) return null
+
   const packages = business.tourPackages || []
 
   const t = dict?.templates?.expedition || DICTIONARIES.expeditionTemplate

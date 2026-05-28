@@ -165,7 +165,7 @@ export function BusinessCard({
                   <ExternalLink className="w-4 h-4 mr-2" /> View Profile
                 </DropdownMenuItem>
               )}
-              {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' && (
+              {business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
                 <DropdownMenuItem onClick={(e) => { 
                   e.stopPropagation(); 
                    
@@ -556,7 +556,7 @@ export function BusinessCard({
               </Link>
             )}
 
-            {showContact && business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' && (
+            {showContact && business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
               <Button
                 onClick={(e) => {
                   e.stopPropagation();

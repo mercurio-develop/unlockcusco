@@ -10,6 +10,8 @@ interface StaysTemplateProps {
 import { DICTIONARIES } from "../../constants"
 
 export function StaysTemplate({ business, dict }: StaysTemplateProps) {
+  if (!business.isAsociado) return null
+
   const rooms = business.services || []
 
   const t = dict?.templates?.stays || DICTIONARIES.staysTemplate

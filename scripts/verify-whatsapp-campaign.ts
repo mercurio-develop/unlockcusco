@@ -11,6 +11,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 const GHOST_PHONE_URL = 'http://localhost:4000';
@@ -18,20 +19,44 @@ const WEBHOOK_SECRET = 'dev-secret';
 const DRY_RUN = process.argv.includes('--dry-run');
 const BATCH_LIMIT = 300;
 
-async function sendVerification(phone: string, businessName: string): Promise<boolean> {
+async function sendVerification(businessId: string, phone: string, businessName: string, slug: string): Promise<boolean> {
+  // Generate a random secure token
+  const token = crypto.randomBytes(16).toString('hex');
+  
+  if (!DRY_RUN) {
+    try {
+      await prisma.business.update({
+        where: { id: businessId },
+        data: { verificationToken: token }
+      });
+    } catch (e) {
+      console.error(`  Failed to save token for ${businessName}:`, e);
+      return false;
+    }
+  }
+
+  const verifyUrl = `https://unlockcusco.com/es/business/${slug}?verify=${token}`;
+
   const message = `Hola ${businessName} 👋
 
 Soy UnlockCusco, la guía de turismo del Valle Sagrado de los Incas.
 
-Los turistas buscan tu negocio en nuestra plataforma. Para que puedan contactarte directamente por WhatsApp, responde con la palabra *VERIFICA* a este mensaje.
+Los turistas buscan tu negocio en nuestra plataforma. Para que puedan contactarte directamente por WhatsApp, ingresa a este enlace para verificar tu negocio:
+${verifyUrl}
+
+O si prefieres, simplemente responde con la palabra *VERIFICA* a este mensaje.
 
 Es gratis y solo toma 5 segundos ✅
 
 ---
-Hello ${businessName}! Tourists are searching for you on UnlockCusco — the Sacred Valley travel guide. Reply *VERIFY* to activate your WhatsApp contact button for tourists. Free & instant.`;
+Hello ${businessName}! Tourists are searching for you on UnlockCusco — the Sacred Valley travel guide. Click this link to verify your business:
+${verifyUrl.replace('/es/', '/en/')}
+
+Or reply *VERIFY* to activate your WhatsApp contact button for tourists. Free & instant.`;
 
   if (DRY_RUN) {
-    console.log(`  [DRY RUN] Would send to ${phone}: "${message.slice(0, 60)}..."`);
+    console.log(`  [DRY RUN] Would send to ${phone}:`);
+    console.log(`    Link: ${verifyUrl}`);
     return true;
   }
 
@@ -60,7 +85,7 @@ async function runCampaign() {
       isClaimed: false,
       whatsapp: { not: null }
     },
-    select: { id: true, name: true, whatsapp: true, locationSlug: true, category: true },
+    select: { id: true, name: true, whatsapp: true, locationSlug: true, category: true, slug: true },
     take: BATCH_LIMIT
   });
 
@@ -73,7 +98,7 @@ async function runCampaign() {
     if (!b.whatsapp) continue;
     process.stdout.write(`  ${b.locationSlug} | ${b.name} ... `);
 
-    const ok = await sendVerification(b.whatsapp, b.name);
+    const ok = await sendVerification(b.id, b.whatsapp, b.name, b.slug);
     const status = ok ? 'sent' : 'failed';
     if (ok) { success++; console.log('✅'); } else { failed++; console.log('❌'); }
 

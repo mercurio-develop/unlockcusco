@@ -22,6 +22,7 @@ model Business {
   imageUrl               String                  @default("")
   heroImages             String                  @default("[]")
   whatsapp               String?
+  verificationToken      String?                 @unique
   isClaimed              Boolean                 @default(false)
   isAsociado             Boolean                 @default(false)
   isFeatured             Boolean                 @default(false)

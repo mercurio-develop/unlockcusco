@@ -8,6 +8,8 @@ interface CultureTemplateProps {
 }
 
 export function CultureTemplate({ business, dict }: CultureTemplateProps) {
+  if (!business.isAsociado) return null
+
   const workshops = business.services || []
 
   const t = dict?.templates?.culture || DICTIONARIES.cultureTemplate
@@ -15,40 +17,44 @@ export function CultureTemplate({ business, dict }: CultureTemplateProps) {
   return (
     <div className="space-y-12">
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
-            <Palette className="w-6 h-6 text-amber-600" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-serif text-slate-900">{t.livingHeritage}</h2>
-            <p className="text-slate-900/50 text-sm">{t.subtitle}</p>
-          </div>
-        </div>
+        {business.category?.toLowerCase() === 'textiles' && (
+          <>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                <Palette className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-serif text-slate-900">{t.livingHeritage}</h2>
+                <p className="text-slate-900/50 text-sm">{t.subtitle}</p>
+              </div>
+            </div>
 
-        {/* Heritage Process Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <Users className="w-5 h-5 text-amber-400" />
+            {/* Heritage Process Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-amber-400" />
+                </div>
+                <h4 className="font-bold text-slate-900">{t.localArtisans}</h4>
+                <p className="text-xs text-slate-900/50 leading-relaxed">{t.localArtisansDesc}</p>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+                  <History className="w-5 h-5 text-rose-400" />
+                </div>
+                <h4 className="font-bold text-slate-900">{t.ancientTech}</h4>
+                <p className="text-xs text-slate-900/50 leading-relaxed">{t.ancientTechDesc}</p>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h4 className="font-bold text-slate-900">{t.authenticGoods}</h4>
+                <p className="text-xs text-slate-900/50 leading-relaxed">{t.authenticGoodsDesc}</p>
+              </div>
             </div>
-            <h4 className="font-bold text-slate-900">{t.localArtisans}</h4>
-            <p className="text-xs text-slate-900/50 leading-relaxed">{t.localArtisansDesc}</p>
-          </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
-              <History className="w-5 h-5 text-rose-400" />
-            </div>
-            <h4 className="font-bold text-slate-900">{t.ancientTech}</h4>
-            <p className="text-xs text-slate-900/50 leading-relaxed">{t.ancientTechDesc}</p>
-          </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-            </div>
-            <h4 className="font-bold text-slate-900">{t.authenticGoods}</h4>
-            <p className="text-xs text-slate-900/50 leading-relaxed">{t.authenticGoodsDesc}</p>
-          </div>
-        </div>
+          </>
+        )}
 
         <div className="grid gap-6">
           <h3 className="text-xl font-serif text-slate-900 mb-2">{t.experiences}</h3>

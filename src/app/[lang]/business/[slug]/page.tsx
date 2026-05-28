@@ -17,6 +17,8 @@ import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { BackButton } from "@/components/ui/back-button"
+import { BusinessCard } from "@/features/discovery/components/business-card"
+import { VerifyOverlay } from "./verify-overlay"
 import { getDictionary, Locale } from "@/lib/dictionaries"
 import { Business, Review, BusinessService, TourPackage, BusinessPremiumProfile, BusinessPillar } from "@prisma/client"
 
@@ -48,7 +50,19 @@ interface JsonLdReview {
   datePublished: string
 }
 
-interface JsonLd {
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c; 
+}
+
+interface JsonLdProps {
   "@context": "https://schema.org"
   "@type": string
   name: string
@@ -79,6 +93,7 @@ interface JsonLd {
 
 interface BusinessPageProps {
   params: Promise<{ slug: string, lang: string }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export const revalidate = 86400; // Cache for 1 day
@@ -143,8 +158,11 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
   }
 }
 
-export default async function BusinessPage({ params }: BusinessPageProps) {
+export default async function BusinessPage({ params, searchParams }: BusinessPageProps) {
   const { slug, lang } = await params
+  const resolvedSearchParams = await searchParams
+  const verifyToken = resolvedSearchParams?.verify as string | undefined
+
   const dict = await getDictionary(lang as Locale)
   const isEs = lang === 'es'
 
@@ -205,6 +223,42 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     }
   }
 
+  // Fetch nearby stays and dining for Boleto businesses
+  let nearbyStays: Business[] = [];
+  let nearbyDining: Business[] = [];
+  
+  if (business.category?.toUpperCase() === 'BOLETO' && business.lat !== null && business.lng !== null && business.locationSlug) {
+    const candidates = await prisma.business.findMany({
+      where: {
+        locationSlug: business.locationSlug,
+        category: {
+          in: ['Stays', 'STAYS', 'stay', 'Stay', 'Dining', 'DINING', 'Meal', 'meal']
+        },
+        id: { not: business.id }
+      },
+      omit: {
+        longDescription: true,
+        longDescriptionEs: true,
+        seoMetaDescEs: true,
+        openingHours: true,
+        heroImages: true,
+        socialLinks: true,
+        featuresJson: true,
+        themeConfig: true,
+      }
+    });
+
+    const candidatesWithDistance = candidates.map(c => {
+       const dist = (c.lat !== null && c.lng !== null && business.lat !== null && business.lng !== null) 
+         ? getDistanceKm(c.lat, c.lng, business.lat, business.lng)
+         : 999;
+       return { ...c, dist };
+    }).sort((a, b) => a.dist - b.dist);
+
+    nearbyStays = candidatesWithDistance.filter(c => ['Stays', 'STAYS', 'stay', 'Stay'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
+    nearbyDining = candidatesWithDistance.filter(c => ['Dining', 'DINING', 'Meal', 'meal'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
+  }
+
   const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : (isEs ? "el Valle Sagrado" : "the Sacred Valley")
   const bName = isEs && business.nameEs ? business.nameEs : business.name
@@ -252,7 +306,8 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
   }
 
   // JSON-LD Structured Data
-  const jsonLd: JsonLd = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jsonLd: any = {
     "@context": "https://schema.org",
     "@type": businessType,
     "name": business.name || 'Business',
@@ -335,6 +390,9 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
+      {verifyToken && business.verificationToken === verifyToken && (
+        <VerifyOverlay businessId={business.id} token={verifyToken} lang={lang} />
+      )}
       {/* Structured Data */}
       <script
         type="application/ld+json"
@@ -469,59 +527,106 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </div>
 
             {/* Desktop CTA */}
-            {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' ? (
-              <a
-                href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                style={{ 
-                  backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
-                }}
-              >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
-              </a>
-            ) : (
-              <button 
-                disabled
-                className="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-[15px]"
-              >
-                Contact Not Available
-              </button>
+            {business.category?.toUpperCase() !== 'BOLETO' && (
+              <>
+                {business.whatsapp && business.isAsociado ? (
+                  <a
+                    href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ 
+                      backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
+                    }}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+                  </a>
+                ) : (
+                  <button 
+                    disabled
+                    className="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-[15px]"
+                  >
+                    {isEs ? 'Contacto no disponible' : 'Contact Not Available'}
+                  </button>
+                )}
+                
+                <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
+                  {dict.business.replyTime || "Usually replies within 1 hour"}
+                </p>
+              </>
             )}
-            
-            <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
-              {dict.business.replyTime || "Usually replies within 1 hour"}
-            </p>
           </div>
         </div>
       </div>
 
+      {/* Nearby Stays and Dining (Boleto Only) */}
+      {business.category?.toUpperCase() === 'BOLETO' && (nearbyStays.length > 0 || nearbyDining.length > 0) && (
+        <div className="lg:max-w-6xl lg:mx-auto lg:px-6 pt-4 pb-12">
+          {nearbyStays.length > 0 && (
+            <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
+              <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Alojamientos Cercanos' : 'Nearby Stays'}</h2>
+              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+                {nearbyStays.map((stay) => (
+                  <div key={stay.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+                    <BusinessCard
+                      business={stay}
+                      orientation="vertical"
+                      showItineraryAdd={true}
+                      dict={dict}
+                    />
+                  </div>
+                ))}
+              </ScrollCarousel>
+            </section>
+          )}
+
+          {nearbyDining.length > 0 && (
+            <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
+              <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Restaurantes Cercanos' : 'Nearby Dining'}</h2>
+              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+                {nearbyDining.map((dining) => (
+                  <div key={dining.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+                    <BusinessCard
+                      business={dining}
+                      orientation="vertical"
+                      showItineraryAdd={true}
+                      dict={dict}
+                    />
+                  </div>
+                ))}
+              </ScrollCarousel>
+            </section>
+          )}
+        </div>
+      )}
+
       {/* 5. Sticky Action Bar - MOBILE ONLY */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-safe">
-        {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' ? (
-          <a
-            href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-white font-medium text-[15px] shadow-sm transition-transform active:scale-[0.98]"
-            style={{ 
-              backgroundColor: business.premiumProfile?.primaryColor || '#10b981' // WhatsApp Green default
-            }}
-          >
-            <MessageCircle className="w-5 h-5 mr-2" />
-            {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
-          </a>
-        ) : (
-          <button 
-            disabled
-            className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-medium text-[15px]"
-          >
-            Contact Not Available
-          </button>
-        )}
-      </div>
+      {business.category?.toUpperCase() !== 'BOLETO' && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          {business.whatsapp && business.isAsociado ? (
+            <a
+              href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-white font-medium text-[15px] shadow-sm transition-transform active:scale-[0.98]"
+              style={{ 
+                backgroundColor: business.premiumProfile?.primaryColor || '#10b981' // WhatsApp Green default
+              }}
+            >
+              <MessageCircle className="w-5 h-5 mr-2" />
+              {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+            </a>
+          ) : (
+            <button 
+              disabled
+              className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-medium text-[15px]"
+            >
+              {isEs ? 'Contacto no disponible' : 'Contact Not Available'}
+            </button>
+          )}
+        </div>
+      )}
     </main>
   )
 }
