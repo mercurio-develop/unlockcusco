@@ -189,9 +189,19 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
     whereClause.OR = orConditions
   }
 
-  let businesses: Business[] = await prisma.business.findMany({
+  let businesses = (await prisma.business.findMany({
     where: whereClause,
-  })
+    omit: {
+      longDescription: true,
+      longDescriptionEs: true,
+      seoMetaDescEs: true,
+      openingHours: true,
+      heroImages: true,
+      socialLinks: true,
+      featuresJson: true,
+      themeConfig: true,
+    }
+  })) as Business[]
 
   // Distance Filter
   if (radiusKm !== undefined) {
@@ -273,7 +283,15 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
 
   return {
     businesses: paginatedBusinesses,
-    allBusinesses: businesses, // Return all for the map
+    allBusinesses: businesses.map(b => ({
+      ...b,
+      longDescription: null,
+      longDescriptionEs: null,
+      heroImages: "[]",
+      socialLinks: "{}",
+      specialties: "[]",
+      themeConfig: "{}"
+    })), // Return stripped-down versions for the map to prevent 2MB cache limit
     categoryCounts,
     hasMore: startIndex + limit < businesses.length
   }
@@ -282,7 +300,7 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
 export async function getBusinesses(params: GetBusinessesParams) {
   const cacheKey = [
     'get-businesses',
-    'v7', // cache buster
+    'v8', // cache buster
     params.query || '',
     params.category || '',
     params.loc || '',

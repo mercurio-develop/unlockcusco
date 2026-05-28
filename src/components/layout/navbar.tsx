@@ -24,6 +24,7 @@ const LOCATIONS = [
 ]
 
 export function Navbar({ dict, user }: { 
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict?: Record<string, any>, 
   user?: User | null 
@@ -99,13 +100,13 @@ export function Navbar({ dict, user }: {
   if (isProfilePage) return null
 
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-xl border-b border-gray-200 h-[calc(48px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
+    <nav className="fixed top-0 w-full z-[100] bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 h-[calc(48px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}
         <Link href={langPrefix} className="flex items-center gap-2 group shrink-0">
           <Bot className="w-4 h-4 text-rose-600" />
-          <span className="text-slate-900 font-bold text-sm tracking-wide uppercase">
+          <span className="text-white font-sans font-bold text-sm tracking-wide uppercase">
             UNLOCK<span className="text-rose-500">CUSCO</span>
           </span>
         </Link>
@@ -120,7 +121,7 @@ export function Navbar({ dict, user }: {
                 key={item.href}
                 href={fullHref}
                 className={`text-xs font-semibold tracking-wide transition-colors ${
-                  isActive ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
+                  isActive ? "text-white" : "text-slate-300 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -129,14 +130,14 @@ export function Navbar({ dict, user }: {
           })}
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 focus:outline-none">
+            <DropdownMenuTrigger className="text-xs font-semibold tracking-wide text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 focus:outline-none">
               <Map className="w-3.5 h-3.5" />
               {t.towns} <ChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110]">
+            <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[110]">
               {LOCATIONS.map((loc) => (
-                <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
-                  <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
+                <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
+                  <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                     {loc.name}
                   </Link>
                 </DropdownMenuItem>
@@ -148,12 +149,12 @@ export function Navbar({ dict, user }: {
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          <div className="flex items-center bg-slate-100/80 p-1 rounded-full border border-slate-200/60 shadow-inner" title={t.changeLanguage}>
+          <div className="flex items-center bg-slate-800/80 p-1 rounded-full border border-slate-700/60 shadow-inner" title={t.changeLanguage}>
             <button
               onClick={() => handleLanguageSwitch('en')}
               className={cn(
                 "px-2.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
-                locale === 'en' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                locale === 'en' ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:text-slate-300"
               )}
             >
               EN
@@ -162,7 +163,7 @@ export function Navbar({ dict, user }: {
               onClick={() => handleLanguageSwitch('es')}
               className={cn(
                 "px-2.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
-                locale === 'es' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                locale === 'es' ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:text-slate-300"
               )}
             >
               ES
@@ -181,7 +182,7 @@ export function Navbar({ dict, user }: {
 
               <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
                 <DialogTrigger render={
-                  <button className="hidden md:flex p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors" title={t.helpInstructions}>
+                  <button className="hidden md:flex p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors" title={t.helpInstructions}>
                     <HelpCircle className="w-4 h-4" />
                   </button>
                 } />
@@ -193,7 +194,7 @@ export function Navbar({ dict, user }: {
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="space-y-5 text-sm text-slate-700 py-2">
+                  <div className="space-y-5 text-sm text-slate-300 hover:text-white py-2">
                     <div className="flex gap-3">
                       <div className="mt-0.5"><Map className="w-5 h-5 text-slate-400"/></div>
                       <div>
@@ -308,18 +309,18 @@ export function Navbar({ dict, user }: {
           {/* Mobile Links */}
           <div className="flex md:hidden items-center ml-1">
             <DropdownMenu>
-              <DropdownMenuTrigger className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors focus:outline-none">
+              <DropdownMenuTrigger className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors focus:outline-none">
                 <Menu className="w-5 h-5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-xl border-slate-200 shadow-xl rounded-2xl p-2 z-[110] mr-4">
+              <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[110] mr-4">
                 {navItems.map((item) => {
                   const fullHref = `${langPrefix}${item.href}`
                   const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
                   return (
-                    <DropdownMenuItem key={item.href} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0 mb-1">
+                    <DropdownMenuItem key={item.href} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0 mb-1">
                       <Link
                         href={fullHref}
-                        className={cn("w-full h-full px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2", isActive ? "text-slate-900 font-bold" : "text-slate-700")}
+                        className={cn("w-full h-full px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2", isActive ? "text-white font-bold" : "text-slate-300")}
                       >
                         <item.icon className="w-4 h-4" />
                         {item.label}
@@ -328,15 +329,15 @@ export function Navbar({ dict, user }: {
                   )
                 })}
                 
-                <div className="h-px bg-slate-100 my-2 mx-1" />
-                <div className="px-3 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <div className="h-px bg-slate-800 my-2 mx-1" />
+                <div className="px-3 py-1.5 text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                   <Map className="w-3.5 h-3.5" />
                   {t.towns}
                 </div>
                 
                 {LOCATIONS.map((loc) => (
-                  <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-50 cursor-pointer p-0">
-                    <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-700">
+                  <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
+                    <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                       {loc.name}
                     </Link>
                   </DropdownMenuItem>

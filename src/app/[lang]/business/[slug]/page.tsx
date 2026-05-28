@@ -164,12 +164,16 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
   if (!business) return notFound()
 
+  // Use longDescription if available, fallback to short Zagat description
+  business.description = business.longDescription || business.description
+
   // Overwrite business fields for templates if Spanish
   if (isEs) {
     business.name = business.nameEs || business.name
     business.category = business.categoryEs || business.category
     business.tagline = business.taglineEs || business.tagline
-    business.description = business.descriptionEs || business.description
+    // Use Spanish longDescription if available, fallback to existing
+    business.description = business.longDescriptionEs || business.descriptionEs || business.description
     business.specialties = business.specialtiesEs || business.specialties
     
     if (business.services) {
@@ -465,7 +469,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </div>
 
             {/* Desktop CTA */}
-            {business.whatsapp ? (
+            {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' ? (
               <a
                 href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
                 target="_blank"
@@ -496,7 +500,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
       {/* 5. Sticky Action Bar - MOBILE ONLY */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-safe">
-        {business.whatsapp ? (
+        {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' ? (
           <a
             href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
             target="_blank"

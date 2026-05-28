@@ -137,7 +137,7 @@ export async function universalSearch({
   }
 
   // Lexical fallback or default view
-  const businesses = await prisma.business.findMany({
+  const businesses = (await prisma.business.findMany({
     where: {
       AND: [
         ...queryWords.map(word => ({
@@ -180,8 +180,18 @@ export async function universalSearch({
       { isAsociado: 'desc' },
       { rating: { sort: 'desc', nulls: 'last' } }
     ],
-    take: limit
-  });
+    take: limit,
+    omit: {
+      longDescription: true,
+      longDescriptionEs: true,
+      seoMetaDescEs: true,
+      openingHours: true,
+      heroImages: true,
+      socialLinks: true,
+      featuresJson: true,
+      themeConfig: true,
+    }
+  })) as Business[];
 
   return businesses;
 }

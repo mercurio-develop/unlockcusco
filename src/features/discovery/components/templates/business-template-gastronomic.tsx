@@ -21,25 +21,25 @@ export function GastronomicTemplate({ business, dict }: GastronomicTemplateProps
             <Utensils className="w-6 h-6 text-rose-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-serif text-white">{t.title}</h2>
-            <p className="text-white/50 text-sm">{t.subtitle}</p>
+            <h2 className="text-3xl font-serif text-slate-900">{t.title}</h2>
+            <p className="text-slate-900/50 text-sm">{t.subtitle}</p>
           </div>
         </div>
 
         <div className="grid gap-6">
           {menuItems.length > 0 ? (
             menuItems.map((item) => (
-              <div key={item.id} className="group relative bg-white/5 border border-white/10 rounded-3xl p-6 transition-all hover:bg-white/[0.08] hover:border-rose-600/30">
+              <div key={item.id} className="group relative bg-slate-50 border border-slate-200 rounded-3xl p-6 transition-all hover:bg-white/[0.08] hover:border-rose-600/30">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white group-hover:text-rose-400 transition-colors mb-2">
+                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-rose-400 transition-colors mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-white/60 text-sm leading-relaxed mb-4">
+                    <p className="text-slate-900/60 text-sm leading-relaxed mb-4">
                       {item.description}
                     </p>
-                    <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-white/40">
-                      <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg">
+                    <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-widest text-slate-900/40">
+                      <span className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg">
                         <Clock className="w-3.5 h-3.5" /> {item.durationMins} min
                       </span>
                       {item.priceUsd > 30 && (
@@ -56,8 +56,8 @@ export function GastronomicTemplate({ business, dict }: GastronomicTemplateProps
               </div>
             ))
           ) : (
-            <div className="text-center py-12 border-2 border-dashed border-white/10 rounded-3xl">
-              <p className="text-white/40">{t.emptyState}</p>
+            <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-3xl">
+              <p className="text-slate-900/40">{t.emptyState}</p>
             </div>
           )}
         </div>

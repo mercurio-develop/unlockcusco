@@ -19,7 +19,7 @@ export function Footer({ lang }: { lang: string }) {
         
         {/* Brand Section */}
         <div className="space-y-6">
-          <Link href={`/${lang}`} className="text-2xl font-serif font-bold text-white tracking-tight">
+          <Link href={`/${lang}`} className="text-2xl font-sans font-bold text-white tracking-tight">
             UNLOCK<span className="text-rose-500">CUSCO</span>
           </Link>
           <p className="text-sm leading-relaxed text-slate-400 max-w-xs">
