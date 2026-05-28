@@ -478,6 +478,18 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     }
   }, [selectedId, businesses, activeItinerary, mapMode, panelMode, latParam, lngParam, isMobile]);
 
+  useEffect(() => {
+    if (currentLoc && TOWN_COORDS[currentLoc] && !selectedId && !activeItinerary) {
+      const { lat, lng } = TOWN_COORDS[currentLoc];
+      mapRef.current?.flyTo({
+        center: [lng, lat],
+        zoom: 13,
+        duration: 1200,
+        essential: true,
+      });
+    }
+  }, [currentLoc, selectedId, activeItinerary]);
+
   const validBusinesses = useMemo(() => {
     return businesses
       .filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng))
@@ -570,18 +582,6 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       }
     }
   }, [panelMode, activeItinerary, selectedId, isMapLoaded, mobileViewMode]);
-
-  // Explicitly fly to the location when currentLoc changes to ensure a zoom happens even if
-  // bounds haven't changed drastically or if the user clicks the footer link.
-  useEffect(() => {
-    if (currentLoc && TOWN_COORDS[currentLoc] && mapRef.current) {
-      const coords = TOWN_COORDS[currentLoc];
-      // Only fly if we aren't currently selecting a specific business
-      if (!selectedId) {
-        mapRef.current.flyTo({ center: [coords.lng, coords.lat], zoom: 14, duration: 1500 });
-      }
-    }
-  }, [currentLoc, selectedId]);
 
   const center: [number, number] = validBusinesses.length > 0
     ? [validBusinesses.reduce((s, b) => s + b.lng, 0) / validBusinesses.length, validBusinesses.reduce((s, b) => s + b.lat, 0) / validBusinesses.length]

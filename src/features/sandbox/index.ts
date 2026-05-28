@@ -1,1 +1,1 @@
-export { SandboxDashboard } from './components/SandboxDashboard';
+export { SandboxDashboard } from './components/sandbox-dashboard';

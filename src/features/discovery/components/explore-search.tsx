@@ -83,7 +83,7 @@ export function ExploreSearch({
           categories: currentCats
         });
       }
-      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)
+      navigateFilters(currentLoc, currentCats, newVal.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
     }, 500)
   }
 
@@ -94,7 +94,7 @@ export function ExploreSearch({
     } else {
       nextCats.push(catValue)
     }
-    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)
+    navigateFilters(currentLoc, nextCats, value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)
   }
 
   const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,7 +255,7 @@ export function ExploreSearch({
                     >
                       <div className="grid grid-cols-3 gap-2 pb-1">
                         <button
-                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, undefined, undefined, currentSort)}
+                          onClick={() => navigateFilters(currentLoc, [], value.trim(), isRadEnabled ? currentRad : undefined, currentLat, currentLng, currentSort)}
                           className={cn(
                             "relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all",
                             currentCats.length === 0 
