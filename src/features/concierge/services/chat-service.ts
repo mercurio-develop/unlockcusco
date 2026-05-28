@@ -141,7 +141,8 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
       queryExpatsGuide: toolsRegistry.queryExpatsGuide,
       buildItinerary: toolsRegistry.buildItinerary,
       mutateItinerary: toolsRegistry.mutateItinerary,
-      generateSaveLink: toolsRegistry.generateSaveLink
+      generateSaveLink: toolsRegistry.generateSaveLink,
+      switchItineraryTab: toolsRegistry.switchItineraryTab
     },
     stopWhen: stepCountIs(8),
   });

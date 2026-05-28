@@ -10,7 +10,7 @@ import { useCallback } from "react"
 import { saveItineraryAction } from "@/features/itinerary/actions/save-itinerary";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/end-point-picker";
-import { Navigation, MapPin, Bed, Plane, X, ChevronDown, Trash2, ArrowUp, ArrowDown, Car, Footprints, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, X, ChevronDown, Trash2, ArrowUp, ArrowDown, Car, Footprints, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock, ArrowRightLeft, Sparkles } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import {
   Dialog,
@@ -101,12 +101,15 @@ export function ItineraryPanel({ dict }: {
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeTab = useItineraryStore(s => s.activeTab);
+  const setActiveTab = useItineraryStore(s => s.setActiveTab);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const removeWaypoint = useItineraryStore(s => s.removeWaypoint);
   const moveWaypoint = useItineraryStore(s => s.moveWaypoint);
+  const moveToOtherItinerary = useItineraryStore(s => s.moveToOtherItinerary);
   const clearStartAnchor = useItineraryStore(s => s.clearStartAnchor);
   const clearEndAnchor = useItineraryStore(s => s.clearEndAnchor);
   const transportProfiles = useItineraryStore(s => s.transportProfiles);
@@ -126,9 +129,17 @@ export function ItineraryPanel({ dict }: {
   const { routeData } = useMapboxRoute();
 
   const saveItinerary = useCallback(async () => {
-    if (!activeItinerary) return null;
+    const { activeItinerary: primary, secondaryItinerary: secondary } = useItineraryStore.getState();
+    if (!primary && !secondary) return null;
+    
+    const stateToSave = {
+      version: 2,
+      primary,
+      secondary
+    };
+
     try {
-      const data = await saveItineraryAction(activeItinerary);
+      const data = await saveItineraryAction(stateToSave);
       if (data.success && data.shortId) {
         const url = new URL(window.location.href);
         url.searchParams.set('trip', data.shortId);
@@ -139,7 +150,7 @@ export function ItineraryPanel({ dict }: {
       console.error("Failed to save itinerary:", e);
     }
     return null;
-  }, [activeItinerary]);
+  }, []);
 
   const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';
@@ -171,23 +182,78 @@ export function ItineraryPanel({ dict }: {
 
   if (!activeItinerary) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center bg-white animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="relative mb-6">
-          <div className="absolute inset-0 bg-rose-100 rounded-full blur-2xl opacity-50 scale-150 animate-pulse" />
-          <div className="relative bg-white p-6 rounded-full shadow-sm border border-slate-50">
-            <Navigation className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+      <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
+        <div className="px-6 pt-6 pb-4 bg-white border-b border-gray-200 shrink-0 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-serif font-semibold text-slate-900 truncate">
+              {activeTab === 'primary' ? "Primary Route" : "Alternative Route"}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setPanelMode("discover")}
+              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
-        <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">Your Route is Empty</h3>
-        <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-          Ask the UnlockCusco Concierge to &quot;plan a full day itinerary&quot; to see your route magically appear here.
-        </p>
-        <button
-          onClick={() => setPanelMode("discover")}
-          className="w-full bg-slate-900 text-white px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-        >
-          Go to Discover
-        </button>
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200 bg-slate-50/50">
+          <button 
+            onClick={() => setActiveTab('primary')}
+            className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === 'primary' ? 'border-b-2 border-slate-900 text-slate-900 bg-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'}`}
+          >
+            Primary Route
+          </button>
+          <button 
+            onClick={() => setActiveTab('secondary')}
+            className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === 'secondary' ? 'border-b-2 border-slate-900 text-slate-900 bg-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'}`}
+          >
+            Alternative Route
+          </button>
+        </div>
+
+        <div className="flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center bg-white animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-rose-100 rounded-full blur-2xl opacity-50 scale-150 animate-pulse" />
+            <div className="relative bg-white p-6 rounded-full shadow-sm border border-slate-50">
+              <Navigation className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+            </div>
+          </div>
+          <h3 className="text-2xl font-serif tracking-tight text-slate-900 mb-3">Your Route is Empty</h3>
+          <p className="text-slate-500 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
+            {activeTab === 'primary' 
+              ? "Ask the UnlockCusco Concierge to \"plan a full day itinerary\" to see your route magically appear here."
+              : "Move places from your Primary Route or browse Discover to add places to this Alternative Route."}
+          </p>
+
+          <div className="w-full max-w-sm mb-8 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quick Starts</p>
+            <div className="flex flex-col gap-2">
+              <a href="?trip=sacred-valley-1-day-itinerary" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
+                <span>Classic Sacred Valley</span>
+                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+              <a href="?trip=top-7-culinary-route" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
+                <span>Top Culinary Route</span>
+                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+              <a href="?trip=coffee-cacao-route" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
+                <span>Coffee & Cacao Route</span>
+                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setPanelMode("discover")}
+            className="w-full bg-slate-900 text-white px-6 py-3 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+          >
+            Go to Discover
+          </button>
+        </div>
       </div>
     );
   }
@@ -241,6 +307,22 @@ export function ItineraryPanel({ dict }: {
             <X className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 bg-slate-50/50">
+        <button 
+          onClick={() => setActiveTab('primary')}
+          className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === 'primary' ? 'border-b-2 border-slate-900 text-slate-900 bg-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'}`}
+        >
+          Primary Route
+        </button>
+        <button 
+          onClick={() => setActiveTab('secondary')}
+          className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === 'secondary' ? 'border-b-2 border-slate-900 text-slate-900 bg-white' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100/50'}`}
+        >
+          Alternative Route
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto bg-gray-50/30 p-6 space-y-4 touch-pan-y overscroll-contain" data-vaul-no-drag>
@@ -427,6 +509,15 @@ export function ItineraryPanel({ dict }: {
                     >
                       <Repeat className="w-3.5 h-3.5" />
                       {t.swap}
+                    </button>
+
+                    <button
+                      onClick={e => { e.stopPropagation(); moveToOtherItinerary(waypoint.id); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                      title={activeTab === 'primary' ? "Move to Alternative Route" : "Move to Primary Route"}
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                      {t.move || "Move"}
                     </button>
 
                     {waypoint.lat != null && waypoint.lng != null && (
@@ -643,7 +734,7 @@ export function ItineraryPanel({ dict }: {
               </div>
               <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">Clear Itinerary</DialogTitle>
               <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
-                Are you sure you want to clear the entire itinerary? This action cannot be undone.
+                Are you sure you want to clear the itinerary "{activeItinerary?.title || "Itinerary"}"? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -666,11 +757,12 @@ export function ItineraryPanel({ dict }: {
                 }}
                 className="bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium w-full sm:w-auto h-11 rounded-xl"
               >
-                Clear Itinerary
+                Clear Route
               </Button>
             </DialogFooter>
           </div>
         </DialogContent>
-      </Dialog>    </ItineraryErrorBoundary>
+      </Dialog>
+    </ItineraryErrorBoundary>
   );
 }

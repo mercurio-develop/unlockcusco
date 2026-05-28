@@ -1,0 +1,527 @@
+prisma/schema.prisma                               |   1 +
+ scripts/verify-whatsapp-campaign.ts                |  37 +++-
+ src/app/[lang]/business/[slug]/actions.ts          |  38 ++++
+ src/app/[lang]/business/[slug]/page.tsx            | 205 ++++++++++++++++-----
+ src/app/[lang]/business/[slug]/verify-overlay.tsx  |  82 +++++++++
+ .../discovery/components/business-card.tsx         |   4 +-
+ .../templates/business-template-culture.tsx        |  70 +++----
+ .../templates/business-template-expedition.tsx     |   2 +
+ .../templates/business-template-gastronomic.tsx    |   2 +
+ .../templates/business-template-sanctuary.tsx      |   2 +
+ .../templates/business-template-stays.tsx          |   2 +
+ ...{SandboxDashboard.tsx => sandbox-dashboard.tsx} |   0
+ 12 files changed, 355 insertions(+), 90 deletions(-)
+
+--- Changes ---
+
+prisma/schema.prisma
+  @@ -22,6 +22,7 @@
+  +  verificationToken      String?                 @unique
+     isClaimed              Boolean                 @default(false)
+     isAsociado             Boolean                 @default(false)
+     isFeatured             Boolean                 @default(false)
+  +1 -0
+
+scripts/verify-whatsapp-campaign.ts
+  @@ -11,6 +11,7 @@
+  +import * as crypto from 'crypto';
+   
+   const prisma = new PrismaClient();
+   const GHOST_PHONE_URL = 'http://localhost:4000';
+  @@ -18,20 +19,44 @@
+  -async function sendVerification(phone: string, businessName: string): Promise<boolean> {
+  +async function sendVerification(businessId: string, phone: string, businessName: string, slug: string): Promise<boolean> {
+  +  // Generate a random secure token
+  +  const token = crypto.randomBytes(16).toString('hex');
+  +  
+  +  if (!DRY_RUN) {
+  +    try {
+  +      await prisma.business.update({
+  +        where: { id: businessId },
+  +        data: { verificationToken: token }
+  +      });
+  +    } catch (e) {
+  +      console.error(`  Failed to save token for ${businessName}:`, e);
+  +      return false;
+  +    }
+  +  }
+  +
+  +  const verifyUrl = `https://unlockcusco.com/es/business/${slug}?verify=${token}`;
+  +
+     const message = `Hola ${businessName} 👋
+   
+   Soy UnlockCusco, la guía de turismo del Valle Sagrado de los Incas.
+   
+  -Los turistas buscan tu negocio en nuestra plataforma. Para que puedan contactarte directamente por WhatsApp, responde con la palabra *VERIFICA* a este mensaje.
+  +Los turistas buscan tu negocio en nuestra plataforma. Para que puedan contactarte directamente por WhatsApp, ingresa a este enlace para verificar tu negocio:
+  +${verifyUrl}
+  +
+  +O si prefieres, simplemente responde con la palabra *VERIFICA* a este mensaje.
+   
+   Es gratis y solo toma 5 segundos ✅
+   
+   ---
+  -Hello ${businessName}! Tourists are searching for you on UnlockCusco — the Sacred Valley travel guide. Reply *VERIFY* to activate your WhatsApp contact button for tourists. Free & instant.`;
+  +Hello ${businessName}! Tourists are searching for you on UnlockCusco — the Sacred Valley travel guide. Click this link to verify your business:
+  +${verifyUrl.replace('/es/', '/en/')}
+  +
+  +Or reply *VERIFY* to activate your WhatsApp contact button for tourists. Free & instant.`;
+   
+     if (DRY_RUN) {
+  -    console.log(`  [DRY RUN] Would send to ${phone}: "${message.slice(0, 60)}..."`);
+  +    console.log(`  [DRY RUN] Would send to ${phone}:`);
+  +    console.log(`    Link: ${verifyUrl}`);
+       return true;
+     }
+   
+  @@ -60,7 +85,7 @@
+  -    select: { id: true, name: true, whatsapp: true, locationSlug: true, category: true },
+  +    select: { id: true, name: true, whatsapp: true, locationSlug: true, category: true, slug: true },
+       take: BATCH_LIMIT
+     });
+   
+  @@ -73,7 +98,7 @@
+  -    const ok = await sendVerification(b.whatsapp, b.name);
+  +    const ok = await sendVerification(b.id, b.whatsapp, b.name, b.slug);
+       const status = ok ? 'sent' : 'failed';
+       if (ok) { success++; console.log('✅'); } else { failed++; console.log('❌'); }
+   
+  +31 -6
+
+src/app/[lang]/business/[slug]/actions.ts
+  @@ -0,0 +1,38 @@
+  +"use server";
+  +
+  +import { prisma } from "@/lib/prisma";
+  +import { revalidateTag } from "next/cache";
+  +
+  +export async function verifyBusinessAction(businessId: string, token: string) {
+  +  if (!businessId || !token) {
+  +    return { success: false, error: "Missing required parameters" };
+  +  }
+  +
+  +  try {
+  +    const business = await prisma.business.findUnique({
+  +      where: { id: businessId }
+  +    });
+  +
+  +    if (!business) {
+  +      return { success: false, error: "Business not found" };
+  +    }
+  +
+  +    if (business.verificationToken !== token) {
+  +      return { success: false, error: "Invalid or expired verification token" };
+  +    }
+  +
+  +    await prisma.business.update({
+  +      where: { id: businessId },
+  +      data: {
+  +        isClaimed: true,
+  +        verificationToken: null // One-time use
+  +      }
+  +    });
+  +
+  +    ;(revalidateTag as (tag: string) => void)("businesses");
+  +    return { success: true };
+  +  } catch (error) {
+  +    console.error("Error verifying business:", error);
+  +    return { success: false, error: "An unexpected error occurred" };
+  +  }
+  +}
+  +38 -0
+
+src/app/[lang]/business/[slug]/page.tsx
+  @@ -17,6 +17,8 @@
+  +import { BusinessCard } from "@/features/discovery/components/business-card"
+  +import { VerifyOverlay } from "./verify-overlay"
+   import { getDictionary, Locale } from "@/lib/dictionaries"
+   import { Business, Review, BusinessService, TourPackage, BusinessPremiumProfile, BusinessPillar } from "@prisma/client"
+   
+  @@ -48,7 +50,19 @@
+  -interface JsonLd {
+  +function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  +  const R = 6371; // Radius of the earth in km
+  +  const dLat = (lat2 - lat1) * Math.PI / 180;
+  +  const dLon = (lon2 - lon1) * Math.PI / 180;
+  +  const a = 
+  +    Math.sin(dLat/2) * Math.sin(dLat/2) +
+  +    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+  +    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  +  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  +  return R * c; 
+  +}
+  +
+  +interface JsonLdProps {
+     "@context": "https://schema.org"
+     "@type": string
+     name: string
+  @@ -79,6 +93,7 @@
+  +  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
+   }
+   
+   export const revalidate = 86400; // Cache for 1 day
+  @@ -143,8 +158,11 @@
+  -export default async function BusinessPage({ params }: BusinessPageProps) {
+  +export default async function BusinessPage({ params, searchParams }: BusinessPageProps) {
+     const { slug, lang } = await params
+  +  const resolvedSearchParams = await searchParams
+  +  const verifyToken = resolvedSearchParams?.verify as string | undefined
+  +
+     const dict = await getDictionary(lang as Locale)
+     const isEs = lang === 'es'
+   
+  @@ -205,6 +223,42 @@
+  +  // Fetch nearby stays and dining for Boleto businesses
+  +  let nearbyStays: Business[] = [];
+  +  let nearbyDining: Business[] = [];
+  +  
+  +  if (business.category?.toUpperCase() === 'BOLETO' && business.lat !== null && business.lng !== null && business.locationSlug) {
+  +    const candidates = await prisma.business.findMany({
+  +      where: {
+  +        locationSlug: business.locationSlug,
+  +        category: {
+  +          in: ['Stays', 'STAYS', 'stay', 'Stay', 'Dining', 'DINING', 'Meal', 'meal']
+  +        },
+  +        id: { not: business.id }
+  +      },
+  +      omit: {
+  +        longDescription: true,
+  +        longDescriptionEs: true,
+  +        seoMetaDescEs: true,
+  +        openingHours: true,
+  +        heroImages: true,
+  +        socialLinks: true,
+  +        featuresJson: true,
+  +        themeConfig: true,
+  +      }
+  +    });
+  +
+  +    const candidatesWithDistance = candidates.map(c => {
+  +       const dist = (c.lat !== null && c.lng !== null && business.lat !== null && business.lng !== null) 
+  +         ? getDistanceKm(c.lat, c.lng, business.lat, business.lng)
+  +         : 999;
+  +       return { ...c, dist };
+  +    }).sort((a, b) => a.dist - b.dist);
+  +
+  +    nearbyStays = candidatesWithDistance.filter(c => ['Stays', 'STAYS', 'stay', 'Stay'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
+  +    nearbyDining = candidatesWithDistance.filter(c => ['Dining', 'DINING', 'Meal', 'meal'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
+  +  }
+  +
+     const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
+     const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : (isEs ? "el Valle Sagrado" : "the Sacred Valley")
+     const bName = isEs && business.nameEs ? business.nameEs : business.name
+  @@ -252,7 +306,8 @@
+  -  const jsonLd: JsonLd = {
+  +  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  +  const jsonLd: any = {
+       "@context": "https://schema.org",
+       "@type": businessType,
+       "name": business.name || 'Business',
+  @@ -335,6 +390,9 @@
+  +      {verifyToken && business.verificationToken === verifyToken && (
+  +        <VerifyOverlay businessId={business.id} token={verifyToken} lang={lang} />
+  +      )}
+         {/* Structured Data */}
+         <script
+           type="application/ld+json"
+  @@ -469,59 +527,106 @@
+  -            {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' ? (
+  -              <a
+  -                href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+  -                target="_blank"
+  -                rel="noopener noreferrer"
+  -                className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+  -                style={{ 
+  -                  backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
+  -                }}
+  -              >
+  -                <MessageCircle className="w-5 h-5 mr-2" />
+  -                {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+  -              </a>
+  -            ) : (
+  -              <button 
+  -                disabled
+  -                className="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-[15px]"
+  -              >
+  -                Contact Not Available
+  -              </button>
+  +            {business.category?.toUpperCase() !== 'BOLETO' && (
+  +              <>
+  +                {business.whatsapp && business.isAsociado ? (
+  +                  <a
+  +                    href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
+  +                    target="_blank"
+  +                    rel="noopener noreferrer"
+  +                    className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
+  +                    style={{ 
+  +                      backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
+  +                    }}
+  +                  >
+  +                    <MessageCircle className="w-5 h-5 mr-2" />
+  +                    {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
+  +                  </a>
+  +                ) : (
+  +                  <button 
+  +                    disabled
+  +                    className="flex items-center justify-center w-full py-4 px-4 rounded-xl bg-slate-100 text-slate-400 font-bold text-[15px]"
+  +                  >
+  +                    {isEs ? 'Contacto no disponible' : 'Contact Not Available'}
+  +                  </button>
+  +                )}
+  +                
+  +                <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
+  +                  {dict.business.replyTime || "Usually replies within 1 hour"}
+  +                </p>
+  +              </>
+               )}
+  -            
+  -            <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
+  -              {dict.business.replyTime || "Usually replies within 1 hour"}
+  -            </p>
+             </div>
+           </div>
+         </div>
+   
+  +      {/* Nearby Stays and Dining (Boleto Only) */}
+  +      {business.category?.toUpperCase() === 'BOLETO' && (nearbyStays.length > 0 || nearbyDining.length > 0) && (
+  +        <div className="lg:max-w-6xl lg:mx-auto lg:px-6 pt-4 pb-12">
+  +          {nearbyStays.length > 0 && (
+  +            <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
+  +              <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Alojamientos Cercanos' : 'Nearby Stays'}</h2>
+  +              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+  +                {nearbyStays.map((stay) => (
+  +                  <div key={stay.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+  +                    <BusinessCard
+  +                      business={stay}
+  +                      orientation="vertical"
+  +                      showItineraryAdd={true}
+  +                      dict={dict}
+  +                    />
+  +                  </div>
+  +                ))}
+  +              </ScrollCarousel>
+  +            </section>
+  +          )}
+  +
+  +          {nearbyDining.length > 0 && (
+  +            <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
+  +              <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Restaurantes Cercanos' : 'Nearby Dining'}</h2>
+  +              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+  +                {nearbyDining.map((dining) => (
+  +                  <div key={dining.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+  +                    <BusinessCard
+  +                      business={dining}
+  +                      orientation="vertical"
+  +                      showItineraryAdd={true}
+  +                      dict={dict}
+  +                    />
+  +                  </div>
+  +                ))}
+  +              </ScrollCarousel>
+  +            </section>
+  +          )}
+  +        </div>
+  +      )}
+  +
+         {/* 5. Sticky Action Bar - MOBILE ONLY */}
+  -      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-safe">
+  ... (truncated)
+  +155 -50
+
+src/app/[lang]/business/[slug]/verify-overlay.tsx
+  @@ -0,0 +1,82 @@
+  +"use client";
+  +
+  +import { useState } from "react";
+  +import { verifyBusinessAction } from "./actions";
+  +import { CheckCircle2, ShieldCheck, X } from "lucide-react";
+  +import { Button } from "@/components/ui/button";
+  +import { useRouter } from "next/navigation";
+  +
+  +interface VerifyOverlayProps {
+  +  businessId: string;
+  +  token: string;
+  +  lang: string;
+  +}
+  +
+  +export function VerifyOverlay({ businessId, token, lang }: VerifyOverlayProps) {
+  +  const [isVerifying, setIsVerifying] = useState(false);
+  +  const [success, setSuccess] = useState(false);
+  +  const [error, setError] = useState<string | null>(null);
+  +  const [hidden, setHidden] = useState(false);
+  +  const router = useRouter();
+  +
+  +  const handleVerify = async () => {
+  +    setIsVerifying(true);
+  +    setError(null);
+  +    const result = await verifyBusinessAction(businessId, token);
+  +    setIsVerifying(false);
+  +
+  +    if (result.success) {
+  +      setSuccess(true);
+  +      setTimeout(() => {
+  +        setHidden(true);
+  +        router.replace(`/${lang}/business/${businessId}`); // or slug if we passed it
+  +      }, 3000);
+  +    } else {
+  +      setError(result.error || "Verification failed");
+  +    }
+  +  };
+  +
+  +  if (hidden) return null;
+  +
+  +  return (
+  +    <div className="fixed bottom-0 left-0 right-0 z-[200] p-4 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 text-white shadow-2xl animate-in slide-in-from-bottom-full duration-500">
+  +      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+  +        <div className="flex items-start gap-3">
+  +          <div className="p-2 bg-blue-500/20 rounded-full shrink-0">
+  +            <ShieldCheck className="w-6 h-6 text-blue-400" />
+  +          </div>
+  +          <div>
+  +            <h3 className="font-bold text-lg">Verify Your Business</h3>
+  +            <p className="text-sm text-slate-300">
+  +              Claim this profile to verify your WhatsApp number and show up in tourist searches.
+  +            </p>
+  +          </div>
+  +        </div>
+  +
+  +        <div className="flex items-center gap-3 w-full sm:w-auto">
+  +          {error && <span className="text-red-400 text-sm">{error}</span>}
+  +          {success ? (
+  +            <div className="flex items-center gap-2 text-emerald-400 font-bold px-4 py-2 bg-emerald-400/10 rounded-lg">
+  +              <CheckCircle2 className="w-5 h-5" />
+  +              Verified Successfully!
+  +            </div>
+  +          ) : (
+  +            <Button
+  +              onClick={handleVerify}
+  +              disabled={isVerifying}
+  +              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold"
+  +            >
+  +              {isVerifying ? "Verifying..." : "Verify Now"}
+  +            </Button>
+  +          )}
+  +          <button 
+  +            onClick={() => setHidden(true)}
+  +            className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors shrink-0"
+  +          >
+  +            <X className="w-5 h-5" />
+  +          </button>
+  +        </div>
+  +      </div>
+  +    </div>
+  +  );
+  +}
+  +82 -0
+
+src/features/discovery/components/business-card.tsx
+  @@ -165,7 +165,7 @@
+  -              {business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' && (
+  +              {business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
+                   <DropdownMenuItem onClick={(e) => { 
+                     e.stopPropagation(); 
+                      
+  @@ -556,7 +556,7 @@
+  -            {showContact && business.whatsapp && business.category?.toUpperCase() !== 'BOLETO' && (
+  +            {showContact && business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
+                 <Button
+                   onClick={(e) => {
+                     e.stopPropagation();
+  +2 -2
+
+src/features/discovery/components/templates/business-template-culture.tsx
+  @@ -8,6 +8,8 @@
+  +  if (!business.isAsociado) return null
+  +
+     const workshops = business.services || []
+   
+     const t = dict?.templates?.culture || DICTIONARIES.cultureTemplate
+  @@ -15,40 +17,44 @@
+  -        <div className="flex items-center gap-3 mb-8">
+  -          <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+  -            <Palette className="w-6 h-6 text-amber-600" />
+  -          </div>
+  -          <div>
+  -            <h2 className="text-3xl font-serif text-slate-900">{t.livingHeritage}</h2>
+  -            <p className="text-slate-900/50 text-sm">{t.subtitle}</p>
+  -          </div>
+  -        </div>
+  -
+  -        {/* Heritage Process Highlights */}
+  -        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  -          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  -            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+  -              <Users className="w-5 h-5 text-amber-400" />
+  -            </div>
+  -            <h4 className="font-bold text-slate-900">{t.localArtisans}</h4>
+  -            <p className="text-xs text-slate-900/50 leading-relaxed">{t.localArtisansDesc}</p>
+  -          </div>
+  -          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  -            <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+  -              <History className="w-5 h-5 text-rose-400" />
+  +        {business.category?.toLowerCase() === 'textiles' && (
+  +          <>
+  +            <div className="flex items-center gap-3 mb-8">
+  +              <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+  +                <Palette className="w-6 h-6 text-amber-600" />
+  +              </div>
+  +              <div>
+  +                <h2 className="text-3xl font-serif text-slate-900">{t.livingHeritage}</h2>
+  +                <p className="text-slate-900/50 text-sm">{t.subtitle}</p>
+  +              </div>
+               </div>
+  -            <h4 className="font-bold text-slate-900">{t.ancientTech}</h4>
+  -            <p className="text-xs text-slate-900/50 leading-relaxed">{t.ancientTechDesc}</p>
+  -          </div>
+  -          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  -            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+  -              <Sparkles className="w-5 h-5 text-emerald-400" />
+  +
+  +            {/* Heritage Process Highlights */}
+  +            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  +              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  +                <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+  +                  <Users className="w-5 h-5 text-amber-400" />
+  +                </div>
+  +                <h4 className="font-bold text-slate-900">{t.localArtisans}</h4>
+  +                <p className="text-xs text-slate-900/50 leading-relaxed">{t.localArtisansDesc}</p>
+  +              </div>
+  +              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  +                <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+  +                  <History className="w-5 h-5 text-rose-400" />
+  +                </div>
+  +                <h4 className="font-bold text-slate-900">{t.ancientTech}</h4>
+  +                <p className="text-xs text-slate-900/50 leading-relaxed">{t.ancientTechDesc}</p>
+  +              </div>
+  +              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-3">
+  +                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+  +                  <Sparkles className="w-5 h-5 text-emerald-400" />
+  +                </div>
+  +                <h4 className="font-bold text-slate-900">{t.authenticGoods}</h4>
+  +                <p className="text-xs text-slate-900/50 leading-relaxed">{t.authenticGoodsDesc}</p>
+  +              </div>
+               </div>
+  -            <h4 className="font-bold text-slate-900">{t.authenticGoods}</h4>
+  -            <p className="text-xs text-slate-900/50 leading-relaxed">{t.authenticGoodsDesc}</p>
+  -          </div>
+  -        </div>
+  +          </>
+  +        )}
+   
+           <div className="grid gap-6">
+             <h3 className="text-xl font-serif text-slate-900 mb-2">{t.experiences}</h3>
+  +38 -32
+
+src/features/discovery/components/templates/business-template-expedition.tsx
+  @@ -9,6 +9,8 @@
+  +  if (!business.isAsociado) return null
+  +
+     const packages = business.tourPackages || []
+   
+     const t = dict?.templates?.expedition || DICTIONARIES.expeditionTemplate
+  +2 -0
+
+src/features/discovery/components/templates/business-template-gastronomic.tsx
+
+... (more changes truncated)
+[full diff: rtk git diff --no-compact]

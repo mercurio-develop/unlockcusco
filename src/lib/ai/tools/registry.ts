@@ -10,6 +10,7 @@ import { queryExpatsGuide } from './query-expats-guide';
 import { buildItinerary } from './build-itinerary';
 import { mutateItinerary } from './mutate-itinerary';
 import { generateSaveLink } from './save-itinerary';
+import { switchItineraryTab } from './switch-itinerary-tab';
 
 // Export the native Vercel AI SDK tools
 export const toolsRegistry = {
@@ -23,5 +24,6 @@ export const toolsRegistry = {
   queryExpatsGuide,
   buildItinerary,
   mutateItinerary,
-  generateSaveLink
+  generateSaveLink,
+  switchItineraryTab
 };

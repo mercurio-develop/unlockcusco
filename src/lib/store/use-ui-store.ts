@@ -8,6 +8,14 @@ export interface InteractionRecord {
   timestamp: number;
 }
 
+export interface RadarState {
+  waypointId: string;
+  lat: number;
+  lng: number;
+  name: string;
+  category: string;
+}
+
 export interface UiState {
   isChatOpen: boolean;
   setIsChatOpen: (v: boolean) => void;
@@ -42,6 +50,8 @@ export interface UiState {
   setAiPromptToTrigger: (v: string | null) => void;
   interactionHistory: InteractionRecord[];
   addInteraction: (record: Omit<InteractionRecord, 'timestamp'>) => void;
+  radarState: RadarState | null;
+  setRadarState: (v: RadarState | null) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -81,4 +91,6 @@ export const useUiStore = create<UiState>((set) => ({
     const history = [newRecord, ...state.interactionHistory].slice(0, 10);
     return { interactionHistory: history };
   }),
+  radarState: null,
+  setRadarState: (v) => set({ radarState: v }),
 }));

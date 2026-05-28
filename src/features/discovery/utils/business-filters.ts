@@ -6,7 +6,7 @@ export function getVisibleBusinesses(
   isSearchActive: boolean
 ): Business[] {
   if (isSearchActive) return effectiveBusinesses;
-  if (!mapBounds) return [];
+  if (!mapBounds) return effectiveBusinesses;
   if (effectiveBusinesses.length === 0) return effectiveBusinesses;
   
   const [west, south, east, north] = mapBounds;

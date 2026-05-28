@@ -40,7 +40,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 export function useMapboxRoute() {
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const transportProfiles = useItineraryStore(s => s.transportProfiles);
 
   const [routeData, setRouteData] = useState<RouteData | null>(null);

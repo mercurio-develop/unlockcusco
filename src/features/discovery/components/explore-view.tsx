@@ -1,12 +1,12 @@
  
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useQueryStates } from "nuqs"
 import { searchParamsParsers } from "../search-params"
-import { LayoutGrid, CalendarDays, Sparkles } from "lucide-react"
+import { LayoutGrid, CalendarDays, Sparkles, MapPin } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { ExplorePanel } from "./explore-panel"
 import { useUiStore } from "@/lib/store/use-ui-store"
@@ -36,12 +36,22 @@ const ExploreMap = dynamic(() => import("@/features/discovery/components/explore
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-50 animate-pulse" />
 })
-export function ExploreView({ 
-  initialBusinesses, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+export function ExploreView({
+  initialBusinesses,
   initialMapBusinesses,
   initialCategoryCounts,
-  initialHasMore, 
-  initialQuery, 
+  initialHasMore,
+  initialQuery,
   initialSelectedId,
   initialItinerary,
   dict
@@ -115,14 +125,86 @@ export function ExploreView({
   const initialTripId = (initialItinerary as (OptimizedPlan & { shortId?: string }) | undefined)?.shortId;
   const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   
+  const [showCollisionDialog, setShowCollisionDialog] = useState(false);
+  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const secondaryItinerary = useItineraryStore(s => s.secondaryItinerary);
+  const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
+  const setActiveTab = useItineraryStore(s => s.setActiveTab);
+
+  // Use a ref to ensure we only process the initial load once
+  const processedTripId = useRef<string | null>(null);
+
   useEffect(() => {
-    if (initialTripId) {
+    if (!initialItinerary || !initialTripId) {
+      if (processedTripId.current === null) {
+        setPanelMode("discover");
+        processedTripId.current = "empty";
+      }
+      return;
+    }
+
+    if (processedTripId.current === initialTripId) return;
+
+    // Check if there's an existing itinerary
+    const hasWaypoints = activeItinerary?.waypoints && activeItinerary.waypoints.length > 0;
+
+    if (!hasWaypoints) {
+      // Safe to load into primary
+      const isV2 = (initialItinerary as any).version === 2;
+      if (isV2) {
+        setActiveTab('primary');
+        setActiveItinerary((initialItinerary as any).primary || null);
+        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).secondary || null });
+      } else {
+        setActiveItinerary(initialItinerary as any);
+        setActiveTab('primary');
+      }
       setPanelMode("itinerary");
       setMobileViewMode("map");
+      processedTripId.current = initialTripId;
     } else {
-      setPanelMode("discover");
+      // Collision!
+      setShowCollisionDialog(true);
+      processedTripId.current = initialTripId;
     }
-  }, [initialTripId, setPanelMode, setMobileViewMode]);
+  }, [initialItinerary, initialTripId, activeItinerary, setActiveItinerary, setActiveTab, setPanelMode, setMobileViewMode]);
+
+  const handleCollisionChoice = (choice: 'primary' | 'secondary' | 'cancel') => {
+    setShowCollisionDialog(false);
+    
+    // Remove the ?trip from URL after making a choice to prevent re-triggering
+    const url = new URL(window.location.href);
+    url.searchParams.delete('trip');
+    window.history.replaceState({}, '', url.toString());
+
+    if (choice === 'cancel') {
+      setPanelMode('itinerary');
+      return;
+    }
+
+    const isV2 = (initialItinerary as any).version === 2;
+
+    if (choice === 'primary') {
+      setActiveTab('primary');
+      if (isV2) {
+        setActiveItinerary((initialItinerary as any).primary || null);
+        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).secondary || null });
+      } else {
+        setActiveItinerary(initialItinerary as any);
+      }
+    } else if (choice === 'secondary') {
+      setActiveTab('secondary');
+      // Set the secondary itinerary and switch to it
+      if (isV2) {
+        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).primary || null });
+      } else {
+        useItineraryStore.setState({ secondaryItinerary: initialItinerary as any });
+      }
+    }
+    
+    setPanelMode("itinerary");
+    setMobileViewMode("map");
+  };
 
   const d = DICTIONARIES.exploreView
 
@@ -170,7 +252,8 @@ export function ExploreView({
   )
 
   return (
-    <ThreePaneLayout
+    <>
+      <ThreePaneLayout
       sidebar={sidebar}
       content={content}
       map={<ExploreMap isDefaultView={isDefaultView} businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""} onSelectBusiness={(id) => {
@@ -188,5 +271,48 @@ export function ExploreView({
       }} onBoundsChange={setMapBounds} dict={dict} />}
       showMap={true}
     />
+
+      <Dialog open={showCollisionDialog} onOpenChange={(open) => { if (!open) handleCollisionChoice('cancel'); }}>
+        <DialogContent className="sm:max-w-md border-0 shadow-2xl rounded-2xl p-0 overflow-hidden">
+          <div className="bg-white p-6 pb-2 relative overflow-hidden">
+            <DialogHeader className="relative z-10 space-y-2">
+              <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-indigo-600" />
+              </div>
+              <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">
+                Load Route
+              </DialogTitle>
+              <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
+                You already have an active route in progress. How would you like to load this new route?
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-6 pt-4 bg-white space-y-3">
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => handleCollisionChoice('secondary')}
+                className="bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-medium h-11 rounded-xl w-full"
+              >
+                Add to Alternative Route
+              </Button>
+              <Button
+                onClick={() => handleCollisionChoice('primary')}
+                variant="outline"
+                className="text-slate-700 hover:text-slate-900 hover:bg-rose-50 hover:border-rose-200 border-slate-200 text-sm font-medium h-11 rounded-xl w-full"
+              >
+                Replace Primary Route
+              </Button>
+              <Button
+                onClick={() => handleCollisionChoice('cancel')}
+                variant="ghost"
+                className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-sm font-medium h-11 rounded-xl w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

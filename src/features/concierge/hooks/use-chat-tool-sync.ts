@@ -9,7 +9,7 @@ export function useChatToolSync(messages: any[]) {
   const setPanelMode = useUiStore(s => s.setPanelMode);
   const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
   
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
@@ -23,6 +23,7 @@ export function useChatToolSync(messages: any[]) {
   const undoItinerary = useItineraryStore(s => s.undoItinerary);
   const redoItinerary = useItineraryStore(s => s.redoItinerary);
 
+  const setActiveTab = useItineraryStore(s => s.setActiveTab);
   const processedToolCalls = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -47,6 +48,13 @@ export function useChatToolSync(messages: any[]) {
 
           const toolName = p.toolName || p.type?.replace(/^tool-/, '');
           const output = p.output;
+
+          if (toolName === 'switchItineraryTab' && output && output.success) {
+            setActiveTab(output.tab);
+            setPanelMode('itinerary' as any);
+            processedToolCalls.current.add(p.toolCallId);
+            return;
+          }
 
           if (toolName === 'buildItinerary' && output && !output.error) {
             setActiveItinerary(output);

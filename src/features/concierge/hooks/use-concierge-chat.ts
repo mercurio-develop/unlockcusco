@@ -21,7 +21,7 @@ export function useConciergeChat() {
   const setConciergeSendMessage = useUiStore(s => s.setConciergeSendMessage);
   const selectedId = useUiStore(s => s.selectedId);
   const interactionHistory = useUiStore(s => s.interactionHistory);
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const pathname = usePathname();
 
   const isEs = pathname?.split('/')[1] === 'es';

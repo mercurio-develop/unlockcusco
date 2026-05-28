@@ -35,9 +35,15 @@ export default async function ExplorePage({
     parsedParams.trip ? getItinerary(parsedParams.trip) : Promise.resolve(null)
   ])
 
-  const initialItinerary = initialItineraryData?.success && initialItineraryData?.state 
-    ? { ...(initialItineraryData.state as unknown as OptimizedPlan), shortId: parsedParams.trip ?? undefined } 
-    : null
+  let initialItinerary = null;
+  if (initialItineraryData?.success && initialItineraryData?.state) {
+    const state = initialItineraryData.state as any;
+    if (state.version === 2) {
+      initialItinerary = { ...state, shortId: parsedParams.trip ?? undefined };
+    } else {
+      initialItinerary = { ...(state as OptimizedPlan), shortId: parsedParams.trip ?? undefined };
+    }
+  }
 
   return (
     <div className="relative">

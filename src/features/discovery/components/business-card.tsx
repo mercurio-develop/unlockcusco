@@ -71,7 +71,7 @@ export function BusinessCard({
   const [isBoletoModalOpen, setIsBoletoModalOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasReportedLoad, setHasReportedLoad] = useState(false)
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const swapWaypoint = useItineraryStore(s => s.swapWaypoint);
   const insertWaypoint = useItineraryStore(s => s.insertWaypoint);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);

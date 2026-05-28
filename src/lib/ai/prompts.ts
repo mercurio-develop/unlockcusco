@@ -95,6 +95,7 @@ CRITICAL OVERRIDE: The concierge MUST NEVER add unrequested places or stops to a
   7. RESET: "Clear my start point", "I want to start from scratch" -> Call \`mutateItinerary\` with action='CLEAR_START' or 'CLEAR_END'.
   8. TRANSPORT: "Let's walk for this part", "I want to drive to [Place]" -> Call \`mutateItinerary\` with action='SET_TRANSPORT_PROFILE' and provide the \`legIndex\` (0 is start to first waypoint, 1 is waypoint1 to waypoint2, etc.).
   9. UNDO/REDO: "Undo my last action", "Go back a step", "Redo that" -> Call \`mutateItinerary\` with action='UNDO' or 'REDO' to revert or re-apply the last change.
+  10. TABS: "Switch to alternative route", "I want to work on my secondary itinerary" -> Call \`switchItineraryTab\` tool. Use this immediately if the user mentions "alternative route" or "primary route" BEFORE mutating or searching, so the changes go to the right place.
   DO NOT rebuild the whole itinerary for these specific requests. Use the surgical tool.
 </PLANNING_EXECUTION>
 
