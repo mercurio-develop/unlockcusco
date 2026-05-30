@@ -8,9 +8,11 @@ import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 import { useMapboxRoute, type RouteData } from "@/features/discovery/hooks/use-mapbox-route"
 import { useCallback } from "react"
 import { saveItineraryAction } from "@/features/itinerary/actions/save-itinerary";
+import { getItinerary } from "@/features/itinerary/queries/get-itinerary";
+import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/end-point-picker";
-import { Navigation, MapPin, Bed, Plane, X, ChevronDown, Trash2, ArrowUp, ArrowDown, Car, Footprints, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock, ArrowRightLeft, Sparkles } from "lucide-react";
+import { Navigation, MapPin, Bed, Plane, X, ChevronDown, Trash2, ArrowUp, ArrowDown, Car, Footprints, AlertTriangle, Flag, Repeat, Plus, Share2, Copy, Check, Clock, ArrowRightLeft, Sparkles, Loader2, Utensils, Mountain } from "lucide-react";
 import { BusinessCard } from "./business-card";
 import {
   Dialog,
@@ -94,13 +96,15 @@ class ItineraryErrorBoundary extends Component<{ children: ReactNode }, { error:
 }
 
 export function ItineraryPanel({ dict }: {
-   
+
   dict?: any
 }) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+  const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
+
   const activeTab = useItineraryStore(s => s.activeTab);
   const setActiveTab = useItineraryStore(s => s.setActiveTab);
   const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
@@ -124,9 +128,52 @@ export function ItineraryPanel({ dict }: {
   const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
   const mapClickMode = useUiStore(s => s.mapClickMode);
   const setMapClickMode = useUiStore(s => s.setMapClickMode);
+  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
+  const setRadarState = useUiStore(s => s.setRadarState);
   const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
 
   const { routeData } = useMapboxRoute();
+
+  const handleSearchNearby = (e: React.MouseEvent, category: string, lat: number | undefined, lng: number | undefined, title: string | undefined) => {
+    e.stopPropagation();
+    if (!lat || !lng) return;
+    
+    setRadarState(null);
+    if (useUiStore.getState().conciergeSendMessage) {
+      useUiStore.getState().conciergeSendMessage!({ 
+        text: `Find top 10 ${category} near ${title || "this location"}. [INTERNAL] You MUST pass userLat=${lat} and userLng=${lng} as arguments to the searchDatabase tool.` 
+      });
+      useUiStore.getState().setIsChatOpen(true);
+    }
+  };
+
+  const handleLoadQuickStart = async (tripId: string) => {
+    setLoadingTripId(tripId);
+    try {
+      const data = await getItinerary(tripId);
+      if (data && data.success && data.state) {
+        const state = data.state as any;
+        let loadedItinerary;
+        if (state && state.version === 2) {
+          loadedItinerary = { ...state.primary, shortId: tripId };
+          useItineraryStore.setState({ secondaryItinerary: state.secondary || null });
+        } else if (state) {
+          loadedItinerary = { ...(state as OptimizedPlan), shortId: tripId };
+        }
+
+        setActiveTab('primary');
+        setActiveItinerary(loadedItinerary);
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('trip', tripId);
+        window.history.pushState({}, '', url.toString());
+      }
+    } catch (error) {
+      console.error("Failed to load quick start trip:", error);
+    } finally {
+      setLoadingTripId(null);
+    }
+  };
 
   const saveItinerary = useCallback(async () => {
     const { activeItinerary: primary, secondaryItinerary: secondary } = useItineraryStore.getState();
@@ -232,18 +279,42 @@ export function ItineraryPanel({ dict }: {
           <div className="w-full max-w-sm mb-8 space-y-3">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quick Starts</p>
             <div className="flex flex-col gap-2">
-              <a href="?trip=sacred-valley-1-day-itinerary" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
-                <span>Classic Sacred Valley</span>
-                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </a>
-              <a href="?trip=top-7-culinary-route" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
+              <button
+                onClick={() => handleLoadQuickStart('ultimate-inca-ruins')}
+                disabled={loadingTripId !== null}
+                className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>Ultimate Inca Ruins</span>
+                {loadingTripId === 'ultimate-inca-ruins' ? (
+                  <Loader2 className="w-4 h-4 text-rose-500 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+              <button
+                onClick={() => handleLoadQuickStart('top-7-culinary-route')}
+                disabled={loadingTripId !== null}
+                className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <span>Top Culinary Route</span>
-                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </a>
-              <a href="?trip=coffee-cacao-route" className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group">
-                <span>Coffee & Cacao Route</span>
-                <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </a>
+                {loadingTripId === 'top-7-culinary-route' ? (
+                  <Loader2 className="w-4 h-4 text-rose-500 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+              <button
+                onClick={() => handleLoadQuickStart('maras-moray')}
+                disabled={loadingTripId !== null}
+                className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>Maras & Moray Adventure</span>
+                {loadingTripId === 'maras-moray' ? (
+                  <Loader2 className="w-4 h-4 text-rose-500 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -261,26 +332,35 @@ export function ItineraryPanel({ dict }: {
   return (
     <ItineraryErrorBoundary>
     <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
-      <div className="px-6 pt-6 pb-4 bg-white border-b border-gray-200 shrink-0 flex justify-between items-center">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">Live Route</span>
+      <div className="px-6 pt-6 pb-4 bg-white border-b border-gray-200 shrink-0 flex flex-col gap-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0 pr-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">Live Route</span>
+              </div>
+              {routeData?.duration != null && (
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                  ~{routeData.duration >= 3600
+                    ? `${Math.floor(routeData.duration / 3600)}h ${Math.round((routeData.duration % 3600) / 60)}m`
+                    : `${Math.round(routeData.duration / 60)}m`}
+                </span>
+              )}
             </div>
-            {routeData?.duration != null && (
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                ~{routeData.duration >= 3600
-                  ? `${Math.floor(routeData.duration / 3600)}h ${Math.round((routeData.duration % 3600) / 60)}m`
-                  : `${Math.round(routeData.duration / 60)}m`}
-              </span>
-            )}
+            <h2 className="text-xl font-serif font-semibold text-slate-900 truncate">
+              {activeItinerary.title || "My Sacred Valley Adventure"}
+            </h2>
           </div>
-          <h2 className="text-xl font-serif font-semibold text-slate-900 truncate">
-            {activeItinerary.title || "Itinerary"}
-          </h2>
+          <button 
+            onClick={() => setPanelMode("discover")}
+            className="w-8 h-8 shrink-0 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200 mt-1"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex items-center justify-start sm:justify-end gap-2">
           <button
             onClick={() => setIsClearModalOpen(true)}
             className="h-8 px-3 rounded-full bg-rose-50 text-rose-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-rose-100 transition-colors"
@@ -299,12 +379,6 @@ export function ItineraryPanel({ dict }: {
             className="h-8 px-3 rounded-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-slate-800 transition-colors"
           >
             <Share2 className="w-3.5 h-3.5" /> Save
-          </button>
-          <button 
-            onClick={() => setPanelMode("discover")}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-slate-500 hover:bg-gray-200"
-          >
-            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -339,6 +413,9 @@ export function ItineraryPanel({ dict }: {
               <p className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-1">Start Point</p>
               <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                 <p className="text-sm font-semibold text-slate-900 truncate flex-1">{activeItinerary.startAnchor?.title || "Current Location"}</p>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mt-3" onClick={e => e.stopPropagation()}>
                 <button
                   onClick={e => {
                     e.stopPropagation();
@@ -355,16 +432,11 @@ export function ItineraryPanel({ dict }: {
                       alert("Geolocation is not supported by your browser.");
                     }
                   }}
-                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full bg-slate-100 flex items-center gap-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-[10px] font-bold uppercase tracking-wider"
                   title="Use My GPS Location"
                 >
-                  <Navigation className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); setSelectedId('itin-start'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
-                  className="shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
-                >
-                  View Map
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Set GPS</span>
                 </button>
                 <button
                   onClick={e => { 
@@ -376,17 +448,22 @@ export function ItineraryPanel({ dict }: {
                       window.dispatchEvent(new CustomEvent('drawer-snap-half'));
                     }
                   }}
-                  className={`shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  className={`shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  title="Set marker on map"
                 >
                   <MapPin className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{mapClickMode === 'start' ? 'Cancel' : 'Set Marker'}</span>
+                  <span className="sm:hidden">{mapClickMode === 'start' ? 'Cancel' : ''}</span>
+                  {!mapClickMode && <span className="sm:hidden">Marker</span>}
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingStart(true); setPanelMode('discover'); }}
                   title={activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? "Exchange start point — browse Discover" : "Add start point — browse Discover"}
-                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
+                  className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full bg-slate-100 flex items-center gap-1.5 text-slate-400 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
                 >
-                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" strokeWidth={1.5} />}
+                  {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />}
+                  <span className="hidden sm:inline">{activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? 'Exchange' : 'Add'}</span>
+                  <span className="sm:hidden">{activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' ? 'Swap' : 'Add'}</span>
                 </button>
                 {activeItinerary.startAnchor?.title && activeItinerary.startAnchor.title !== 'Current Location' && (
                   <button
@@ -402,10 +479,44 @@ export function ItineraryPanel({ dict }: {
             </div>
           </div>
           {/* Expandable detail — inside border container, mirrors waypoint card */}
-          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor.service as Business) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
-              {(activeItinerary.startAnchor.service as Business) && (
-                <BusinessCard business={(activeItinerary.startAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+              {(activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) && (
+                <div className="space-y-4 pt-4">
+                  {(activeItinerary.startAnchor.service as Business) && (
+                    <BusinessCard business={(activeItinerary.startAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+                  )}
+                  
+                  <div className="space-y-2 pt-2">
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'dining', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
+                      >
+                        <Utensils className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.eat} Nearby</span>
+                        <span className="sm:hidden">{t.eat}</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'stays', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
+                      >
+                        <Bed className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.stay} Nearby</span>
+                        <span className="sm:hidden">{t.stay}</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'adventure', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
+                      >
+                        <Mountain className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.do} Nearby</span>
+                        <span className="sm:hidden">{t.do}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -471,54 +582,97 @@ export function ItineraryPanel({ dict }: {
                   </div>
                 </div>
 
-                {/* Action Footer: Delete, Swap, End Point */}
+                {/* Action Footer: Delete, Swap, Move, End Here */}
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Dialog>
                       <DialogTrigger render={
                         <button 
                           onClick={(e) => { e.stopPropagation(); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 h-8 rounded-md bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                          title={t.delete}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          {t.delete}
+                          <span className="hidden sm:inline">{t.delete}</span>
                         </button>
                       } />
-                      <DialogContent className="sm:max-w-[425px]" onClick={(e) => e.stopPropagation()}>
-                        <DialogHeader>
-                          <DialogTitle>{t.removeStop}</DialogTitle>
-                          <DialogDescription>
-                            {t.areYouSure} <strong>{waypoint.title}</strong> {t.fromItinerary}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter className="mt-4">
-                          <DialogClose render={<Button variant="outline">{t.cancel}</Button>} />
-                          <DialogClose render={
-                            <Button variant="destructive" onClick={(e) => { e.stopPropagation(); removeWaypoint(waypoint.id); }}>
-                              {t.remove}
-                            </Button>
-                          } />
-                        </DialogFooter>
+                      <DialogContent className="sm:max-w-md border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-0 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white p-6 pb-2 relative overflow-hidden">
+                          <DialogHeader className="relative z-10 space-y-2">
+                            <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center mb-4">
+                              <Trash2 className="w-6 h-6 text-rose-600" />
+                            </div>
+                            <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">{t.removeStop}</DialogTitle>
+                            <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
+                              {t.areYouSure} <strong>{waypoint.title}</strong> {t.fromItinerary}
+                            </DialogDescription>
+                          </DialogHeader>
+                        </div>
+                        <div className="p-6 pt-4 bg-white space-y-3">
+                          <div className="flex flex-col gap-2">
+                            <DialogClose render={
+                              <Button className="bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium h-11 rounded-xl w-full" onClick={(e) => { e.stopPropagation(); removeWaypoint(waypoint.id); }}>
+                                {t.remove}
+                              </Button>
+                            } />
+                            <DialogClose render={
+                              <Button variant="ghost" className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-sm font-medium h-11 rounded-xl w-full">
+                                {t.cancel}
+                              </Button>
+                            } />
+                          </div>
+                        </div>
                       </DialogContent>
                     </Dialog>
                     
                     <button
                       onClick={e => { e.stopPropagation(); setExchangeTargetId?.(waypoint.id); setPanelMode('discover'); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                      title="Exchange this place"
+                      className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 h-8 rounded-md bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                      title={t.swap}
                     >
                       <Repeat className="w-3.5 h-3.5" />
-                      {t.swap}
+                      <span className="hidden sm:inline">{t.swap}</span>
                     </button>
 
-                    <button
-                      onClick={e => { e.stopPropagation(); moveToOtherItinerary(waypoint.id); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                      title={activeTab === 'primary' ? "Move to Alternative Route" : "Move to Primary Route"}
-                    >
-                      <ArrowRightLeft className="w-3.5 h-3.5" />
-                      {t.move || "Move"}
-                    </button>
+                    <Dialog>
+                      <DialogTrigger render={
+                        <button
+                          onClick={e => { e.stopPropagation(); }}
+                          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 h-8 rounded-md bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                          title={activeTab === 'primary' ? "Move to Alternative Route" : "Move to Primary Route"}
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">{t.move || "Move"}</span>
+                        </button>
+                      } />
+                      <DialogContent className="sm:max-w-md border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-0 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white p-6 pb-2 relative overflow-hidden">
+                          <DialogHeader className="relative z-10 space-y-2">
+                            <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+                              <ArrowRightLeft className="w-6 h-6 text-indigo-600" />
+                            </div>
+                            <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">{t.moveStop}</DialogTitle>
+                            <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
+                              {t.areYouSureMove} <strong>{waypoint.title}</strong> {t.toOtherItinerary}
+                            </DialogDescription>
+                          </DialogHeader>
+                        </div>
+                        <div className="p-6 pt-4 bg-white space-y-3">
+                          <div className="flex flex-col gap-2">
+                            <DialogClose render={
+                              <Button className="bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-medium h-11 rounded-xl w-full" onClick={(e) => { e.stopPropagation(); moveToOtherItinerary(waypoint.id); }}>
+                                {t.move || "Move"}
+                              </Button>
+                            } />
+                            <DialogClose render={
+                              <Button variant="ghost" className="text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-sm font-medium h-11 rounded-xl w-full">
+                                {t.cancel}
+                              </Button>
+                            } />
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     {waypoint.lat != null && waypoint.lng != null && (
                       <button
@@ -530,11 +684,11 @@ export function ItineraryPanel({ dict }: {
                           }
                           removeWaypoint(waypoint.id);
                         }}
-                        title="Set as end of trip"
-                        className="flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                        title={t.endHere}
+                        className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 h-8 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
                       >
                         <Flag className="w-3.5 h-3.5" />
-                        {t.endHere}
+                        <span className="hidden sm:inline">{t.endHere}</span>
                       </button>
                     )}
                   </div>
@@ -553,7 +707,39 @@ export function ItineraryPanel({ dict }: {
                 >
                   <div className="overflow-hidden">
                     {(waypoint.service as Business | null) && (
-                      <BusinessCard business={(waypoint.service as Business)} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+                      <div className="space-y-4">
+                        <BusinessCard business={(waypoint.service as Business)} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+                        
+                        <div className="space-y-2 pt-2">
+                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
+                          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                            <button
+                              onClick={(e) => handleSearchNearby(e, 'dining', waypoint.lat, waypoint.lng, waypoint.title)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
+                            >
+                              <Utensils className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">{t.eat} Nearby</span>
+                              <span className="sm:hidden">{t.eat}</span>
+                            </button>
+                            <button
+                              onClick={(e) => handleSearchNearby(e, 'stays', waypoint.lat, waypoint.lng, waypoint.title)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
+                            >
+                              <Bed className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">{t.stay} Nearby</span>
+                              <span className="sm:hidden">{t.stay}</span>
+                            </button>
+                            <button
+                              onClick={(e) => handleSearchNearby(e, 'adventure', waypoint.lat, waypoint.lng, waypoint.title)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
+                            >
+                              <Mountain className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">{t.do} Nearby</span>
+                              <span className="sm:hidden">{t.do}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -581,87 +767,120 @@ export function ItineraryPanel({ dict }: {
             className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-lg ring-1 ring-rose-500 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
           >
             <div className="flex gap-4 p-4">
-            <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
-              <Bed className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">{t.endPoint}</p>
-              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
-                <EndPointPicker
-                  value={activeItinerary.endAnchor?.title}
-                  placeholder={t.endPlaceholder}
-                  onSelect={({ lat, lng, name, service }) => {
-                    updateEndAnchorLocation(lat, lng, name, service);
-                    if (conciergeSendMessage) {
-                      conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${name}.` });
-                    }
-                  }}
-                />
-                <button
-                  onClick={e => { e.stopPropagation(); setSelectedId('itin-arrival'); window.dispatchEvent(new CustomEvent('drawer-snap-half')); }}
-                  className="shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
-                >
-                  {t.viewMap}
-                </button>
-                <button
-                  onClick={e => { 
-                    e.stopPropagation(); 
-                    if (mapClickMode === 'end') {
-                      setMapClickMode(null);
-                    } else {
-                      setMapClickMode('end');
-                      window.dispatchEvent(new CustomEvent('drawer-snap-half'));
-                    }
-                  }}
-                  className={`shrink-0 h-8 px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
-                >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{mapClickMode === 'end' ? t.cancel : t.setMarker}</span>
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
-                  title={activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? "Exchange end point — browse Discover" : "Add end point — browse Discover"}
-                  className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors"
-                >
-                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-4 h-4" /> : <Plus className="w-4 h-4" strokeWidth={1.5} />}
-                </button>
-                {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
-                  <button
-                    onClick={e => { e.stopPropagation(); clearEndAnchor(); setIsExchangingEnd(false); }}
-                    title="Remove end point"
-                    className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+              <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
+                <Bed className="w-4 h-4" />
               </div>
-              {(() => {
-                // End arrival = last stop time + last stop duration + last leg travel
-                const waypoints = activeItinerary.waypoints || [];
-                if (stopTimes.length > 0 || routeData?.legs) {
-                  const lastStopMins = (() => {
-                    const parseTime = (t: string | undefined) => { if (!t) return 9*60; const [h,m]=t.split(':').map(Number); return (h||0)*60+(m||0); };
-                    let cur = parseTime(activeItinerary.startAnchor?.time);
-                    waypoints.forEach((wp, i: number) => {
-                      cur += routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration/60) : 0;
-                      cur += wp.durationMins || 60;
-                    });
-                    const lastLeg = routeData?.legs?.[waypoints.length];
-                    if (lastLeg) cur += Math.round(lastLeg.duration/60);
-                    const h = Math.floor(cur/60)%24; const m = cur%60;
-                    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-                  })();
-                  return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ {(t as any).arrives} ~{lastStopMins}</p>;
-                }
-                return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
-              })()}
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase mb-1">{t.endPoint}</p>
+                <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                  <EndPointPicker
+                    value={activeItinerary.endAnchor?.title}
+                    placeholder={t.endPlaceholder}
+                    onSelect={({ lat, lng, name, service }) => {
+                      updateEndAnchorLocation(lat, lng, name, service);
+                      if (conciergeSendMessage) {
+                        conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to ${name}.` });
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-3" onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={e => { 
+                      e.stopPropagation(); 
+                      if (mapClickMode === 'end') {
+                        setMapClickMode(null);
+                      } else {
+                        setMapClickMode('end');
+                        window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+                      }
+                    }}
+                    className={`shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                    title="Set marker on map"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{mapClickMode === 'end' ? t.cancel : t.setMarker}</span>
+                    <span className="sm:hidden">{mapClickMode === 'end' ? 'Cancel' : 'Marker'}</span>
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
+                    title={activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? "Exchange end point — browse Discover" : "Add end point — browse Discover"}
+                    className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full bg-slate-100 flex items-center gap-1.5 text-slate-400 hover:bg-slate-200 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                  >
+                    {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? <Repeat className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />}
+                    <span className="hidden sm:inline">{activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? 'Exchange' : 'Add'}</span>
+                    <span className="sm:hidden">{activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' ? 'Swap' : 'Add'}</span>
+                  </button>
+                  {activeItinerary.endAnchor?.title && activeItinerary.endAnchor.title !== 'Destination' && (
+                    <button
+                      onClick={e => { e.stopPropagation(); clearEndAnchor(); setIsExchangingEnd(false); }}
+                      title="Remove end point"
+                      className="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {(() => {
+                  const waypoints = activeItinerary.waypoints || [];
+                  if (stopTimes.length > 0 || routeData?.legs) {
+                    const lastStopMins = (() => {
+                      const parseTime = (t: string | undefined) => { if (!t) return 9*60; const [h,m]=t.split(':').map(Number); return (h||0)*60+(m||0); };
+                      let cur = parseTime(activeItinerary.startAnchor?.time);
+                      waypoints.forEach((wp, i: number) => {
+                        cur += routeData?.legs?.[i] ? Math.round(routeData.legs[i].duration/60) : 0;
+                        cur += wp.durationMins || 60;
+                      });
+                      const lastLeg = routeData?.legs?.[waypoints.length];
+                      if (lastLeg) cur += Math.round(lastLeg.duration/60);
+                      const h = Math.floor(cur/60)%24; const m = cur%60;
+                      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                    })();
+                    return <p className="text-[10px] font-bold text-rose-400 mt-1">⏱ {(t as any).arrives} ~{lastStopMins}</p>;
+                  }
+                  return activeItinerary.endAnchor?.time ? <p className="text-xs text-slate-500 mt-1">{activeItinerary.endAnchor.time}</p> : null;
+                })()}
+              </div>
             </div>
-            </div>
-            {/* Expandable detail — inside border container, mirrors waypoint card */}
-            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor.service as Business) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
+            {/* Expandable detail */}
+            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
               <div className="overflow-hidden">
-                {(activeItinerary.endAnchor.service as Business) && (
-                  <BusinessCard business={(activeItinerary.endAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} showMap={false} dict={dict} />
+                {(activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) && (
+                  <div className="space-y-4 pt-4">
+                    {(activeItinerary.endAnchor.service as Business) && (
+                      <BusinessCard business={(activeItinerary.endAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
+                    )}
+                    <div className="space-y-2 pt-2">
+                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'dining', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
+                      >
+                        <Utensils className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.eat} Nearby</span>
+                        <span className="sm:hidden">{t.eat}</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'stays', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
+                      >
+                        <Bed className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.stay} Nearby</span>
+                        <span className="sm:hidden">{t.stay}</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleSearchNearby(e, 'adventure', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
+                      >
+                        <Mountain className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.do} Nearby</span>
+                        <span className="sm:hidden">{t.do}</span>
+                      </button>
+                    </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -734,7 +953,7 @@ export function ItineraryPanel({ dict }: {
               </div>
               <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">Clear Itinerary</DialogTitle>
               <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
-                Are you sure you want to clear the itinerary "{activeItinerary?.title || "Itinerary"}"? This action cannot be undone.
+                Are you sure you want to clear the itinerary "{activeItinerary?.title || "My Sacred Valley Adventure"}"? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
           </div>
