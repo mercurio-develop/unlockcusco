@@ -36,16 +36,18 @@ async function main() {
     // Quick check if it looks like it might contain Spanish or just to be safe, pass them all
     console.log(`\nTranslating: ${b.name}`);
 
-    const prompt = `
-You are an expert translator and travel writer.
-The following is a Zagat-style description of a business. It may contain Spanish words, phrases, or quotes.
-Translate the ENTIRE description into natural, idiomatic English. 
-Maintain the Zagat style: short, punchy, 1-2 sentences, and keep the quoted phrases (translate the quotes to English as well, keeping the quote marks).
-If the description is already 100% English, just output it exactly as is.
+    const prompt = \`
+    You are an expert translator and travel writer.
+    The following is a Zagat-style description of a business. It is supposed to be in English, but it may contain a mix of languages including French, Italian, or Spanish words, phrases, or quotes.
+    Translate the ENTIRE description into natural, idiomatic, plain English.
+    Maintain the Zagat style: short, punchy, 1-2 sentences, and keep the quoted phrases (translate the quotes to English as well, keeping the quote marks).
+    If the description is already 100% pure English, just output it exactly as is.
 
-Original Description:
-${originalDescription}
-    `;
+    CRITICAL INSTRUCTION: Do NOT include any conversational text, explanations, or meta-commentary like "This description is mixed with French...". Output ONLY the final translated English description and nothing else.
+
+    Original Description:
+    \${originalDescription}
+    \`;
 
     try {
       const { text } = await generateText({
