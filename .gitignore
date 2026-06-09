@@ -83,6 +83,7 @@ temp-*
 *.tmp
 tmp/
 *.sql
+*-report.json
 
 # Build & Logs
 *.log
@@ -104,3 +105,4 @@ pipelines/
 mcp-configs/
 playwright.config.ts
 .devtools
+scripts//
