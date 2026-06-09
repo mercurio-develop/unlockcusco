@@ -11,7 +11,8 @@ export function useChatLocation(
   targetDate: Date | null,
   activeItinerary: OptimizedPlan | null
 ) {
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const userCoords = useUiStore(s => s.userCoords);
+  const setUserCoords = useUiStore(s => s.setUserCoords);
   const searchParams = useSearchParams();
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const setPanelMode = useUiStore(s => s.setPanelMode);
@@ -28,7 +29,6 @@ export function useChatLocation(
         const { latitude, longitude } = position.coords;
         setUserCoords({ lat: latitude, lng: longitude });
         setStartAnchorLocation(latitude, longitude);
-        setPanelMode('itinerary');
         
         chatSendMessage(
           { text: `I just shared my GPS location. I am at coordinates ${latitude.toFixed(5)}, ${longitude.toFixed(5)}. What can you recommend nearby?` },

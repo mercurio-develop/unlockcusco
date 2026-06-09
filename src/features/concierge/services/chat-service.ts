@@ -33,8 +33,8 @@ export interface ChatMessage {
 }
 
 export interface ChatRequestData {
-  userLat?: number | null;
-  userLng?: number | null;
+  userLat?: number | null | string;
+  userLng?: number | null | string;
   localTime?: string;
   targetDate?: string;
   archetype?: keyof typeof PSYCHOGRAPHIC_MATRIX;
@@ -53,7 +53,7 @@ export interface ChatRequestData {
 export async function processChatStream(messages: ChatMessage[], bodyData: ChatRequestData) {
   const { userLat, userLng, localTime, targetDate, archetype, intensity, itineraryStartTitle, itineraryEndTitle, itineraryState, currentlyViewing, interactionHistory, activeFilters } = bodyData;
 
-  const hasGPS = userLat != null && userLng != null;
+  const hasGPS = userLat != null && userLng != null && userLat !== 'NOT_SHARED' && userLng !== 'NOT_SHARED';
   const gpsStatus = hasGPS ? 'CONFIRMED GPS' : 'TOURIST HAS NOT SHARED LOCATION YET';
 
   let systemInstruction = SYSTEM_PROMPT_CONCIERGE
@@ -134,9 +134,21 @@ export async function processChatStream(messages: ChatMessage[], bodyData: ChatR
     tools: {
       askAvailability: toolsRegistry.askAvailability,
       askUserLocation: toolsRegistry.askUserLocation,
-      searchDatabase: toolsRegistry.searchDatabase,
+      searchDatabase: {
+        ...toolsRegistry.searchDatabase,
+        execute: async (args: any) => {
+          const effectiveLat = args.userLat ?? (hasGPS ? Number(userLat) : undefined);
+          const effectiveLng = args.userLng ?? (hasGPS ? Number(userLng) : undefined);
+          
+          return (toolsRegistry.searchDatabase as any).execute({
+            ...args,
+            userLat: effectiveLat,
+            userLng: effectiveLng
+          });
+        }
+      },
       showBoletoInfo: toolsRegistry.showBoletoInfo,
-      estimateTaxiFare: toolsRegistry.estimateTaxiFare,
+      // estimateTaxiFare: toolsRegistry.estimateTaxiFare,
       triggerSupportAlert: toolsRegistry.triggerSupportAlert,
       queryExpatsGuide: toolsRegistry.queryExpatsGuide,
       buildItinerary: toolsRegistry.buildItinerary,
