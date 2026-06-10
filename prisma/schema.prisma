@@ -101,6 +101,8 @@ model Review {
   id         String   @id @default(uuid())
   businessId String
   text       String
+  textEn     String?
+  textEs     String?
   author     String
   rating     Int
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)

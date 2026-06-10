@@ -12,7 +12,8 @@
     "db:clean": "python3 scripts/clean_db.py",
     "postinstall": "prisma generate",
     "cap": "cap",
-    "init-llm": "bash scripts/init-llm.sh"
+    "init-llm": "bash scripts/init-llm.sh",
+    "scaffold:feature": "npx tsx scripts/scaffold-feature.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.71",
@@ -50,6 +51,7 @@
     "react-dom": "19.2.4",
     "react-intersection-observer": "^10.0.3",
     "react-map-gl": "^8.1.1",
+    "resend": "^6.12.4",
     "stripe": "^22.1.0",
     "supercluster": "^8.0.1",
     "swr": "^2.4.1",
