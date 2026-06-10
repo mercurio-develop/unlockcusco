@@ -12,6 +12,10 @@
     "working": "Buscando...",
     "search": "Buscar",
     "popularItineraries": "Itinerarios Populares Pre-Armados",
+    "hostelsTitle": "Top 5 Alojamientos",
+    "hostelsDesc": "Los alojamientos y hoteles mejor valorados del valle.",
+    "diningTitle": "Top 5 Restaurantes",
+    "diningDesc": "Experiencias culinarias altamente recomendadas.",
     "trips": {
       "classic": "Valle Sagrado Clásico (Día Completo)",
       "cusco": "City Tour Cusco",

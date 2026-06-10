@@ -1,4 +1,4 @@
-import { HeroSection, FeaturesSection } from "@/features/landing"
+import { HeroSection, FeaturesSection, TopListsSection } from "@/features/landing"
 import { siteConfig } from "@/lib/config/site"
 import type { Metadata } from "next"
 import { getDictionary, Locale } from "@/lib/dictionaries"
@@ -57,6 +57,7 @@ export default async function HomePage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <HeroSection dict={dict.home} />
+      <TopListsSection dict={dict.home} locale={lang} />
       <FeaturesSection dict={dict.home} />
 
     </div>

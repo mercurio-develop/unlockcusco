@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "../globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import PostHogPageView from "@/components/providers/posthog-pageview";
 import { Analytics } from "@vercel/analytics/react";
@@ -99,10 +100,11 @@ export default async function RootLayout(props: {
           <NuqsAdapter>
             <PostHogPageView />
             <Navbar dict={dict.navbar} user={user} />
-            <main className="flex-1 flex flex-col pt-12 bg-white">
+            <main className="flex-1 flex flex-col pt-12 pb-16 md:pb-0 bg-white">
               {children}
             </main>
             <Footer lang={params.lang} />
+            <BottomNav />
           </NuqsAdapter>
         </PostHogProvider>
         <Analytics />

@@ -5,13 +5,13 @@ import { EXPATS_KNOWLEDGE_BASE } from '../knowledge/expats-guide';
 import { sanitizeToolOutput } from '@/lib/ai/utils/sanitize-tool-output';
 
 const payloadSchema = z.object({
-  query: z.string().describe('The topic or question to search the guide for, e.g. "altitude sickness", "colectivo", "safety".'),
+  query: z.string().describe('The topic or question to search the local knowledge base for, e.g. "buying land", "renting", "Calca", "Rainbow Mountain".'),
 });
 
 type Payload = z.infer<typeof payloadSchema>;
 
 export const queryExpatsGuide = tool({
-  description: 'Search the comprehensive Expats Guide to the Sacred Valley. Use this to find information about local customs, safety, transportation, food, culture, history, and practical tips for tourists and expats living in or visiting Cusco and the Sacred Valley.',
+  description: 'Search the local knowledge base for the Sacred Valley. Use this to find information about long-term stays, buying land, renting houses, living in towns like Huaran or Calca, and sustainable tourism (Palo Santo, Rainbow Mountain). DO NOT use this for general tourism info like restaurants or opening hours.',
   parameters: payloadSchema,
   execute: async ({ query }: Payload) => {
     // In a real RAG system, this would do vector search.

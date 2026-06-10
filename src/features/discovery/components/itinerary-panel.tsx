@@ -134,17 +134,19 @@ export function ItineraryPanel({ dict }: {
 
   const { routeData } = useMapboxRoute();
 
-  const handleSearchNearby = (e: React.MouseEvent, category: string, lat: number | undefined, lng: number | undefined, title: string | undefined) => {
+  const handleSearchNearby = (e: React.MouseEvent, category: string, lat: number | undefined, lng: number | undefined, title: string | undefined, waypointId?: string) => {
     e.stopPropagation();
     if (!lat || !lng) return;
     
-    setRadarState(null);
-    if (useUiStore.getState().conciergeSendMessage) {
-      useUiStore.getState().conciergeSendMessage!({ 
-        text: `Find top 10 ${category} near ${title || "this location"}. [INTERNAL] You MUST pass userLat=${lat} and userLng=${lng} as arguments to the searchDatabase tool.` 
-      });
-      useUiStore.getState().setIsChatOpen(true);
-    }
+    setRadarState({
+      waypointId: waypointId || 'itin-anchor',
+      lat: lat,
+      lng: lng,
+      name: title || 'Location',
+      category: category === 'dining' ? 'Dining' : category === 'stays' ? 'Stays' : 'Culture'
+    });
+    setPanelMode('discover');
+    setMobileViewMode('map');
   };
 
   const handleLoadQuickStart = async (tripId: string) => {
@@ -422,8 +424,8 @@ export function ItineraryPanel({ dict }: {
                     if (navigator.geolocation) {
                       navigator.geolocation.getCurrentPosition((pos) => {
                         setStartAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
-                        if (useUiStore.getState().conciergeSendMessage) {
-                          useUiStore.getState().conciergeSendMessage!({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
+                        if (conciergeSendMessage) {
+                          conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
                         }
                       }, () => {
                         alert("Could not access your location. Please check browser permissions.");
@@ -714,7 +716,7 @@ export function ItineraryPanel({ dict }: {
                           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
                           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                             <button
-                              onClick={(e) => handleSearchNearby(e, 'dining', waypoint.lat, waypoint.lng, waypoint.title)}
+                              onClick={(e) => handleSearchNearby(e, 'dining', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
                             >
                               <Utensils className="w-3.5 h-3.5" />
@@ -722,7 +724,7 @@ export function ItineraryPanel({ dict }: {
                               <span className="sm:hidden">{t.eat}</span>
                             </button>
                             <button
-                              onClick={(e) => handleSearchNearby(e, 'stays', waypoint.lat, waypoint.lng, waypoint.title)}
+                              onClick={(e) => handleSearchNearby(e, 'stays', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
                             >
                               <Bed className="w-3.5 h-3.5" />
@@ -730,7 +732,7 @@ export function ItineraryPanel({ dict }: {
                               <span className="sm:hidden">{t.stay}</span>
                             </button>
                             <button
-                              onClick={(e) => handleSearchNearby(e, 'adventure', waypoint.lat, waypoint.lng, waypoint.title)}
+                              onClick={(e) => handleSearchNearby(e, 'adventure', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
                             >
                               <Mountain className="w-3.5 h-3.5" />
@@ -953,7 +955,7 @@ export function ItineraryPanel({ dict }: {
               </div>
               <DialogTitle className="text-xl font-semibold tracking-tight text-slate-900">Clear Itinerary</DialogTitle>
               <DialogDescription className="text-slate-500 text-sm leading-relaxed mt-2">
-                Are you sure you want to clear the itinerary "{activeItinerary?.title || "My Sacred Valley Adventure"}"? This action cannot be undone.
+                Are you sure you want to clear the itinerary &quot;{activeItinerary?.title || "My Sacred Valley Adventure"}&quot;? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
           </div>

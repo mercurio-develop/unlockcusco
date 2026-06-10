@@ -119,6 +119,7 @@ export function AiConcierge() {
                   (messages as UIMessage[]).map((msg, index: number) => {
                     const content = (msg.parts || [])
                       .filter(p => p.type === 'text')
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       .map(p => (p as any).text)
                       .join('\n');
 

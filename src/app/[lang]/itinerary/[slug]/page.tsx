@@ -27,7 +27,7 @@ export default async function DynamicItineraryPage(props: { params: Promise<{ la
 
   // Fetch from DB
   const itineraryData = await getItinerary(slug);
-  if (!itineraryData?.success || !itineraryData.state) {
+  if (!itineraryData || !itineraryData.success || !itineraryData.state) {
     notFound();
   }
 

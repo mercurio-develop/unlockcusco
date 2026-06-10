@@ -47,8 +47,8 @@ export const buildChatPayload = (params: {
   const eTitle = activeItinerary?.endAnchor?.title;
 
   return {
-    userLat: userCoords?.lat,
-    userLng: userCoords?.lng,
+    userLat: userCoords?.lat ?? 'NOT_SHARED',
+    userLng: userCoords?.lng ?? 'NOT_SHARED',
     localTime: new Date().toLocaleTimeString(),
     targetDate: targetDate?.toLocaleDateString() || 'today',
     archetype: travelVibe,

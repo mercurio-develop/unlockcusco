@@ -39,7 +39,8 @@ function normalizeAnchor<T extends Anchor>(anchor: T): T {
 
 export const buildItinerary = tool({
   description: `Generates a full daily itinerary using the Journey Skeleton. Use this to plan a specific day with start/end anchors, waypoints, and transit.
-CRITICAL: You MUST include realistic transit edges between every location. Do not invent fake businesses, use places from your searchDatabase results.
+CRITICAL: You MUST include a cool, evocative 'title' for the day (e.g. 'Ruins & Hidden Gems', 'Cusco Gastronomic Loop'). 
+You MUST include realistic transit edges between every location. Do not invent fake businesses, use places from your searchDatabase results.
 You can include 'pax' (number of passengers) to estimate per-person costs. Ensure totalCost is correctly calculated.`,
   parameters: microDaySchema,
   execute: async (payload: Payload) => {
@@ -54,7 +55,12 @@ You can include 'pax' (number of passengers) to estimate per-person costs. Ensur
     if (!payload.title?.trim()) {
       const s = payload.startAnchor?.title;
       const e = payload.endAnchor?.title;
-      if (s && e) payload.title = `${s} → ${e}`;
+      if (s && e) {
+        if (s === e) payload.title = `${s} Exploration`;
+        else payload.title = `${s} to ${e} Adventure`;
+      } else {
+        payload.title = "Sacred Valley Day Trip";
+      }
     }
     return payload;
   }

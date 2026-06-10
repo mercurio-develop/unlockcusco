@@ -89,7 +89,7 @@ export function ThreePaneLayout({
   }, [setMobileViewMode])
 
   return (
-    <div ref={containerRef} className={cn("h-[calc(100dvh-48px)] md:h-[calc(100vh-48px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
+    <div ref={containerRef} className={cn("h-[calc(100dvh-112px)] md:h-[calc(100vh-48px)] w-full flex overflow-hidden bg-white font-sans relative", className)}>
       {/* Desktop Left / Main Content Panel / Mobile List Panel */}
       <div 
         style={{ 
@@ -110,7 +110,7 @@ export function ThreePaneLayout({
         </div>
 
         {/* Primary Content (Scrollable Area) */}
-        <div className="flex-1 overflow-hidden flex flex-col pb-16 md:pb-0">
+        <div className="flex-1 overflow-hidden flex flex-col md:pb-0">
            {content}
         </div>
       </div>
@@ -144,42 +144,27 @@ export function ThreePaneLayout({
         </div>
       )}
 
-      {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[110] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_14px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center justify-around h-16 px-2">
-          <button 
-            onClick={() => { setPanelMode('discover'); setMobileViewMode('list'); setIsChatOpen(false); }}
-            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", panelMode === 'discover' && mobileViewMode === 'list' && !isChatOpen ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
+      {/* Mobile Map/List Toggle FAB */}
+      {showMap && (
+        <div className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] pb-[env(safe-area-inset-bottom)]">
+          <button
+            onClick={() => setMobileViewMode(mobileViewMode === 'map' ? 'list' : 'map')}
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/95 backdrop-blur-md text-white rounded-full shadow-lg font-bold text-xs tracking-wide transition-transform active:scale-95 border border-slate-700/50"
           >
-            <LayoutGrid className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Discover</span>
-          </button>
-          
-          <button 
-            onClick={() => { setMobileViewMode('map'); setIsChatOpen(false); }}
-            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", mobileViewMode === 'map' && !isChatOpen ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
-          >
-            <RouteMap className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Map</span>
-          </button>
-          
-          <button 
-            onClick={() => { setPanelMode('itinerary'); setMobileViewMode('list'); setIsChatOpen(false); }}
-            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors", panelMode === 'itinerary' && mobileViewMode === 'list' && !isChatOpen ? "text-slate-900" : "text-slate-500 hover:text-slate-900")}
-          >
-            <CalendarDays className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Itinerary</span>
-          </button>
-          
-          <button 
-            onClick={() => { setIsChatOpen(!isChatOpen); }}
-            className={cn("flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors relative", isChatOpen ? "text-rose-600" : "text-slate-500 hover:text-slate-900")}
-          >
-            <Sparkles className={cn("w-5 h-5", isChatOpen ? "text-rose-600" : "text-slate-500")} />
-            <span className="text-[10px] font-medium">Concierge</span>
+            {mobileViewMode === 'map' ? (
+              <>
+                <LayoutGrid className="w-4 h-4" />
+                <span>Show List</span>
+              </>
+            ) : (
+              <>
+                <RouteMap className="w-4 h-4" />
+                <span>Show Map</span>
+              </>
+            )}
           </button>
         </div>
-      </div>
+      )}
 
     </div>
   )

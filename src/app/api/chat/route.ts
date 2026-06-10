@@ -32,6 +32,8 @@ export async function POST(req: Request) {
       }
     }
 
+    console.log("[API CHAT] received body userLat:", body.userLat, "userLng:", body.userLng);
+
     const result = await processChatStream(messages, body);
     return result.toUIMessageStreamResponse();
 

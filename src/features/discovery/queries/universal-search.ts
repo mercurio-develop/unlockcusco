@@ -33,6 +33,7 @@ export async function universalSearch({
       // 1. First, fetch explicit name matches to guarantee they appear at the top
       const nameMatches = await prisma.business.findMany({
         where: {
+          category: { notIn: ['TRANSPORT', 'Transport', 'transport', 'Taxi', 'taxi'] },
           AND: [
             { name: { contains: queryLower, mode: 'insensitive' as const } },
             ...(locLower ? [{
@@ -84,6 +85,7 @@ export async function universalSearch({
         if (businessIds.length > 0) {
           businesses = await prisma.business.findMany({
             where: {
+              category: { notIn: ['TRANSPORT', 'Transport', 'transport', 'Taxi', 'taxi'] },
               AND: [
                 { id: { in: businessIds } },
                 ...(locLower ? [{
@@ -139,6 +141,7 @@ export async function universalSearch({
   // Lexical fallback or default view
   const businesses = (await prisma.business.findMany({
     where: {
+      category: { notIn: ['TRANSPORT', 'Transport', 'transport', 'Taxi', 'taxi'] },
       AND: [
         ...queryWords.map(word => ({
           OR: [

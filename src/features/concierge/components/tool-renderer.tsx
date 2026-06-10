@@ -16,7 +16,28 @@ interface ToolRendererProps {
 export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
   // Map AI SDK v6 or v3 tools
   // v6 uses parts, v3 uses toolInvocations (deprecated but may exist in some older parts)
-  const partsTools = (message.parts || []).filter((p) => p.type.startsWith('tool-') || p.type === 'dynamic-tool');
+  const partsMap = new Map();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (message.parts || []).forEach((p: any, index: number) => {
+    const isTool = p.type?.toLowerCase().includes('tool') || p.type === 'dynamic-tool' || p.toolCallId !== undefined || p.toolInvocation !== undefined;
+    if (!isTool) return;
+    
+    const key = p.toolCallId || p.toolInvocation?.toolCallId;
+    if (!key) {
+      partsMap.set(`unknown-tool-${index}`, p);
+      return;
+    }
+    
+    const existing = partsMap.get(key);
+    if (!existing) {
+      partsMap.set(key, { ...p });
+    } else {
+      // Merge them to ensure we keep both input and output if they are split
+      partsMap.set(key, { ...existing, ...p });
+    }
+  });
+  
+  const partsTools = Array.from(partsMap.values());
 
   // Backwards compatibility for toolInvocations if present
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,12 +62,12 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
         
         const key = part.toolCallId || part.toolInvocation?.toolCallId || idx;
         const toolInvocation = part.toolInvocation || part;
-        const toolName = part.toolName || toolInvocation.toolName || part.type.replace(/^tool-/, '');
+        const toolName = part.toolName || toolInvocation.toolName || part.type?.replace(/^tool-/, '');
         
         // In v6 UIMessage, state is 'output-available' for completed tools.
-        // In some SDK versions it's 'result'. Check both the wrapper and the inner invocation.
-        const isCompleted = part?.state === 'output-available' || part?.state === 'result' || toolInvocation?.state === 'result';
-        const isError = part?.state === 'output-error' || part?.state === 'error' || toolInvocation?.state === 'error';
+        // Also explicitly check if part.type === 'tool-result' which indicates completion.
+        const isCompleted = part?.state === 'output-available' || part?.state === 'result' || toolInvocation?.state === 'result' || part?.type === 'tool-result';
+        const isError = part?.state === 'output-error' || part?.state === 'error' || toolInvocation?.state === 'error' || part?.type === 'tool-error';
         const isDone = isCompleted || isError;
         
         // Prefer the actual result or output object

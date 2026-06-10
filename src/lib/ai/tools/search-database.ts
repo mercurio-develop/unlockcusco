@@ -32,6 +32,7 @@ const payloadSchema = z.object({
   searchKeywords: z.array(z.string()).optional().describe("If the user asks for a vibe, concept, or specific item (e.g., 'romantic', 'pizza'), generate 3-5 related literal keywords that might appear in a business description (e.g., 'wine', 'view', 'candlelight', 'pizza', 'italian'). If it's a general request, leave empty or provide basic keywords."),
   category: z.string().optional().describe("The category to search for, e.g. DINING, STAYS, WELLNESS, TRANSPORT, ADVENTURE, CULTURE, TEXTILES, AGENCY"),
   location: z.string().optional().describe("The specific town to search in, e.g. pisac, urubamba"),
+  nearBusinessName: z.string().optional().describe("If the user asks for places nearby a specific business (like the one they are currently viewing or one mentioned in chat), put that business name here to sort results by proximity to that business."),
   userLat: z.number().optional(),
   userLng: z.number().optional(),
   intent: z.enum(['SET_START', 'SET_END', 'ADD_WAYPOINT', 'GENERAL']).optional().describe("Contextual intent for the search, determines UI buttons rendered for results.")
@@ -40,10 +41,30 @@ const payloadSchema = z.object({
 type Payload = z.infer<typeof payloadSchema>;
 
 export const searchDatabase = tool({
-  description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" queries. Supports Spatial RAG by calculating real-world distances if coordinates are provided.',
+  description: 'Search database for businesses, activities, food, services. Use for simple "what is in X" or "what is near me" queries. Supports Spatial RAG by calculating real-world distances if coordinates or a reference business name are provided.',
   parameters: payloadSchema,
-  execute: async ({ query, searchKeywords, category, location, userLat, userLng, intent }: Payload) => {
+  execute: async ({ query, searchKeywords, category, location, nearBusinessName, userLat, userLng, intent }: Payload) => {
     let dbCategory: string | undefined = undefined;
+
+    // Spatial RAG Enhancement: If a business name is provided for proximity search, look up its coords
+    let effectiveLat = userLat;
+    let effectiveLng = userLng;
+
+    if (nearBusinessName) {
+      try {
+        const { prisma } = await import('@/lib/prisma');
+        const refBusiness = await prisma.business.findFirst({
+          where: { name: { contains: nearBusinessName, mode: 'insensitive' } },
+          select: { lat: true, lng: true }
+        });
+        if (refBusiness?.lat && refBusiness?.lng) {
+          effectiveLat = refBusiness.lat;
+          effectiveLng = refBusiness.lng;
+        }
+      } catch (e) {
+        console.error("Failed to lookup reference business for proximity search:", e);
+      }
+    }
     
     // Normalize location using the fuzzy matcher
     let searchLocation = location ? normalizeLocation(location) : null;
@@ -102,11 +123,14 @@ export const searchDatabase = tool({
         // Construct a semantic query by combining provided query and keywords
         const semanticQuery = [query, ...(searchKeywords || [])].filter(Boolean).join(" ");
 
+        // If doing a pure proximity search with no query/category, fetch more so we can sort them all in memory by distance
+        const fetchLimit = (!semanticQuery && !dbCategory && effectiveLat && effectiveLng) ? 1000 : 30;
+
         results = await universalSearch({ 
           query: semanticQuery,
           category: dbCategory,
           location: searchLocation || undefined, 
-          limit: 30 // Smaller limit since it's already ranked semantically
+          limit: fetchLimit
         });
       } catch (e) {
         console.error("universalSearch failed:", e);
@@ -130,10 +154,11 @@ export const searchDatabase = tool({
     if (results.length === 0 && searchLocation) {
       try {
         const semanticQuery = [query, ...(searchKeywords || [])].filter(Boolean).join(" ");
+        const fetchLimit = (!semanticQuery && !dbCategory && effectiveLat && effectiveLng) ? 1000 : 30;
         results = await universalSearch({
           query: semanticQuery,
           category: dbCategory,
-          limit: 30
+          limit: fetchLimit
         });
         results = results.filter((b) => typeof b.rating === 'number' && b.rating > 0);
         if (results.length > 0) {
@@ -145,11 +170,11 @@ export const searchDatabase = tool({
     }
 
     // Spatial RAG Enhancement: Inject distances and sort by proximity + rating
-    if (userLat && userLng) {
+    if (effectiveLat && effectiveLng) {
       const withDistance = results.map((b) => {
         let distanceKm: number | null = null;
         if (b.lat && b.lng) {
-          distanceKm = calculateDistance(userLat, userLng, b.lat, b.lng);
+          distanceKm = calculateDistance(effectiveLat, effectiveLng, b.lat, b.lng);
         }
         return { ...b, distanceKm };
       });

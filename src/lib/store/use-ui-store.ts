@@ -21,6 +21,8 @@ export interface UiState {
   setIsChatOpen: (v: boolean) => void;
   mobileViewMode: 'list' | 'map';
   setMobileViewMode: (v: 'list' | 'map') => void;
+  userCoords: { lat: number; lng: number } | null;
+  setUserCoords: (v: { lat: number; lng: number } | null) => void;
   travelVibe: string | null;
   setTravelVibe: (v: string | null) => void;
   travelIntensity: number | null;
@@ -59,6 +61,8 @@ export const useUiStore = create<UiState>((set) => ({
   setIsChatOpen: (v) => set({ isChatOpen: v }),
   mobileViewMode: 'list',
   setMobileViewMode: (v) => set({ mobileViewMode: v }),
+  userCoords: null,
+  setUserCoords: (v) => set({ userCoords: v }),
   travelVibe: null,
   setTravelVibe: (v) => set({ travelVibe: v }),
   travelIntensity: null,

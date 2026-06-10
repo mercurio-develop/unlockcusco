@@ -1,4 +1,4 @@
-import { Bot, Map, Utensils, Car, Ticket } from "lucide-react";
+import { Bot, Map, Utensils, Bed, MapPin, Info, Calendar } from "lucide-react";
 
 interface ConciergeWelcomeProps {
   isEs: boolean;
@@ -12,7 +12,7 @@ export function ConciergeWelcome({ isEs, sendMessage }: ConciergeWelcomeProps) {
         <Bot className="w-8 h-8 text-rose-600" />
       </div>
       <h2 className="text-xl font-bold font-serif text-slate-900 mb-2">
-        {isEs ? "¡Hola! Soy tu Concierge del Valle." : "Hi! I'm your Sacred Valley Concierge."}
+        {isEs ? "¡Hola! Soy tu Conserje." : "Hi! I'm your Concierge."}
       </h2>
       <p className="text-sm text-slate-500 mb-8 max-w-xs">
         {isEs ? "¿Qué planeamos hoy?" : "What are we planning today?"}
@@ -34,18 +34,25 @@ export function ConciergeWelcome({ isEs, sendMessage }: ConciergeWelcomeProps) {
           <span className="text-xs font-semibold text-slate-700">{isEs ? "Restaurantes" : "Top Dining"}</span>
         </button>
         <button 
-          onClick={() => sendMessage({ text: isEs ? "Necesito un taxi seguro" : "Book a safe taxi" })}
+          onClick={() => sendMessage({ text: isEs ? "Recomiéndame un lugar para quedarme" : "Recommend a place to stay" })}
           className="flex flex-col items-center justify-center p-4 bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-2xl transition-all shadow-sm group"
         >
-          <Car className="w-6 h-6 text-slate-400 group-hover:text-blue-500 mb-2 transition-colors" />
-          <span className="text-xs font-semibold text-slate-700">{isEs ? "Pedir Taxi" : "Transport"}</span>
+          <Bed className="w-6 h-6 text-slate-400 group-hover:text-blue-500 mb-2 transition-colors" />
+          <span className="text-xs font-semibold text-slate-700">{isEs ? "Alojamiento" : "Stays"}</span>
         </button>
         <button 
-          onClick={() => sendMessage({ text: isEs ? "Info de Boletos Turísticos" : "Ticket Info" })}
+          onClick={() => sendMessage({ text: isEs ? "¿Qué hay cerca de mí?" : "What's good near me?" })}
           className="flex flex-col items-center justify-center p-4 bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 rounded-2xl transition-all shadow-sm group"
         >
-          <Ticket className="w-6 h-6 text-slate-400 group-hover:text-emerald-500 mb-2 transition-colors" />
-          <span className="text-xs font-semibold text-slate-700">{isEs ? "Boletos" : "Tickets"}</span>
+          <MapPin className="w-6 h-6 text-slate-400 group-hover:text-emerald-500 mb-2 transition-colors" />
+          <span className="text-xs font-semibold text-slate-700">{isEs ? "Cerca de Mí" : "Near Me"}</span>
+        </button>
+        <button 
+          onClick={() => sendMessage({ text: isEs ? "Quisiera algunos tips locales y FAQs" : "I'd like some local tips and FAQs" })}
+          className="flex flex-col items-center justify-center p-4 bg-white border border-slate-200 hover:border-sky-300 hover:bg-sky-50 rounded-2xl transition-all shadow-sm group"
+        >
+          <Info className="w-6 h-6 text-slate-400 group-hover:text-sky-500 mb-2 transition-colors" />
+          <span className="text-xs font-semibold text-slate-700">{isEs ? "Tips & FAQ" : "Tips & FAQ"}</span>
         </button>
       </div>
     </div>

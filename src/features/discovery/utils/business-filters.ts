@@ -46,7 +46,8 @@ export function getEffectiveMapBusinesses(
   mapSearchResults?: Business[] | null
 ): Business[] {
   if (!mapSearchResults || mapSearchResults.length === 0) return mapBusinesses;
-  const searchMap = new Map(mapSearchResults.map(b => [b.id, b]));
-  const otherBusinesses = mapBusinesses.filter(b => !searchMap.has(b.id));
-  return [...Array.from(searchMap.values()), ...otherBusinesses];
+  
+  // If we have specific search results from the concierge, ONLY show those on the map
+  // and mark them so they get the special concierge marker styling.
+  return mapSearchResults.map(b => ({ ...b, isConciergeResult: true }));
 }

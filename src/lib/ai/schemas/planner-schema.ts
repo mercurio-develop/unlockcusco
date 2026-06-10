@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const microDaySchema = z.object({
-  title: z.string().optional(),
+  title: z.string().optional().describe("A cool, evocative name for the day's adventure, e.g. 'Ruins & Rivers', 'Pisaq Gourmet Trail', 'Sacred Spirit Journey'."),
   totalCost: z.number().optional(),
   constraints: z.string().optional(),
   startAnchor: z.object({
@@ -64,6 +64,7 @@ export const microDaySchema = z.object({
     })
   ),
   needsAccommodationUpsell: z.boolean(),
+  shortId: z.string().optional(),
 });
 
 export type OptimizedPlan = z.infer<typeof microDaySchema>;

@@ -36,11 +36,20 @@ export default async function ExplorePage({
   ])
 
   let initialItinerary = null;
-  if (initialItineraryData?.success && initialItineraryData?.state) {
-    const state = initialItineraryData.state as any;
-    if (state.version === 2) {
-      initialItinerary = { ...state, shortId: parsedParams.trip ?? undefined };
-    } else {
+  if (initialItineraryData && initialItineraryData.success && initialItineraryData.state) {
+    const state = initialItineraryData.state as {
+      version?: number;
+      primary?: OptimizedPlan | null;
+      secondary?: OptimizedPlan | null;
+    } & OptimizedPlan;
+    if (state && state.version === 2) {
+      initialItinerary = { 
+        ...state, 
+        shortId: parsedParams.trip ?? undefined,
+        primary: state.primary ? { ...state.primary, shortId: parsedParams.trip ?? undefined } : null,
+        secondary: state.secondary ? { ...state.secondary, shortId: parsedParams.trip ?? undefined } : null
+      };
+    } else if (state) {
       initialItinerary = { ...(state as OptimizedPlan), shortId: parsedParams.trip ?? undefined };
     }
   }

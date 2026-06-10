@@ -100,19 +100,16 @@ async function getBusinessesInternal({ query = "", category = "", loc = "", radi
     else if (qLower.includes("textile") || qLower.includes("tejido") || qLower.includes("weaving") || qLower.includes("artesanía") || qLower.includes("artisan") || qLower.includes("tejedoras")) { 
       targetCategory = "Textiles"; isHeuristicMatch = true; 
     }
-    else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile") || qLower.includes("ruins") || qLower.includes("attraction")) { 
-      targetCategory = "Culture"; isHeuristicMatch = true; 
-    }
-    else if (qLower.includes("transport") || qLower.includes("taxi") || qLower.includes("airport") || qLower.includes("driver") || qLower.includes("shuttle") || qLower.includes("transfer")) { 
-      targetCategory = "Transport"; isHeuristicMatch = true; 
+    else if (qLower.includes("market") || qLower.includes("culture") || qLower.includes("art") || qLower.includes("textile") || qLower.includes("ruins") || qLower.includes("attraction")) {
+      targetCategory = "Culture"; isHeuristicMatch = true;
     }
   }
 
   const whereClause: Prisma.BusinessWhereInput = {
-    category: { notIn: ['AGENCY', 'Agency', 'agency'] }
+    category: { notIn: ['AGENCY', 'Agency', 'agency', 'TRANSPORT', 'Transport', 'transport', 'Taxi', 'taxi'] }
   }
 
-  if (targetCategory) {
+    if (targetCategory) {
     const categories = targetCategory.split(',').map(c => c.trim()).filter(Boolean)
     if (categories.length > 0) {
       // Expand to cover different casings present in the DB (e.g. 'Dining', 'DINING', 'dining')

@@ -72,7 +72,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     en: {
       title: "Top 7 Culinary Route in Cusco",
       intro: "A gastronomic journey through the imperial city, featuring the best Novo-Andean cuisine, traditional courtyard dining, and innovative cocktails.",
-      image: "/images/dummy/ceviche.jpg",
+      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
       sections: [
         { title: "Gourmet Mastery", desc: "Experience elevated Peruvian cuisine at spots like Chicha and MAP Café, where traditional ingredients meet modern technique." },
         { title: "Traditional & Rustic", desc: "Savor the authentic flavors of the Andes in cozy settings like Pachapapa and Uchu Peruvian Steakhouse." }
@@ -81,7 +81,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
     es: {
       title: "Ruta Culinaria Top 7 en Cusco",
       intro: "Un viaje gastronómico por la ciudad imperial, presentando la mejor cocina novoandina, cenas en patios tradicionales y cócteles innovadores.",
-      image: "/images/dummy/ceviche.jpg",
+      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
       sections: [
         { title: "Maestría Gourmet", desc: "Experimenta la alta cocina peruana en lugares como Chicha y MAP Café, donde los ingredientes tradicionales se encuentran con la técnica moderna." },
         { title: "Tradicional y Rústico", desc: "Saborea los auténticos sabores de los Andes en ambientes acogedores como Pachapapa y Uchu Peruvian Steakhouse." }

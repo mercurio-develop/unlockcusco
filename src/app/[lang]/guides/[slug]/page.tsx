@@ -1,13 +1,10 @@
-import { Metadata } from "next";
-import Image from "next/image";
 import { Sparkles, Map, Bot } from "lucide-react";
-import { notFound } from "next/navigation";
 
 // Define a type for the content
 type GuideContent = {
   title: string;
   desc: string;
-  image: string;
+  image?: string;
   sections: { h2: string; p: string }[];
 };
 
@@ -45,7 +42,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "top-7-culinary-route": {
     title: "The Top 7 Culinary Route",
     desc: "An AI-curated guide to the best flavors in the Andes.",
-    image: "/images/dummy/ceviche.jpg",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Andean Gastronomy", p: "The Sacred Valley is a food lover's paradise. The unique microclimates allow for the cultivation of hundreds of varieties of potatoes, corn, and quinoa." },
       { h2: "From Pachamanca to Haute Cuisine", p: "You can experience everything from a traditional Pachamanca (meat and potatoes cooked under the earth using hot stones) to world-class tasting menus at restaurants like MIL, located right next to the Moray ruins." }
@@ -81,7 +78,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "acclimating-altitude": {
     title: "How to Acclimate to Altitude",
     desc: "Essential medical and practical tips for beating Soroche (altitude sickness).",
-    image: "/images/boleto/sacsayhuaman.jpg",
+    image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Understanding Soroche", p: "Cusco sits at an elevation of 3,399 meters (11,152 feet). The air is noticeably thinner, which can cause headaches, nausea, and shortness of breath." },
       { h2: "The Golden Rules", p: "Take it easy on your first day. Hydrate constantly. Avoid heavy meals and alcohol for the first 24 hours. Drink coca tea, a traditional Andean remedy that helps improve blood oxygenation." },
@@ -91,7 +88,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "packing-sacred-valley": {
     title: "Packing List for the Sacred Valley",
     desc: "What to bring for the dramatic temperature swings of the Andes.",
-    image: "/images/boleto/moray.jpg",
+    image: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Layers are Everything", p: "The Andes are famous for having 'four seasons in a single day'. When the sun is out, it's intense and hot. As soon as the sun drops behind the mountains, temperatures plummet toward freezing." },
       { h2: "The Essentials", p: "Pack a good sun hat, strong sunscreen (the UV index at this altitude is extreme), a lightweight rain jacket, a warm fleece or down layer, and comfortable, broken-in walking shoes." }
@@ -100,7 +97,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "boleto-turistico-explained": {
     title: "Understanding the Boleto Turistico",
     desc: "Don't get confused at the gate. Here is exactly what the Cusco Tourist Ticket covers.",
-    image: "/images/boleto/cosituc-ticket-office.jpg",
+    image: "https://images.unsplash.com/photo-1600577916048-804c9191e36c?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "What is it?", p: "The Boleto Turistico del Cusco (BTC) is a mandatory ticket that grants you access to 16 of the most important archaeological sites and museums in and around Cusco and the Sacred Valley. You cannot pay individual entrance fees at most of these sites." },
       { h2: "Partial vs. Full", p: "You can buy a partial ticket (valid for 1-2 days, covering a specific circuit of sites) or the full ticket (valid for 10 days, covering everything). If you plan to see the Sacred Valley and Cusco City ruins, the full ticket is always the best value." }
@@ -109,7 +106,7 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
   "best-time-machu-picchu": {
     title: "Best Time to Visit Machu Picchu",
     desc: "Weather, crowds, and the optimal months for your trip.",
-    image: "/images/dummy/aguas-calientes.jpg",
+    image: "https://images.unsplash.com/photo-1508873696983-2df519f0397e?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Dry Season vs. Wet Season", p: "The dry season runs from May to October, offering clear blue skies and cold nights. The wet season is from November to April, bringing warmer nights but heavy afternoon downpours." },
       { h2: "The Sweet Spot", p: "The absolute best times to visit are the 'shoulder months' of May and September/October. You'll enjoy the lush green landscapes left over from the rains, but with mostly dry, clear days and smaller crowds than the peak months of July and August." }
@@ -145,7 +142,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "top-7-culinary-route": {
     title: "La Ruta Culinaria del Valle",
     desc: "Una guía seleccionada por IA con los mejores sabores de los Andes.",
-    image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?q=80&w=1000&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Gastronomía Andina", p: "El Valle Sagrado es un paraíso. Los microclimas permiten el cultivo de cientos de variedades de papas, maíz y quinua." }
     ]
@@ -177,7 +174,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "acclimating-altitude": {
     title: "Cómo Aclimatarse a la Altura",
     desc: "Consejos médicos y prácticos para vencer el Soroche.",
-    image: "/images/boleto/sacsayhuaman.jpg",
+    image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Entendiendo el Soroche", p: "Cusco está a 3,399 metros. El aire es más fino, lo que puede causar dolores de cabeza y náuseas." },
       { h2: "Las Reglas de Oro", p: "Tómatelo con calma el primer día. Hidrátate. Evita comidas pesadas. Bebe mate de coca." }
@@ -186,7 +183,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "packing-sacred-valley": {
     title: "Qué Empacar para el Valle Sagrado",
     desc: "Lo esencial para los cambios bruscos de temperatura de los Andes.",
-    image: "/images/boleto/moray.jpg",
+    image: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "Las Capas lo son Todo", p: "Los Andes tienen 'cuatro estaciones en un día'. Empaca un buen bloqueador, chaqueta para lluvia y algo abrigador para la noche." }
     ]
@@ -194,7 +191,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "boleto-turistico-explained": {
     title: "Entendiendo el Boleto Turístico",
     desc: "Qué es y qué cubre exactamente el Boleto Turístico del Cusco.",
-    image: "/images/boleto/cosituc-ticket-office.jpg",
+    image: "https://images.unsplash.com/photo-1600577916048-804c9191e36c?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "¿Qué es?", p: "Es un boleto obligatorio que te da acceso a 16 sitios arqueológicos y museos. No puedes pagar entradas individuales en la mayoría de estos sitios." }
     ]
@@ -202,7 +199,7 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
   "best-time-machu-picchu": {
     title: "Mejor Época para Visitar Machu Picchu",
     desc: "Clima, multitudes y los meses óptimos para tu viaje.",
-    image: "/images/dummy/aguas-calientes.jpg",
+    image: "https://images.unsplash.com/photo-1508873696983-2df519f0397e?q=80&w=600&auto=format&fit=crop",
     sections: [
       { h2: "El Punto Exacto", p: "Los mejores meses son mayo y septiembre/octubre. Disfrutarás de paisajes verdes, días secos y menos multitudes que en julio." }
     ]
@@ -249,9 +246,7 @@ export default async function DynamicGuidePage({ params }: { params: Promise<{ l
           {content.desc}
         </p>
 
-        <div className="w-full aspect-[21/9] bg-slate-100 rounded-2xl shadow-inner overflow-hidden relative mb-12">
-          <Image src={content.image} alt={content.title} fill className="object-cover" />
-        </div>
+
 
         {/* Action Callout (Only for Itineraries) */}
         {[

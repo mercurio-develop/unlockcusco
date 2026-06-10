@@ -1,10 +1,10 @@
-"use client";
-
 import type { Business } from "@prisma/client";
 
 import { useUiStore } from "@/lib/store/use-ui-store";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { BusinessCard } from "@/features/discovery/components/business-card";
+import { Button } from "@/components/ui/button";
+import { Map } from "lucide-react";
 
 interface SearchInput {
   query?: string;
@@ -21,11 +21,19 @@ type SearchResults = Business[] | FallbackResults;
 
 export function SearchResultsCard({ businesses, input, intent }: { businesses: SearchResults, messageId?: string, input?: SearchInput, intent?: string }) {
   const setSelectedId = useUiStore(s => s.setSelectedId);
+  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
+  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
+  const setRadarState = useUiStore(s => s.setRadarState);
+  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const router = useRouter();
+  const pathname = usePathname();
 
   const isFallback = !Array.isArray(businesses) && 'alternatives' in businesses;
   const list = Array.isArray(businesses) ? businesses : (businesses.alternatives || []);
   const requestedLocation = !Array.isArray(businesses) ? businesses.requestedLocation : null;
+
+  const locale = pathname?.split('/')[1] || 'en';
+  const fallbackTitle = locale === 'es' ? "Alojamientos Cercanos" : "Nearby Stays";
 
   let dynamicTitle = "Top Recommendations";
   if (intent === 'SET_START') {
@@ -52,6 +60,7 @@ export function SearchResultsCard({ businesses, input, intent }: { businesses: S
     // Cast to any for dynamic property checks if not in Prisma model
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const b = business as any;
+    setIsChatOpen(false); // Close chat to view the page
     if (business.category === 'Taxi' || b.type === 'TRANSPORT') {
       router.push('/services/transport');
     } else if (business.category === 'Business' || b.type === 'AGENCY') {
@@ -60,6 +69,25 @@ export function SearchResultsCard({ businesses, input, intent }: { businesses: S
       router.push('/services/healers');
     } else {
       setSelectedId(business.id);
+      if (pathname && !pathname.includes('/explore')) {
+        const locale = pathname.split('/')[1] || 'en';
+        const langPrefix = ['en', 'es'].includes(locale) ? `/${locale}` : '/en';
+        router.push(`${langPrefix}/explore`);
+      }
+    }
+  };
+
+  const handleShowInMap = () => {
+    setRadarState(null);
+    setSelectedId(null);
+    setMapSearchResults(list as Business[]);
+    setMobileViewMode('map');
+    setIsChatOpen(false); // Close chat overlay to see the map
+    
+    if (pathname && !pathname.includes('/explore')) {
+      const locale = pathname.split('/')[1] || 'en';
+      const langPrefix = ['en', 'es'].includes(locale) ? `/${locale}` : '/en';
+      router.push(`${langPrefix}/explore`);
     }
   };
 
@@ -68,7 +96,7 @@ export function SearchResultsCard({ businesses, input, intent }: { businesses: S
       <div className="flex items-center justify-between mb-2 px-4 sm:px-0">
         <div className="flex flex-col">
           <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
-            {isFallback ? "Nearby Alternatives" : dynamicTitle}
+            {isFallback ? fallbackTitle : dynamicTitle}
           </span>
           {isFallback && requestedLocation && (
             <span className="text-[9px] text-rose-500 font-bold uppercase mt-0.5">
@@ -79,9 +107,9 @@ export function SearchResultsCard({ businesses, input, intent }: { businesses: S
         <span className="text-[10px] text-slate-400 mr-2 sm:mr-0">{list.length} found</span>
       </div>
 
-      <div className="flex overflow-x-auto gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
+      <div className="flex overflow-x-auto items-stretch gap-4 pb-4 px-4 sm:px-0 snap-x snap-mandatory scrollbar-hide">
         {list.map((business, idx: number) => (
-          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start">
+          <div key={business.id ?? idx} className="w-[280px] shrink-0 snap-start flex flex-col">
             <BusinessCard
               business={business}
               orientation="vertical"
@@ -92,6 +120,18 @@ export function SearchResultsCard({ businesses, input, intent }: { businesses: S
             />
           </div>
         ))}
+      </div>
+      
+      <div className="px-4 sm:px-0 mt-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full flex items-center justify-center gap-2 text-xs h-9 bg-white shadow-sm border-slate-200"
+          onClick={handleShowInMap}
+        >
+          <Map className="w-4 h-4 text-emerald-600" />
+          Show in Map
+        </Button>
       </div>
     </div>
   );

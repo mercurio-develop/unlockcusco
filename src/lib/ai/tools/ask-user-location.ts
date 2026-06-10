@@ -10,7 +10,7 @@ const payloadSchema = z.object({
 type Payload = z.infer<typeof payloadSchema>;
 
 export const askUserLocation = tool({
-  description: 'Displays a button in the chat asking the user to share their current GPS location. Use this when the user is starting their journey and you need their exact starting point.',
+  description: 'Displays a button in the chat asking the user to share their current GPS location. Use this ONLY when you DO NOT already have their userLat/userLng coordinates and they ask for recommendations "near me" or "nearby". DO NOT use this if the GPS status is already CONFIRMED.',
   parameters: payloadSchema,
   execute: async (args: Payload) => {
     return sanitizeToolOutput({

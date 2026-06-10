@@ -27,7 +27,7 @@ import {
 import { getCategoryColor } from "@/lib/utils/category-style";
 
 type PopupData = 
-  | (Business & { isConciergeResult?: boolean; isItineraryItem?: boolean; isLibraryItem?: boolean; isClusterPopup?: false })
+  | (Business & { isConciergeResult?: boolean; isRadarResult?: boolean; isItineraryItem?: boolean; isLibraryItem?: boolean; isClusterPopup?: false })
   | { isClusterPopup: true; businesses: Business[]; lat: number; lng: number }
   | { id: string; name: string; lat: number; lng: number; category?: string; isClusterPopup?: false; title?: string };
 
@@ -214,10 +214,11 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
         }
 
         const bId = properties.businessId;
-        const bData = properties.business as Business & { isConciergeResult?: boolean, isItineraryItem?: boolean, isLibraryItem?: boolean };
+        const bData = properties.business as Business & { isConciergeResult?: boolean, isRadarResult?: boolean, isItineraryItem?: boolean, isLibraryItem?: boolean };
         const isSelected = selectedId === bId;
         
         const isConciergeResult = bData.isConciergeResult;
+        const isRadarResult = bData.isRadarResult;
         const markerBg = isConciergeResult ? "#6366F1" : style.bg;
         const MarkerIcon = isConciergeResult ? Bot : Icon;
 
@@ -244,6 +245,9 @@ function CategoryClusterLayer({ category, businesses, bounds, zoom, mapRef, sele
               >
                 <MarkerIcon className="w-4 h-4 text-white" />
               </div>
+              {isRadarResult && (
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white shadow-sm z-20" />
+              )}
               <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-white" style={{ backgroundColor: markerBg }} />
             </div>
           </Marker>
@@ -297,6 +301,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
 
+  const mapSearchResults = useUiStore(s => s.mapSearchResults);
   const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
   const setMapClickModeGlobal = useUiStore(s => s.setMapClickMode);
   const isChatOpen = useUiStore(s => s.isChatOpen);
@@ -304,6 +309,10 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   const { routeData } = useMapboxRoute();
   const panelMode = useUiStore(s => s.panelMode);
+  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const radarState = useUiStore(s => s.radarState);
+  const setRadarState = useUiStore(s => s.setRadarState);
+  const setSelectedId = useUiStore(s => s.setSelectedId);
 
   // FlyTo when start anchor location changes
   const startLat = activeItinerary?.startAnchor?.lat
@@ -322,6 +331,62 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       mapRef.current.flyTo({ center: [endLng, endLat], zoom: 13, duration: 900, essential: true })
     }
   }, [endLat, endLng])
+
+  const zoomToConciergePicks = () => {
+    if (!mapSearchResults || mapSearchResults.length === 0 || !mapRef.current) return;
+    
+    const withCoords = mapSearchResults.filter(b => b.lat != null && b.lng != null);
+    if (withCoords.length === 0) return;
+
+    let minLng = withCoords[0].lng!;
+    let maxLng = withCoords[0].lng!;
+    let minLat = withCoords[0].lat!;
+    let maxLat = withCoords[0].lat!;
+
+    for (const b of withCoords) {
+      if (b.lng! < minLng) minLng = b.lng!;
+      if (b.lng! > maxLng) maxLng = b.lng!;
+      if (b.lat! < minLat) minLat = b.lat!;
+      if (b.lat! > maxLat) maxLat = b.lat!;
+    }
+
+    if (minLng !== maxLng || minLat !== maxLat) {
+      mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1000, maxZoom: 15 });
+    } else {
+      mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14, duration: 1000 });
+      // If there is only one result, automatically select it and show the popup
+      if (withCoords.length === 1) {
+        const bData = withCoords[0] as Business & { isConciergeResult?: boolean };
+        bData.isConciergeResult = true;
+        setPopupBusiness(bData as any);
+        onSelectBusiness(bData.id);
+      }
+    }
+  };
+
+  const zoomToRadar = () => {
+    if (!radarState || !mapRef.current) return;
+
+    let minLng = radarState.lng;
+    let maxLng = radarState.lng;
+    let minLat = radarState.lat;
+    let maxLat = radarState.lat;
+
+    const radarResults = validBusinesses.filter(b => (b as any).isRadarResult);
+
+    for (const b of radarResults) {
+      if (b.lng < minLng) minLng = b.lng;
+      if (b.lng > maxLng) maxLng = b.lng;
+      if (b.lat < minLat) minLat = b.lat;
+      if (b.lat > maxLat) maxLat = b.lat;
+    }
+
+    if (minLng !== maxLng || minLat !== maxLat) {
+      mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: isMobile ? 50 : 100, duration: 1000, maxZoom: 15 });
+    } else {
+      mapRef.current.flyTo({ center: [minLng, minLat], zoom: 14.5, duration: 1000 });
+    }
+  };
 
   const controlsRightOffset = (isChatOpen && panelMode !== 'itinerary') ? "466px" : "16px"
 
@@ -470,16 +535,16 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       }
     } 
 
-    if (targetLat !== null && targetLng !== null) {
+    if (targetLat !== null && targetLng !== null && isMapLoaded) {
       mapRef.current?.flyTo({ center: [targetLng, targetLat], zoom: 15, pitch: (mapMode === "satellite" ? 60 : 0), duration: 1200, essential: true, offset: [0, isMobile ? 220 : 150] });
       setPopupBusiness(targetBusiness);
-    } else {
+    } else if (isMapLoaded) {
       setPopupBusiness(null);
     }
-  }, [selectedId, businesses, activeItinerary, mapMode, panelMode, latParam, lngParam, isMobile]);
+    }, [selectedId, businesses, activeItinerary, mapMode, panelMode, latParam, lngParam, isMobile, isMapLoaded]);
 
   useEffect(() => {
-    if (currentLoc && TOWN_COORDS[currentLoc] && !selectedId && !activeItinerary) {
+    if (currentLoc && TOWN_COORDS[currentLoc] && !selectedId && panelMode !== "itinerary") {
       const { lat, lng } = TOWN_COORDS[currentLoc];
       mapRef.current?.flyTo({
         center: [lng, lat],
@@ -488,24 +553,33 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         essential: true,
       });
     }
-  }, [currentLoc, selectedId, activeItinerary]);
+  }, [currentLoc, selectedId, panelMode]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const validBusinesses = useMemo(() => {
-    return businesses
-      .filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng))
-      .filter(b => {
-        if (currentCats.length === 0) return true;
-        const bCat = b.category?.toUpperCase() || "UNKNOWN";
-        return currentCats.some(cat => {
-            const c = cat.toUpperCase();
-            if (c === bCat) return true;
-            if (c === "DINING" && bCat === "MEAL") return true;
-            if (c === "STAYS" && bCat === "STAY") return true;
-            if (c === "AGENCY" && bCat === "EXPERIENCE") return true;
-            return false;
-        });
-      }) as (Business & { lat: number, lng: number })[];
-  }, [businesses, currentCats]);
+    const list = businesses.filter(b => b.lat != null && b.lng != null && !isNaN(b.lat) && !isNaN(b.lng));
+
+    // If we are showing specific concierge results or radar results, do not apply URL category filters
+    const isFilteredOrRadar = radarState || (mapSearchResults && mapSearchResults.length > 0);
+    if (isFilteredOrRadar) {
+      return list as (Business & { lat: number, lng: number })[];
+    }
+
+    const filtered = list.filter(b => {
+      if (currentCats.length === 0) return true;
+      const bCat = b.category?.toUpperCase() || "UNKNOWN";
+      return currentCats.some(cat => {
+          const c = cat.toUpperCase();
+          if (c === bCat) return true;
+          if (c === "DINING" && bCat === "MEAL") return true;
+          if (c === "STAYS" && bCat === "STAY") return true;
+          if (c === "AGENCY" && bCat === "EXPERIENCE") return true;
+          return false;
+      });
+    });
+
+    return filtered as (Business & { lat: number, lng: number })[];
+  }, [businesses, currentCats, radarState, mapSearchResults]);
 
   const pointsByCategory = useMemo(() => {
     const categories: Record<string, Business[]> = {};
@@ -519,29 +593,62 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   const businessSignature = validBusinesses.map(b => b.id).join(',');
   const [prevSignature, setPrevSignature] = useState<string | null>(null);
+  const [prevMobileViewMode, setPrevMobileViewMode] = useState<string | null>(null);
 
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
     const shouldRefit = businessSignature !== prevSignature;
+    const viewModeChangedToMap = mobileViewMode === 'map' && prevMobileViewMode !== 'map';
     
     // Always run the bounds check if mobile view mode changes to 'map'
-    if (shouldRefit || mobileViewMode === 'map') {
+    if (shouldRefit || viewModeChangedToMap) {
       if (shouldRefit) setPrevSignature(businessSignature);
+      if (viewModeChangedToMap) setPrevMobileViewMode(mobileViewMode);
       
-      if (isDefaultView && !selectedId) return;
-      if (selectedId && validBusinesses.some(b => b.id === selectedId)) return;
-      let minLng = validBusinesses[0].lng, maxLng = validBusinesses[0].lng;
-      let minLat = validBusinesses[0].lat, maxLat = validBusinesses[0].lat;
+      if (isDefaultView && !selectedId && !radarState && (!mapSearchResults || mapSearchResults.length === 0)) return;
+      if (selectedId) return;
+      
+      let minLng: number | null = null;
+      let maxLng: number | null = null;
+      let minLat: number | null = null;
+      let maxLat: number | null = null;
+
+      // Context-aware bounds initialization
+      if (radarState) {
+        minLng = radarState.lng;
+        maxLng = radarState.lng;
+        minLat = radarState.lat;
+        maxLat = radarState.lat;
+      } else if (mapSearchResults && mapSearchResults.length > 0) {
+        const firstWithCoords = mapSearchResults.find(b => b.lat != null && b.lng != null);
+        if (firstWithCoords) {
+          minLng = firstWithCoords.lng;
+          maxLng = firstWithCoords.lng;
+          minLat = firstWithCoords.lat;
+          maxLat = firstWithCoords.lat;
+        }
+      } else if (activeItinerary?.startAnchor?.lat != null && activeItinerary?.startAnchor?.lng != null) {
+        minLng = activeItinerary.startAnchor.lng;
+        maxLng = activeItinerary.startAnchor.lng;
+        minLat = activeItinerary.startAnchor.lat;
+        maxLat = activeItinerary.startAnchor.lat;
+      } else {
+        minLng = validBusinesses[0].lng;
+        maxLng = validBusinesses[0].lng;
+        minLat = validBusinesses[0].lat;
+        maxLat = validBusinesses[0].lat;
+      }
+
       const boundsItems = validBusinesses.slice(0, 20);
       for (const b of boundsItems) {
-        if (b.lng < minLng) minLng = b.lng;
-        if (b.lng > maxLng) maxLng = b.lng;
-        if (b.lat < minLat) minLat = b.lat;
-        if (b.lat > maxLat) maxLat = b.lat;
+        if (minLng === null || b.lng < minLng) minLng = b.lng;
+        if (maxLng === null || b.lng > maxLng) maxLng = b.lng;
+        if (minLat === null || b.lat < minLat) minLat = b.lat;
+        if (maxLat === null || b.lat > maxLat) maxLat = b.lat;
       }
       
       const timer = setTimeout(() => {
-        if (!mapRef.current) return;
+        if (!mapRef.current || minLng === null || maxLng === null || minLat === null || maxLat === null) return;
         if (minLng !== maxLng || minLat !== maxLat) {
           mapRef.current.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, duration: 1200, maxZoom: 15 });
         } else {
@@ -551,12 +658,12 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       
       return () => clearTimeout(timer);
     }
-  }, [validBusinesses, businessSignature, prevSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode]);
+  }, [validBusinesses, businessSignature, prevSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode, radarState, mapSearchResults]);
 
   // Explicitly fit bounds for the active itinerary when panel mode is 'itinerary'
   useEffect(() => {
     if (panelMode === "itinerary" && activeItinerary && mapRef.current) {
-      if (selectedId && activeItinerary.waypoints?.some(b => b.id === selectedId)) return;
+      if (selectedId) return;
       const pts: { lat: number, lng: number }[] = [];
       if (activeItinerary.startAnchor?.lat != null && activeItinerary.startAnchor?.lng != null) {
         pts.push({ lat: activeItinerary.startAnchor.lat, lng: activeItinerary.startAnchor.lng });
@@ -728,11 +835,90 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
         {activeItinerary && (
           <div className="flex items-center bg-white/90 backdrop-blur-md rounded-full shadow-sm border border-slate-200 p-0.5 w-fit mb-1">
-            <button onClick={(e) => { e.preventDefault(); useUiStore.getState().setPanelMode('discover'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Places</button>
-            <button onClick={(e) => { e.preventDefault(); useUiStore.getState().setPanelMode('itinerary'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Route</button>
+            <button onClick={(e) => { e.preventDefault(); setPanelMode('discover'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode !== 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Places</button>
+            <button onClick={(e) => { e.preventDefault(); setPanelMode('itinerary'); }} className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-colors", panelMode === 'itinerary' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900")}>Route</button>
           </div>
         )}
       </div>
+
+      <div className={cn(
+        "absolute z-30 flex flex-wrap items-start justify-start md:justify-center gap-1.5 pointer-events-none transition-all duration-300",
+        mapClickMode ? "top-16" : "top-4",
+        "left-4 right-14 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-[calc(100%-2rem)] md:bottom-12 md:top-auto bottom-auto"
+      )}>
+        {mapSearchResults && mapSearchResults.length > 0 && (
+          <div 
+            onClick={zoomToConciergePicks}
+            className="pointer-events-auto cursor-pointer flex items-center gap-1.5 bg-white/95 backdrop-blur-md border border-indigo-200 px-2.5 py-1.5 rounded-full shadow-lg max-w-full animate-in slide-in-from-top-4 md:slide-in-from-bottom-4 duration-300 ring-1 ring-indigo-500/20 hover:bg-white transition-all active:scale-95"
+          >
+            <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+              <Bot className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-[11px] font-bold text-indigo-900 whitespace-nowrap overflow-hidden text-ellipsis">
+              {locale === 'es' ? 'Selección del Concierge' : 'Concierge Picks'}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setMapSearchResults(null);
+                setSelectedId(null);
+              }}
+              className="ml-0.5 w-5 h-5 rounded-full hover:bg-indigo-100 flex items-center justify-center transition-colors shrink-0"
+              title="Clear Picks"
+            >
+              <X className="w-3 h-3 text-indigo-500" />
+            </button>
+          </div>
+        )}
+
+        {(() => {
+          if (!radarState) return null;
+          const catColor = getCategoryColor(radarState.category);
+          return (
+            <div 
+              onClick={zoomToRadar}
+              className="pointer-events-auto cursor-pointer flex items-center gap-1.5 bg-white/95 backdrop-blur-md border px-2.5 py-1.5 rounded-full shadow-lg max-w-full animate-in slide-in-from-top-4 md:slide-in-from-bottom-4 duration-300 hover:bg-white transition-all active:scale-95"
+              style={{ borderColor: `${catColor}40` }}
+            >
+              <div 
+                className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 shadow-sm"
+                style={{ backgroundColor: catColor }}
+              >
+                <MapPin className="w-3 h-3 text-white" />
+              </div>
+              <span
+                className="text-[11px] font-bold whitespace-nowrap overflow-hidden text-ellipsis capitalize"
+                style={{ color: catColor }}
+              >
+                {(() => {
+                  const c = radarState.category.toUpperCase();
+                  if (locale === 'es') {
+                    if (c === 'STAYS') return 'Alojamientos';
+                    if (c === 'DINING') return 'Restaurantes';
+                    if (c === 'CULTURE') return 'Cultura';
+                    if (c === 'WELLNESS') return 'Bienestar';
+                    if (c === 'ADVENTURE') return 'Aventura';
+                    return radarState.category;
+                  }
+                  return `Nearby ${radarState.category}`;
+                })()}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRadarState(null);
+                  setSelectedId(null);
+                }}
+                className="ml-0.5 w-5 h-5 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors shrink-0"
+                title="Clear Nearby"
+              >
+                <X className="w-3 h-3 text-slate-500" />
+              </button>
+            </div>
+          );
+        })()}
+      </div>
+
       <Map
         ref={mapRef}
         initialViewState={{ longitude: center[0], latitude: center[1], zoom: 11, pitch: 0, bearing: 0 }}
@@ -825,6 +1011,42 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           );
         })()}
 
+        {radarState && (
+          <Marker
+            pitchAlignment="viewport"
+            longitude={radarState.lng}
+            latitude={radarState.lat}
+            anchor="bottom"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setPopupBusiness({
+                id: radarState.waypointId,
+                name: radarState.name,
+                lat: radarState.lat,
+                lng: radarState.lng,
+                isClusterPopup: false
+              } as any);
+              onSelectBusiness(radarState.waypointId);
+            }}
+          >
+            <div
+              className={cn(
+                "cursor-pointer transition-all duration-300 relative flex flex-col items-center animate-in zoom-in fade-in slide-in-from-bottom-4 z-40",
+                selectedId === radarState.waypointId ? "scale-125 z-50" : "scale-100"
+              )}
+            >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-white whitespace-nowrap z-20 max-w-[150px] overflow-hidden text-ellipsis">
+                {radarState.name || 'ORIGIN'}
+              </div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 blur-[2px] rounded-full" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-md border-[2.5px] border-rose-500 bg-white transition-all ring-2 ring-white">
+                <MapPin className="w-4 h-4 text-rose-600" />
+              </div>
+              <div className="w-1.5 h-1.5 -mt-1 rotate-45 border-r-[2.5px] border-b-[2.5px] border-rose-500 bg-white" />
+            </div>
+          </Marker>
+        )}
+
         {itineraryMarkers.map(({ pick, idx }) => {
           const style = getCategoryStyle(pick.category);
           const isSelected = selectedId === pick.id;
@@ -840,7 +1062,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
           )
         })}
 
-        {panelMode !== "itinerary" && Object.entries(pointsByCategory).map(([category, catBusinesses]) => (
+        {(panelMode !== "itinerary" || (mapSearchResults && mapSearchResults.length > 0)) && Object.entries(pointsByCategory).map(([category, catBusinesses]) => (
           <CategoryClusterLayer key={category} category={category} businesses={catBusinesses} bounds={bounds} zoom={zoom} mapRef={mapRef} selectedId={selectedId} setPopupBusiness={setPopupBusiness} onSelectBusiness={onSelectBusiness} panelMode={panelMode} isMobile={isMobile} />
         ))}
 

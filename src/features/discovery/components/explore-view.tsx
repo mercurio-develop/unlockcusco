@@ -15,11 +15,18 @@ import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
 import { ItineraryPanel } from "./itinerary-panel"
 import { useExploreViewState } from "../hooks/use-explore-view"
-import { getVisibleBusinesses, getEffectiveMapBusinesses } from "../utils/business-filters"
+import { getVisibleBusinesses } from "../utils/business-filters"
 import { DICTIONARIES } from "../constants"
 
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema"
 import type { Business } from "@prisma/client"
+
+interface LegacyItineraryState extends Partial<OptimizedPlan> {
+  version?: number;
+  shortId?: string;
+  primary?: (OptimizedPlan & { shortId?: string }) | null;
+  secondary?: (OptimizedPlan & { shortId?: string }) | null;
+}
 
 interface ExploreViewProps {
   initialBusinesses: Business[]
@@ -42,7 +49,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -56,6 +62,8 @@ export function ExploreView({
   initialItinerary,
   dict
 }: ExploreViewProps) {
+
+  const plan = initialItinerary as LegacyItineraryState | undefined;
 
   const [mapLoaded, setMapLoaded] = useState(false)
 
@@ -98,16 +106,97 @@ export function ExploreView({
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
 
-  const effectiveBusinesses = mapSearchResults && mapSearchResults.length > 0 ? (mapSearchResults as Business[]) : businesses;
-  const isSearchActive = !!initialQuery;
+  const radarState = useUiStore(s => s.radarState);
+
+  // Compute nearby businesses for radarState
+  const radarBusinesses = useMemo(() => {
+    if (!radarState) return [];
+    const list = mapBusinesses.filter(b => b.lat != null && b.lng != null);
+    const rCat = radarState.category.toUpperCase();
+    const matching = list.filter(b => {
+      const bCat = b.category?.toUpperCase() || "UNKNOWN";
+      if (rCat === bCat) return true;
+      if (rCat === "DINING" && bCat === "MEAL") return true;
+      if (rCat === "STAYS" && bCat === "STAY") return true;
+      if (rCat === "CULTURE" && ["CULTURE", "BOLETO", "EXPERIENCE", "AGENCY", "ADVENTURE", "WELLNESS"].includes(bCat)) return true;
+      return false;
+    });
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+      const R = 6371; // km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2); 
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      return R * c;
+    };
+
+    return matching
+      .map(b => ({
+        ...b,
+        dist: calculateDistance(radarState.lat, radarState.lng, b.lat!, b.lng!),
+        isRadarResult: true
+      }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 10);
+  }, [mapBusinesses, radarState]);
+
+  const effectiveBusinesses = useMemo(() => {
+    let combined: any[] = [];
+    if (mapSearchResults && mapSearchResults.length > 0) {
+      const searchRes = mapSearchResults.map(b => ({ ...b, isConciergeResult: true }));
+      combined = [...combined, ...searchRes];
+    }
+    if (radarState) {
+      combined = [...combined, ...radarBusinesses];
+    }
+
+    if (combined.length > 0) {
+      const uniqueIds = new Set();
+      return combined.filter(b => {
+        if (!uniqueIds.has(b.id)) {
+          uniqueIds.add(b.id);
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return businesses;
+  }, [businesses, mapSearchResults, radarState, radarBusinesses]);
+
+  const isSearchActive = !!initialQuery || !!radarState || (!!mapSearchResults && mapSearchResults.length > 0);
 
   const visibleBusinesses = useMemo(() => {
     return getVisibleBusinesses(effectiveBusinesses, mapBounds, isSearchActive)
   }, [effectiveBusinesses, mapBounds, isSearchActive])
 
   const effectiveMapBusinesses = useMemo(() => {
-    return getEffectiveMapBusinesses(mapBusinesses, mapSearchResults)
-  }, [mapBusinesses, mapSearchResults])
+    let combined: any[] = [];
+    if (mapSearchResults && mapSearchResults.length > 0) {
+      const searchRes = mapSearchResults.map(b => ({ ...b, isConciergeResult: true }));
+      combined = [...combined, ...searchRes];
+    }
+    if (radarState) {
+      combined = [...combined, ...radarBusinesses];
+    }
+
+    if (combined.length > 0) {
+      const uniqueIds = new Set();
+      return combined.filter(b => {
+        if (!uniqueIds.has(b.id)) {
+          uniqueIds.add(b.id);
+          return true;
+        }
+        return false;
+      });
+    }
+
+    return mapBusinesses;
+  }, [mapBusinesses, mapSearchResults, radarState, radarBusinesses]);
   
   const isDefaultView = !params.q && !params.loc && !params.cat && !params.trip && !params.id && !initialItinerary;
 
@@ -122,12 +211,19 @@ export function ExploreView({
     }
   }, [initialSelectedId, setSelectedId])
 
-  const initialTripId = (initialItinerary as (OptimizedPlan & { shortId?: string }) | undefined)?.shortId;
+  const prevLoc = useRef(params.loc)
+  useEffect(() => {
+    if (params.loc !== prevLoc.current) {
+      setSelectedId(null)
+      prevLoc.current = params.loc
+    }
+  }, [params.loc, setSelectedId])
+
+  const initialTripId = params.trip;
   const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   
   const [showCollisionDialog, setShowCollisionDialog] = useState(false);
   const activeItinerary = useItineraryStore(s => s.activeItinerary);
-  const secondaryItinerary = useItineraryStore(s => s.secondaryItinerary);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
   const setActiveTab = useItineraryStore(s => s.setActiveTab);
 
@@ -145,18 +241,26 @@ export function ExploreView({
 
     if (processedTripId.current === initialTripId) return;
 
+    // Skip if this trip is already the active one (e.g. back navigation)
+    if (activeItinerary?.shortId === initialTripId) {
+      processedTripId.current = initialTripId;
+      return;
+    }
+
     // Check if there's an existing itinerary
     const hasWaypoints = activeItinerary?.waypoints && activeItinerary.waypoints.length > 0;
 
     if (!hasWaypoints) {
       // Safe to load into primary
-      const isV2 = (initialItinerary as any).version === 2;
+      const isV2 = plan?.version === 2;
       if (isV2) {
         setActiveTab('primary');
-        setActiveItinerary((initialItinerary as any).primary || null);
-        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).secondary || null });
+        const primary = plan?.primary;
+        setActiveItinerary(primary ? { ...primary, shortId: initialTripId } : null);
+        const secondary = plan?.secondary;
+        useItineraryStore.setState({ secondaryItinerary: secondary ? { ...secondary, shortId: initialTripId } : null });
       } else {
-        setActiveItinerary(initialItinerary as any);
+        setActiveItinerary(plan ? { ...plan, shortId: initialTripId } as OptimizedPlan : null);
         setActiveTab('primary');
       }
       setPanelMode("itinerary");
@@ -167,7 +271,7 @@ export function ExploreView({
       setShowCollisionDialog(true);
       processedTripId.current = initialTripId;
     }
-  }, [initialItinerary, initialTripId, activeItinerary, setActiveItinerary, setActiveTab, setPanelMode, setMobileViewMode]);
+  }, [initialItinerary, initialTripId, activeItinerary, setActiveItinerary, setActiveTab, setPanelMode, setMobileViewMode, plan]);
 
   const handleCollisionChoice = (choice: 'primary' | 'secondary' | 'cancel') => {
     setShowCollisionDialog(false);
@@ -182,23 +286,26 @@ export function ExploreView({
       return;
     }
 
-    const isV2 = (initialItinerary as any).version === 2;
+    const isV2 = plan?.version === 2;
 
     if (choice === 'primary') {
       setActiveTab('primary');
       if (isV2) {
-        setActiveItinerary((initialItinerary as any).primary || null);
-        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).secondary || null });
+        const primary = plan?.primary;
+        setActiveItinerary(primary ? { ...primary, shortId: plan?.shortId || initialTripId || undefined } : null);
+        const secondary = plan?.secondary;
+        useItineraryStore.setState({ secondaryItinerary: secondary ? { ...secondary, shortId: plan?.shortId || initialTripId || undefined } : null });
       } else {
-        setActiveItinerary(initialItinerary as any);
+        setActiveItinerary(plan ? { ...plan, shortId: plan?.shortId || initialTripId || undefined } as OptimizedPlan : null);
       }
     } else if (choice === 'secondary') {
       setActiveTab('secondary');
       // Set the secondary itinerary and switch to it
       if (isV2) {
-        useItineraryStore.setState({ secondaryItinerary: (initialItinerary as any).primary || null });
+        const primary = plan?.primary;
+        useItineraryStore.setState({ secondaryItinerary: primary ? { ...primary, shortId: plan?.shortId || initialTripId || undefined } : null });
       } else {
-        useItineraryStore.setState({ secondaryItinerary: initialItinerary as any });
+        useItineraryStore.setState({ secondaryItinerary: plan ? { ...plan, shortId: plan?.shortId || initialTripId || undefined } as OptimizedPlan : null });
       }
     }
     
@@ -238,9 +345,9 @@ export function ExploreView({
           selectedId={selectedId}
           setSelectedId={setSelectedId}          
           onReset={() => router.push('/explore')}
-          hasMore={hasMore}
-          isLoadingMore={!mapLoaded || isLoadingMore}
-          onLoadMore={loadMore}
+          hasMore={radarState || (mapSearchResults && mapSearchResults.length > 0) ? false : hasMore}
+          isLoadingMore={radarState || (mapSearchResults && mapSearchResults.length > 0) ? false : (!mapLoaded || isLoadingMore)}
+          onLoadMore={radarState || (mapSearchResults && mapSearchResults.length > 0) ? undefined : loadMore}
           dict={dict}
         />
       ) : panelMode === "itinerary" ? (

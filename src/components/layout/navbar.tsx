@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Compass, Map, Sparkles, Bot, Route, Settings2, ChevronDown, HelpCircle, Menu } from "lucide-react"
 import { explorePath } from "@/paths"
 import { useUiStore } from "@/lib/store/use-ui-store"
@@ -30,6 +30,7 @@ export function Navbar({ dict, user }: {
   user?: User | null 
 }) {
   const pathname = usePathname() || '/'
+  const router = useRouter()
   const isChatOpen = useUiStore(s => s.isChatOpen)
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
   const travelVibe = useUiStore(s => s.travelVibe)
@@ -88,7 +89,9 @@ export function Navbar({ dict, user }: {
     } else {
       segments.splice(1, 0, newLocale)
     }
-    window.location.href = segments.join('/')
+    const newPath = segments.join('/')
+    router.push(newPath)
+    router.refresh()
   }
 
   const navItems = [
@@ -100,7 +103,7 @@ export function Navbar({ dict, user }: {
   if (isProfilePage) return null
 
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 h-[calc(48px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
+    <nav className="fixed top-0 w-full z-[200] bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 h-[calc(48px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center justify-center transition-all shadow-sm">
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}
@@ -134,10 +137,10 @@ export function Navbar({ dict, user }: {
               <Map className="w-3.5 h-3.5" />
               {t.towns} <ChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[110]">
+            <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[210]">
               {LOCATIONS.map((loc) => (
                 <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
-                  <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
+                  <Link href={`${langPrefix}/explore/${loc.id}`} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                     {loc.name}
                   </Link>
                 </DropdownMenuItem>
@@ -170,12 +173,18 @@ export function Navbar({ dict, user }: {
             </button>
           </div>
 
-          {pathname?.includes("/explore") && (
-            <>
-              <button 
-                onClick={() => setIsChatOpen(!isChatOpen)}
-                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white border-transparent shadow-lg animate-pulse hover:animate-none hover:scale-105'}`}
-              >
+          {/* Concierge Trigger - always visible */}
+          <button
+            onClick={() => {
+              if (!pathname?.includes("/explore")) {
+                setIsChatOpen(true);
+                router.push(`${langPrefix}/explore`);
+              } else {
+                setIsChatOpen(!isChatOpen);
+              }
+            }}
+            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-[11px] transition-all border ${isChatOpen ? 'bg-rose-600 text-white border-rose-600 shadow-md' : 'bg-gradient-to-r from-rose-500 to-purple-600 text-white border-transparent shadow-lg animate-pulse hover:animate-none hover:scale-105'}`}
+          >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Concierge</span>
               </button>
@@ -301,18 +310,16 @@ export function Navbar({ dict, user }: {
                   <Button onClick={() => setIsPrefsOpen(false)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-6 rounded-xl font-bold shadow-lg mt-4 transition-transform hover:scale-[1.02]">
                     {t.savePreferences}
                   </Button>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+                  </DialogContent>
+                  </Dialog>
 
-          {/* Mobile Links */}
+                  {/* Mobile Links */}
           <div className="flex md:hidden items-center ml-1">
             <DropdownMenu>
               <DropdownMenuTrigger className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors focus:outline-none">
                 <Menu className="w-5 h-5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[110] mr-4">
+              <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[210] mr-4">
                 {navItems.map((item) => {
                   const fullHref = `${langPrefix}${item.href}`
                   const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
@@ -337,7 +344,7 @@ export function Navbar({ dict, user }: {
                 
                 {LOCATIONS.map((loc) => (
                   <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
-                    <Link href={`${langPrefix}/explore/${loc.id}`} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
+                    <Link href={`${langPrefix}/explore/${loc.id}`} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                       {loc.name}
                     </Link>
                   </DropdownMenuItem>

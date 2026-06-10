@@ -18,7 +18,7 @@ import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { BackButton } from "@/components/ui/back-button"
 import { BusinessCard } from "@/features/discovery/components/business-card"
-import { VerifyOverlay } from "./verify-overlay"
+import { VerifyOverlay } from "@/features/discovery/components/verify-overlay"
 import { getDictionary, Locale } from "@/lib/dictionaries"
 import { Business, Review, BusinessService, TourPackage, BusinessPremiumProfile, BusinessPillar } from "@prisma/client"
 
@@ -50,17 +50,7 @@ interface JsonLdReview {
   datePublished: string
 }
 
-function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371; // Radius of the earth in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; 
-}
+import { getNearbyBusinesses } from "@/features/discovery/queries/get-nearby-businesses"
 
 interface JsonLdProps {
   "@context": "https://schema.org"
@@ -169,7 +159,10 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
   const business = await prisma.business.findUnique({
     where: { slug: slug },
     include: {
-      reviews: true,
+      reviews: {
+        take: 10,
+        orderBy: { rating: 'desc' }
+      },
       services: true,
       premiumProfile: {
         include: {
@@ -223,40 +216,29 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
     }
   }
 
-  // Fetch nearby stays and dining for Boleto businesses
+  // Fetch nearby stays and dining
   let nearbyStays: Business[] = [];
   let nearbyDining: Business[] = [];
   
-  if (business.category?.toUpperCase() === 'BOLETO' && business.lat !== null && business.lng !== null && business.locationSlug) {
-    const candidates = await prisma.business.findMany({
-      where: {
-        locationSlug: business.locationSlug,
-        category: {
-          in: ['Stays', 'STAYS', 'stay', 'Stay', 'Dining', 'DINING', 'Meal', 'meal']
-        },
-        id: { not: business.id }
-      },
-      omit: {
-        longDescription: true,
-        longDescriptionEs: true,
-        seoMetaDescEs: true,
-        openingHours: true,
-        heroImages: true,
-        socialLinks: true,
-        featuresJson: true,
-        themeConfig: true,
-      }
-    });
-
-    const candidatesWithDistance = candidates.map(c => {
-       const dist = (c.lat !== null && c.lng !== null && business.lat !== null && business.lng !== null) 
-         ? getDistanceKm(c.lat, c.lng, business.lat, business.lng)
-         : 999;
-       return { ...c, dist };
-    }).sort((a, b) => a.dist - b.dist);
-
-    nearbyStays = candidatesWithDistance.filter(c => ['Stays', 'STAYS', 'stay', 'Stay'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
-    nearbyDining = candidatesWithDistance.filter(c => ['Dining', 'DINING', 'Meal', 'meal'].includes(c.category)).map(({ dist, ...rest }) => rest as Business).slice(0, 8);
+  if (business.category?.toUpperCase() === 'BOLETO' && business.lat !== null && business.lng !== null) {
+    // Dynamic fetching using Postgres spatial query
+    nearbyStays = await getNearbyBusinesses(
+      business.lat,
+      business.lng,
+      ['STAYS', 'STAY'],
+      business.id,
+      8,
+      2
+    );
+    
+    nearbyDining = await getNearbyBusinesses(
+      business.lat,
+      business.lng,
+      ['DINING', 'MEAL'],
+      business.id,
+      8,
+      2
+    );
   }
 
   const categoryName = business.category ? business.category.charAt(0).toUpperCase() + business.category.slice(1).toLowerCase() : business.category
@@ -306,8 +288,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
   }
 
   // JSON-LD Structured Data
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonLd: any = {
+  const jsonLd: JsonLdProps = {
     "@context": "https://schema.org",
     "@type": businessType,
     "name": business.name || 'Business',
@@ -488,9 +469,9 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           {business.reviews && business.reviews.length > 0 && (
              <section className="px-4 lg:px-0 py-8 bg-slate-50 lg:bg-transparent">
                 <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{dict.business.reviews}</h2>
-                <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+                <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0 items-stretch">
                   {business.reviews.map((review) => (
-                    <div key={review.id} className="w-[280px] lg:w-[320px] flex-shrink-0 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div key={review.id} className="w-[280px] lg:w-[320px] flex-shrink-0 flex flex-col bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">
                           {review.author?.charAt(0) || 'U'}
@@ -504,7 +485,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                           </div>
                         </div>
                       </div>
-                      <ExpandableText text={review.text || ''} maxLength={180} />
+                      <ExpandableText text={isEs ? (review.textEs || review.text || '') : (review.textEn || review.text || '')} maxLength={180} />
                     </div>
                   ))}
                 </ScrollCarousel>
@@ -551,24 +532,26 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                   </button>
                 )}
                 
-                <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
-                  {dict.business.replyTime || "Usually replies within 1 hour"}
-                </p>
+                {business.whatsapp && business.isAsociado && (
+                  <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
+                    {dict.business.replyTime || "Usually replies within 1 hour"}
+                  </p>
+                )}
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Nearby Stays and Dining (Boleto Only) */}
-      {business.category?.toUpperCase() === 'BOLETO' && (nearbyStays.length > 0 || nearbyDining.length > 0) && (
+      {/* Nearby Stays and Dining */}
+      {(nearbyStays.length > 0 || nearbyDining.length > 0) && (
         <div className="lg:max-w-6xl lg:mx-auto lg:px-6 pt-4 pb-12">
           {nearbyStays.length > 0 && (
             <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
               <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Alojamientos Cercanos' : 'Nearby Stays'}</h2>
-              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0 items-stretch">
                 {nearbyStays.map((stay) => (
-                  <div key={stay.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+                  <div key={stay.id} className="w-[280px] lg:w-[320px] flex-shrink-0 flex flex-col">
                     <BusinessCard
                       business={stay}
                       orientation="vertical"
@@ -584,9 +567,9 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           {nearbyDining.length > 0 && (
             <section className="px-4 lg:px-0 py-8 border-t border-slate-200/60">
               <h2 className="text-xl lg:text-2xl font-serif text-slate-900 mb-6">{isEs ? 'Restaurantes Cercanos' : 'Nearby Dining'}</h2>
-              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0">
+              <ScrollCarousel className="-mx-4 px-4 pb-4 lg:mx-0 lg:px-0 items-stretch">
                 {nearbyDining.map((dining) => (
-                  <div key={dining.id} className="w-[280px] lg:w-[320px] flex-shrink-0">
+                  <div key={dining.id} className="w-[280px] lg:w-[320px] flex-shrink-0 flex flex-col">
                     <BusinessCard
                       business={dining}
                       orientation="vertical"

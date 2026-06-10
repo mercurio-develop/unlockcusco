@@ -83,6 +83,11 @@ export function Footer({ lang }: { lang: string }) {
                 {isEs ? "Mapa Interactivo" : "Interactive Map"}
               </Link>
             </li>
+            <li>
+              <Link href={`/${lang}/contact`} className="text-sm hover:text-rose-400 transition-colors">
+                {isEs ? "Contacto" : "Contact Us"}
+              </Link>
+            </li>
           </ul>
         </div>
 

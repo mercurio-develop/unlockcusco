@@ -29,12 +29,20 @@ export function SafeImageWrapper({
     onLoadRef.current = onLoad;
   }, [onLoad]);
 
+  // Reset error state and initialize loading state when src changes
   useEffect(() => {
+    setHasError(false);
+    
     if (imgRef.current?.complete) {
       setIsLoading(false);
       if (onLoadRef.current) onLoadRef.current();
+    } else {
+      setIsLoading(true);
     }
   }, [src]);
+
+  // Determine actual image source to display, falling back if there's an error
+  const displaySrc = hasError && fallbackSrc ? fallbackSrc : (src || fallbackSrc || "");
 
   if (hasError && !fallbackSrc) return null;
 
@@ -43,28 +51,35 @@ export function SafeImageWrapper({
       {isLoading && (
         <div className="absolute inset-0 bg-slate-200 animate-pulse z-0" />
       )}
-      <img 
-        ref={imgRef}
-        src={hasError && fallbackSrc ? fallbackSrc : src} 
-        alt={alt} 
-        referrerPolicy="no-referrer"
-        fetchPriority={priority ? "high" : "auto"}
-        className={cn(imgClassName, "relative z-10 transition-opacity duration-500", isLoading ? "opacity-0" : "opacity-100")} 
-        onLoad={() => {
-          setIsLoading(false);
-          if (onLoad) onLoad();
-        }}
-        onError={() => {
-          if (!hasError && fallbackSrc) {
-            setHasError(true);
-            setIsLoading(true); // reset loading state for fallback
-          } else {
-            setHasError(true);
+      {displaySrc ? (
+        <img 
+          ref={imgRef}
+          src={displaySrc} 
+          alt={alt} 
+          referrerPolicy="no-referrer"
+          fetchPriority={priority ? "high" : "auto"}
+          className={cn(imgClassName, "relative z-10 transition-opacity duration-500", isLoading ? "opacity-0" : "opacity-100")} 
+          onLoad={() => {
             setIsLoading(false);
             if (onLoad) onLoad();
-          }
-        }} 
-      />
+          }}
+          onError={() => {
+            // Only try to fall back if we haven't failed already, have a fallback, and displaySrc is not already the fallback
+            if (!hasError && fallbackSrc && src !== fallbackSrc) {
+              setHasError(true);
+              setIsLoading(true); // reset loading state for fallback
+            } else {
+              setHasError(true);
+              setIsLoading(false);
+              if (onLoad) onLoad();
+            }
+          }} 
+        />
+      ) : (
+        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+          No Image
+        </div>
+      )}
     </div>
   );
 }

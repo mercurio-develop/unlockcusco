@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, Repeat, Bed, Navigation } from "lucide-react"
+import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, Repeat, Bed, Navigation, Bot, Radar } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
@@ -212,11 +212,13 @@ export function BusinessCard({
         
         {/* Top Badges */}
         <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10 pointer-events-none">
-          {business.vehicleType && (
-             <span className="bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] font-bold text-white shadow-sm uppercase tracking-wider">
-               {business.vehicleType}
-             </span>
-          )}
+          <div className="flex flex-col items-start gap-1">
+            {business.vehicleType && (
+               <span className="bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[9px] font-bold text-white shadow-sm uppercase tracking-wider">
+                 {business.vehicleType}
+               </span>
+            )}
+          </div>
           
           {isClaimed && (
             <span className="bg-white/90 text-slate-900 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md flex items-center gap-1 ml-auto">
@@ -270,7 +272,7 @@ export function BusinessCard({
                const displayCategory = getLocalizedField(business, 'category', locale) || catData.label;
                return (
                  <span className={cn(
-                   "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1",
+                   "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border flex items-center gap-1",
                    catData.theme
                  )}>
                    <CatIcon className="w-2.5 h-2.5" />
@@ -320,32 +322,32 @@ export function BusinessCard({
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsBoletoModalOpen(true); }}
                 className="flex items-center gap-1 text-[10px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200/50 px-2 py-1 rounded-md transition-colors"
               >
-                🎟️ Requires Boleto Turístico
+                🎟️ {t.requiresBoleto || "Requires Boleto Turístico"}
               </button>
               <Dialog open={isBoletoModalOpen} onOpenChange={setIsBoletoModalOpen}>
                 <DialogContent className="sm:max-w-md p-6 rounded-3xl bg-white border border-gray-200" onClick={(e) => e.stopPropagation()}>
                   <DialogHeader className="mb-2">
                     <DialogTitle className="text-xl font-serif tracking-tight text-slate-900 flex items-center gap-2">
-                      🎟️ Cusco Tourist Ticket (BTC)
+                      🎟️ {t.boletoTitle || "Cusco Tourist Ticket (BTC)"}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="text-sm text-slate-600 space-y-4">
                     <p>
-                      This site requires the <strong>Boleto Turístico del Cusco (BTC)</strong>. It is a unified ticket managed by the government that grants access to up to 16 major archaeological sites and museums in Cusco and the Sacred Valley.
+                      {t.boletoDesc1 || "This site requires the"} <strong>Boleto Turístico del Cusco (BTC)</strong>. {t.boletoDesc2 || "It is a unified ticket managed by the government that grants access to up to 16 major archaeological sites and museums in Cusco and the Sacred Valley."}
                     </p>
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <h4 className="font-bold text-slate-900 mb-2">Options:</h4>
+                      <h4 className="font-bold text-slate-900 mb-2">{t.options || "Options:"}</h4>
                       <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">
-                        <li><strong>Full Ticket (130 Soles):</strong> Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley.</li>
-                        <li><strong>Partial Ticket (70 Soles):</strong> Valid for 1-2 days for a specific circuit (e.g., just Sacred Valley ruins).</li>
+                        <li><strong>{t.fullTicket || "Full Ticket (130 Soles):"}</strong> {t.fullTicketDesc || "Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley."}</li>
+                        <li><strong>{t.partialTicket || "Partial Ticket (70 Soles):"}</strong> {t.partialTicketDesc || "Valid for 1-2 days for a specific circuit (e.g., just Sacred Valley ruins)."}</li>
                       </ul>
                     </div>
                     <p className="text-xs text-slate-500">
-                      <em>Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit.</em>
+                      <em>{t.note || "Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit."}</em>
                     </p>
                   </div>
                   <div className="mt-4 flex justify-end">
-                    <Button onClick={() => setIsBoletoModalOpen(false)} className="bg-slate-900 text-white rounded-xl px-6">Got it</Button>
+                    <Button onClick={() => setIsBoletoModalOpen(false)} className="bg-slate-900 text-white rounded-xl px-6">{t.gotIt || "Got it"}</Button>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -376,7 +378,7 @@ export function BusinessCard({
                 )}
               >
                 <Navigation className="w-3 h-3" />
-                <span className="hidden sm:inline">Set as Start</span>
+                <span className="hidden sm:inline">{t.setStart || "Set as Start"}</span>
               </Button>
             ) : showItineraryAdd && intent === 'SET_END' ? (
               <Button
@@ -421,7 +423,7 @@ export function BusinessCard({
                     )}
                   >
                     <Navigation className="w-3 h-3" />
-                    <span className="hidden sm:inline">Set as Start</span>
+                    <span className="hidden sm:inline">{t.setStart || "Set as Start"}</span>
                   </Button>
                 ) : isExchangingEnd && business.lat != null && business.lng != null ? (
                   <Button
@@ -488,7 +490,7 @@ export function BusinessCard({
                     )}
                   >
                     <Repeat className="w-3 h-3" />
-                    <span className="hidden sm:inline">Exchange</span>
+                    <span className="hidden sm:inline">{t.exchange || "Exchange"}</span>
                   </Button>
                 ) : (
                   <>
@@ -525,11 +527,12 @@ export function BusinessCard({
                   e.stopPropagation();
                   addInteraction({ type: 'map_click', id: business.id, name: business.name });
                   setIsChatOpen(false); // Close the chat overlay to show the map
-                  if (pathname === '/explore') {
+                  setMobileViewMode('map'); // Ensure we are in map view on mobile
+                  if (pathname === `/${locale}/explore`) {
                     setSelectedId(mapTargetId || business.id);
                     window.dispatchEvent(new CustomEvent('switch-to-map-view'));
                   } else {
-                    router.push(`/explore?loc=${business.locationSlug || ''}&lat=${business.lat}&lng=${business.lng}&id=${business.id}`);
+                    router.push(`/${locale}/explore?loc=${business.locationSlug || ''}&lat=${business.lat}&lng=${business.lng}&id=${business.id}`);
                   }
                 }}
                 className={cn(

@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot } from "lucide-react"
+import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot, Ticket, Calendar } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 
@@ -165,13 +165,13 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
         </div>
 
         {/* Popular Itineraries */}
-        <div className="mt-12 w-full max-w-5xl px-2">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">{dict.popularItineraries}</h2>
-          <ScrollCarousel className="pb-4">
+        <div className="mt-12 w-full max-w-5xl px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left">{dict.popularItineraries}</h2>
+          <ScrollCarousel className="mx-0 px-0 pb-4">
             {[
               { id: "cusco-city-tour", title: dict.trips.cusco, image: "/images/boleto/sacsayhuaman.jpg" },
               { id: "ultimate-inca-ruins", title: dict.trips.ruins, image: "/images/boleto/ollantaytambo-ruins.jpg" },
-              { id: "top-7-culinary-route", title: dict.trips.culinary, image: "/images/dummy/ceviche.jpg" },
+              { id: "top-7-culinary-route", title: dict.trips.culinary, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop" },
               { id: "maras-moray", title: dict.trips.maras, image: "/images/boleto/moray.jpg" },
             ].map(trip => (
               <div
@@ -188,7 +188,7 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
                     sizes="(max-width: 768px) 260px, 260px"
                   />
                 </div>
-                <h3 className="font-bold text-lg mb-4 text-slate-900 line-clamp-1">{trip.title}</h3>
+                <h3 className="font-bold text-base mb-4 text-slate-900 line-clamp-1">{trip.title}</h3>
                 <div className="flex gap-2 mt-auto">
                   <button
                     onClick={(e) => { e.stopPropagation(); router.push(`${langPrefix}/explore?trip=${trip.id}`); }}
@@ -211,27 +211,56 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
         </div>
 
         {/* Travel Guides Carousel */}
-        <div className="mt-8 w-full max-w-5xl px-2">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left pl-2">Essential Travel Guides</h2>
-          <ScrollCarousel className="pb-4">
+        <div className="mt-8 w-full max-w-5xl px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-slate-900 mb-4 md:mb-6 text-left">{locale === 'es' ? "Guías de Viaje Esenciales" : "Essential Travel Guides"}</h2>
+          <ScrollCarousel className="mx-0 px-0 pb-4">
             {[
-              { slug: "acclimating-altitude", title: "How to Acclimate to Altitude", image: "/images/boleto/sacsayhuaman.jpg" },
-              { slug: "packing-sacred-valley", title: "Packing List for the Sacred Valley", image: "/images/boleto/moray.jpg" },
-              { slug: "boleto-turistico-explained", title: "Understanding the Boleto Turistico", image: "/images/boleto/cosituc-ticket-office.jpg" },
-              { slug: "best-time-machu-picchu", title: "Best Time to Visit Machu Picchu", image: "/images/dummy/aguas-calientes.jpg" },
+              {
+                slug: "acclimating-altitude",
+                title: locale === 'es' ? "Cómo Aclimatarse a la Altura" : "How to Acclimate to Altitude",
+                desc: locale === 'es' ? "Consejos prácticos para vencer el Soroche." : "Essential medical and practical tips for beating Soroche.",
+                Icon: Leaf,
+                iconBg: "bg-emerald-50 border border-emerald-100",
+                iconColor: "text-emerald-600"
+              },
+              {
+                slug: "packing-sacred-valley",
+                title: locale === 'es' ? "Qué Empacar para el Valle Sagrado" : "Packing List for the Sacred Valley",
+                desc: locale === 'es' ? "Lo esencial para los cambios de temperatura." : "What to bring for the dramatic temperature swings.",
+                Icon: Compass,
+                iconBg: "bg-blue-50 border border-blue-100",
+                iconColor: "text-blue-600"
+              },
+              {
+                slug: "boleto-turistico-explained",
+                title: locale === 'es' ? "Entendiendo el Boleto Turístico" : "Understanding the Boleto Turistico",
+                desc: locale === 'es' ? "Qué cubre exactamente el boleto de Cusco." : "Don't get confused. What the Cusco Tourist Ticket covers.",
+                Icon: Ticket,
+                iconBg: "bg-amber-50 border border-amber-100",
+                iconColor: "text-amber-600"
+              },
+              {
+                slug: "best-time-machu-picchu",
+                title: locale === 'es' ? "Mejor Época para Machu Picchu" : "Best Time to Visit Machu Picchu",
+                desc: locale === 'es' ? "Clima, multitudes y los meses óptimos." : "Weather, crowds, and the optimal months for your trip.",
+                Icon: Calendar,
+                iconBg: "bg-rose-50 border border-rose-100",
+                iconColor: "text-rose-600"
+              },
             ].map(guide => (
               <div
                 key={guide.slug}
-                className="min-w-[240px] bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col snap-center shrink-0 cursor-pointer hover:shadow-md transition-all"
+                className="min-w-[240px] max-w-[280px] bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col snap-center shrink-0 cursor-pointer hover:shadow-md hover:border-rose-200 transition-all group"
                 onClick={() => router.push(`${langPrefix}/guides/${guide.slug}`)}
               >
-                <div className="h-28 bg-slate-50 border border-slate-100 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
-                  <Compass className="w-10 h-10 text-slate-300" />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 shadow-inner ${guide.iconBg}`}>
+                  <guide.Icon className={`w-5 h-5 ${guide.iconColor}`} />
                 </div>
-                <h3 className="font-bold text-md mb-2 text-slate-900 line-clamp-2">{guide.title}</h3>
+                <h3 className="font-bold text-base mb-1 text-slate-900 line-clamp-2 group-hover:text-rose-600 transition-colors">{guide.title}</h3>
+                <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed">{guide.desc}</p>
                 <div className="flex gap-2 mt-auto pt-2">
-                  <span className="text-rose-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                    Read Guide <ArrowRight className="w-3 h-3" />
+                  <span className="text-rose-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1 group-hover:gap-2 transition-all">
+                    {locale === 'es' ? "Leer Guía" : "Read Guide"} <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>

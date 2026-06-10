@@ -34,14 +34,14 @@ export function useChatToolSync(messages: any[]) {
         
          
         const toolParts = msg.parts?.filter((p: any) => p?.type?.startsWith('tool-') || p?.type === 'dynamic-tool') 
-           
+
           || (msg.toolInvocations || []).filter((ti: any) => ti != null).map((ti: any) => ({ 
                type: 'tool-invocation', toolInvocation: ti, 
                state: ti?.state === 'result' ? 'output-available' : undefined, 
                output: ti?.result, toolCallId: ti?.toolCallId, toolName: ti?.toolName 
              })) || [];
 
-         
+
         toolParts.forEach((p: any) => {
           if (!p || p?.state !== 'output-available') return;
           if (processedToolCalls.current.has(p.toolCallId)) return;
@@ -65,7 +65,7 @@ export function useChatToolSync(messages: any[]) {
           }
 
           if (toolName === 'searchDatabase' && output && !output.error) {
-            const list = Array.isArray(output) ? output : (output.alternatives || []);
+            const list = Array.isArray(output.results) ? output.results : (output.results?.alternatives || []);
             if (list.length > 0) {
                
               const withFlag = list.map((b: any) => ({ ...b, isConciergeResult: true }));

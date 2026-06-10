@@ -2,14 +2,14 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, Utensils, Landmark, Ticket, MapPin } from "lucide-react"
+import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, MapPin, Bot, Radar } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import { useUiStore } from "@/lib/store/use-ui-store"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
-import { SORT_OPTIONS, CATEGORIES, LOCATIONS } from "@/features/discovery/constants"
+import { SORT_OPTIONS, LOCATIONS, getCategoryData } from "@/features/discovery/constants"
 import { Footer } from "@/components/layout/footer"
 
 interface DiscoverPanelProps {
@@ -51,6 +51,11 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
   const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
   const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
   const setPanelMode = useUiStore(s => s.setPanelMode);
+  
+  const mapSearchResults = useUiStore(s => s.mapSearchResults);
+  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
+  const radarState = useUiStore(s => s.radarState);
+  const setRadarState = useUiStore(s => s.setRadarState);
 
   const removeFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -189,8 +194,22 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
             </div>
           </div>
 
-          {(q || loc || cats.length > 0 || rad) && (
+          {(q || loc || cats.length > 0 || rad || (mapSearchResults && mapSearchResults.length > 0) || radarState) && (
             <div className="flex flex-wrap items-center gap-2 w-full">
+              {mapSearchResults && mapSearchResults.length > 0 && (
+                <button onClick={() => setMapSearchResults(null)} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-indigo-50 text-indigo-700 border-indigo-200/50 hover:bg-indigo-100">
+                  <Bot className="w-2.5 h-2.5" />
+                  <span>{lang === 'es' ? 'Selección del Concierge' : 'Concierge Picks'}</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
+              )}
+              {radarState && (
+                <button onClick={() => setRadarState(null)} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-rose-50 text-rose-700 border-rose-200/50 hover:bg-rose-100">
+                  <Radar className="w-2.5 h-2.5" />
+                  <span>{lang === 'es' ? 'Cerca' : 'Nearby'}</span>
+                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </button>
+              )}
               {q && (
                 <button onClick={() => removeFilter("q")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
                   <span>&quot;{q}&quot;</span>
@@ -204,21 +223,25 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
                   <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
                 </button>
               )}
-              {cats.map(c => (
-                <button key={c} onClick={() => removeFilter("cat", c)} className={cn(
-                  "shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] md:text-xs font-black uppercase tracking-widest transition-colors",
-                  c.toUpperCase() === 'DINING' ? "bg-amber-50 text-amber-700 border-amber-200/50 hover:bg-amber-100" :
-                  c.toUpperCase() === 'CULTURE' ? "bg-purple-50 text-purple-700 border-purple-200/50 hover:bg-purple-100" :
-                  c.toUpperCase() === 'BOLETO' ? "bg-sky-50 text-sky-700 border-sky-200/50 hover:bg-sky-100" :
-                  "bg-rose-50 text-rose-600 border-rose-100/50 hover:bg-rose-100"
-                )}>
-                  {c.toUpperCase() === 'DINING' && <Utensils className="w-2.5 h-2.5" />}
-                  {c.toUpperCase() === 'CULTURE' && <Landmark className="w-2.5 h-2.5" />}
-                  {c.toUpperCase() === 'BOLETO' && <Ticket className="w-2.5 h-2.5" />}
-                  <span>{CATEGORIES.find(cat => cat.value === c)?.label || c}</span>
-                  <X className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
-                </button>
-              ))}
+              {cats.map(c => {
+                const catData = getCategoryData(c);
+                const CatIcon = catData.icon;
+                return (
+                  <button 
+                    key={c} 
+                    onClick={() => removeFilter("cat", c)} 
+                    className={cn(
+                      "shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-colors shadow-sm",
+                      catData.theme,
+                      "hover:bg-opacity-80"
+                    )}
+                  >
+                    <CatIcon className="w-3.5 h-3.5" />
+                    <span>{catData.label}</span>
+                    <X className="w-3.5 h-3.5 ml-0.5 opacity-60 hover:opacity-100" />
+                  </button>
+                );
+              })}
               {rad && (
                 <button onClick={() => removeFilter("rad")} className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-widest transition-colors bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100">
                   <span>{rad}km Radius</span>
