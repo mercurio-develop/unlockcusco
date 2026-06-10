@@ -11,7 +11,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { getDictionary, Locale } from "@/lib/dictionaries";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { createClient } from "@/lib/supabase/server";
 
 import { siteConfig } from "@/lib/config/site";
 
@@ -83,9 +82,6 @@ export default async function RootLayout(props: {
   const params = await props.params;
   const dict = await getDictionary(params.lang as Locale);
   
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   const {
     children
   } = props;
@@ -99,7 +95,7 @@ export default async function RootLayout(props: {
         <PostHogProvider>
           <NuqsAdapter>
             <PostHogPageView />
-            <Navbar dict={dict.navbar} user={user} />
+            <Navbar dict={dict.navbar} />
             <main className="flex-1 flex flex-col pt-12 pb-16 md:pb-0 bg-white">
               {children}
             </main>

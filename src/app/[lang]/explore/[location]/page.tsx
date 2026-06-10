@@ -22,14 +22,6 @@ const LOCATION_LABELS: Record<string, string> = {
   cusco: 'Cusco',
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
-  dining:    { label: 'Dining',    emoji: '🍽️' },
-  wellness:  { label: 'Wellness',  emoji: '🧘' },
-  adventure: { label: 'Adventure', emoji: '🥾' },
-  stays:     { label: 'Stays',     emoji: '🛌' },
-  culture:   { label: 'Culture',   emoji: '🏺' },
-}
-
 export async function generateStaticParams() {
   const combinations = await prisma.business.groupBy({
     by: ['locationSlug'],

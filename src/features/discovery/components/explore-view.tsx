@@ -145,7 +145,7 @@ export function ExploreView({
   }, [mapBusinesses, radarState]);
 
   const effectiveBusinesses = useMemo(() => {
-    let combined: any[] = [];
+    let combined: Business[] = [];
     if (mapSearchResults && mapSearchResults.length > 0) {
       const searchRes = mapSearchResults.map(b => ({ ...b, isConciergeResult: true }));
       combined = [...combined, ...searchRes];
@@ -175,7 +175,7 @@ export function ExploreView({
   }, [effectiveBusinesses, mapBounds, isSearchActive])
 
   const effectiveMapBusinesses = useMemo(() => {
-    let combined: any[] = [];
+    let combined: Business[] = [];
     if (mapSearchResults && mapSearchResults.length > 0) {
       const searchRes = mapSearchResults.map(b => ({ ...b, isConciergeResult: true }));
       combined = [...combined, ...searchRes];

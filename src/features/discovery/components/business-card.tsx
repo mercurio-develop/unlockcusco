@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, Repeat, Bed, Navigation, Bot, Radar } from "lucide-react"
+import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, Repeat, Bed, Navigation } from "lucide-react"
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
@@ -88,7 +88,7 @@ export function BusinessCard({
   const addInteraction = useUiStore(s => s.addInteraction);
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   const router = useRouter()
   const pathname = usePathname()

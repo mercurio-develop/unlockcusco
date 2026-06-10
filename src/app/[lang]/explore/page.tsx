@@ -56,7 +56,7 @@ export default async function ExplorePage({
 
   return (
     <div className="relative">
-      <StoreInitializer initialItinerary={initialItinerary} />
+      <StoreInitializer />
       <Suspense fallback={
         <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-8 h-8 text-rose-600 animate-spin" />

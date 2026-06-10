@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useUiStore } from "@/lib/store/use-ui-store";
 
 export function useChatAutoPrompt(
@@ -10,7 +10,6 @@ export function useChatAutoPrompt(
   const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
   
   const processedPromptsRef = useRef<Set<string>>(new Set());
   const pendingPromptRef = useRef<string | null>(null);

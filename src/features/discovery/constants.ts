@@ -1,4 +1,4 @@
-  import { Utensils, Sprout, Mountain as MountainIcon, Bed, Ticket, Car, Scissors, Library, Sparkles, MapPin, Compass, Landmark, User } from "lucide-react"
+  import { Utensils, Sprout, Mountain as MountainIcon, Bed, Ticket, Scissors, Library, Sparkles, MapPin, Compass, Landmark, User } from "lucide-react"
 
 export const DEFAULT_CATEGORY_THEME = "bg-rose-50 text-rose-600 border-rose-100/50";
 export const DEFAULT_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=600&auto=format&fit=crop";

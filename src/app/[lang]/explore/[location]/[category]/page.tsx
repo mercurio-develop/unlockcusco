@@ -1,8 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { SafeImageWrapper } from '@/components/ui/safe-image'
-import { Star, Zap, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
 

@@ -89,6 +89,13 @@ tmp/
 *.log
 
 # Deep Cleanup (Clutter removal from public repo)
+businesses-export.json
+public/sw.js
+docs/
+business-images/
+issues/
+ghost-phone/
+onboarding-client/
 CAPACITOR_DEV_GUIDE.md
 CLAUDE.md
 GEMINI.md
@@ -105,4 +112,8 @@ pipelines/
 mcp-configs/
 playwright.config.ts
 .devtools
-scripts//
+scripts/
+check-*.ts
+check-*.js
+restore_*.js
+screenshot.js

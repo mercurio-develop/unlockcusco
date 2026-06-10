@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUiStore } from "@/lib/store/use-ui-store";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
@@ -15,7 +14,6 @@ export function useChatLocation(
   const setUserCoords = useUiStore(s => s.setUserCoords);
   const searchParams = useSearchParams();
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
   const travelVibe = useUiStore(s => s.travelVibe);
   const travelIntensity = useUiStore(s => s.travelIntensity);
 

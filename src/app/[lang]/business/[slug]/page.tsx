@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import type { Metadata } from "next"
-import { Star, MessageCircle, Clock, ShieldCheck, MapPin } from "lucide-react"
+import { Star, MessageCircle,  MapPin } from "lucide-react"
 import { 
   AsociadoBadge, 
   GastronomicTemplate, 
@@ -252,8 +251,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       : `Hello ${business.name}! 👋 I saw your profile on UnlockCusco and I'd like to make a reservation. When do you have availability?`
   )
 
-  const isAsociado = business.isAsociado || false
-   
+
   const schemaTypeMap: Record<string, string> = {
     'DINING': 'Restaurant',
     'AGENCY': 'TravelAgency',

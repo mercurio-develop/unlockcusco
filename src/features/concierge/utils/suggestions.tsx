@@ -1,4 +1,4 @@
-import { Compass, MapPin, ShoppingBag, Car, Utensils, Leaf, Wine, Sparkles, Map, Lightbulb, Bed, Route, List } from "lucide-react";
+import { Compass, MapPin, ShoppingBag, Utensils, Leaf, Wine, Sparkles, Map, Bed, Route, List } from "lucide-react";
 
 export function getSuggestions(travelVibe: string, isEs: boolean, panelMode?: "discover" | "itinerary", mobileViewMode?: "list" | "map") {
   const iconClass = "w-3.5 h-3.5 text-rose-500";

@@ -126,5 +126,5 @@ export function useChatToolSync(messages: any[]) {
         });
       });
     } catch (e) { console.error("Tool sync error:", e); }
-  }, [messages, activeItinerary, setActiveItinerary, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation, setMapSearchResults, undoItinerary, redoItinerary]);
+  }, [messages, activeItinerary, setActiveItinerary, setPanelMode, moveWaypoint, clearStartAnchor, clearEndAnchor, setLegTransportProfile, insertWaypoint, swapWaypoint, removeWaypoint, setStartAnchorLocation, updateEndAnchorLocation, setMapSearchResults, undoItinerary, redoItinerary, setActiveTab]);
 }

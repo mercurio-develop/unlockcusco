@@ -3,14 +3,14 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Compass, Map, Sparkles, Bot, Route, Settings2, ChevronDown, HelpCircle, Menu } from "lucide-react"
+import { Compass, Map, Sparkles, Bot, Settings2, ChevronDown, HelpCircle, Menu, Home, LayoutGrid, CalendarDays } from "lucide-react"
 import { explorePath } from "@/paths"
 import { useUiStore } from "@/lib/store/use-ui-store"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import type { User } from "@prisma/client"
+
 
 const LOCATIONS = [
   { id: "cusco", name: "Cusco" },
@@ -23,11 +23,11 @@ const LOCATIONS = [
   { id: "calca", name: "Calca" },
 ]
 
-export function Navbar({ dict, user }: { 
+export function Navbar({ dict }: { 
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict?: Record<string, any>, 
-  user?: User | null 
+   
 }) {
   const pathname = usePathname() || '/'
   const router = useRouter()
@@ -48,12 +48,14 @@ export function Navbar({ dict, user }: {
     towns: "Towns",
     howToUse: "How to use UnlockCusco",
     quickGuide: "Quick guide to planning your perfect Sacred Valley trip.",
+    homeIconTitle: "Home Icon (Top Lists & Guides)",
+    homeIconDesc: "Return to the main page to find our Top 5 Lists, popular pre-built itineraries, and essential travel guides.",
     mapIconTitle: "Map Icon (Towns & Filters)",
     mapIconDesc: "Use the unified filter in the top left of the map to select specific towns (like Pisac or Ollantaytambo) and filter by categories (Dining, Stays, Wellness, etc.).",
-    compassIconTitle: "Compass Icon (Discover Mode)",
-    compassIconDesc: "Use <b>Discover</b> mode to explore points of interest across the valley. Click places to add them to your itinerary.",
-    routeIconTitle: "Route Icon (Itinerary Builder)",
-    routeIconDesc: "In the Itinerary tab, you can add, remove, and reorder stops. Set your starting and ending points by clicking them on the map.",
+    discoverIconTitle: "Grid Icon (Discover Mode)",
+    discoverIconDesc: "Use <b>Discover</b> mode to explore points of interest across the valley. Click places to add them to your itinerary.",
+    itineraryIconTitle: "Calendar Icon (Itinerary Builder)",
+    itineraryIconDesc: "In the Itinerary tab, you can add, remove, and reorder stops. Set your starting and ending points by clicking them on the map.",
     sparklesIconTitle: "Sparkles Icon (AI Concierge)",
     sparklesIconDesc: "Tap the Concierge button to open the chat. The AI can build an entire day for you based on your preferences, check Boleto Turístico info, and estimate taxi fares.",
     settingsIconTitle: "Settings Icon (Preferences)",
@@ -205,6 +207,13 @@ export function Navbar({ dict, user }: {
                   
                   <div className="space-y-5 text-sm text-slate-300 hover:text-white py-2">
                     <div className="flex gap-3">
+                      <div className="mt-0.5"><Home className="w-5 h-5 text-slate-400"/></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{t.homeIconTitle}</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">{t.homeIconDesc}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
                       <div className="mt-0.5"><Map className="w-5 h-5 text-slate-400"/></div>
                       <div>
                         <h4 className="font-bold text-slate-900">{t.mapIconTitle}</h4>
@@ -212,17 +221,17 @@ export function Navbar({ dict, user }: {
                       </div>
                     </div>
                     <div className="flex gap-3">
-                      <div className="mt-0.5"><Compass className="w-5 h-5 text-slate-400"/></div>
+                      <div className="mt-0.5"><LayoutGrid className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">{t.compassIconTitle}</h4>
-                        <p className="mt-1 text-slate-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.compassIconDesc }}></p>
+                        <h4 className="font-bold text-slate-900">{t.discoverIconTitle}</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: t.discoverIconDesc }}></p>
                       </div>
                     </div>
                     <div className="flex gap-3">
-                      <div className="mt-0.5"><Route className="w-5 h-5 text-slate-400"/></div>
+                      <div className="mt-0.5"><CalendarDays className="w-5 h-5 text-slate-400"/></div>
                       <div>
-                        <h4 className="font-bold text-slate-900">{t.routeIconTitle}</h4>
-                        <p className="mt-1 text-slate-600 leading-relaxed">{t.routeIconDesc}</p>
+                        <h4 className="font-bold text-slate-900">{t.itineraryIconTitle}</h4>
+                        <p className="mt-1 text-slate-600 leading-relaxed">{t.itineraryIconDesc}</p>
                       </div>
                     </div>
                     <div className="flex gap-3">

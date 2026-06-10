@@ -65,8 +65,8 @@ export function ToolRenderer({ message, onShareLocation }: ToolRendererProps) {
         const toolName = part.toolName || toolInvocation.toolName || part.type?.replace(/^tool-/, '');
         
         // In v6 UIMessage, state is 'output-available' for completed tools.
-        // Also explicitly check if part.type === 'tool-result' which indicates completion.
-        const isCompleted = part?.state === 'output-available' || part?.state === 'result' || toolInvocation?.state === 'result' || part?.type === 'tool-result';
+        // Also explicitly check if part.type === 'tool-result' or 'tool-output-available' which indicates completion.
+        const isCompleted = part?.state === 'output-available' || part?.state === 'result' || toolInvocation?.state === 'result' || part?.type === 'tool-result' || part?.type === 'tool-output-available';
         const isError = part?.state === 'output-error' || part?.state === 'error' || toolInvocation?.state === 'error' || part?.type === 'tool-error';
         const isDone = isCompleted || isError;
         

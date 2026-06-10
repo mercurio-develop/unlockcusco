@@ -592,17 +592,21 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   }, [validBusinesses]);
 
   const businessSignature = validBusinesses.map(b => b.id).join(',');
+  const searchSignature = mapSearchResults ? mapSearchResults.map(b => b.id).join(',') : '';
   const [prevSignature, setPrevSignature] = useState<string | null>(null);
+  const [prevSearchSignature, setPrevSearchSignature] = useState<string | null>(null);
   const [prevMobileViewMode, setPrevMobileViewMode] = useState<string | null>(null);
 
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
     const shouldRefit = businessSignature !== prevSignature;
+    const searchRefit = searchSignature !== prevSearchSignature;
     const viewModeChangedToMap = mobileViewMode === 'map' && prevMobileViewMode !== 'map';
     
     // Always run the bounds check if mobile view mode changes to 'map'
-    if (shouldRefit || viewModeChangedToMap) {
+    if (shouldRefit || searchRefit || viewModeChangedToMap) {
       if (shouldRefit) setPrevSignature(businessSignature);
+      if (searchRefit) setPrevSearchSignature(searchSignature);
       if (viewModeChangedToMap) setPrevMobileViewMode(mobileViewMode);
       
       if (isDefaultView && !selectedId && !radarState && (!mapSearchResults || mapSearchResults.length === 0)) return;
@@ -639,8 +643,15 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
         maxLat = validBusinesses[0].lat;
       }
 
-      const boundsItems = validBusinesses.slice(0, 20);
+      let boundsItems: any[] = validBusinesses.slice(0, 20);
+      if (radarState) {
+        boundsItems = [];
+      } else if (mapSearchResults && mapSearchResults.length > 0) {
+        boundsItems = mapSearchResults;
+      }
+
       for (const b of boundsItems) {
+        if (b.lng == null || b.lat == null) continue;
         if (minLng === null || b.lng < minLng) minLng = b.lng;
         if (maxLng === null || b.lng > maxLng) maxLng = b.lng;
         if (minLat === null || b.lat < minLat) minLat = b.lat;
@@ -658,6 +669,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       
       return () => clearTimeout(timer);
     }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validBusinesses, businessSignature, prevSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode, radarState, mapSearchResults]);
 
   // Explicitly fit bounds for the active itinerary when panel mode is 'itinerary'

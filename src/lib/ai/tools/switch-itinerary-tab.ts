@@ -13,4 +13,5 @@ export const switchItineraryTab = tool({
       message: `Successfully switched context to the ${tab} itinerary. Any places you add will now go here.`
     };
   }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any);

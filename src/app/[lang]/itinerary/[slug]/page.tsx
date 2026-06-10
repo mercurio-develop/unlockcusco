@@ -1,13 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
+;
 import { notFound } from "next/navigation";
-import { Sparkles, Map } from "lucide-react";
 import { getItinerary } from "@/features/itinerary/queries/get-itinerary";
 import { ITINERARY_GUIDES } from "@/lib/dictionaries/itinerary-guides";
 import { ItineraryTimelineDisplay } from "@/features/itinerary/components/itinerary-timeline-display";
 import { ItineraryMapPreview } from "@/features/itinerary/components/itinerary-map-preview";
 import { StoreInitializer } from "@/lib/store/store-initializer";
-import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { Metadata } from 'next';
 
 export async function generateMetadata(props: { params: Promise<{ lang: string, slug: string }> }): Promise<Metadata> {
@@ -41,7 +39,7 @@ export default async function DynamicItineraryPage(props: { params: Promise<{ la
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
-      <StoreInitializer initialItinerary={{ ...(itineraryData.state as unknown as OptimizedPlan), shortId: slug }} />
+      <StoreInitializer />
       
       {/* Hero Section */}
       <div className="relative h-[40vh] md:h-[70vh] w-full">

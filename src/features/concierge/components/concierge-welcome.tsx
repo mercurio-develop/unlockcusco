@@ -1,4 +1,4 @@
-import { Bot, Map, Utensils, Bed, MapPin, Info, Calendar } from "lucide-react";
+import { Bot, Map, Utensils, Bed, MapPin, Info } from "lucide-react";
 
 interface ConciergeWelcomeProps {
   isEs: boolean;

@@ -14,7 +14,7 @@ export async function sendContactEmail(formData: FormData) {
   try {
     // If the API key is "dummy_key", we simulate success
     if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL && process.env.RESEND_API_KEY !== "dummy_key") {
-      const { data, error } = await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: "UnlockCusco Contact <onboarding@resend.dev>",
         to: process.env.ADMIN_EMAIL,
         subject: `New Contact Message from ${name}`,

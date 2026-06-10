@@ -52,6 +52,7 @@ export function SafeImageWrapper({
         <div className="absolute inset-0 bg-slate-200 animate-pulse z-0" />
       )}
       {displaySrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img 
           ref={imgRef}
           src={displaySrc} 
