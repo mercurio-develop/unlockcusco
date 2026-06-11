@@ -107,8 +107,31 @@ export async function generateMetadata({ params }: BusinessPageProps): Promise<M
 
   const categoryName = bCategory ? bCategory.charAt(0).toUpperCase() + bCategory.slice(1).toLowerCase() : bCategory
   const locationName = business.locationSlug ? business.locationSlug.charAt(0).toUpperCase() + business.locationSlug.slice(1) : (isEs ? "el Valle Sagrado" : "the Sacred Valley")
-  const title = bSeoMetaTitle || `${bName} — ${categoryName} ${isEs ? 'en' : 'in'} ${locationName}`
-  const description = bSeoMetaDesc || bTagline || (isEs ? `Lee reseñas, mira fotos y contacta a ${bName} directamente. Calificación: ${business.rating?.toFixed(1) || 'Nuevo'} estrellas.` : `Read reviews, view photos, and contact ${bName} directamente. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`)
+  
+  const isDining = business.category?.toUpperCase() === 'DINING'
+  
+  let title = bSeoMetaTitle
+  let description = bSeoMetaDesc
+
+  if (isDining) {
+    if (!title) {
+      title = isEs ? `${bName}: Menú, Fotos y Reseñas` : `${bName}: Menu, Photos & Reviews | Unlock Cusco`
+    }
+    if (!description) {
+      description = isEs 
+        ? `Descubre ${bName} en ${locationName}. Mira fotos reales de sus platos, explora el menú actualizado y lee reseñas auténticas. ¡Reserva hoy!`
+        : `Discover ${bName} in ${locationName}. View real photos of their dishes, explore the updated menu, and read authentic reviews. Book today!`
+    }
+  }
+
+  // Fallbacks for non-dining or missing fields
+  if (!title) {
+    title = `${bName} — ${categoryName} ${isEs ? 'en' : 'in'} ${locationName}`
+  }
+  
+  if (!description) {
+    description = bTagline || (isEs ? `Lee reseñas, mira fotos y contacta a ${bName} directamente. Calificación: ${business.rating?.toFixed(1) || 'Nuevo'} estrellas.` : `Read reviews, view photos, and contact ${bName} directamente. Average rating: ${business.rating?.toFixed(1) || 'New'} stars.`)
+  }
 
   const ogImage = business.premiumProfile?.coverPhotoUrl || business.premiumProfile?.logoUrl || `/api/og?title=${encodeURIComponent(bName || 'UnlockCusco')}&description=${encodeURIComponent((categoryName || '') + (isEs ? ' en ' : ' in ') + locationName)}&image=${encodeURIComponent(business.imageUrl || '')}${business.rating ? '&rating=' + business.rating : ''}`
 
@@ -254,12 +277,13 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
 
   const schemaTypeMap: Record<string, string> = {
     'DINING': 'Restaurant',
+    'MEAL': 'Restaurant',
     'AGENCY': 'TravelAgency',
     'WELLNESS': 'HealthAndBeautyBusiness',
     'STAYS': 'LodgingBusiness',
     'CULTURE': 'TouristAttraction',
   }
-  const businessType = schemaTypeMap[business.category || ''] || 'LocalBusiness'
+  const businessType = schemaTypeMap[business.category?.toUpperCase() || ''] || 'LocalBusiness'
 
   let socialLinks: SocialLink[] = []
   try {
@@ -508,7 +532,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
             {/* Desktop CTA */}
             {business.category?.toUpperCase() !== 'BOLETO' && (
               <>
-                {business.whatsapp && business.isAsociado ? (
+                {business.whatsapp && (business.isClaimed || business.isAsociado) ? (
                   <a
                     href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
                     target="_blank"
@@ -530,7 +554,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                   </button>
                 )}
                 
-                {business.whatsapp && business.isAsociado && (
+                {business.whatsapp && (business.isClaimed || business.isAsociado) && (
                   <p className="text-center text-xs font-medium text-slate-400 mt-4 uppercase tracking-widest">
                     {dict.business.replyTime || "Usually replies within 1 hour"}
                   </p>
@@ -585,7 +609,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       {/* 5. Sticky Action Bar - MOBILE ONLY */}
       {business.category?.toUpperCase() !== 'BOLETO' && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-          {business.whatsapp && business.isAsociado ? (
+          {business.whatsapp && (business.isClaimed || business.isAsociado) ? (
             <a
               href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
               target="_blank"
