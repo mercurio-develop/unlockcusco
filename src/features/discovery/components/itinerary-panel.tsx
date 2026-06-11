@@ -424,6 +424,8 @@ export function ItineraryPanel({ dict }: {
                     if (navigator.geolocation) {
                       navigator.geolocation.getCurrentPosition((pos) => {
                         setStartAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
+                        setSelectedId('itin-start');
+                        setMobileViewMode('map');
                         if (conciergeSendMessage) {
                           conciergeSendMessage({ text: `[INTERNAL] I just updated my start location to my current GPS location.` });
                         }
@@ -443,20 +445,16 @@ export function ItineraryPanel({ dict }: {
                 <button
                   onClick={e => { 
                     e.stopPropagation(); 
-                    if (mapClickMode === 'start') {
-                      setMapClickMode(null);
-                    } else {
-                      setMapClickMode('start');
-                      window.dispatchEvent(new CustomEvent('drawer-snap-half'));
-                    }
+                    setMapClickMode('start');
+                    setMobileViewMode('map');
+                    window.dispatchEvent(new CustomEvent('drawer-snap-half'));
                   }}
-                  className={`shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'start' ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
                   title="Set marker on map"
                 >
                   <MapPin className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{mapClickMode === 'start' ? 'Cancel' : 'Set Marker'}</span>
-                  <span className="sm:hidden">{mapClickMode === 'start' ? 'Cancel' : ''}</span>
-                  {!mapClickMode && <span className="sm:hidden">Marker</span>}
+                  <span className="hidden sm:inline">{t.setMarker}</span>
+                  <span className="sm:hidden">Marker</span>
                 </button>
                 <button
                   onClick={e => { e.stopPropagation(); setIsExchangingStart(true); setPanelMode('discover'); }}
@@ -789,21 +787,42 @@ export function ItineraryPanel({ dict }: {
 
                 <div className="flex flex-wrap gap-2 mt-3" onClick={e => e.stopPropagation()}>
                   <button
-                    onClick={e => { 
-                      e.stopPropagation(); 
-                      if (mapClickMode === 'end') {
-                        setMapClickMode(null);
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((pos) => {
+                          updateEndAnchorLocation(pos.coords.latitude, pos.coords.longitude, "My Location");
+                          setSelectedId('itin-arrival');
+                          setMobileViewMode('map');
+                          if (conciergeSendMessage) {
+                            conciergeSendMessage({ text: `[INTERNAL] I just updated my end location to my current GPS location.` });
+                          }
+                        }, () => {
+                          alert("Could not access your location. Please check browser permissions.");
+                        });
                       } else {
-                        setMapClickMode('end');
-                        window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+                        alert("Geolocation is not supported by your browser.");
                       }
                     }}
-                    className={`shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider ${mapClickMode === 'end' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600'}`}
+                    className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full bg-slate-100 flex items-center gap-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors text-[10px] font-bold uppercase tracking-wider"
+                    title="Use My GPS Location"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Set GPS</span>
+                  </button>
+                  <button
+                    onClick={e => { 
+                      e.stopPropagation(); 
+                      setMapClickMode('end');
+                      setMobileViewMode('map');
+                      window.dispatchEvent(new CustomEvent('drawer-snap-half'));
+                    }}
+                    className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
                     title="Set marker on map"
                   >
                     <MapPin className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{mapClickMode === 'end' ? t.cancel : t.setMarker}</span>
-                    <span className="sm:hidden">{mapClickMode === 'end' ? 'Cancel' : 'Marker'}</span>
+                    <span className="hidden sm:inline">{t.setMarker}</span>
+                    <span className="sm:hidden">Marker</span>
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); setIsExchangingEnd(true); setPanelMode('discover'); }}
