@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "streetviewpixels-pa.googleapis.com" },
       { protocol: "https", hostname: "*.mapbox.com" },
       { protocol: "https", hostname: "*.apify.com" },
+      { protocol: "https", hostname: "dynamic-media-cdn.tripadvisor.com" },
       // Allow localhost images in dev
       { protocol: "http", hostname: "localhost" },
     ],
