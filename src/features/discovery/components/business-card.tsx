@@ -145,14 +145,14 @@ export function BusinessCard({
     >
       {/* Top Right Action Menu */}
       {false && (
-        <div 
-          className="absolute top-3 right-3 z-30 flex items-center justify-center" 
+        <div
+          className="absolute top-3 right-3 z-30 flex items-center justify-center"
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <DropdownMenu>
             <DropdownMenuTrigger render={
-              <button 
+              <button
                 type="button"
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 border border-slate-200 shadow-md text-slate-600 hover:text-rose-600 hover:scale-110 transition-all cursor-pointer backdrop-blur-sm"
               >
@@ -165,11 +165,11 @@ export function BusinessCard({
                   <ExternalLink className="w-4 h-4 mr-2" /> View Profile
                 </DropdownMenuItem>
               )}
-              {business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
-                <DropdownMenuItem onClick={(e) => { 
-                  e.stopPropagation(); 
-                   
-                  handleBookNow(e as any); 
+              {business.whatsapp && (business.isClaimed || business.isAsociado) && business.category?.toUpperCase() !== 'BOLETO' && (
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+
+                  handleBookNow(e as any);
                 }} className="text-[#25D366] font-medium">
                   <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
                 </DropdownMenuItem>
@@ -559,7 +559,7 @@ export function BusinessCard({
               </Link>
             )}
 
-            {showContact && business.whatsapp && business.isAsociado && business.category?.toUpperCase() !== 'BOLETO' && (
+            {showContact && business.whatsapp && (business.isClaimed || business.isAsociado) && business.category?.toUpperCase() !== 'BOLETO' && (
               <Button
                 onClick={(e) => {
                   e.stopPropagation();

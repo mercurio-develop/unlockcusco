@@ -135,7 +135,7 @@ export default async function LocationPage({
   // Combine counts for categories that only differ by case
   const combinedCategories: Record<string, { category: string, count: number }> = {}
   availableCategoriesRaw.forEach(c => {
-    if (c.category && c.category.toUpperCase() !== 'AGENCY') {
+    if (c.category && !['AGENCY', 'TRANSPORT', 'TAXI'].includes(c.category.toUpperCase())) {
       const key = c.category.toUpperCase()
       if (!combinedCategories[key]) {
         combinedCategories[key] = { category: c.category, count: c._count._all }
