@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import Image from "next/image"
+import { SafeImageWrapper } from "@/components/ui/safe-image"
 import { getCategoryData } from "@/features/discovery/constants"
 import { cn } from "@/lib/utils"
 import { MapPin } from "lucide-react"
@@ -92,12 +92,11 @@ export function TopListClient({ title, items, subtitle, locale = "en" }: { title
             >
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-3 bg-slate-100 shrink-0">
                 {item.imageUrl ? (
-                  <Image 
+                  <SafeImageWrapper 
                     src={item.imageUrl} 
                     alt={item.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 300px"
+                    wrapperClassName="w-full h-full"
+                    imgClassName="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
