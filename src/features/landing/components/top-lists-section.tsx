@@ -17,19 +17,16 @@ export async function TopListsSection({ dict, locale = "en" }: { dict?: Record<s
     prisma.business.findMany({
       where: { category: { in: ['stays', 'STAYS'] }, imageUrl: { contains: 'http' } },
       orderBy: { reviewsCount: 'desc' },
-      take: 50,
       select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
     }),
     prisma.business.findMany({
       where: { category: { in: ['dining', 'DINING'] }, imageUrl: { contains: 'http' } },
       orderBy: { reviewsCount: 'desc' },
-      take: 50,
       select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
     }),
     prisma.business.findMany({
       where: { category: { in: ['adventure', 'ADVENTURE', 'agency', 'AGENCY'] }, imageUrl: { contains: 'http' } },
       orderBy: { reviewsCount: 'desc' },
-      take: 50,
       select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
     })
   ]);
