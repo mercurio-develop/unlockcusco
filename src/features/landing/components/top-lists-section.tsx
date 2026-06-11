@@ -5,6 +5,7 @@ import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { getCategoryData } from "@/features/discovery/constants"
 import { cn } from "@/lib/utils"
+import { MapPin } from "lucide-react"
 
 interface TopListItem {
   id: string
@@ -17,6 +18,7 @@ interface TopListItem {
   categoryEs: string | null
   description: string | null
   descriptionEs: string | null
+  locationSlug: string | null
   open?: boolean
 }
 
@@ -103,6 +105,12 @@ function TopList({ title, items, subtitle, locale = "en" }: { title: string, ite
                     </p>
                   );
                 })()}
+                {item.locationSlug && (
+                  <div className="flex items-center gap-1 text-indigo-500 text-[10px] font-bold uppercase tracking-wider mt-1.5 bg-indigo-50 w-fit px-2 py-0.5 rounded-full">
+                    <MapPin className="w-2.5 h-2.5" />
+                    {item.locationSlug.replace(/-/g, ' ')}
+                  </div>
+                )}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {tags.map((tag: string) => (
@@ -129,20 +137,28 @@ export async function TopListsSection({ dict, locale = "en" }: { dict?: Record<s
     hostelsDesc: dict?.hostelsDesc || "The highest rated hostels and hotels across the valley.",
     diningTitle: dict?.diningTitle || "Top 5 Restaurants",
     diningDesc: dict?.diningDesc || "Highly recommended culinary experiences.",
+    adventuresTitle: dict?.adventuresTitle || "Top 5 Adventures",
+    adventuresDesc: dict?.adventuresDesc || "The most thrilling experiences and tours.",
   }
 
-  const [topStays, topDining] = await Promise.all([
+  const [topStays, topDining, topAdventures] = await Promise.all([
     prisma.business.findMany({
       where: { category: { in: ['stays', 'STAYS'] }, imageUrl: { not: '' } },
       orderBy: { reviewsCount: 'desc' },
       take: 5,
-      select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true }
+      select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
     }),
     prisma.business.findMany({
       where: { category: { in: ['dining', 'DINING'] }, imageUrl: { not: '' } },
       orderBy: { reviewsCount: 'desc' },
       take: 5,
-      select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true }
+      select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
+    }),
+    prisma.business.findMany({
+      where: { category: { in: ['adventure', 'ADVENTURE', 'agency', 'AGENCY'] }, imageUrl: { not: '' } },
+      orderBy: { reviewsCount: 'desc' },
+      take: 5,
+      select: { id: true, slug: true, name: true, imageUrl: true, priceTier: true, specialties: true, category: true, categoryEs: true, description: true, descriptionEs: true, locationSlug: true }
     })
   ]);
 
@@ -159,6 +175,12 @@ export async function TopListsSection({ dict, locale = "en" }: { dict?: Record<s
           title={t.diningTitle} 
           subtitle={t.diningDesc}
           items={topDining} 
+          locale={locale}
+        />
+        <TopList 
+          title={t.adventuresTitle} 
+          subtitle={t.adventuresDesc}
+          items={topAdventures} 
           locale={locale}
         />
       </div>
