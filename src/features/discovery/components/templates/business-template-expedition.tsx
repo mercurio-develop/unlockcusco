@@ -116,7 +116,7 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                             style={{ backgroundColor: primaryColor }}
                           >
                             <MessageCircle className="w-4 h-4" />
-                            {isEs ? 'Consultar' : 'Inquire'}
+                            WhatsApp
                           </a>
                         ) : null}
                       </div>
