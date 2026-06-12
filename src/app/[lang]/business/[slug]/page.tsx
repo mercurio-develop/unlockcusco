@@ -571,8 +571,8 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           )}
         </div>
 
-        {/* Right Column (Sticky Action Card) - DESKTOP ONLY */}
-        <div className="hidden lg:block lg:col-span-1">
+        {/* Right Column (Sticky Action Card) */}
+        <div className="lg:col-span-1 mt-8 lg:mt-0">
           <div className="sticky top-24 bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
             {/* Trust Signal */}
             <div className="flex flex-col items-center justify-center mb-6 pb-6 border-b border-slate-100">
@@ -595,7 +595,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                     rel="noopener noreferrer"
                     className="flex items-center justify-center w-full py-4 px-4 rounded-xl text-white font-bold text-[15px] shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     style={{ 
-                      backgroundColor: business.premiumProfile?.primaryColor || '#10b981' 
+                      backgroundColor: '#25D366' // WhatsApp Green
                     }}
                   >
                     <MessageCircle className="w-5 h-5 mr-2" />
@@ -658,33 +658,6 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                 ))}
               </ScrollCarousel>
             </section>
-          )}
-        </div>
-      )}
-
-      {/* 5. Sticky Action Bar - MOBILE ONLY */}
-      {business.category?.toUpperCase() !== 'BOLETO' && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 z-40 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-          {business.whatsapp && (business.isClaimed || business.isAsociado) ? (
-            <a
-              href={`https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-white font-medium text-[15px] shadow-sm transition-transform active:scale-[0.98]"
-              style={{ 
-                backgroundColor: business.premiumProfile?.primaryColor || '#10b981' // WhatsApp Green default
-              }}
-            >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              {isEs ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}
-            </a>
-          ) : (
-            <button 
-              disabled
-              className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl bg-slate-100 text-slate-400 font-medium text-[15px]"
-            >
-              {isEs ? 'Contacto no disponible' : 'Contact Not Available'}
-            </button>
           )}
         </div>
       )}

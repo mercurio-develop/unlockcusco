@@ -107,7 +107,8 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                             href={whatsappUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-full justify-center rounded-xl px-4 py-3 text-xs font-bold transition-transform hover:scale-[1.02] flex items-center gap-1.5 shadow-sm premium-accent-bg"
+                            className="w-full justify-center rounded-xl px-4 py-3 text-xs font-bold transition-transform hover:scale-[1.02] flex items-center gap-1.5 shadow-sm text-white"
+                            style={{ backgroundColor: '#25D366' }}
                           >
                             <MessageCircle className="w-4 h-4" />
                             WhatsApp
