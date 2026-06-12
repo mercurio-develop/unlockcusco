@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
+import { generateObject } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY,
+});
 
 interface PremiumClientData {
   business: {
@@ -67,6 +76,57 @@ interface PremiumClientData {
     textEn?: string;
     textEs?: string;
   }>;
+}
+
+async function generateAIDescriptions(businessId: string, name: string, reviews: any[]) {
+  console.log(`\n🤖 Generating AI Descriptions for ${name}...`);
+  const reviewsText = reviews.map(r => `- ${r.text}`).join('\n');
+
+  const prompt = `
+You are an expert travel writer and critic. Based ONLY on the following customer reviews, generate two descriptions for this business:
+
+1. A Zagat-style description: 1 or 2 punchy sentences focusing exclusively on positive sentiments. Weave short direct quotes (1-3 words) from the reviews into the sentence using quotes. Maximum 25 words.
+2. A Long description: 2-3 paragraphs providing a comprehensive, compelling overview of the experience, atmosphere, and service based on the reviews. Write it in an engaging, professional tone.
+
+Additionally, infer the price tier: '$' (budget), '$$' (moderate), '$$$' (expensive), or '$$$$' (luxury). Default to '$$' if unsure.
+
+Business Name: ${name}
+
+Reviews:
+${reviewsText}
+  `;
+
+  try {
+    const { object } = await generateObject({
+      model: google('gemini-2.5-flash'),
+      schema: z.object({
+        zagatDescription: z.string().describe('The short Zagat-style description'),
+        longDescription: z.string().describe('The long, multi-paragraph description'),
+        priceTier: z.enum(['$', '$$', '$$$', '$$$$']).describe('The inferred price tier')
+      }),
+      prompt: prompt,
+    });
+
+    let cleanZagat = object.zagatDescription.trim();
+    if (cleanZagat.startsWith('"') && cleanZagat.endsWith('"')) {
+        cleanZagat = cleanZagat.substring(1, cleanZagat.length - 1);
+    }
+
+    await prisma.business.update({
+      where: { id: businessId },
+      data: { 
+        description: cleanZagat,
+        longDescription: object.longDescription,
+        priceTier: object.priceTier
+      }
+    });
+
+    console.log(`   ✅ AI Zagat Description: ${cleanZagat}`);
+    console.log(`   ✅ AI Price Tier: ${object.priceTier}`);
+    console.log(`   ✅ AI Long Description generated successfully.`);
+  } catch (err) {
+    console.error(`❌ Error generating AI descriptions:`, err);
+  }
 }
 
 async function importClient(filePath: string) {
@@ -162,7 +222,8 @@ async function importClient(filePath: string) {
 
     console.log(`✅ Successfully imported ${business.name}!`);
     if (data.reviews && data.reviews.length > 0) {
-      console.log(`   Added ${data.reviews.length} reviews. Next step: Run 'npx tsx scripts/generate-zagat-descriptions.ts'`);
+      console.log(`   Added ${data.reviews.length} reviews. Running AI Generation...`);
+      await generateAIDescriptions(business.id, business.name, data.reviews);
     } else {
       console.log(`   ⚠️ No reviews provided. Ask the client for 10 reviews to generate AI descriptions!`);
     }
