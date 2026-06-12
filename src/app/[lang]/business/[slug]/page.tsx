@@ -409,7 +409,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
+    <main className="-mt-12 min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
       {/* Dynamic Premium Styles */}
       {business.premiumProfile && (
         <>
@@ -448,7 +448,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <div className="absolute top-4 left-4 lg:left-auto lg:right-[calc(50%+24rem+1rem)] z-50">
+      <div className="absolute top-16 lg:top-4 left-4 lg:left-auto lg:right-[calc(50%+24rem+1rem)] z-50">
         <BackButton className="bg-white/80 backdrop-blur-md shadow-sm" />
       </div>
 
@@ -483,7 +483,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
         )}
 
         {/* Trust Signal Overlay */}
-        <div className="absolute -bottom-4 right-4 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
+        <div className="absolute -bottom-4 right-6 md:right-8 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
            <span className="font-medium text-sm text-slate-900">{business.rating?.toFixed(1) || 'New'}</span>
            <span className="text-xs text-slate-500 ml-1">({business.reviewsCount || 0})</span>
@@ -496,7 +496,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
         {/* Left Column (Main Content) */}
         <div className="lg:col-span-2">
           {/* 2. Header Section */}
-          <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
+          <section className="px-6 md:px-8 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
             <div className="flex items-start justify-between gap-4">
               <h1 className={`text-3xl lg:text-4xl font-serif leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : 'text-slate-900'}`}>
                 {bName}
