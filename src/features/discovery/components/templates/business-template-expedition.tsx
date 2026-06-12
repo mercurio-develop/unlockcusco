@@ -36,9 +36,9 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
           </div>
         </div>
 
-        <div className="-mx-4 sm:mx-0">
+        <div className="w-full">
           {packages.length > 0 ? (
-            <ScrollCarousel className="w-full gap-4 pb-4 px-4 sm:px-0 items-stretch">
+            <ScrollCarousel className="mx-0 px-0 items-stretch pb-4 gap-4">
               {packages.map((pkg) => {
                 const highlights = JSON.parse(pkg.highlights || "[]") as string[]
                 
