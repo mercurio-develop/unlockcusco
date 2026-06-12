@@ -409,7 +409,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
   }
 
   return (
-    <main className={`min-h-screen pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900 ${business.premiumProfile ? 'premium-page-bg' : 'bg-gray-50'}`}>
+    <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
       {/* Dynamic Premium Styles */}
       {business.premiumProfile && (
         <>
@@ -468,6 +468,20 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           ))}
         </ScrollCarousel>
 
+        {/* Centered Logo Overlay */}
+        {business.premiumProfile?.logoUrl && (
+          <div className="absolute inset-0 m-auto w-32 h-32 md:w-48 md:h-48 z-10 flex items-center justify-center">
+            <div className="relative w-full h-full drop-shadow-2xl">
+              <SafeImageWrapper 
+                src={business.premiumProfile.logoUrl} 
+                alt={`${bName} logo`} 
+                wrapperClassName="w-full h-full drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                imgClassName="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Trust Signal Overlay */}
         <div className="absolute -bottom-4 right-4 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -477,34 +491,22 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       </section>
 
       {/* Main Grid Layout */}
-      <div className={`lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12 ${business.premiumProfile ? 'premium-font-body premium-text-main' : ''}`}>
+      <div className={`lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12 ${business.premiumProfile ? 'premium-font-body' : ''}`}>
 
         {/* Left Column (Main Content) */}
         <div className="lg:col-span-2">
           {/* 2. Header Section */}
-          <section className={`px-4 lg:px-0 pt-8 lg:pt-0 pb-6 lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none ${business.premiumProfile ? 'premium-page-bg' : 'bg-white'}`}>
+          <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-4 md:gap-6">
-                {business.premiumProfile?.logoUrl && (
-                  <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 relative flex items-center justify-center">
-                    <SafeImageWrapper 
-                      src={business.premiumProfile.logoUrl} 
-                      alt={`${bName} logo`} 
-                      wrapperClassName="w-full h-full"
-                      imgClassName="w-full h-full object-contain drop-shadow-md"
-                    />
-                  </div>
-                )}
-                <h1 className={`text-3xl lg:text-4xl font-serif leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : 'text-slate-900'}`}>
-                  {bName}
-                </h1>
-              </div>
+              <h1 className={`text-3xl lg:text-4xl font-serif leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : 'text-slate-900'}`}>
+                {bName}
+              </h1>
               {business.isAsociado && <AsociadoBadge className="mt-1 flex-shrink-0" />}
             </div>
 
             {/* Quick Info Strip */}
-            <div className={`flex flex-wrap items-center gap-3 mt-4 text-sm mb-6 ${business.premiumProfile ? 'premium-text-muted' : 'text-slate-600'}`}>
-              <span className={`px-2.5 py-1 rounded-md font-medium ${business.premiumProfile ? 'premium-card-bg premium-text-main' : 'bg-slate-100 text-slate-700'}`}>{categoryName}</span>
+            <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-slate-600 mb-6">
+              <span className="px-2.5 py-1 bg-slate-100 rounded-md font-medium text-slate-700">{categoryName}</span>
               <span>•</span>
               <span className="font-medium">{business.priceTier || '$$'}</span>
               <span>•</span>
