@@ -228,6 +228,10 @@ async function importClient(filePath: string) {
       console.log(`   ⚠️ No reviews provided. Ask the client for 10 reviews to generate AI descriptions!`);
     }
 
+    console.log(`\n🎉 Profile is ready! View it here:`);
+    console.log(`   🇬🇧 EN: http://localhost:3000/en/business/${business.slug}`);
+    console.log(`   🇪🇸 ES: http://localhost:3000/es/business/${business.slug}\n`);
+
   } catch (error) {
     console.error(`❌ Error importing premium client:`, error);
   } finally {
