@@ -525,7 +525,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           </section>
 
           {/* 3. Category-Specific Body */}
-          <div className="bg-white lg:bg-transparent">
+          <div className="bg-white lg:bg-transparent p-2">
             {(business.category?.toLowerCase() === 'dining') && (
               <GastronomicTemplate business={business as any} dict={dict} />
             )}
