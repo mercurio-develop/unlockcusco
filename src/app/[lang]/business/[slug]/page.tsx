@@ -392,12 +392,24 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
   }
 
   const primaryColor = business.premiumProfile?.primaryColor;
+  const accentColor = business.premiumProfile?.accentColor;
   const fonts = business.premiumProfile?.fonts?.split(',').map(f => f.trim()) || [];
   const displayFont = fonts[0] ? fonts[0].replace(/ /g, '+') : null;
   const bodyFont = fonts[1] ? fonts[1].replace(/ /g, '+') : null;
 
+  // Calculate luminance to determine dark theme
+  let isDarkTheme = false;
+  if (primaryColor) {
+    const hex = primaryColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    isDarkTheme = luma < 128;
+  }
+
   return (
-    <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
+    <main className={`min-h-screen pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900 ${business.premiumProfile ? 'premium-page-bg' : 'bg-gray-50'}`}>
       {/* Dynamic Premium Styles */}
       {business.premiumProfile && (
         <>
@@ -407,7 +419,18 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           <style dangerouslySetInnerHTML={{__html: `
             ${displayFont ? `.premium-font-display { font-family: '${fonts[0]}', serif !important; }` : ''}
             ${bodyFont ? `.premium-font-body { font-family: '${fonts[1]}', sans-serif !important; }` : ''}
-            ${primaryColor ? `.premium-text-primary { color: ${primaryColor} !important; }` : ''}
+            ${primaryColor ? `
+              .premium-page-bg { background-color: ${primaryColor} !important; }
+              .premium-text-primary { color: ${primaryColor} !important; }
+              .premium-text-main { color: ${isDarkTheme ? '#ffffff' : '#0f172a'} !important; }
+              .premium-text-muted { color: ${isDarkTheme ? 'rgba(255,255,255,0.6)' : '#64748b'} !important; }
+              .premium-card-bg { background-color: ${isDarkTheme ? 'rgba(255,255,255,0.05)' : '#ffffff'} !important; }
+              .premium-card-border { border-color: ${isDarkTheme ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} !important; }
+            ` : ''}
+            ${accentColor ? `
+              .premium-accent-bg { background-color: ${accentColor} !important; color: ${isDarkTheme ? '#000000' : '#ffffff'} !important; }
+              .premium-accent-text { color: ${accentColor} !important; }
+            ` : ''}
           `}} />
         </>
       )}
@@ -454,12 +477,12 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       </section>
 
       {/* Main Grid Layout */}
-      <div className={`lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12 ${business.premiumProfile ? 'premium-font-body' : ''}`}>
+      <div className={`lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12 ${business.premiumProfile ? 'premium-font-body premium-text-main' : ''}`}>
 
         {/* Left Column (Main Content) */}
         <div className="lg:col-span-2">
           {/* 2. Header Section */}
-          <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
+          <section className={`px-4 lg:px-0 pt-8 lg:pt-0 pb-6 lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none ${business.premiumProfile ? 'premium-page-bg' : 'bg-white'}`}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4 md:gap-6">
                 {business.premiumProfile?.logoUrl && (
@@ -472,16 +495,16 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
                     />
                   </div>
                 )}
-                <h1 className={`text-3xl lg:text-4xl font-serif text-slate-900 leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : ''}`}>
+                <h1 className={`text-3xl lg:text-4xl font-serif leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : 'text-slate-900'}`}>
                   {bName}
                 </h1>
               </div>
               {business.isAsociado && <AsociadoBadge className="mt-1 flex-shrink-0" />}
             </div>
-            
+
             {/* Quick Info Strip */}
-            <div className="flex flex-wrap items-center gap-3 mt-4 text-sm text-slate-600 mb-6">
-              <span className="px-2.5 py-1 bg-slate-100 rounded-md font-medium text-slate-700">{categoryName}</span>
+            <div className={`flex flex-wrap items-center gap-3 mt-4 text-sm mb-6 ${business.premiumProfile ? 'premium-text-muted' : 'text-slate-600'}`}>
+              <span className={`px-2.5 py-1 rounded-md font-medium ${business.premiumProfile ? 'premium-card-bg premium-text-main' : 'bg-slate-100 text-slate-700'}`}>{categoryName}</span>
               <span>•</span>
               <span className="font-medium">{business.priceTier || '$$'}</span>
               <span>•</span>
