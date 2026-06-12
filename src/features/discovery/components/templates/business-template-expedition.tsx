@@ -74,12 +74,6 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                     <div className="p-6 flex flex-col flex-1">
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-3">
-                           <span 
-                             className="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider"
-                             style={{ color: primaryColor, backgroundColor: `${primaryColor}1A`, borderColor: `${primaryColor}33` }}
-                           >
-                             {pkg.difficulty}
-                           </span>
                            <span className="text-slate-500 text-xs font-medium bg-white px-2 py-1 border border-slate-200 rounded-full">{pkg.durationDays} {t.days}</span>
                         </div>
                         <h3 className="text-xl font-serif text-slate-900 mb-1 leading-tight">{pkg.title}</h3>
