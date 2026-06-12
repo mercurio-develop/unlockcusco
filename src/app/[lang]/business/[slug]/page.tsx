@@ -424,7 +424,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
               .premium-text-primary { color: ${primaryColor} !important; }
               .premium-text-main { color: ${isDarkTheme ? '#ffffff' : '#0f172a'} !important; }
               .premium-text-muted { color: ${isDarkTheme ? 'rgba(255,255,255,0.6)' : '#64748b'} !important; }
-              .premium-card-bg { background-color: ${isDarkTheme ? 'rgba(255,255,255,0.05)' : '#ffffff'} !important; }
+              .premium-card-bg { background-color: ${primaryColor} !important; }
               .premium-card-border { border-color: ${isDarkTheme ? 'rgba(255,255,255,0.1)' : '#f1f5f9'} !important; }
             ` : ''}
             ${accentColor ? `
