@@ -61,7 +61,7 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                   : "#"
 
                 return (
-                  <div key={pkg.id} className={cn("w-[300px] md:w-[380px] shrink-0 border rounded-[2rem] overflow-hidden flex flex-col snap-start", business.premiumProfile ? 'premium-card-bg premium-card-border' : 'bg-slate-50 border-slate-200')}>
+                  <div key={pkg.id} className={cn("w-[300px] md:w-[380px] shrink-0 rounded-[2rem] overflow-hidden flex flex-col snap-start", business.premiumProfile ? 'premium-card-bg' : 'bg-slate-50 border border-slate-200')}>
                     {heroImage && (
                       <div className="w-full h-48 relative shrink-0">
                         <SafeImageWrapper
@@ -75,7 +75,7 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                     <div className="p-6 flex flex-col flex-1">
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-3">
-                           <span className={cn("text-xs font-medium px-2 py-1 border rounded-full", business.premiumProfile ? 'premium-card-bg premium-card-border premium-text-main' : 'bg-white text-slate-500 border-slate-200')}>{pkg.durationDays} {t.days}</span>
+                           <span className={cn("text-xs font-medium px-2 py-1 rounded-full", business.premiumProfile ? 'premium-card-bg premium-text-main' : 'bg-white text-slate-500 border border-slate-200')}>{pkg.durationDays} {t.days}</span>
                         </div>
                         <h3 className={cn("text-xl font-serif mb-1 leading-tight", business.premiumProfile ? 'premium-text-primary premium-font-display' : 'text-slate-900')}>{pkg.title}</h3>
                         <p className={cn("text-sm italic", business.premiumProfile ? 'premium-text-muted' : 'text-slate-500')}>{pkg.tagline}</p>
@@ -101,13 +101,13 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                         )}
                       </div>
 
-                      <div className={cn("mt-auto pt-4 border-t flex items-center justify-between", business.premiumProfile ? 'premium-card-border' : 'border-slate-100')}>
+                      <div className={cn("mt-auto pt-4 flex items-center justify-between", business.premiumProfile ? '' : 'border-t border-slate-100')}>
                         {business.whatsapp ? (
                           <a 
                             href={whatsappUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="w-full justify-center rounded-xl px-4 py-3 text-xs font-bold transition-transform hover:scale-[1.02] flex items-center gap-1.5 shadow-sm premium-accent-bg premium-accent-text"
+                            className="w-full justify-center rounded-xl px-4 py-3 text-xs font-bold transition-transform hover:scale-[1.02] flex items-center gap-1.5 shadow-sm premium-accent-bg"
                           >
                             <MessageCircle className="w-4 h-4" />
                             WhatsApp
