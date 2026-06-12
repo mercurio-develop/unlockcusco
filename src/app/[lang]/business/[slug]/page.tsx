@@ -470,7 +470,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
 
         {/* Centered Logo Overlay */}
         {business.premiumProfile?.logoUrl && (
-          <div className="absolute inset-0 m-auto w-32 h-32 md:w-48 md:h-48 z-10 flex items-center justify-center">
+          <div className="absolute inset-0 m-auto w-48 h-48 md:w-72 md:h-72 z-10 flex items-center justify-center">
             <div className="relative w-full h-full drop-shadow-2xl">
               <SafeImageWrapper 
                 src={business.premiumProfile.logoUrl} 
