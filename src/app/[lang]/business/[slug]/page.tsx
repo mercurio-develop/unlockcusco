@@ -425,20 +425,6 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
             </div>
           ))}
         </ScrollCarousel>
-        
-        {/* Centered Logo Overlay */}
-        {business.premiumProfile?.logoUrl && (
-          <div className="absolute inset-0 m-auto w-32 h-32 md:w-48 md:h-48 z-10 flex items-center justify-center">
-            <div className="relative w-full h-full drop-shadow-2xl">
-              <SafeImageWrapper 
-                src={business.premiumProfile.logoUrl} 
-                alt={`${bName} logo`} 
-                wrapperClassName="w-full h-full drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]"
-                imgClassName="w-full h-full object-contain"
-              />
-            </div>
-          </div>
-        )}
 
         {/* Trust Signal Overlay */}
         <div className="absolute -bottom-4 right-4 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
@@ -456,9 +442,21 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           {/* 2. Header Section */}
           <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-3xl lg:text-4xl font-serif text-slate-900 leading-tight">
-                {bName}
-              </h1>
+              <div className="flex items-center gap-3">
+                {business.premiumProfile?.logoUrl && (
+                  <div className="w-12 h-12 md:w-16 md:h-16 shrink-0 relative overflow-hidden rounded-full border border-slate-100 shadow-sm bg-white">
+                    <SafeImageWrapper 
+                      src={business.premiumProfile.logoUrl} 
+                      alt={`${bName} logo`} 
+                      wrapperClassName="w-full h-full"
+                      imgClassName="w-full h-full object-contain p-1"
+                    />
+                  </div>
+                )}
+                <h1 className="text-3xl lg:text-4xl font-serif text-slate-900 leading-tight">
+                  {bName}
+                </h1>
+              </div>
               {business.isAsociado && <AsociadoBadge className="mt-1 flex-shrink-0" />}
             </div>
             
