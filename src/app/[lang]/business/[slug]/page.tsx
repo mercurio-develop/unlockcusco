@@ -391,8 +391,27 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
     ]
   }
 
+  const primaryColor = business.premiumProfile?.primaryColor;
+  const fonts = business.premiumProfile?.fonts?.split(',').map(f => f.trim()) || [];
+  const displayFont = fonts[0] ? fonts[0].replace(/ /g, '+') : null;
+  const bodyFont = fonts[1] ? fonts[1].replace(/ /g, '+') : null;
+
   return (
     <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12 relative selection:bg-rose-100 selection:text-rose-900">
+      {/* Dynamic Premium Styles */}
+      {business.premiumProfile && (
+        <>
+          {(displayFont || bodyFont) && (
+            <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${displayFont ? `family=${displayFont}:wght@400;700&` : ''}${bodyFont ? `family=${bodyFont}:wght@400;500;700&` : ''}display=swap`} />
+          )}
+          <style dangerouslySetInnerHTML={{__html: `
+            ${displayFont ? `.premium-font-display { font-family: '${fonts[0]}', serif !important; }` : ''}
+            ${bodyFont ? `.premium-font-body { font-family: '${fonts[1]}', sans-serif !important; }` : ''}
+            ${primaryColor ? `.premium-text-primary { color: ${primaryColor} !important; }` : ''}
+          `}} />
+        </>
+      )}
+
       {verifyToken && business.verificationToken === verifyToken && (
         <VerifyOverlay businessId={business.id} token={verifyToken} lang={lang} />
       )}
@@ -409,7 +428,7 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       <div className="absolute top-4 left-4 lg:left-auto lg:right-[calc(50%+24rem+1rem)] z-50">
         <BackButton className="bg-white/80 backdrop-blur-md shadow-sm" />
       </div>
-      
+
       {/* 1. Hero Image Carousel */}
       <section className="relative w-full h-[40vh] min-h-[300px] lg:h-[50vh] lg:max-w-6xl lg:mx-auto lg:rounded-b-3xl overflow-hidden bg-slate-200 shadow-sm">
         <ScrollCarousel className="w-full h-full [&>div]:snap-start">
@@ -435,25 +454,25 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
       </section>
 
       {/* Main Grid Layout */}
-      <div className="lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12">
-        
+      <div className={`lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12 lg:grid lg:grid-cols-3 lg:gap-12 ${business.premiumProfile ? 'premium-font-body' : ''}`}>
+
         {/* Left Column (Main Content) */}
         <div className="lg:col-span-2">
           {/* 2. Header Section */}
           <section className="px-4 lg:px-0 pt-8 lg:pt-0 pb-6 bg-white lg:bg-transparent -mt-6 lg:mt-0 relative z-20 rounded-t-[2rem] lg:rounded-none">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4 md:gap-6">
                 {business.premiumProfile?.logoUrl && (
-                  <div className="w-12 h-12 md:w-16 md:h-16 shrink-0 relative overflow-hidden rounded-full border border-slate-100 shadow-sm bg-white">
+                  <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 relative flex items-center justify-center">
                     <SafeImageWrapper 
                       src={business.premiumProfile.logoUrl} 
                       alt={`${bName} logo`} 
                       wrapperClassName="w-full h-full"
-                      imgClassName="w-full h-full object-contain p-1"
+                      imgClassName="w-full h-full object-contain drop-shadow-md"
                     />
                   </div>
                 )}
-                <h1 className="text-3xl lg:text-4xl font-serif text-slate-900 leading-tight">
+                <h1 className={`text-3xl lg:text-4xl font-serif text-slate-900 leading-tight ${business.premiumProfile ? 'premium-font-display premium-text-primary' : ''}`}>
                   {bName}
                 </h1>
               </div>
