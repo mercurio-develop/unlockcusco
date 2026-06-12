@@ -452,21 +452,23 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
         <BackButton className="bg-white/80 backdrop-blur-md shadow-sm" />
       </div>
 
-      {/* 1. Hero Image Carousel */}
+      {/* 1. Hero Image */}
       <section className="relative w-full h-[40vh] min-h-[300px] lg:h-[50vh] lg:max-w-6xl lg:mx-auto lg:rounded-b-3xl overflow-hidden bg-slate-200 shadow-sm">
-        <ScrollCarousel className="w-full h-full [&>div]:snap-start">
-          {images.map((url, i) => (
-            <div key={i} className="relative w-screen lg:w-full h-[40vh] min-h-[300px] lg:h-[50vh] flex-shrink-0">
-               <SafeImageWrapper 
-                  src={url} 
-                  alt={bName || ''} 
-                  wrapperClassName="w-full h-full"
-                  imgClassName="w-full h-full object-cover"
-                  priority={i === 0}
-                />
-            </div>
-          ))}
-        </ScrollCarousel>
+        {images.length > 0 ? (
+          <div className="relative w-full h-full flex-shrink-0">
+            <SafeImageWrapper 
+              src={images[0]} 
+              alt={bName || ''} 
+              wrapperClassName="w-full h-full"
+              imgClassName="w-full h-full object-cover"
+              priority={true}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-400">
+            No image available
+          </div>
+        )}
 
         {/* Centered Logo Overlay */}
         {business.premiumProfile?.logoUrl && (
