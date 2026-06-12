@@ -1,25 +1,29 @@
-import { Map, CheckCircle2 } from "lucide-react"
+import { Map, CheckCircle2, MessageCircle } from "lucide-react"
 import type { Business, BusinessService, TourPackage } from "@prisma/client"
 import { DICTIONARIES } from "../../constants"
+import { ScrollCarousel } from "@/components/ui/scroll-carousel"
+import { SafeImageWrapper } from "@/components/ui/safe-image"
 
 interface ExpeditionTemplateProps {
   business: Business & { services: BusinessService[]; tourPackages?: TourPackage[] }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict?: Record<string, any>
+  locale?: string
 }
 
-export function ExpeditionTemplate({ business, dict }: ExpeditionTemplateProps) {
+export function ExpeditionTemplate({ business, dict, locale = 'en' }: ExpeditionTemplateProps) {
   if (!business.isAsociado) return null
 
   const packages = business.tourPackages || []
 
   const t = dict?.templates?.expedition || DICTIONARIES.expeditionTemplate
+  const isEs = locale === 'es'
 
   return (
     <div className="space-y-12">
       <section>
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
             <Map className="w-6 h-6 text-blue-600" />
           </div>
           <div>
@@ -28,78 +32,120 @@ export function ExpeditionTemplate({ business, dict }: ExpeditionTemplateProps) 
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="-mx-4 sm:mx-0">
           {packages.length > 0 ? (
-            packages.map((pkg) => {
-              const highlights = JSON.parse(pkg.highlights || "[]") as string[]
-              const included = JSON.parse(pkg.included || "[]") as string[]
+            <ScrollCarousel className="w-full gap-4 pb-4 px-4 sm:px-0 items-stretch">
+              {packages.map((pkg) => {
+                const highlights = JSON.parse(pkg.highlights || "[]") as string[]
+                const included = JSON.parse(pkg.included || "[]") as string[]
+                
+                let gallery: string[] = []
+                try {
+                  gallery = JSON.parse(pkg.gallery || "[]")
+                } catch {
+                  gallery = []
+                }
+                const heroImage = gallery.length > 0 ? gallery[0] : null
 
-              return (
-                <div key={pkg.id} className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-8 backdrop-blur-md overflow-hidden relative">
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="flex-1 space-y-6">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                           <span className="bg-blue-600/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-600/30 uppercase tracking-wider">
+                const whatsappMsg = encodeURIComponent(
+                  isEs 
+                    ? `¡Hola ${business.name}! 👋 Vi su perfil en UnlockCusco y me interesa obtener más información sobre el paquete: "${pkg.title}".`
+                    : `Hello ${business.name}! 👋 I saw your profile on UnlockCusco and I'm interested in getting more information about the package: "${pkg.title}".`
+                )
+                
+                const whatsappUrl = business.whatsapp 
+                  ? `https://wa.me/51${business.whatsapp.replace(/\D/g, '')}?text=${whatsappMsg}`
+                  : "#"
+
+                return (
+                  <div key={pkg.id} className="w-[300px] md:w-[380px] shrink-0 bg-slate-50 border border-slate-200 rounded-[2rem] overflow-hidden flex flex-col snap-start">
+                    {heroImage && (
+                      <div className="w-full h-48 relative shrink-0">
+                        <SafeImageWrapper
+                          src={heroImage}
+                          alt={pkg.title}
+                          wrapperClassName="w-full h-full"
+                          imgClassName="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-3">
+                           <span className="bg-blue-600/10 text-blue-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-blue-600/20 uppercase tracking-wider">
                              {pkg.difficulty}
                            </span>
-                           <span className="text-slate-900/40 text-xs uppercase tracking-widest">• {pkg.durationDays} {t.days}</span>
+                           <span className="text-slate-500 text-xs font-medium bg-white px-2 py-1 border border-slate-200 rounded-full">{pkg.durationDays} {t.days}</span>
                         </div>
-                        <h3 className="text-2xl font-serif text-slate-900 mb-2">{pkg.title}</h3>
-                        <p className="text-slate-900/60 text-sm italic">{pkg.tagline}</p>
+                        <h3 className="text-xl font-serif text-slate-900 mb-1 leading-tight">{pkg.title}</h3>
+                        <p className="text-slate-500 text-sm italic">{pkg.tagline}</p>
                       </div>
 
-                      <p className="text-slate-900/70 text-sm leading-relaxed">
+                      <p className="text-slate-600 text-sm leading-relaxed mb-6">
                         {pkg.description}
                       </p>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                          <h4 className="text-[10px] font-bold text-slate-900/40 uppercase tracking-[0.2em]">{t.highlights}</h4>
-                          <ul className="space-y-2">
-                            {highlights.map((h, i) => (
-                              <li key={i} className="text-xs text-slate-900/80 flex items-start gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                                {h}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="space-y-3">
-                          <h4 className="text-[10px] font-bold text-slate-900/40 uppercase tracking-[0.2em]">{t.included}</h4>
-                          <ul className="space-y-2">
-                            {included.map((inc, i) => (
-                              <li key={i} className="text-xs text-slate-900/60 flex items-center gap-2">
-                                <div className="w-1 h-1 rounded-full bg-slate-200" />
-                                {inc}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                      <div className="space-y-4 mb-8">
+                        {highlights.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.highlights}</h4>
+                            <ul className="space-y-1.5">
+                              {highlights.map((h, i) => (
+                                <li key={i} className="text-xs text-slate-700 flex items-start gap-2">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                  <span className="leading-tight">{h}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {included.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.included}</h4>
+                            <ul className="space-y-1.5">
+                              {included.slice(0, 4).map((inc, i) => (
+                                <li key={i} className="text-xs text-slate-600 flex items-center gap-2">
+                                  <div className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+                                  <span className="leading-tight truncate">{inc}</span>
+                                </li>
+                              ))}
+                              {included.length > 4 && (
+                                <li className="text-[10px] text-slate-400 italic">
+                                  + {included.length - 4} {isEs ? 'más' : 'more'}
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="w-full md:w-64 flex flex-col justify-between items-center p-6 bg-slate-50 rounded-3xl border border-white/5">
-                      <div className="text-center">
-                        <p className="text-slate-900/40 text-xs uppercase tracking-widest mb-1">{t.priceFrom}</p>
-                        <p className="text-4xl font-serif text-slate-900 font-bold">${pkg.basePriceUsd}</p>
-                        <p className="text-slate-900/40 text-[10px] mt-1">{t.perPerson}</p>
-                      </div>
-                      
-                      <div className="w-full space-y-3 mt-8">
-                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-900/40 uppercase px-1">
-                          <span>{t.intensity}</span>
-                          <span className="text-slate-900/80">{pkg.pace}</span>
+                      <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <div className="w-1/2 pr-4 space-y-1.5">
+                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase">
+                            <span>{t.intensity}</span>
+                            <span className="text-slate-600">{pkg.pace}</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                             <div className="h-full bg-blue-500 rounded-full" style={{ width: pkg.difficulty === 'EASY' ? '30%' : pkg.difficulty === 'MODERATE' ? '60%' : '90%' }} />
+                          </div>
                         </div>
-                        <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                           <div className="h-full bg-blue-500 rounded-full" style={{ width: pkg.difficulty === 'EASY' ? '30%' : pkg.difficulty === 'MODERATE' ? '60%' : '90%' }} />
-                        </div>
+                        {business.whatsapp ? (
+                          <a 
+                            href={whatsappUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl px-4 py-2 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            {isEs ? 'Consultar' : 'Inquire'}
+                          </a>
+                        ) : null}
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
+                )
+              })}
+            </ScrollCarousel>
           ) : (
             <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-3xl">
               <p className="text-slate-900/40">{t.emptyState}</p>
