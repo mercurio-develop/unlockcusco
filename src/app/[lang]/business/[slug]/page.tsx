@@ -426,6 +426,20 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           ))}
         </ScrollCarousel>
         
+        {/* Centered Logo Overlay */}
+        {business.premiumProfile?.logoUrl && (
+          <div className="absolute inset-0 m-auto w-32 h-32 md:w-48 md:h-48 z-10 flex items-center justify-center">
+            <div className="relative w-full h-full drop-shadow-2xl">
+              <SafeImageWrapper 
+                src={business.premiumProfile.logoUrl} 
+                alt={`${bName} logo`} 
+                wrapperClassName="w-full h-full drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                imgClassName="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Trust Signal Overlay */}
         <div className="absolute -bottom-4 right-4 z-10 bg-white px-4 py-1.5 rounded-full shadow-md border border-slate-100 flex items-center gap-1 lg:hidden">
            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />

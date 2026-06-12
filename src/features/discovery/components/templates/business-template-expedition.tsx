@@ -1,11 +1,11 @@
 import { Map, CheckCircle2, MessageCircle } from "lucide-react"
-import type { Business, BusinessService, TourPackage } from "@prisma/client"
+import type { Business, BusinessService, TourPackage, BusinessPremiumProfile } from "@prisma/client"
 import { DICTIONARIES } from "../../constants"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
 
 interface ExpeditionTemplateProps {
-  business: Business & { services: BusinessService[]; tourPackages?: TourPackage[] }
+  business: Business & { services: BusinessService[]; tourPackages?: TourPackage[]; premiumProfile?: BusinessPremiumProfile | null }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dict?: Record<string, any>
   locale?: string
@@ -19,12 +19,15 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
   const t = dict?.templates?.expedition || DICTIONARIES.expeditionTemplate
   const isEs = locale === 'es'
 
+  const primaryColor = business.premiumProfile?.primaryColor || '#2563eb'
+  const accentColor = business.premiumProfile?.accentColor || '#10b981'
+
   return (
     <div className="space-y-12">
       <section>
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-            <Map className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0" style={{ backgroundColor: `${primaryColor}1A` }}>
+            <Map className="w-6 h-6" style={{ color: primaryColor }} />
           </div>
           <div>
             <h2 className="text-3xl font-serif text-slate-900">{t.title}</h2>
@@ -37,7 +40,6 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
             <ScrollCarousel className="w-full gap-4 pb-4 px-4 sm:px-0 items-stretch">
               {packages.map((pkg) => {
                 const highlights = JSON.parse(pkg.highlights || "[]") as string[]
-                const included = JSON.parse(pkg.included || "[]") as string[]
                 
                 let gallery: string[] = []
                 try {
@@ -72,7 +74,10 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                     <div className="p-6 flex flex-col flex-1">
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-3">
-                           <span className="bg-blue-600/10 text-blue-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-blue-600/20 uppercase tracking-wider">
+                           <span 
+                             className="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider"
+                             style={{ color: primaryColor, backgroundColor: `${primaryColor}1A`, borderColor: `${primaryColor}33` }}
+                           >
                              {pkg.difficulty}
                            </span>
                            <span className="text-slate-500 text-xs font-medium bg-white px-2 py-1 border border-slate-200 rounded-full">{pkg.durationDays} {t.days}</span>
@@ -92,51 +97,25 @@ export function ExpeditionTemplate({ business, dict, locale = 'en' }: Expedition
                             <ul className="space-y-1.5">
                               {highlights.map((h, i) => (
                                 <li key={i} className="text-xs text-slate-700 flex items-start gap-2">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: accentColor }} />
                                   <span className="leading-tight">{h}</span>
                                 </li>
                               ))}
                             </ul>
                           </div>
                         )}
-                        {included.length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.included}</h4>
-                            <ul className="space-y-1.5">
-                              {included.slice(0, 4).map((inc, i) => (
-                                <li key={i} className="text-xs text-slate-600 flex items-center gap-2">
-                                  <div className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
-                                  <span className="leading-tight truncate">{inc}</span>
-                                </li>
-                              ))}
-                              {included.length > 4 && (
-                                <li className="text-[10px] text-slate-400 italic">
-                                  + {included.length - 4} {isEs ? 'más' : 'more'}
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
                       </div>
 
                       <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <div className="w-1/2 pr-4 space-y-1.5">
-                          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase">
-                            <span>{t.intensity}</span>
-                            <span className="text-slate-600">{pkg.pace}</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                             <div className="h-full bg-blue-500 rounded-full" style={{ width: pkg.difficulty === 'EASY' ? '30%' : pkg.difficulty === 'MODERATE' ? '60%' : '90%' }} />
-                          </div>
-                        </div>
                         {business.whatsapp ? (
                           <a 
                             href={whatsappUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl px-4 py-2 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                            className="w-full justify-center text-white rounded-xl px-4 py-3 text-xs font-bold transition-transform hover:scale-[1.02] flex items-center gap-1.5 shadow-sm"
+                            style={{ backgroundColor: primaryColor }}
                           >
-                            <MessageCircle className="w-3.5 h-3.5" />
+                            <MessageCircle className="w-4 h-4" />
                             {isEs ? 'Consultar' : 'Inquire'}
                           </a>
                         ) : null}
