@@ -1,7 +1,8 @@
 import { Metadata } from "next";
-import { Droplet, ExternalLink, ShieldCheck, Zap, Sun } from "lucide-react";
+import { Droplet, ShieldCheck, Zap, Sun } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { AffiliateProductCard } from "@/features/guides/components/affiliate-product-card";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -134,6 +135,13 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
 
   const text = isEs ? content.es : content.en;
 
+  const labels = {
+    why: text.why,
+    perf: text.perf,
+    bestUse: text.bestUse,
+    buyOnAmazon: text.buyOnAmazon
+  };
+
   return (
     <>
       <script
@@ -152,23 +160,23 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
               "logo": { "@type": "ImageObject", "url": "https://unlockcusco.com/icon.svg" }
             },
             "datePublished": new Date().toISOString().split('T')[0],
-            })
-            }}
-            />
-            <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-            <div className="mb-8">
-            <Link href={`/${lang}/guides`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition-colors w-fit">
+          })
+        }}
+      />
+      <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
+        <div className="mb-8">
+          <Link href={`/${lang}/guides`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition-colors w-fit">
             &larr; {isEs ? 'Volver a Guías' : 'Back to Guides'}
-            </Link>
-            </div>
+          </Link>
+        </div>
 
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6 leading-tight">
-            {text.title}
-            </h1>
+        <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6 leading-tight">
+          {text.title}
+        </h1>
 
-            {/* Author Byline */}
-            <div className="flex items-center gap-3 mb-8">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-slate-200">
+        {/* Author Byline */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-slate-200">
             <Image 
               // REPLACE THIS URL WITH REBECCA'S ACTUAL IMAGE URL
               src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop" 
@@ -176,14 +184,14 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
               fill 
               className="object-cover" 
             />
-            </div>
-            <div>
+          </div>
+          <div>
             <p className="font-bold text-slate-900">Rebecca W.</p>
             <p className="text-sm text-slate-500">{isEs ? 'Co-fundadora' : 'Co-founder'}, UnlockCusco</p>
-            </div>
-            </div>
+          </div>
+        </div>
 
-            <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-sm">
+        <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-sm">
            <Image 
              src="https://images.unsplash.com/photo-1544985223-958b9758cbcc?q=80&w=1200&auto=format&fit=crop" 
              alt="Drinking water in nature" 
@@ -203,55 +211,9 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
           <p className="text-slate-600 mb-12">{text.solutionText}</p>
 
           <div className="space-y-8">
-            {text.products.map((product, i) => {
-              const Icon = product.icon;
-              return (
-                <div key={i} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <div className={`p-6 border-b ${product.color}`}>
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold mb-1 leading-tight">{product.title}</h3>
-                        <p className="text-sm font-medium opacity-80">{product.subtitle}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-6 md:p-8 space-y-6">
-                    <p className="text-slate-600 leading-relaxed m-0">{product.desc}</p>
-                    
-                    <div className="grid md:grid-cols-2 gap-6 pt-2">
-                      <div className="space-y-2">
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0">{text.why}</h4>
-                        <p className="text-sm text-slate-700 m-0">{product.why}</p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0">{text.perf}</h4>
-                        <p className="text-sm text-slate-700 m-0">{product.perf}</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 m-0">{text.bestUse}</h4>
-                      <p className="text-sm text-slate-700 m-0">{product.bestUse}</p>
-                    </div>
-
-                    <div className="pt-2">
-                      <a 
-                        href={product.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3.5 bg-[#FF9900] hover:bg-[#F3A847] text-slate-900 font-bold rounded-xl transition-transform hover:scale-[1.02] shadow-sm no-underline"
-                      >
-                        {text.buyOnAmazon}
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+            {text.products.map((product, i) => (
+              <AffiliateProductCard key={i} product={product} labels={labels} />
+            ))}
           </div>
         </div>
       </div>

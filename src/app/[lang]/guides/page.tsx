@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 
 const GUIDES_EN = [
   {
+    title: "Sacred Valley Packing List: The Layering Rule",
+    slug: "sacred-valley-packing-list",
+    description: "Andean weather is unpredictable. Learn exactly what to pack to survive the intense sun and sudden rain in the Sacred Valley.",
+  },
+  {
     title: "Do I Need a Water Filter in Peru?",
     slug: "do-i-need-water-filter-in-peru",
     description: "Discover why a portable water filter is essential for traveling through the Andes, and my top recommendations based on 13 years living in Peru.",
@@ -40,6 +45,11 @@ const GUIDES_EN = [
 ];
 
 const GUIDES_ES = [
+  {
+    title: "Lista de Empaque para el Valle Sagrado: La Regla de las Capas",
+    slug: "sacred-valley-packing-list",
+    description: "El clima andino es impredecible. Aprende exactamente qué empacar para sobrevivir al sol intenso y la lluvia en el Valle Sagrado.",
+  },
   {
     title: "¿Necesito un filtro de agua en Perú?",
     slug: "do-i-need-water-filter-in-peru",
