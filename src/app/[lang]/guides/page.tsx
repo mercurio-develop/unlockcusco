@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 
 const GUIDES_EN = [
   {
+    title: "Do I Need a Water Filter in Peru?",
+    slug: "do-i-need-water-filter-in-peru",
+    description: "Discover why a portable water filter is essential for traveling through the Andes, and my top recommendations based on 13 years living in Peru.",
+  },
+  {
     title: "The Ultimate 1-Day Sacred Valley Itinerary",
     slug: "sacred-valley-1-day-itinerary",
     description: "Short on time? Here is the perfect 1-day route hitting Pisac, Urubamba, and Ollantaytambo before catching the train to Machu Picchu.",
@@ -35,6 +40,11 @@ const GUIDES_EN = [
 ];
 
 const GUIDES_ES = [
+  {
+    title: "¿Necesito un filtro de agua en Perú?",
+    slug: "do-i-need-water-filter-in-peru",
+    description: "Descubre por qué un filtro portátil es esencial para viajar por los Andes y mis mejores recomendaciones basadas en 13 años viviendo en Perú.",
+  },
   {
     title: "El Itinerario Definitivo de 1 Día en el Valle Sagrado",
     slug: "sacred-valley-1-day-itinerary",
