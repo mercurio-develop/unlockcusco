@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 
 const GUIDES_EN = [
   {
+    title: "Essential Health & Hydration in Peru",
+    slug: "essential-health-hydration-peru",
+    description: "Why hydration matters at 12,000 feet and how to prepare your gut for the Andean climate.",
+  },
+  {
     title: "Sacred Valley Packing List: The Layering Rule",
     slug: "sacred-valley-packing-list",
     description: "Andean weather is unpredictable. Learn exactly what to pack to survive the intense sun and sudden rain in the Sacred Valley.",
@@ -45,6 +50,11 @@ const GUIDES_EN = [
 ];
 
 const GUIDES_ES = [
+  {
+    title: "Salud e Hidratación Esencial en Perú",
+    slug: "essential-health-hydration-peru",
+    description: "Por qué la hidratación importa a más de 3,600 metros de altura y cómo preparar tu intestino para el clima andino.",
+  },
   {
     title: "Lista de Empaque para el Valle Sagrado: La Regla de las Capas",
     slug: "sacred-valley-packing-list",
