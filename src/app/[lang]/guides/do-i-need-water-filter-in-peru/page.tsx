@@ -145,28 +145,45 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
             "headline": text.title,
             "description": text.intro.substring(0, 150) + "...",
             "image": "https://images.unsplash.com/photo-1544985223-958b9758cbcc?q=80&w=1200&auto=format&fit=crop",
-            "author": { "@type": "Organization", "name": "UnlockCusco" },
+            "author": { "@type": "Person", "name": "Rebecca W." },
             "publisher": {
               "@type": "Organization",
               "name": "UnlockCusco",
               "logo": { "@type": "ImageObject", "url": "https://unlockcusco.com/icon.svg" }
             },
             "datePublished": new Date().toISOString().split('T')[0],
-          })
-        }}
-      />
-      <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-        <div className="mb-8">
-          <Link href={`/${lang}/guides`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition-colors w-fit">
+            })
+            }}
+            />
+            <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
+            <div className="mb-8">
+            <Link href={`/${lang}/guides`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition-colors w-fit">
             &larr; {isEs ? 'Volver a Guías' : 'Back to Guides'}
-          </Link>
-        </div>
+            </Link>
+            </div>
 
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6 leading-tight">
-          {text.title}
-        </h1>
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6 leading-tight">
+            {text.title}
+            </h1>
 
-        <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-sm">
+            {/* Author Byline */}
+            <div className="flex items-center gap-3 mb-8">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-slate-200">
+            <Image 
+              // REPLACE THIS URL WITH REBECCA'S ACTUAL IMAGE URL
+              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop" 
+              alt="Rebecca W." 
+              fill 
+              className="object-cover" 
+            />
+            </div>
+            <div>
+            <p className="font-bold text-slate-900">Rebecca W.</p>
+            <p className="text-sm text-slate-500">{isEs ? 'Co-fundadora' : 'Co-founder'}, UnlockCusco</p>
+            </div>
+            </div>
+
+            <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-sm">
            <Image 
              src="https://images.unsplash.com/photo-1544985223-958b9758cbcc?q=80&w=1200&auto=format&fit=crop" 
              alt="Drinking water in nature" 
