@@ -93,7 +93,9 @@ export default async function RootLayout(props: {
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
       <head>
-        <script
+        <Script
+          id="affiliate-tracker"
+          strategy="afterInteractive"
           // @ts-expect-error - Custom attributes for affiliate tracker
           nowprocket=""
           data-noptimize="1"
