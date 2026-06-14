@@ -17,9 +17,11 @@ import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 import { ExpandableText } from "@/components/ui/expandable-text"
 import { BackButton } from "@/components/ui/back-button"
 import { BusinessCard } from "@/features/discovery/components/business-card"
+import { ComparableExperiences } from "@/features/discovery/components/comparable-experiences"
 import { VerifyOverlay } from "@/features/discovery/components/verify-overlay"
 import { getDictionary, Locale } from "@/lib/dictionaries"
 import { Business, Review, BusinessService, TourPackage, BusinessPremiumProfile, BusinessPillar } from "@prisma/client"
+import { AffiliateBookingButtons, AffiliateLink } from "@/features/discovery/components/affiliate-booking-buttons"
 
 interface SocialLink {
   platform?: string
@@ -236,6 +238,20 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
         description: p.descriptionEs || p.description
       }))
     }
+  }
+
+  // Fetch comparable experiences
+  let comparableExperiences: Business[] = [];
+  
+  if (business.category && business.lat !== null && business.lng !== null) {
+    comparableExperiences = await getNearbyBusinesses(
+      business.lat,
+      business.lng,
+      [business.category],
+      business.id,
+      5, // Limit 5
+      20 // Max 20km radius
+    );
   }
 
   // Fetch nearby stays and dining
@@ -587,6 +603,13 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
               </span>
             </div>
 
+            {/* Affiliate Links */}
+            {Array.isArray(business.affiliateLinks) && business.affiliateLinks.length > 0 && (
+              <div className="mb-6">
+                <AffiliateBookingButtons links={business.affiliateLinks as unknown as AffiliateLink[]} />
+              </div>
+            )}
+
             {/* Desktop CTA */}
             {business.category?.toUpperCase() !== 'BOLETO' && (
               <>
@@ -622,6 +645,9 @@ export default async function BusinessPage({ params, searchParams }: BusinessPag
           </div>
         </div>
       </div>
+
+      {/* Comparable Experiences */}
+      <ComparableExperiences experiences={comparableExperiences} isEs={isEs} dict={dict} />
 
       {/* Nearby Stays and Dining */}
       {(nearbyStays.length > 0 || nearbyDining.length > 0) && (

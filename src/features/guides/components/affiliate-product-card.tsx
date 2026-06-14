@@ -26,7 +26,7 @@ export function AffiliateProductCard({ product, labels }: { product: AffiliatePr
   return (
     <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className={`p-6 border-b ${product.color}`}>
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-sm">
             <Icon className="w-6 h-6" />
           </div>

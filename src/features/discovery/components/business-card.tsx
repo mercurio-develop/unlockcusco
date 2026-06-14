@@ -30,6 +30,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { getCategoryData } from "@/features/discovery/constants"
+import { AffiliateBookingButtons, AffiliateLink } from "@/features/discovery/components/affiliate-booking-buttons"
 
 interface BusinessCardProps {
   business: Business
@@ -575,6 +576,13 @@ export function BusinessCard({
                 <span className="hidden sm:inline">{t.whatsapp}</span>
               </Button>
             )}
+          </div>
+        )}
+
+        {/* Affiliate Links Row */}
+        {(business as any).affiliateLinks && Array.isArray((business as any).affiliateLinks) && (business as any).affiliateLinks.length > 0 && (
+          <div className="w-full mt-1 border-t border-slate-100 pt-1" onClick={e => e.stopPropagation()}>
+            <AffiliateBookingButtons links={(business as any).affiliateLinks as AffiliateLink[]} compact={true} />
           </div>
         )}
       </div>

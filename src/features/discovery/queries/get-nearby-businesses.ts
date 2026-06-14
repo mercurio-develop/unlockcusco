@@ -16,10 +16,11 @@ export async function getNearbyBusinesses(
 ): Promise<(Business & { dist: number })[]> {
   const upperCategories = categories.map(c => c.toUpperCase());
 
-  const result = await prisma.$queryRaw<
-    (Business & { dist: number })[]
+  // Fetch only IDs and distances via raw query to avoid Prisma crashing on the Unsupported 'vector' type
+  const rawResult = await prisma.$queryRaw<
+    { id: string; dist: number }[]
   >`
-    SELECT *,
+    SELECT id,
       (
         6371 * acos(
           cos(radians(${lat})) * cos(radians(lat)) *
@@ -33,7 +34,7 @@ export async function getNearbyBusinesses(
       AND lat IS NOT NULL
       AND lng IS NOT NULL
       AND UPPER(category) IN (${Prisma.join(upperCategories)})
-    HAVING (
+      AND (
         6371 * acos(
           cos(radians(${lat})) * cos(radians(lat)) *
           cos(radians(lng) - radians(${lng})) +
@@ -44,5 +45,21 @@ export async function getNearbyBusinesses(
     LIMIT ${limit}
   `;
 
-  return result;
+  if (rawResult.length === 0) return [];
+
+  // Fetch the full business records securely using Prisma
+  const businesses = await prisma.business.findMany({
+    where: {
+      id: { in: rawResult.map((r) => r.id) }
+    }
+  });
+
+  // Map the distances back and maintain the ordered sorting from the raw query
+  return rawResult.map((raw) => {
+    const business = businesses.find((b) => b.id === raw.id)!;
+    return {
+      ...business,
+      dist: raw.dist
+    };
+  }).filter(b => b.id); // Filter out any mismatched records just in case
 }

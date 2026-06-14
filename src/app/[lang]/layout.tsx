@@ -92,30 +92,8 @@ export default async function RootLayout(props: {
       lang={params.lang}
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
-      <head>
-        <Script
-          id="affiliate-tracker"
-          strategy="afterInteractive"
-          // @ts-expect-error - Custom attributes for affiliate tracker
-          nowprocket=""
-          data-noptimize="1"
-          data-cfasync="false"
-          data-wpfc-render="false"
-          seraph-accel-crit="1"
-          data-no-defer="1"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                  var script = document.createElement("script");
-                  script.async = 1;
-                  script.src = 'https://tpembars.com/NTM5NzA3.js?t=539707';
-                  document.head.appendChild(script);
-              })();
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
+        <Script src="https://tpembars.com/NTM5NzA3.js?t=539707" strategy="beforeInteractive" />
         <PostHogProvider>
           <NuqsAdapter>
             <PostHogPageView />

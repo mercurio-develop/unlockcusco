@@ -63,6 +63,7 @@ model Business {
   openingHours           Json?
   priceLevel             String?
   website                String?
+  affiliateLinks         Json?
   bookingType            String                  @default("INSTANT")
   embedding              Unsupported("vector")?
   minAdvanceHours        Int                     @default(0)
