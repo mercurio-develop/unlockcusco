@@ -1,4 +1,5 @@
 import { Sparkles, Map, Bot } from "lucide-react";
+import { AffiliateCallout } from "@/components/ui/affiliate-callout";
 
 // Define a type for the content
 type GuideContent = {
@@ -286,6 +287,16 @@ export default async function DynamicGuidePage({ params }: { params: Promise<{ l
             </div>
           ))}
         </div>
+
+        {/* Affiliate Callout Example */}
+        {slug === "classic-sacred-valley" && (
+          <AffiliateCallout 
+            title="Essential Gear: Rain Jacket"
+            description="The weather in the Andes changes rapidly. A lightweight, packable rain jacket is absolutely essential for Machu Picchu and the Sacred Valley."
+            link="https://www.amazon.com/dp/B00DQYQ28Q?tag=unlockcusco-20"
+            ctaText="View on Amazon"
+          />
+        )}
       </div>
     </>
   );

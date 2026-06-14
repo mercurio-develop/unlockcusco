@@ -71,6 +71,7 @@ model Business {
   leads                  Lead[]
   reviews                Review[]
   tourPackages           TourPackage[]
+  campaignLogs           WhatsAppCampaignLog[]
 }
 
 model BusinessService {
@@ -225,4 +226,15 @@ enum MessageSender {
   TOURIST
   DRIVER
   SYSTEM
+}
+
+model WhatsAppCampaignLog {
+  id               String   @id @default(cuid())
+  businessId       String
+  categoryTargeted String
+  phone            String
+  status           String   @default("PENDING") // PENDING, SENT, FAILED
+  errorMessage     String?
+  sentAt           DateTime @default(now())
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }

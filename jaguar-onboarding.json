@@ -3,41 +3,41 @@
     "slug": "jaguar-llaqta",
     "name": "Jaguar Llaqta",
     "category": "AGENCY",
-    "tagline": "Authentic Andean experiences and treks",
-    "taglineEs": "Experiencias y caminatas auténticas en los Andes",
+    "tagline": "Descubre la cultura viva del Perú",
+    "taglineEs": "Descubre la cultura viva del Perú",
     "description": "",
-    "locationSlug": "urubamba",
-    "whatsapp": "51912345678",
-    "contactEmail": "contacto@jaguarllaqta.com",
-    "imageUrl": "/images/jaguar-llaqta-cover.jpg"
+    "locationSlug": "cusco",
+    "whatsapp": "51926935820",
+    "contactEmail": "jaguarllaqta@gmail.com",
+    "imageUrl": "/agencies/jaguarllaqta/cover-photo.jpg"
   },
   "premiumProfile": {
-    "logoUrl": "",
-    "coverPhotoUrl": "/images/jaguar-llaqta-cover.jpg",
-    "primaryColor": "#0F172A",
-    "accentColor": "#D97706",
+    "logoUrl": "/agencies/jaguarllaqta/logo.png",
+    "coverPhotoUrl": "/agencies/jaguarllaqta/cover-photo.jpg",
+    "primaryColor": "#0E0E0E",
+    "accentColor": "#F7B916",
     "fonts": "Playfair Display, Inter",
-    "visionStatement": "To share the true essence of the Andes through sustainable, community-driven experiences.",
+    "visionStatement": "Sostenemos la visión de llegar a ser un proyecto de turismo alternativo reconocido por su ética, autenticidad y compromiso. Generando un impacto positivo en las comunidades nativas con las que se trabaja, contribuyendo a la conciencia ambiental y cultural de viajeros.",
     "pillars": [
       {
-        "title": "Native Guides",
-        "titleEs": "Guías Nativos",
-        "description": "Expert locals rooted in the Andes.",
-        "descriptionEs": "Expertos locales arraigados en los Andes.",
+        "title": "Propuestas Alternativas",
+        "titleEs": "Propuestas Alternativas",
+        "description": "Creemos en un turismo responsable como herramienta de cambio y aprendizaje.",
+        "descriptionEs": "Creemos en un turismo responsable como herramienta de cambio y aprendizaje.",
         "icon": "Compass"
       },
       {
-        "title": "Community Focus",
-        "titleEs": "Enfoque Comunitario",
-        "description": "Direct collaboration with high Andean families.",
-        "descriptionEs": "Colaboración directa con familias altoandinas.",
-        "icon": "Users"
+        "title": "Respaldados por la Experiencia",
+        "titleEs": "Respaldados por la Experiencia",
+        "description": "Contamos con un equipo de profesionales capacitados y con años de experiencia en el rubro.",
+        "descriptionEs": "Contamos con un equipo de profesionales capacitados y con años de experiencia en el rubro.",
+        "icon": "Target"
       },
       {
-        "title": "Authentic Rituals",
-        "titleEs": "Rituales Auténticos",
-        "description": "Respectful integration of ancestral ceremonies.",
-        "descriptionEs": "Integración respetuosa de ceremonias ancestrales.",
+        "title": "Vivencias Integradoras",
+        "titleEs": "Vivencias Integradoras",
+        "description": "Ofrecemos un formato que permite al viajero sumergirse en la naturaleza que recorre y nutrirse de las comunidades nativas con las que interactúa.",
+        "descriptionEs": "Ofrecemos un formato que permite al viajero sumergirse en la naturaleza que recorre y nutrirse de las comunidades nativas con las que interactúa.",
         "icon": "Heart"
       }
     ]
@@ -846,64 +846,40 @@
   ],
   "reviews": [
     {
-      "author": "Michael T.",
+      "author": "Noemí (España)",
       "rating": 5,
-      "text": "Incredible experience with Jaguar Llaqta! The guides were so knowledgeable about the history and flora.",
-      "textEs": "¡Increíble experiencia con Jaguar Llaqta! Los guías sabían mucho sobre la historia y la flora."
+      "text": "Álvaro speaks Quechua, which makes the connection with the local communities totally authentic. On the Ausangate route we shared very special moments with an indigenous community that welcomed us with an unforgettable hospitality.",
+      "textEs": "Álvaro habla quechua, lo que hace que la conexión con las comunidades locales sea totalmente auténtica. En la ruta del Ausangate compartimos momentos muy especiales con una comunidad indígena que nos acogió con una hospitalidad que nunca olvidaremos."
     },
     {
-      "author": "Sarah W.",
+      "author": "Javier (España)",
       "rating": 5,
-      "text": "The Ausangate trek was challenging but absolutely breathtaking. The equipment provided was top-notch.",
-      "textEs": "La caminata al Ausangate fue un desafío pero absolutamente impresionante. El equipo proporcionado era de primera."
+      "text": "Álvaro is a close, polite person and is always looking out for people (...) he is someone who truly understands and respects the Andean culture. We recommend him 100%.",
+      "textEs": "Álvaro es una persona cercana, educada y siempre está pendiente de las personas (...) es alguien que realmente entiende y respeta la cultura andina. Lo recomendamos al 100%."
     },
     {
-      "author": "David L.",
+      "author": "Emilio (España)",
       "rating": 5,
-      "text": "I loved the community visit to Cancha Cancha. It felt so authentic and respectful.",
-      "textEs": "Me encantó la visita a la comunidad de Cancha Cancha. Se sintió muy auténtico y respetuoso."
+      "text": "On our trip to Peru we did several mountain routes and it was a spectacular experience. Not only because of the landscapes, but because of the way Álvaro experiences and transmits them.",
+      "textEs": "En nuestro viaje a Perú hicimos varias rutas de montaña y fue una experiencia espectacular. No solo por los paisajes, sino por la forma en que Álvaro los vive y los transmite."
     },
     {
-      "author": "Emma R.",
-      "rating": 4,
-      "text": "Beautiful landscapes and great food during the trek. Highly recommend their services.",
-      "textEs": "Hermosos paisajes y gran comida durante la caminata. Recomiendo encarecidamente sus servicios."
-    },
-    {
-      "author": "James B.",
+      "author": "Raquel (España)",
       "rating": 5,
-      "text": "The Temazcal ceremony was deeply moving. A truly spiritual journey in the Sacred Valley.",
-      "textEs": "La ceremonia de Temazcal fue profundamente conmovedora. Un viaje verdaderamente espiritual en el Valle Sagrado."
+      "text": "Álvaro knows the mountain perfectly, is always attentive and knows how to create a close and authentic environment. Thanks to him we not only walked through incredible places, but we better understood the culture...",
+      "textEs": "Álvaro conoce la montaña a la perfección, está pendiente en todo momento y sabe crear un ambiente cercano y auténtico. Gracias a él no solo caminamos por lugares increíbles, sino que entendimos mejor la cultura..."
     },
     {
-      "author": "Linda K.",
+      "author": "Nika Lozovska (Ucrania)",
       "rating": 5,
-      "text": "Very professional agency. They took care of everything from start to finish.",
-      "textEs": "Agencia muy profesional. Se encargaron de todo de principio a fin."
+      "text": "We had the incredible opportunity to do a 4-day route... I am not exaggerating when I say that it changed my life and my perception of 'exploring the world'. We were in the middle of wild nature, but in total safety.",
+      "textEs": "Tuvimos la increíble oportunidad de hacer una ruta durante 4 días... no exagero al decir que cambió mi vida y mi percepción de 'explorar el mundo'. Estuvimos en plena naturaleza salvaje, pero con total seguridad."
     },
     {
-      "author": "Carlos M.",
+      "author": "Monserratt Guajardo (Estados Unidos)",
       "rating": 5,
-      "text": "Un trato muy cálido y humano. Los guías son excelentes y conocen la ruta a la perfección.",
-      "textEs": "Un trato muy cálido y humano. Los guías son excelentes y conocen la ruta a la perfección."
-    },
-    {
-      "author": "Anna S.",
-      "rating": 5,
-      "text": "The food on the Lares trek was amazing! Better than some restaurants in Cusco.",
-      "textEs": "¡La comida en la caminata de Lares fue increíble! Mejor que en algunos restaurantes del Cusco."
-    },
-    {
-      "author": "Tom H.",
-      "rating": 4,
-      "text": "Great attention to detail and safety. I felt very secure during the Choquequirao trek.",
-      "textEs": "Gran atención al detalle y la seguridad. Me sentí muy seguro durante la caminata a Choquequirao."
-    },
-    {
-      "author": "Maria G.",
-      "rating": 5,
-      "text": "Una experiencia inolvidable. La conexión con la naturaleza y las comunidades locales es única.",
-      "textEs": "Una experiencia inolvidable. La conexión con la naturaleza y las comunidades locales es única."
+      "text": "I have hired Alvaro on four different trips to explore the Sacred Valley... He has such a beautiful connection with the geography and the communities that makes each trip feel truly authentic and special. The best guide in the Andes!",
+      "textEs": "He contratado a Alvaro en cuatro viajes distintos para explorar el Valle Sagrado... Tiene una conexión tan hermosa con la geografía y las comunidades que hace que cada viaje se sienta verdaderamente auténtico y especial. ¡El mejor guía de los Andes!"
     }
   ]
 }

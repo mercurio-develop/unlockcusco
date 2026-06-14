@@ -13,6 +13,7 @@ import { getDictionary, Locale } from "@/lib/dictionaries";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { siteConfig } from "@/lib/config/site";
+import Script from "next/script";
 
 const fontSans = Inter({
   variable: "--font-sans",
@@ -91,6 +92,18 @@ export default async function RootLayout(props: {
       lang={params.lang}
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
+      <head>
+        <Script
+          id="affiliate-tracker"
+          src="https://tpembars.com/NTM5NzA3.js?t=539707"
+          strategy="afterInteractive"
+          data-noptimize="1"
+          data-cfasync="false"
+          data-wpfc-render="false"
+          seraph-accel-crit="1"
+          data-no-defer="1"
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
         <PostHogProvider>
           <NuqsAdapter>
