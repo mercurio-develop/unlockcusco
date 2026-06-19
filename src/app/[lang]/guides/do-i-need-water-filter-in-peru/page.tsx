@@ -37,7 +37,7 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
           bestUse: 'General travel where you want a durable, easy-to-use bottle that requires no complex maintenance, whether you are in a bustling city or near a trailhead.',
           icon: ShieldCheck,
           color: 'bg-blue-50 text-blue-700 border-blue-200',
-          link: 'https://www.amazon.com/s?k=grayl+geopress+water+purifier&tag=unlockcusco-20'
+          link: "https://www.amazon.com/GRAYL-GeoPress-Water-Purifier-Bottle/dp/B08TTXBHRW?dib=eyJ2IjoiMSJ9.eU9Jnf-MxmB7aF9yxjj-x1aeevAtpXvZ6LUTii2GE_ShptajkzD2G4BeVdVNKWV5SPc8uBsVHbl6YvDSgUTii9nIhsmHCUyO7fAaIbnkAZrRMrHA--tGEpRY0aMxBHPXwEMpsJw-kWtvEgEeIMHS8SC9KjQTfMRcD5_65LM9DPeTHg651UPTgOTWLIbz7hPUJUYNBAIF4Ce7b9ZWhL9mTzxfkRSBWUqDbkZ_wu-evofS80Wzm7isMMvjIm1x6YSed4c6grTxOsxbiBZ9Gj_5y6t2CsSbtO6nzRTPSHLSSV0.w5hWh-V1PbVcxXMyKnNNZ0jMjBgTMUSE6Y1OXvcXvPI&dib_tag=se&keywords=grayl%2Bgeopress%2Bwater%2Bpurifier&qid=1781473908&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&th=1&linkCode=ll2&tag=unlockcusco-20&linkId=35c9f688f2b45aa6f3d67fb27f9f16cb&language=en_US&ref_=as_li_ss_tl"
         },
         {
           title: 'Best for Adventurers: Screw-Cap Membrane Filters',
@@ -48,7 +48,7 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
           bestUse: 'Individual use during trekking, city exploring, or any scenario where you need a compact, immediate solution.',
           icon: Zap,
           color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          link: 'https://www.amazon.com/s?k=sawyer+mini+water+filter&tag=unlockcusco-20'
+          link: 'https://www.amazon.com/Sawyer-Products-SP128-Filtration-System/dp/B00FA2RLX2?dib=eyJ2IjoiMSJ9.1YwEWrHW7H_EGaZVW0Nx3jNYeArKVvuMRdPq0rFhMciROFN-anv-QLF4pla91aslD_8mgJx1b5Cb9DRuN9d0JN8prC7xoAouFT6RSH9MG6Gn4Q6Uo6ocq0DJ6nyibHZp3Ii4jsaY8LrYYubFfGBJtm2OLVpkIiO1fY5ARMCWG8rstudJ296LpREhvt2rhYcGBcLknqfPTdabJOCuJ8tQEyqTqv7FDodGo-Q23Cae6PQ.2FruKRiVhqzh5f5FDy_VsdOdTr7nER5L8NiAp5GgfqQ&dib_tag=se&keywords=sawyer%2Bmini%2Bwater%2Bfilter&qid=1781473879&sr=8-1-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&th=1&linkCode=ll2&tag=unlockcusco-20&linkId=bb6b58e628a12beab507313bf48c15e5&language=en_US&ref_=as_li_ss_tl'
         },
         {
           title: 'Best for Families: Platypus GravityWorks',
@@ -59,7 +59,7 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
           bestUse: 'Family accommodation, base camps, or anywhere you need to filter larger amounts of water for drinking and cooking without individual effort.',
           icon: Droplet,
           color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-          link: 'https://www.amazon.com/s?k=platypus+gravityworks&tag=unlockcusco-20'
+          link: 'https://www.amazon.com/Platypus-GravityWorks-Camping-Filter-4-Liter/dp/B0CV9RPT8Y?dib=eyJ2IjoiMSJ9.i3iCYAf8pM69SWCSzFsWkq0P49M57WUJEI8KxZHFC7gxFOXhS3zcoCLPa_qjjfjLFpQoTkCuhzoTZx_-nZYLfa77-uvFAR6l6H5FQFKiP3jjcC5WqvmNVti-PSljmwzEbdGp5pES78SF5v4TXQX-4IWJ6WCQr3oSvZv9obE1MEgKslbDD-cp2UhS8yReOJdS86RzrmXHngLSzY0nmd1h8eqkaCz4yr8jXuK-V3_6Ka5ttt4uuxecImVvFQ3yWlIH2KrpJgl9YI3JbIy6g4mmUU0CyMJG2AV8jkGYzEbWRy0.mGa1gzkeQNwHJxn0UpweBoEvN1yZ2RUgfekuhFRij0I&dib_tag=se&keywords=platypus%2Bgravityworks&qid=1781473822&sr=8-1&th=1&linkCode=ll2&tag=unlockcusco-20&linkId=0eb8ba1b7eaaba6177d6307408c0d4c4&language=en_US&ref_=as_li_ss_tl'
         },
         {
           title: 'Best for Sensitive Bellies: Solar Bags (AquaPak)',

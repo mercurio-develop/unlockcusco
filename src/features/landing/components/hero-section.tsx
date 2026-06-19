@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot, Ticket, Calendar } from "lucide-react"
+import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot, Ticket, Calendar, Droplet, HeartPulse } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
 import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 
@@ -246,6 +246,22 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
                 Icon: Calendar,
                 iconBg: "bg-rose-50 border border-rose-100",
                 iconColor: "text-rose-600"
+              },
+              {
+                slug: "do-i-need-water-filter-in-peru",
+                title: locale === 'es' ? "¿Necesito un filtro de agua en Perú?" : "Do I Need a Water Filter in Peru?",
+                desc: locale === 'es' ? "Descubre por qué un filtro de agua es esencial para viajar a Perú." : "Discover why a water filter is essential for traveling to Peru.",
+                Icon: Droplet,
+                iconBg: "bg-cyan-50 border border-cyan-100",
+                iconColor: "text-cyan-600"
+              },
+              {
+                slug: "essential-health-hydration-peru",
+                title: locale === 'es' ? "Salud e Hidratación Esencial en Perú" : "Essential Health & Hydration in Peru",
+                desc: locale === 'es' ? "Por qué la hidratación importa a más de 3,600 metros de altura." : "Why hydration matters at 12,000 feet and how to prepare.",
+                Icon: HeartPulse,
+                iconBg: "bg-teal-50 border border-teal-100",
+                iconColor: "text-teal-600"
               },
             ].map(guide => (
               <div

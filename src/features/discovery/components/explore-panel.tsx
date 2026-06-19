@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, MapPin, Bot, Radar } from "lucide-react"
+import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, MapPin, Bot, Radar, Bed, ExternalLink } from "lucide-react"
 import { useInView } from "react-intersection-observer"
 import { BusinessCard } from "@/features/discovery/components/business-card"
 import { useUiStore } from "@/lib/store/use-ui-store"
@@ -11,6 +11,7 @@ import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { SORT_OPTIONS, LOCATIONS, getCategoryData } from "@/features/discovery/constants"
 import { Footer } from "@/components/layout/footer"
+import { getKlookDestinationHotelLink } from "@/features/discovery/utils/klook-destinations"
 
 interface DiscoverPanelProps {
   businesses: Business[]
@@ -279,7 +280,39 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
           </div>
         )
       ) : (
-        <div className={cn("pb-20", viewMode === "grid" ? "grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6" : "flex flex-col gap-4")}>
+        <>
+          {loc && getKlookDestinationHotelLink(loc) && (
+            <div className="mb-6 bg-gradient-to-r from-rose-50/50 to-amber-50/50 border border-slate-200/60 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:shadow-md">
+              <div className="flex items-start gap-4">
+                <div className="bg-rose-50 p-3 rounded-xl text-rose-600 shrink-0 border border-rose-100/50">
+                  <Bed className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-[15px] leading-tight">
+                    {lang === 'es' 
+                      ? `Encuentra Hoteles en ${LOCATIONS.find(l => l.value === loc)?.label || loc}`
+                      : `Find Hotels in ${LOCATIONS.find(l => l.value === loc)?.label || loc}`}
+                  </h4>
+                  <p className="text-slate-500 text-xs mt-1 max-w-lg leading-relaxed font-medium">
+                    {lang === 'es'
+                      ? "Explora estancias boutique, alojamientos locales y hoteles con ofertas exclusivas en Klook."
+                      : "Browse hand-picked boutique stays, guest houses, and premium hotels with exclusive rates on Klook."}
+                  </p>
+                </div>
+              </div>
+              <a
+                href={getKlookDestinationHotelLink(loc) || undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest px-5 py-3.5 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.03] active:scale-95 transition-all shrink-0 w-full sm:w-auto"
+              >
+                <span>{lang === 'es' ? 'Ver Ofertas' : 'View Stays'}</span>
+                <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </div>
+          )}
+
+          <div className={cn("pb-20", viewMode === "grid" ? "grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6" : "flex flex-col gap-4")}>
            {businesses.map(e => (
              <BusinessCard 
                key={e.id} 
@@ -297,11 +330,12 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
            ))}
            {hasMore && (
              <div ref={ref} className="w-full py-8 flex justify-center items-center col-span-full">
-               {isLoadingMore && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
-             </div>
-           )}
-        </div>
-      )}
+                {isLoadingMore && <Loader2 className="w-6 h-6 text-rose-600 animate-spin" />}
+              </div>
+            )}
+          </div>
+        </>
+       )}
       <Footer lang={lang} />
     </div>
   )

@@ -23,9 +23,49 @@ function getLocale(request: NextRequest) {
   return defaultLocale
 }
 
-export default async function proxy(request: NextRequest) {
-  // Check if there is any supported locale in the pathname
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // Check if pathname starts with /sandbox or /[locale]/sandbox
+  const isSandbox = pathname === '/sandbox' || 
+                    pathname.startsWith('/sandbox/') ||
+                    locales.some(lang => pathname === `/${lang}/sandbox` || pathname.startsWith(`/${lang}/sandbox/`))
+
+  if (isSandbox) {
+    const adminPassword = process.env.AUTH_ADMIN
+
+    if (adminPassword) {
+      const authHeader = request.headers.get('authorization')
+      
+      if (!authHeader) {
+        return new NextResponse('Authentication Required', {
+          status: 401,
+          headers: {
+            'WWW-Authenticate': 'Basic realm="Secure Sandbox"',
+          },
+        })
+      }
+
+      try {
+        const auth = authHeader.split(' ')[1]
+        const decoded = atob(auth)
+        const [_, password] = decoded.split(':')
+
+        if (password !== adminPassword) {
+          return new NextResponse('Unauthorized', {
+            status: 401,
+            headers: {
+              'WWW-Authenticate': 'Basic realm="Secure Sandbox"',
+            },
+          })
+        }
+      } catch (err) {
+        return new NextResponse('Invalid Authorization Header', { status: 400 })
+      }
+    }
+  }
+
+  // Check if there is any supported locale in the pathname
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   )
@@ -44,9 +84,13 @@ export default async function proxy(request: NextRequest) {
   return await updateSession(request)
 }
 
+// Export default as well for backward/framework compatibility
+export default proxy
+
 export const config = {
   matcher: [
     // Skip all internal paths (_next)
     '/((?!_next|api|images|public|.*\\..*).*)',
   ],
 }
+
