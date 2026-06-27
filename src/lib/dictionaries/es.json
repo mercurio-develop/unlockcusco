@@ -19,7 +19,7 @@
     "trips": {
       "classic": "Valle Sagrado Clásico (Día Completo)",
       "cusco": "City Tour Cusco",
-      "ruins": "El Tour Definitivo de Ruinas Incas",
+      "ruins": "El Tour Definitivo de Sitios Arqueológicos Incas",
       "culinary": "Ruta Culinaria Top 7 en Cusco",
       "maras": "Maras, Moray y Chinchero",
       "artisan": "Mejores Mercados Artesanales",
@@ -131,7 +131,7 @@
       "wellness": "Reconéctate contigo mismo. Descubre spas holísticos, terapias de sanación inca, retiros de yoga y centros de meditación en las tranquilas montañas del Valle Sagrado.",
       "adventure": "Haz que tu adrenalina bombee. El Valle Sagrado es un patio de recreo para los buscadores de emociones, ofreciendo trekking, cuatrimotos, rafting y tirolesa por paisajes impresionantes.",
       "stays": "Descansa en comodidad sin igual. Ya sea que busques un eco-lodge de lujo, un hotel boutique o una acogedora posada familiar, encuentra el campamento base perfecto para tus exploraciones andinas.",
-      "culture": "Sumérgete en la historia viva. Explora mercados artesanales, ruinas antiguas, centros de tejido tradicional y talleres interactivos que preservan el legado de los Incas."
+      "culture": "Sumérgete en la historia viva. Explora mercados artesanales, sitios arqueológicos antiguos, centros de tejido tradicional y talleres interactivos que preservan el legado de los Incas."
     },
     "categories": {
       "Template": "Plantilla",
@@ -224,7 +224,7 @@
     "fullTicket": "Boleto Integral (130 Soles):",
     "fullTicketDesc": "Válido por 10 días. Incluye los 16 sitios en Cusco, Valle Sagrado y Valle Sur.",
     "partialTicket": "Boleto Parcial (70 Soles):",
-    "partialTicketDesc": "Válido por 1-2 días para un circuito específico (ej., solo ruinas del Valle Sagrado).",
+    "partialTicketDesc": "Válido por 1-2 días para un circuito específico (ej., solo sitios arqueológicos del Valle Sagrado).",
     "note": "Nota: El boleto no se puede comprar en línea por adelantado. Debe comprarse en persona en la oficina de COSITUC (Av. El Sol 103, Cusco) o en la entrada del primer sitio que visite.",
     "gotIt": "Entendido",
     "selected": "Seleccionado",

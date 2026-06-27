@@ -297,7 +297,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
 

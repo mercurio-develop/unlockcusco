@@ -19,7 +19,7 @@
     "trips": {
       "classic": "Classic Sacred Valley Full Day",
       "cusco": "Cusco City Tour",
-      "ruins": "The Ultimate Inca Ruins Tour",
+      "ruins": "The Ultimate Inca Archeological Sites Tour",
       "culinary": "Top 7 Culinary Route in Cusco",
       "maras": "Maras, Moray & Chinchero",
       "artisan": "Best Artisan Markets",
@@ -131,7 +131,7 @@
       "wellness": "Reconnect with your inner self. Discover holistic spas, ancient Inca healing therapies, yoga retreats, and meditation centers nestled in the tranquil mountains of the Sacred Valley.",
       "adventure": "Get your adrenaline pumping. The Sacred Valley is a playground for thrill-seekers, offering world-class trekking, ATV tours, white-water rafting, and zip-lining across breathtaking landscapes.",
       "stays": "Rest in unparalleled comfort. Whether you seek a luxury eco-lodge, a boutique hotel, or a cozy family-run inn, find the perfect basecamp for your Andean explorations.",
-      "culture": "Immerse yourself in living history. Explore vibrant artisan markets, ancient ruins, traditional textile weaving centers, and interactive workshops that preserve the legacy of the Incas."
+      "culture": "Immerse yourself in living history. Explore vibrant artisan markets, ancient archeological sites, traditional textile weaving centers, and interactive workshops that preserve the legacy of the Incas."
     },
     "categories": {
       "Template": "Template",
@@ -224,7 +224,7 @@
     "fullTicket": "Full Ticket (130 Soles):",
     "fullTicketDesc": "Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley.",
     "partialTicket": "Partial Ticket (70 Soles):",
-    "partialTicketDesc": "Valid for 1-2 days for a specific circuit (e.g., Sacred Valley ruins only).",
+    "partialTicketDesc": "Valid for 1-2 days for a specific circuit (e.g., Sacred Valley archeological sites only).",
     "note": "Note: The ticket cannot be purchased online in advance. It must be bought in person at the COSITUC office (Av. El Sol 103, Cusco) or at the entrance of the first site you visit.",
     "gotIt": "Got it",
     "selected": "Selected",

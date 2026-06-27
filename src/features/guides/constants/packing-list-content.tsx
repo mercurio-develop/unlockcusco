@@ -1,12 +1,122 @@
-import { CloudRain, ThermometerSun, Sun, Footprints, Backpack, Shirt, Mountain, BatteryCharging, Check, Droplet, ShieldCheck } from "lucide-react";
+import { CloudRain, ThermometerSun, Sun, Footprints, Backpack, Shirt, Mountain, BatteryCharging, Check, Droplet } from "lucide-react";
 
-export const packingListContent = {
+export interface MistakeSection {
+  title: string;
+  paragraphs: string[];
+  fixTitle: string;
+  fixes: string[];
+}
+
+export interface AffiliateProduct {
+  title: string;
+  subtitle: string;
+  desc: string;
+  why: string;
+  perf: string;
+  bestUse: string;
+  icon: any;
+  color: string;
+  link: string;
+  image?: string;
+}
+
+export interface PackingListContent {
+  title: string;
+  intro: string[];
+  sections: MistakeSection[];
+  outro: string;
+  buyOnAmazon: string;
+  why: string;
+  perf: string;
+  bestUse: string;
+  products: AffiliateProduct[];
+}
+
+export const packingListContent: { en: PackingListContent; es: PackingListContent } = {
   en: {
-    title: 'Sacred Valley Packing List: The Layering Rule',
-    intro: 'The Sacred Valley’s weather is notoriously unpredictable. In a single day, you can experience intense sun that burns your skin, freezing winds cutting through the ruins, and sudden, torrential downpours. The secret to comfort at 9,000+ feet? Strategic layering.',
-    realityTitle: 'The Reality of Andean Weather',
-    realityText: 'Forget everything you know about weather apps. In the Andes, it’s not uncommon to start the morning freezing in a thick sweater, sweating in a t-shirt by 1:00 PM, and scrambling for a rain jacket by 4:00 PM. UV radiation is also significantly higher at this altitude, meaning you will burn much faster than you would at sea level, even when it feels cloudy.',
-    solutionText: 'The biggest mistake tourists make is bringing heavy, bulky coats. You do not need a massive winter parka unless you are doing a high-altitude overnight trek (like Ausangate). For day-to-day exploring in Cusco, Pisac, and Ollantaytambo, you need lightweight, breathable layers that you can easily take off and stuff into a daypack. Here are the absolute essentials you need to pack.',
+    title: 'Packing for Cusco: How to Be Ready for Intense Sun, Rain, and Cold (Without Looking Like a Safari Guide)',
+    intro: [
+      'When I first traveled to South America, I did an awful job of packing. I walked into a travel shop in downtown Boulder and bought a mountain of technical “travel clothes” and a behemoth backpacking pack.',
+      'Some of the clothes were okay, but most of them never felt quite like me. And that backpack? It was so violently oversized that I’m pretty sure my current chronic back pain started right then and there. I had way too much stuff, but absolutely none of the right stuff. It got so bad that every time I handed my pack over to a bus driver or a hotel bellhop, I secretly hoped someone would just steal the thing to relieve me of the burden.',
+      'To save your spine—and your style—let me help you avoid making the exact same mistakes on your trip to Cusco.'
+    ],
+    sections: [
+      {
+        title: 'Mistake 1: Clothes That Don’t Feel Like "You"',
+        paragraphs: [
+          'I used to think buying specialized "travel gear" was a requirement. The problem is that most technical travel clothes make you feel like an undercover safari guide instead of yourself. You want to look back at your travel photos and see you, not a walking billboard for an outdoor catalog.',
+          'You absolutely need sun protection, but you don\'t need head-to-toe Gore-Tex to get it.'
+        ],
+        fixTitle: 'The Fix:',
+        fixes: [
+          '**Ditch the Cargo Travel Pants:** Leave the multi-pocket hiking trousers at home. You will feel much more like yourself in your favorite jeans, a solid pair of leggings, or some comfortable joggers.',
+          '**Skip the Shorts:** You won\'t see locals wearing shorts very often in Cusco; the culture is a bit more conservative than the coast or the jungle. Plus, there are tiny, annoying midges (biting bugs) that absolutely love exposed ankles.',
+          '**Keep Tops Light and Breathable:** Bring a lightweight button-up shirt in a linen or cotton blend, a few tank tops, and a couple of regular t-shirts. If you’re hiking up around Machu Picchu, pack just one dedicated UPF sun shirt.',
+          '**Pack One "Feel Good" Item:** Bring a comfortable dress or a jumpsuit. Choose something that you don’t mind getting a little wrinkled but makes you feel pretty when you want to dust off the trail grime for a nice dinner.'
+        ]
+      },
+      {
+        title: 'Mistake 2: The "Behemoth" Backpack',
+        paragraphs: [
+          'My giant Osprey backpack was a logistical nightmare. The airport in Lima is massive and requires a ton of walking, and Cusco’s historic center is a maze of steep, cobblestone stairs that taxis physically cannot drive up. Hauling a giant pack up those stairs is a quick way to ruin your first day.',
+          'If you aren’t bringing a rolling suitcase, do not buy a backpack over 50 liters. If you pack carefully, you can easily go much smaller.'
+        ],
+        fixTitle: 'The Fix:',
+        fixes: [
+          '**The 50L Max Rule:** If you are unsure about the weight, pack your bag at home and do a test walk for half a mile. If you feel like collapsing, open the bag and start losing stuff immediately.',
+          '**Stop the "Front-Pack" Madness:** Don\'t make the mistake of strapping a secondary daypack across your chest like a turtle shell. It destroys your posture and makes navigating crowded local buses impossible. Instead, keep your essentials—phone, passport, wallet, and sunglasses—in a simple, secure crossbody bag on your front.',
+          '**What I Use Now:** I upgraded to an awesome, compact [Cotopaxi Allpa Travel Pack](https://amzn.to/4wif2E1). It forces me to pack smart, fits perfectly in overhead compartments, and keeps everything organized without the bulk.'
+        ]
+      },
+      {
+        title: 'Mistake 3: The "Only Hiking Shoes" Trap',
+        paragraphs: [
+          'On my first trip, I had a pair of [Salomon sneakers](https://amzn.to/3SxJ08j) that I absolutely loved (and will recommend forever for hiking), but I didn\'t bring a single pair of normal, flat shoes. Every time I wanted to go to a casual cafe or a nice restaurant, I felt like I was dressed to summit a mountain.'
+        ],
+        fixTitle: 'The Fix:',
+        fixes: [
+          '**Pack a Travel Flat (With Traction):** Bring a simple, lightweight flat shoe or canvas sneaker for city walking. *Crucial tip: Make sure it has a solid rubber sole with actual grip.* Cusco’s historic stones turn mirror-slick the second a sudden rainstorm hits, and you don’t want to accidentally ice-skate down the steep stairs of Resbalosa street.',
+          '**Bring Flip-Flops:** Pack a lightweight, cheap pair of flip-flops. You\'ll want them if you\'re staying in a hostel or taking a day trip to the local hot springs.',
+          '**Choose One Style:** If you are a dedicated Birkenstock fan, choose between your travel flats or your Birks—you don\'t need both taking up precious space.'
+        ]
+      },
+      {
+        title: 'Mistake 4: Awkward Outer Layers',
+        paragraphs: [
+          'Weather in the Andes moves fast. You will experience scorching equator-adjacent sun, sudden downpours, and freezing high-altitude nights all in the same afternoon. Layers are your best friend, but make sure they are layers you actually enjoy wearing.',
+          'I spent my first trip wrapped in a bright neon-green rain jacket that was completely wrong for my skin tone, and I hated looking at myself in photos.'
+        ],
+        fixTitle: 'The Fix:',
+        fixes: [
+          '**A Neutral Rain Jacket:** Absolutely bring a rain jacket, but choose a color that actually suits you or a solid neutral tone that blends with the rest of your clothes.',
+          '**Packable Down:** Cusco gets incredibly chilly the moment the sun drops below the mountains. A lightweight, packable down jacket is a total necessity. ([Packable Down](https://amzn.to/4apuc1E))',
+          '**The Secret Weapon (Cashmere):** If you take only one high-quality outer layer, make it a cozy [100% Cashmere Crewneck Sweater](https://amzn.to/3Qm3i44) (brands like State Cashmere on Amazon make incredible, classic versions). Cashmere is brilliant for travel: it’s lightweight, intensely warm without causing overheating, and naturally resists odors so you can wear it repeatedly.',
+          '**A Wide Shawl:** A large, soft shawl doubles as a cozy blanket on long bus rides and a temporary sun shield for your shoulders. *If you don\'t own one, don\'t buy it before you leave!* You can pick up stunning, inexpensive alpaca-blend shawls at the local markets in Cusco, Pisac, or Ollantaytambo.',
+          '**A Packable Sun Hat:** The high-altitude sun here is deceptively intense. Bring your favorite sun hat, but make sure it’s a style that can be squished into your bag without losing its shape.'
+        ]
+      },
+      {
+        title: 'Mistake 5: Lugging Around Miscellaneous Junk',
+        paragraphs: [
+          'I am still embarrassed by the sheer volume of random stuff I dragged across South America. As a redhead, I was terrified of running out of sun protection, so I carried five full bottles of sunscreen in my pack.',
+          'I quickly learned that at 11,000+ feet, the high-altitude Andean UV index is brutal, and slathering on heavy, sticky cream all day is a losing battle. A quality wide-brimmed hat and a long-sleeve linen shirt were infinitely more effective at blocking the rays (and significantly less sticky).',
+          'I also hauled heavy watercolor kits, multiple journals, hardcover books, travel dictionaries, and a heavy "backpack safe" metal mesh wrap that I never used even once.'
+        ],
+        fixTitle: 'What You Actually Need to Pack:',
+        fixes: [
+          'Peru has fantastic, fully stocked pharmacies and shops everywhere you look—including Cusco, the Sacred Valley, and Aguas Calientes (Machu Picchu town). If you run out of toothpaste or need a specific cream, you can buy it there in five minutes.',
+          '*Keep your miscellaneous list strictly to the essentials:*',
+          'A good sun hat & sunglasses',
+          'High-quality electrolytes (like [LMNT packets](https://amzn.to/3T4eYJn) to help hydrate and fight altitude sickness)',
+          'Reliable [liquid probiotics](https://amzn.to/3SlXOqF) (to protect your stomach against new food bacteria)',
+          'A Kindle or e-reader (instead of heavy books)',
+          'Earbuds',
+          'A filter water bottle (like a [Grayl or LifeStraw](https://amzn.to/3QsyxKO))',
+          'Minimal, travel-sized toiletries (just enough sunscreen, shampoo, and a toothbrush to get you through the first two days)'
+        ]
+      }
+    ],
+    outro: 'And that’s it. Pack light, pack pieces that make you feel like yourself, and enjoy the cobblestones of Cusco without a massive weight on your shoulders!',
     buyOnAmazon: 'Buy on Amazon',
     why: 'Why it works',
     perf: 'Performance',
@@ -21,7 +131,8 @@ export const packingListContent = {
         bestUse: 'Keep it stuffed in the bottom of your daypack at all times. Pull it out when the afternoon rain clouds roll over the mountains.',
         icon: CloudRain,
         color: 'bg-blue-50 text-blue-700 border-blue-200',
-        link: 'https://www.amazon.com/s?k=patagonia+torrentshell&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=patagonia+torrentshell&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'The Core Layer: Merino Wool Base Layers',
@@ -32,7 +143,8 @@ export const packingListContent = {
         bestUse: 'Wear it as your base layer every single day. It keeps you warm in the chilly mornings and cool during the hot afternoons.',
         icon: ThermometerSun,
         color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        link: 'https://www.amazon.com/s?k=icebreaker+merino+wool&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=icebreaker+merino+wool&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Ultimate Protection: Columbia Sun Hat',
@@ -43,7 +155,8 @@ export const packingListContent = {
         bestUse: 'Exploring exposed ruins like Sacsayhuaman, Pisac, and Machu Picchu where there is absolutely zero natural shade.',
         icon: Sun,
         color: 'bg-amber-50 text-amber-700 border-amber-200',
-        link: 'https://www.amazon.com/s?k=columbia+bora+bora+booney+hat&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=columbia+bora+bora+booney+hat&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'The Foundation: Salomon Trail Runners',
@@ -54,7 +167,8 @@ export const packingListContent = {
         bestUse: 'Navigating the uneven, slippery cobblestone streets of Cusco and climbing the steep, irregular stone steps of Inca ruins.',
         icon: Footprints,
         color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-        link: 'https://www.amazon.com/s?k=salomon+speedcross&tag=unlockcusco-20'
+        link: 'https://amzn.to/3SxJ08j',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Cushioned Alternative: HOKA Speedgoat',
@@ -65,29 +179,32 @@ export const packingListContent = {
         bestUse: 'Travelers who prioritize maximum cushioning and joint relief during long days of walking.',
         icon: Footprints,
         color: 'bg-purple-50 text-purple-700 border-purple-200',
-        link: 'https://www.amazon.com/s?k=hoka+speedgoat&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=hoka+speedgoat&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=600&auto=format&fit=crop'
       },
       {
-        title: 'The Ultimate Daypack: Osprey Talon 22',
-        subtitle: 'Best for Daily Excursions',
-        desc: 'A comfortable, breathable daypack is essential for carrying your layers, water, and snacks while exploring ruins.',
+        title: 'The Ultimate Travel Pack: Cotopaxi Allpa',
+        subtitle: 'Best for Packing Smart',
+        desc: 'A durable, organized travel pack that keeps your gear secure and easily accessible, fitting perfectly in overhead bins.',
         why: 'It features a continuous wrap-around harness and hipbelt that moves with you.',
         perf: 'Lightweight, extremely breathable back panel, and perfectly sized for day trips.',
         bestUse: 'Exploring the Sacred Valley, full-day Machu Picchu tours, and carrying your daily essentials.',
         icon: Backpack,
         color: 'bg-stone-50 text-stone-700 border-stone-200',
-        link: 'https://www.amazon.com/s?k=osprey+talon+22&tag=unlockcusco-20'
+        link: 'https://amzn.to/4wif2E1',
+        image: '/images/guides/packing-product-cotopaxi.jpeg'
       },
       {
-        title: 'The Mid-Layer: Patagonia Better Sweater',
-        subtitle: 'Best for Crisp Evenings',
-        desc: 'When the sun drops behind the mountains, the temperature plummets. A reliable fleece mid-layer provides instant warmth.',
+        title: 'The Secret Weapon: Cashmere Crewneck',
+        subtitle: 'Best for Weight-to-Warmth Ratio',
+        desc: 'A high-quality 100% cashmere sweater is lightweight, incredibly warm, and naturally odor-resistant, making it perfect for travel.',
         why: 'It offers the aesthetic of wool with the easy care and quick-drying performance of fleece.',
         perf: 'Highly insulating, durable, and comfortable over base layers.',
         bestUse: 'Chilly mornings, evening strolls around Cusco, and layering under your rain shell.',
         icon: Shirt,
         color: 'bg-zinc-50 text-zinc-700 border-zinc-200',
-        link: 'https://www.amazon.com/s?k=patagonia+better+sweater&tag=unlockcusco-20'
+        link: 'https://amzn.to/3Qm3i44',
+        image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Happy Feet: Darn Tough Merino Socks',
@@ -98,7 +215,8 @@ export const packingListContent = {
         bestUse: 'Every single day of your trip to keep your feet dry and blister-free.',
         icon: Footprints,
         color: 'bg-neutral-50 text-neutral-700 border-neutral-200',
-        link: 'https://www.amazon.com/s?k=darn+tough+merino+wool+socks+cushion&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=darn+tough+merino+wool+socks+cushion&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1582966772680-860e372bb558?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Knee Savers: Black Diamond Trekking Poles',
@@ -109,7 +227,8 @@ export const packingListContent = {
         bestUse: 'Descending steep ruins like Pisac and navigating the uneven terrain of the Inca Trail.',
         icon: Mountain,
         color: 'bg-slate-50 text-slate-700 border-slate-200',
-        link: 'https://www.amazon.com/s?k=black+diamond+trail+back+trekking+poles&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=black+diamond+trail+back+trekking+poles&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1565992441121-4367c2967103?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Never Lose Charge: Anker Power Bank',
@@ -120,16 +239,95 @@ export const packingListContent = {
         bestUse: 'Full-day tours to the Sacred Valley or Machu Picchu where wall outlets are non-existent.',
         icon: BatteryCharging,
         color: 'bg-gray-50 text-gray-700 border-gray-200',
-        link: 'https://www.amazon.com/s?k=anker+powercore+10000&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=anker+powercore+10000&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?q=80&w=600&auto=format&fit=crop'
       }
     ]
   },
   es: {
-    title: 'Lista de Empaque para el Valle Sagrado: La Regla de las Capas',
-    intro: 'El clima del Valle Sagrado es notoriamente impredecible. En un solo día, puedes experimentar un sol intenso que quema tu piel, vientos helados cruzando las ruinas y aguaceros repentinos y torrenciales. ¿El secreto para estar cómodo a más de 2,700 metros de altura? Vestirse estratégicamente en capas.',
-    realityTitle: 'La Realidad del Clima Andino',
-    realityText: 'Olvida todo lo que sabes sobre las aplicaciones del clima. En los Andes, es muy común comenzar la mañana congelándote con un suéter grueso, sudar en camiseta a la 1:00 PM y buscar desesperadamente una chaqueta impermeable a las 4:00 PM. Además, la radiación UV es significativamente más alta a esta altitud, lo que significa que te quemarás mucho más rápido que al nivel del mar, incluso cuando parezca estar nublado.',
-    solutionText: 'El mayor error que cometen los turistas es traer abrigos pesados y voluminosos. No necesitas una parka gigante de invierno a menos que vayas a hacer una caminata técnica nocturna a gran altitud (como Ausangate). Para explorar el día a día en Cusco, Pisac y Ollantaytambo, necesitas capas ligeras y transpirables que puedas quitarte fácilmente y guardar en una mochila pequeña. Aquí tienes los elementos esenciales que debes empacar.',
+    title: 'Empacar para Cusco: Cómo estar listo para el sol intenso, la lluvia y el frío (sin parecer un guía de safari)',
+    intro: [
+      'Cuando viajé a Sudamérica por primera vez, hice un trabajo terrible al empacar. Entré a una tienda de viajes en el centro de Boulder y compré una montaña de "ropa técnica de viaje" y una mochila de mochilero gigantesca.',
+      'Algunas prendas estaban bien, pero la mayoría nunca se sintieron realmente como yo. ¿Y esa mochila? Era tan violentamente sobredimensionada que estoy bastante segura de que mi dolor de espalda crónico actual comenzó justo ahí. Tenía demasiadas cosas, pero absolutamente nada de lo correcto. Llegó a ser tan malo que cada vez que le entregaba mi mochila a un conductor de autobús o a un botones de hotel, en secreto esperaba que alguien se la robara para liberarme de esa carga.',
+      'Para salvar tu columna, y tu estilo, déjame ayudarte a evitar cometer los mismos errores en tu viaje a Cusco.'
+    ],
+    sections: [
+      {
+        title: 'Error 1: Ropa que no se siente como "Tú"',
+        paragraphs: [
+          'Solía pensar que comprar "equipo de viaje" especializado era un requisito. El problema es que la mayoría de la ropa técnica de viaje te hace sentir como un guía de safari encubierto en lugar de ti mismo. Quieres mirar atrás a tus fotos de viaje y verte a ti, no a un anuncio andante para un catálogo de actividades al aire libre.',
+          'Absolutamente necesitas protección solar, pero no necesitas Gore-Tex de pies a cabeza para conseguirla.'
+        ],
+        fixTitle: 'La Solución:',
+        fixes: [
+          '**Olvídate de los pantalones cargo de viaje:** Deja los pantalones de senderismo con múltiples bolsillos en casa. Te sentirás mucho más como tú mismo con tus jeans favoritos, un buen par de leggings o unos joggers cómodos.',
+          '**Evita los pantalones cortos:** No verás a los locales usar pantalones cortos muy a menudo en Cusco; la cultura es un poco más conservadora que la de la costa o la selva. Además, hay pequeños y molestos jejenes (bichos que pican) que adoran los tobillos expuestos.',
+          '**Mantén las partes de arriba ligeras y transpirables:** Trae una camisa ligera de botones en una mezcla de lino o algodón, algunas camisetas sin mangas y un par de camisetas normales. Si vas a caminar por Machu Picchu, empaca solo una camisa de sol UPF dedicada.',
+          '**Empaca una prenda para "sentirte bien":** Trae un vestido cómodo o un mono. Elige algo que no te importe que se arrugue un poco pero que te haga sentir bonita cuando quieras quitarte la suciedad del sendero para una buena cena.'
+        ]
+      },
+      {
+        title: 'Error 2: La mochila gigante ("Behemoth")',
+        paragraphs: [
+          'Mi mochila gigante Osprey fue una pesadilla logística. El aeropuerto de Lima es enorme y requiere caminar un montón, y el centro histórico de Cusco es un laberinto de escaleras empinadas de adoquines por las que los taxis físicamente no pueden subir. Cargar una mochila gigante por esas escaleras es una forma rápida de arruinar tu primer día.',
+          'Si no vas a traer una maleta con ruedas, no compres una mochila de más de 50 litros. Si empacas con cuidado, puedes viajar fácilmente con algo mucho más pequeño.'
+        ],
+        fixTitle: 'La Solución:',
+        fixes: [
+          '**La regla del máximo de 50L:** Si no estás seguro del peso, empaca tu mochila en casa y haz una caminata de prueba de un kilómetro. Si sientes que te vas a desmayar, abre la mochila y empieza a sacar cosas de inmediato.',
+          '**Detén la locura de la "mochila frontal":** No cometas el error de colgarte una mochila secundaria en el pecho como si fuera un caparazón de tortuga. Destruye tu postura y hace que moverte en autobuses locales llenos sea imposible. En su lugar, mantén tus elementos esenciales (teléfono, pasaporte, billetera y lentes de sol) en un bolso cruzado simple y seguro en el frente.',
+          '**Lo que uso ahora:** Me cambié a una mochila compacta y fantástica, la [Cotopaxi Allpa Travel Pack](https://amzn.to/4wif2E1). Me obliga a empacar de manera inteligente, cabe perfectamente en los compartimentos superiores y mantiene todo organizado sin el volumen.'
+        ]
+      },
+      {
+        title: 'Error 3: La trampa de "Solo zapatos de senderismo"',
+        paragraphs: [
+          'En mi primer viaje, tenía un par de [zapatillas Salomon](https://amzn.to/3SxJ08j) que me encantaban (y recomendaré por siempre para hacer senderismo), pero no traje ni un solo par de zapatos normales y planos. Cada vez que quería ir a una cafetería informal o a un buen restaurante, sentía que estaba vestida para escalar una montaña.'
+        ],
+        fixTitle: 'La Solución:',
+        fixes: [
+          '**Empaca un calzado plano de viaje (con tracción):** Trae un zapato plano simple y ligero o unas zapatillas de lona para caminar por la ciudad. *Consejo crucial: Asegúrate de que tenga una suela de gama sólida con agarre real.* Las piedras históricas de Cusco se vuelven resbaladizas como un espejo en el segundo en que cae una tormenta de lluvia repentina, y no querrás patinar accidentalmente por las empinadas escaleras de la calle Resbalosa.',
+          '**Trae sandalias de playa (flip-flops):** Empaca un par ligero y económico de sandalias. Las querrás si te hospedas en un hostal o haces una excursión de un día a las aguas termales locales.',
+          '**Elige un estilo:** Si eres un fanático dedicado de Birkenstock, elige entre tus planos de viaje o tus Birks; no necesitas ambos ocupando espacio precioso.'
+        ]
+      },
+      {
+        title: 'Error 4: Capas exteriores incómodas',
+        paragraphs: [
+          'El clima en los Andes cambia rápido. Experimentarás un sol abrasador cerca del ecuador, aguaceros repentinos y noches heladas a gran altura, todo en la misma tarde. Las capas son tus mejores aliadas, pero asegúrate de que sean capas que realmente disfrutes usar.',
+          'Pasé mi primer viaje envuelta en una chaqueta impermeable de color verde neón brillante que no combinaba para nada con mi tono de piel, y odiaba verme en las fotos.'
+        ],
+        fixTitle: 'La Solución:',
+        fixes: [
+          '**Una chaqueta impermeable neutra:** Definitivamente trae una chaqueta impermeable, pero elige un color que realmente te quede bien o un tono neutro sólido que combine con el resto de tu ropa.',
+          '**Chaqueta de plumón empacable:** Cusco se vuelve increíblemente frío en el momento en que el sol se oculta tras las montañas. Una chaqueta de plumón ligera y empacable es una necesidad absoluta. ([Chaqueta de Plumón](https://amzn.to/4apuc1E))',
+          '**El arma secreta (Cashmere):** Si vas a llevar solo una capa exterior de alta calidad, que sea un suéter de cuello redondo de [100% cachemira](https://amzn.to/3Qm3i44) (marcas como State Cashmere en Amazon hacen versiones clásicas increíbles). La cachemira es genial para viajar: es ligera, sumamente cálida sin causar sobrecalentamiento y naturalmente resistente a los olores, por lo que puedes usarla repetidamente.',
+          '**Un chal ancho:** Un chal grande y suave funciona como una manta acogedora en los viajes largos en autobús y como un protector solar temporal para tus hombros. *Si no tienes uno, ¡no lo compres antes de irte!* Puedes conseguir chales hermosos y económicos de mezcla de alpaca en los mercados locales de Cusco, Pisac u Ollantaytambo.',
+          '**Un sombrero de sol empacable:** El sol de gran altitud aquí es engañosamente intenso. Trae tu sombrero de sol favorito, pero asegúrate de que sea un estilo que se pueda guardar en tu mochila sin perder su forma.'
+        ]
+      },
+      {
+        title: 'Error 5: Cargar con cosas inútiles y variadas',
+        paragraphs: [
+          'Todavía me avergüenza el gran volumen de cosas aleatorias que arrastré por Sudamérica. Como pelirroja, me aterrorizaba quedarme sin protección solar, así que cargaba cinco botellas llenas de protector solar en mi mochila.',
+          'Rápidamente aprendí que a más de 3,300 metros de altura, el índice UV andino es brutal, y embadurnarse con crema espesa y pegajosa todo el día es una batalla perdida. Un sombrero de ala ancha de calidad y una camisa de lino de manga larga fueron infinitamente más efectivos para bloquear los rayos (y significativamente menos pegajosos).',
+          'También cargué con pesados estuches de acuarelas, múltiples diarios, libros de tapa dura, diccionarios de viaje y una pesada malla metálica de seguridad para mochilas que nunca usé ni una sola vez.'
+        ],
+        fixTitle: 'Lo que realmente necesitas empacar:',
+        fixes: [
+          'Perú tiene farmacias y tiendas fantásticas y completamente abastecidas dondequiera que mires, incluidos Cusco, el Valle Sagrado y Aguas Calientes (el pueblo de Machu Picchu). Si te quedas sin pasta de dientes o necesitas una crema específica, puedes comprarla allí en cinco minutos.',
+          '*Mantén tu lista de artículos varios estrictamente en lo esencial:*',
+          'Un buen sombrero de sol y lentes de sol',
+          'Electrolitos de alta calidad (como los [paquetes LMNT](https://amzn.to/3T4eYJn) para ayudar a hidratarte y combatir el mal de altura)',
+          'Probióticos líquidos confiables (para proteger tu estómago de las bacterias de los nuevos alimentos) ([Probióticos Líquidos](https://amzn.to/3SlXOqF))',
+          'Un Kindle o lector de libros electrónicos (en lugar de libros pesados)',
+          'Auriculares',
+          'Una botella con filtro de agua (como [Grayl o LifeStraw](https://amzn.to/3QsyxKO))',
+          'Artículos de tocador mínimos de tamaño de viaje (solo suficiente protector solar, champú y un cepillo de dientes para pasar los dos primeros días)'
+        ]
+      }
+    ],
+    outro: 'Y eso es todo. ¡Empaca ligero, empaca prendas con las que te sientas tú mismo y disfruta de los adoquines de Cusco sin un peso enorme sobre tus hombros!',
     buyOnAmazon: 'Comprar en Amazon',
     why: 'Por qué funciona',
     perf: 'Rendimiento',
@@ -139,12 +337,13 @@ export const packingListContent = {
         title: 'La Capa Esencial: Patagonia Torrentshell',
         subtitle: 'Lo Mejor para Aguaceros Repentinos',
         desc: 'Una chaqueta impermeable ligera y de alta calidad no es negociable. La Patagonia Torrentshell es un clásico porque es increíblemente duradera, completamente impermeable y se guarda en su propio bolsillo.',
-        why: 'Cuenta con una capa H2No de 3 niveles, lo que significa que bloquea completamente el viento y la lluvia sin dejar de ser transpirable.',
+        why: 'Cuenta con un tejido H2No de 3 capas, lo que significa que bloquea completamente el viento y la lluvia sin dejar de ser transpirable.',
         perf: 'Impermeable, a prueba de viento y transpirable. No te hará sudar profusamente mientras subes a las ruinas.',
         bestUse: 'Mantenla siempre guardada en el fondo de tu mochila. Sácala cuando las nubes de lluvia de la tarde cubran las montañas.',
         icon: CloudRain,
         color: 'bg-blue-50 text-blue-700 border-blue-200',
-        link: 'https://www.amazon.com/s?k=patagonia+torrentshell&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=patagonia+torrentshell&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1544923246-77307dd654cb?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'El Núcleo: Capas Base de Lana Merino',
@@ -155,7 +354,8 @@ export const packingListContent = {
         bestUse: 'Úsalo como tu capa base todos los días. Te mantiene caliente en las mañanas frías y fresco durante las tardes calurosas.',
         icon: ThermometerSun,
         color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        link: 'https://www.amazon.com/s?k=icebreaker+merino+wool&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=icebreaker+merino+wool&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Protección Total: Sombrero Columbia',
@@ -166,7 +366,8 @@ export const packingListContent = {
         bestUse: 'Explorar ruinas expuestas como Sacsayhuaman, Pisac y Machu Picchu donde hay absolutamente cero sombra natural.',
         icon: Sun,
         color: 'bg-amber-50 text-amber-700 border-amber-200',
-        link: 'https://www.amazon.com/s?k=columbia+bora+bora+booney+hat&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=columbia+bora+bora+booney+hat&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'La Base: Zapatillas de Trail Salomon',
@@ -177,7 +378,8 @@ export const packingListContent = {
         bestUse: 'Navegar por las calles empedradas desiguales y resbaladizas de Cusco y escalar los empinados e irregulares escalones de piedra de las ruinas incas.',
         icon: Footprints,
         color: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-        link: 'https://www.amazon.com/s?k=salomon+speedcross&tag=unlockcusco-20'
+        link: 'https://amzn.to/3SxJ08j',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'El Peso Pesado: Grayl GeoPress',
@@ -188,7 +390,8 @@ export const packingListContent = {
         bestUse: 'Viajes generales donde deseas una botella duradera y fácil de usar que no requiera mantenimiento complejo, ya sea en una ciudad bulliciosa o al inicio de un sendero.',
         icon: Check,
         color: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-        link: 'https://www.amazon.com/s?k=grayl+geopress+water+purifier&tag=unlockcusco-20'
+        link: 'https://amzn.to/3QsyxKO',
+        image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Soporte Avanzado de Hidratación: Paquetes de Electrolitos LMNT',
@@ -199,7 +402,8 @@ export const packingListContent = {
         bestUse: 'Hidratación diaria durante caminatas, exploración de ciudades a gran altitud o recuperación de la fatiga del viaje.',
         icon: Droplet,
         color: 'bg-sky-50 text-sky-700 border-sky-200',
-        link: 'https://www.amazon.com/s?k=lmnt+electrolyte+powder&tag=unlockcusco-20'
+        link: 'https://amzn.to/3T4eYJn',
+        image: '/images/guides/health-hydration-product-2.jpeg'
       },
       {
         title: 'Rescate Rápido del Intestino: Paquetes de Probióticos Líquidos',
@@ -210,7 +414,8 @@ export const packingListContent = {
         bestUse: 'Tómalo a diario como medida preventiva o inmediatamente a la primera señal de molestia estomacal.',
         icon: Check,
         color: 'bg-teal-50 text-teal-700 border-teal-200',
-        link: 'https://www.amazon.com/s?k=travel+liquid+probiotics&tag=unlockcusco-20'
+        link: 'https://amzn.to/3SlXOqF',
+        image: '/images/guides/health-hydration-product-3.jpeg'
       },
       {
         title: 'Protección para Alta Altitud: Protector Solar Mineral No Tóxico',
@@ -221,7 +426,8 @@ export const packingListContent = {
         bestUse: 'Aplicación diaria para ruinas a gran altitud, caminatas o cualquier exploración al aire libre en los Andes.',
         icon: Sun,
         color: 'bg-orange-50 text-orange-700 border-orange-200',
-        link: 'https://www.amazon.com/s?k=thinkbaby+sunscreen&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=thinkbaby+sunscreen&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Alternativa Amortiguada: HOKA Speedgoat',
@@ -232,29 +438,32 @@ export const packingListContent = {
         bestUse: 'Viajeros que priorizan la máxima amortiguación y el alivio de las articulaciones durante largos días de caminata.',
         icon: Footprints,
         color: 'bg-purple-50 text-purple-700 border-purple-200',
-        link: 'https://www.amazon.com/s?k=hoka+speedgoat&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=hoka+speedgoat&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=600&auto=format&fit=crop'
       },
       {
-        title: 'La Mochila Definitiva: Osprey Talon 22',
-        subtitle: 'Lo Mejor para Excursiones Diarias',
-        desc: 'Una mochila de día cómoda y transpirable es esencial para llevar tus capas, agua y bocadillos mientras exploras las ruinas.',
+        title: 'La Mochila de Viaje Definitiva: Cotopaxi Allpa',
+        subtitle: 'Lo Mejor para Empacar Inteligente',
+        desc: 'Una mochila de viaje duradera y organizada que mantiene tu equipo seguro y de fácil acceso, cabiendo perfectamente en los compartimentos superiores.',
         why: 'Cuenta con un arnés envolvente y cinturón de cadera que se mueve contigo.',
         perf: 'Ligera, panel trasero extremadamente transpirable y de tamaño perfecto para viajes de un día.',
         bestUse: 'Explorar el Valle Sagrado, tours de todo el día en Machu Picchu y llevar tus elementos esenciales diarios.',
         icon: Backpack,
         color: 'bg-stone-50 text-stone-700 border-stone-200',
-        link: 'https://www.amazon.com/s?k=osprey+talon+22&tag=unlockcusco-20'
+        link: 'https://amzn.to/4wif2E1',
+        image: '/images/guides/packing-product-cotopaxi.jpeg'
       },
       {
-        title: 'La Capa Intermedia: Patagonia Better Sweater',
-        subtitle: 'Lo Mejor para Tardes Frescas',
-        desc: 'Cuando el sol se oculta tras las montañas, la temperatura cae en picado. Una capa intermedia de vellón (fleece) confiable proporciona calor instantáneo.',
+        title: 'El Arma Secreta: Suéter de Cachemira',
+        subtitle: 'Lo Mejor para Relación Peso-Calor',
+        desc: 'Un suéter de cachemira de alta calidad es ligero, increíblemente cálido y naturalmente resistente a los olores, lo que lo hace perfecto para viajar.',
         why: 'Ofrece la estética de la lana con el cuidado fácil y secado rápido del vellón.',
         perf: 'Altamente aislante, duradero y cómodo sobre las capas base.',
         bestUse: 'Mañanas frías, paseos nocturnos por Cusco y para usar debajo de tu chaqueta impermeable.',
         icon: Shirt,
         color: 'bg-zinc-50 text-zinc-700 border-zinc-200',
-        link: 'https://www.amazon.com/s?k=patagonia+better+sweater&tag=unlockcusco-20'
+        link: 'https://amzn.to/3Qm3i44',
+        image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Pies Felices: Calcetines Darn Tough Merino',
@@ -265,7 +474,8 @@ export const packingListContent = {
         bestUse: 'Todos los días de tu viaje para mantener tus pies secos y sin ampollas.',
         icon: Footprints,
         color: 'bg-neutral-50 text-neutral-700 border-neutral-200',
-        link: 'https://www.amazon.com/s?k=darn+tough+merino+wool+socks+cushion&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=darn+tough+merino+wool+socks+cushion&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1582966772680-860e372bb558?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Salvadores de Rodillas: Bastones Black Diamond',
@@ -276,7 +486,8 @@ export const packingListContent = {
         bestUse: 'Descender ruinas empinadas como Pisac y navegar por el terreno irregular del Camino Inca.',
         icon: Mountain,
         color: 'bg-slate-50 text-slate-700 border-slate-200',
-        link: 'https://www.amazon.com/s?k=black+diamond+trail+back+trekking+poles&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=black+diamond+trail+back+trekking+poles&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1565992441121-4367c2967103?q=80&w=600&auto=format&fit=crop'
       },
       {
         title: 'Nunca Sin Batería: Batería Externa Anker',
@@ -287,7 +498,8 @@ export const packingListContent = {
         bestUse: 'Tours de todo el día al Valle Sagrado o Machu Picchu donde no hay enchufes de pared.',
         icon: BatteryCharging,
         color: 'bg-gray-50 text-gray-700 border-gray-200',
-        link: 'https://www.amazon.com/s?k=anker+powercore+10000&tag=unlockcusco-20'
+        link: 'https://www.amazon.com/s?k=anker+powercore+10000&tag=unlockcusco-20',
+        image: 'https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?q=80&w=600&auto=format&fit=crop'
       }
     ]
   }

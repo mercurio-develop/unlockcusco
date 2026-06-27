@@ -8,87 +8,27 @@ export const metadata: Metadata = {
 
 const GUIDES_EN = [
   {
-    title: "Essential Health & Hydration in Peru",
+    title: "The Puno Wake-Up Call: Why Hydration Matters at 12,000 Feet",
     slug: "essential-health-hydration-peru",
-    description: "Why hydration matters at 12,000 feet and how to prepare your gut for the Andean climate.",
+    description: "Puno, Peru is nestled on the banks of Lake Titicaca, one of the most beautiful places I’ve ever visited. The combination of extreme altitude, intense sun, and dry air means you have to take hydration seriously.",
   },
   {
-    title: "Sacred Valley Packing List: The Layering Rule",
+    title: "Packing for Cusco: How to Be Ready for Intense Sun, Rain, and Cold (Without Looking Like a Safari Guide)",
     slug: "sacred-valley-packing-list",
-    description: "Andean weather is unpredictable. Learn exactly what to pack to survive the intense sun and sudden rain in the Sacred Valley.",
-  },
-  {
-    title: "Do I Need a Water Filter in Peru?",
-    slug: "do-i-need-water-filter-in-peru",
-    description: "Discover why a portable water filter is essential for traveling through the Andes, and my top recommendations based on 13 years living in Peru.",
-  },
-  {
-    title: "The Ultimate 1-Day Sacred Valley Itinerary",
-    slug: "sacred-valley-1-day-itinerary",
-    description: "Short on time? Here is the perfect 1-day route hitting Pisac, Urubamba, and Ollantaytambo before catching the train to Machu Picchu.",
-  },
-  {
-    title: "Machu Picchu Circuits Explained (2026 Guide)",
-    slug: "machu-picchu-circuits-explained",
-    description: "Don't buy the wrong ticket! A complete breakdown of Circuit 1, Circuit 2, and Circuit 3, plus how to combine them with mountain hikes.",
-  },
-  {
-    title: "7 Best Restaurants in Cusco & The Sacred Valley",
-    slug: "best-restaurants-cusco-sacred-valley",
-    description: "From world-class tasting menus at MIL to hidden local gems in Urubamba, discover where to eat in the Andes.",
-  },
-  {
-    title: "The Route of Coffee and Cacao",
-    slug: "coffee-cacao-route",
-    description: "Immerse yourself in Peru's rich agricultural heritage with a bean-to-cup and bean-to-bar journey.",
-  },
-  {
-    title: "How to Avoid Soroche (Altitude Sickness) in Cusco",
-    slug: "how-to-avoid-soroche-altitude-sickness-cusco",
-    description: "Learn how to prevent and treat altitude sickness before your trip to the Andes.",
+    description: "To save your spine—and your style—let me help you avoid making the exact same mistakes on your trip to Cusco.",
   }
 ];
 
 const GUIDES_ES = [
   {
-    title: "Salud e Hidratación Esencial en Perú",
+    title: "La llamada de atención de Puno: Por qué importa la hidratación a 3,800 metros",
     slug: "essential-health-hydration-peru",
-    description: "Por qué la hidratación importa a más de 3,600 metros de altura y cómo preparar tu intestino para el clima andino.",
+    description: "Puno, Perú, está ubicado a orillas del Lago Titicaca, uno de los lugares más hermosos que he visitado. La combinación de altitud extrema, sol intenso y aire seco significa que debes tomarte la hidratación muy en serio.",
   },
   {
-    title: "Lista de Empaque para el Valle Sagrado: La Regla de las Capas",
+    title: "Empacar para Cusco: Cómo estar listo para el sol intenso, la lluvia y el frío (sin parecer un guía de safari)",
     slug: "sacred-valley-packing-list",
-    description: "El clima andino es impredecible. Aprende exactamente qué empacar para sobrevivir al sol intenso y la lluvia en el Valle Sagrado.",
-  },
-  {
-    title: "¿Necesito un filtro de agua en Perú?",
-    slug: "do-i-need-water-filter-in-peru",
-    description: "Descubre por qué un filtro portátil es esencial para viajar por los Andes y mis mejores recomendaciones basadas en 13 años viviendo en Perú.",
-  },
-  {
-    title: "El Itinerario Definitivo de 1 Día en el Valle Sagrado",
-    slug: "sacred-valley-1-day-itinerary",
-    description: "¿Poco tiempo? Esta es la ruta perfecta de 1 día que pasa por Pisac, Urubamba y Ollantaytambo antes de tomar el tren a Machu Picchu.",
-  },
-  {
-    title: "Circuitos de Machu Picchu Explicados (Guía 2026)",
-    slug: "machu-picchu-circuits-explained",
-    description: "¡No compres el boleto equivocado! Un desglose completo del Circuito 1, Circuito 2 y Circuito 3, además de cómo combinarlos con caminatas por la montaña.",
-  },
-  {
-    title: "Los 7 Mejores Restaurantes en Cusco y el Valle Sagrado",
-    slug: "best-restaurants-cusco-sacred-valley",
-    description: "Desde menús de degustación de clase mundial en MIL hasta joyas locales escondidas en Urubamba, descubre dónde comer en los Andes.",
-  },
-  {
-    title: "La Ruta del Café y Cacao",
-    slug: "coffee-cacao-route",
-    description: "Sumérgete en la rica herencia agrícola de Perú con un viaje desde el grano hasta la taza y la barra.",
-  },
-  {
-    title: "Cómo Evitar el Soroche (Mal de Altura) en Cusco",
-    slug: "how-to-avoid-soroche-altitude-sickness-cusco",
-    description: "Aprende cómo prevenir y tratar el mal de altura antes de tu viaje a los Andes.",
+    description: "Para salvar tu columna, y tu estilo, déjame ayudarte a evitar cometer los mismos errores en tu viaje a Cusco.",
   }
 ];
 
@@ -110,17 +50,17 @@ export default async function GuidesIndex({ params }: { params: Promise<{ lang: 
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
         {GUIDES.map((guide) => (
-          <a key={guide.slug} href={`/${lang}/guides/${guide.slug}`} className="group block bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:border-rose-200 transition-all flex flex-col justify-between min-h-[200px]">
+          <a key={guide.slug} href={`/${lang}/guides/${guide.slug}`} className="group block bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:border-indigo-200 transition-all flex flex-col justify-between min-h-[220px]">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-rose-600 transition-colors">{guide.title}</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">{guide.title}</h2>
               <p className="text-sm text-slate-600 leading-relaxed mb-6">
                 {guide.description}
               </p>
             </div>
-            <div className="text-rose-600 text-xs font-bold uppercase tracking-wider flex items-center gap-1 group-hover:gap-2 transition-all">
-              {isEs ? "Leer Guía" : "Read Guide"} <ArrowRight className="w-3.5 h-3.5" />
+            <div className="text-indigo-600 text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+              {isEs ? "Leer Guía" : "Read Guide"} <ArrowRight className="w-4 h-4" />
             </div>
           </a>
         ))}

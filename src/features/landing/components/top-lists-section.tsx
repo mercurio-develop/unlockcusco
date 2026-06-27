@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { TopListClient } from "./top-list-client"
+import { EssentialGuides } from "./essential-guides"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function TopListsSection({ dict, locale = "en" }: { dict?: Record<string, any>, locale?: string }) {
@@ -52,6 +53,7 @@ export async function TopListsSection({ dict, locale = "en" }: { dict?: Record<s
           items={topAdventures} 
           locale={locale}
         />
+        <EssentialGuides locale={locale} />
       </div>
     </section>
   )

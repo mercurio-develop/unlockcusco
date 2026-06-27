@@ -18,7 +18,7 @@ export const BOLETO_DATA = {
     days: 1,
     foreignPrice: "70 PEN (~$19 USD)",
     nationalPrice: "40 PEN",
-    description: "Valid for 1 day. Covers the 4 ruins just above Cusco city.",
+    description: "Valid for 1 day. Covers the 4 archeological sites just above Cusco city.",
     mapUrl: "https://cuscoperu.b-cdn.net/wp-content/uploads/2023/06/Mapa-del-Boleto-Turistico-Parcial-Circuito-I-scaled.jpg",
     places: ["Sacsayhuaman", "Q'enqo", "Puka Pukara", "Tambomachay"]
   },
@@ -27,7 +27,7 @@ export const BOLETO_DATA = {
     days: 2,
     foreignPrice: "70 PEN (~$19 USD)",
     nationalPrice: "40 PEN",
-    description: "Valid for 2 days. Covers South Valley ruins and city museums.",
+    description: "Valid for 2 days. Covers South Valley archeological sites and city museums.",
     mapUrl: "https://cuscoperu.b-cdn.net/wp-content/uploads/2023/06/Mapa-del-Boleto-Turistico-Parcial-Circuito-II-scaled.jpg",
     places: ["Tipon", "Pikillaqta", "Museo Histórico Regional", "Museo de Arte Contemporáneo", "Museo de Arte Popular", "Centro Qosqo de Arte Nativo", "Monumento a Pachacutec"]
   },
@@ -36,7 +36,7 @@ export const BOLETO_DATA = {
     days: 2,
     foreignPrice: "70 PEN (~$19 USD)",
     nationalPrice: "40 PEN",
-    description: "Valid for 2 days. Covers the major Sacred Valley ruins.",
+    description: "Valid for 2 days. Covers the major Sacred Valley archeological sites.",
     mapUrl: "https://cuscoperu.b-cdn.net/wp-content/uploads/2023/06/Mapa-del-Boleto-Turistico-Parcial-Circuito-III-scaled.jpg",
     places: ["Pisac Ruins", "Ollantaytambo Ruins", "Chinchero Ruins", "Moray"]
   }

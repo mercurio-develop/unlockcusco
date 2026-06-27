@@ -18,11 +18,11 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
 
   const content = {
     en: {
-      title: 'Essential Health & Hydration in Peru',
-      intro: 'The Puno Wake-Up Call: Why Hydration Matters at 12,000 Feet',
+      title: 'The Puno Wake-Up Call: Why Hydration Matters at 12,000 Feet',
+      intro: 'Puno, Peru is nestled on the banks of Lake Titicaca, one of the most beautiful places I’ve ever visited. When night falls on the lake, the sky reflects in the deep purple water—half daylight and half full of stars. I’m not even kidding, you need to see it.',
       realityTitle: 'The Reality of the Andean Climate',
-      realityText: 'I’ll never forget the trip to Puno that taught me just how brutal altitude and dehydration can be. Nestled right on the edge of Lake Titicaca, Puno is breathtaking—literally. The air up there is so thin and dry that it quickly saps the moisture right out of your body without you even realizing it.\n\nOn that trip, I underestimated the climate, got severely dehydrated, and paid the price. I was stuck in bed for three straight days, absolutely miserable, watching the beautiful Peruvian landscape from a window instead of exploring it.\n\nTo make matters worse, my mom came to visit me around that same time and caught a horrible local stomach bug. She was staying in a traditional guest house where the only available bathroom was down two flights of stairs. If you’ve ever had a travel illness, you know that navigating stairs in the middle of the night is the absolute worst-case scenario. Luckily, we managed to get her some high-quality liquid probiotics, and they fixed her gut almost immediately.',
-      solutionText: 'Those two experiences completely changed how I pack. Now, whenever friends or family tell me they are coming to visit me in Peru, I give them a strict list of must-haves to buy before they leave.\n\n**My Top Travel Prep Recommendations**\n\nYou can easily find all of these items online before your flight. They take up almost no space in a suitcase but will completely save your trip.\n\n**Travel Tip:** Pack these in your carry-on luggage! You do not want to be caught without an electrolyte packet if the airline loses your checked bags and you hit the ground running in Cusco or Puno.',
+      realityText: 'Unfortunately, the first time I visited, I spent the entire trip stuck in the lower level of a hostel bunk bed, nauseous with my head aching, because I underestimated the altitude. In my gringa brilliance, I thought that having grown up in Colorado at 5,000 feet above sea level, I was immune. I was wrong. Lake Titicaca sits at over 12,000 feet, and the combination of extreme altitude, intense sun, and dry air means you have to take hydration seriously.\n\nAnother way to sap the fun from an amazing adventure is to succumb to traveler\'s diarrhea. The bacteria present in foods, even if you carefully avoid salads, raw fruits, and soft cheeses, can wreak havoc on your intestines. Once when my mom was visiting, she spent days trekking up and down the stairs at our guesthouse just to reach the bathroom. Luckily, we took her to the local pharmacy, and they gave her an amazing liquid probiotic called Enterogermina that got her back on her feet quickly. Now, she starts taking them a few days before visiting us, and she\'s been enjoying her time in Peru so much more.',
+      solutionText: 'Those two experiences completely changed how I pack. Now, whenever friends or family tell me they are coming to visit us in Peru, I suggest they bring a few simple things to make sure they feel their best.\n\n**My Top Travel Prep Recommendations**\n\nYou can easily find all of these items online before your flight. They take up almost no space in a suitcase but could absolutely save your trip.\n\n**Travel Tip:** Pack these in your carry-on luggage! You do not want to be caught without an electrolyte packet if the airline loses your checked bags and you hit the ground running in Cusco or Puno.',
       buyOnAmazon: 'Buy on Amazon',
       why: 'Why I love it',
       perf: 'Performance',
@@ -30,45 +30,48 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
       products: [
         {
           title: 'Advanced Hydration Support: LMNT Electrolyte Packets',
-          subtitle: 'Best for Extreme Altitude & Humidity',
-          desc: 'When you are dealing with the intense humidity of the Amazon or the extreme altitude of the Andes, plain water isn\'t enough. You lose vital minerals when you sweat and acclimatize.',
+          subtitle: 'Best for Extreme Altitude & Dry Air',
+          desc: 'When you are dealing with extreme altitude and dry mountain air, plain water isn\'t enough. You lose vital minerals much faster as your body acclimates to the thin air.',
           why: 'LMNT packets contain a high-sodium, zero-sugar formulation (along with potassium and magnesium) that rehydrates you faster than any standard sports drink.',
-          perf: 'They come in lightweight single-serve sticks that you can dump straight into your filtered water.',
+          perf: 'They come in lightweight, single-serve sticks that you can dump straight into your filtered water.',
           bestUse: 'Daily hydration during trekking, high-altitude city exploring, or recovering from travel fatigue.',
           icon: Droplet,
           color: 'bg-blue-50 text-blue-700 border-blue-200',
-          link: 'https://www.amazon.com/s?k=lmnt+electrolyte+powder&tag=unlockcusco-20'
+          link: 'https://amzn.to/44mbF2G',
+          image: '/images/guides/health-hydration-product-2.jpeg'
         },
         {
-          title: 'Rapid Gut Rescue: Liquid Probiotic Packs',
+          title: 'Rapid Gut Rescue: Enterogermina Liquid Probiotic Packs',
           subtitle: 'Best for Sensitive Bellies adapting to local food',
-          desc: 'When my mom got sick, it was a harsh reminder that traveling introduces your stomach to entirely new strains of bacteria. A daily probiotic builds a defensive wall in your gut flora.',
-          why: 'Liquid probiotics absorb much faster than traditional pills and don\'t require refrigeration if you buy travel-stable varieties. They are a literal lifesaver for sensitive bellies adapting to local food.',
+          desc: 'Traveling introduces your stomach to entirely new strains of bacteria. A daily probiotic builds a defensive wall in your gut flora. Ever since that pharmacy visit, my mom swears by Enterogermina and always starts her regimen a few days before she flies out.',
+          why: 'These single-dose liquid vials absorb quickly, are completely tasteless, and don\'t require refrigeration, making them perfect for travel. They are a literal lifesaver for sensitive bellies adapting to local food.',
           perf: 'Highly effective clinical-grade options from brands like Klaire Labs or Seeking Health stabilize your microbiome rapidly.',
           bestUse: 'Take daily as a preventative measure or immediately at the first sign of stomach discomfort.',
           icon: ShieldCheck,
           color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          link: 'https://www.amazon.com/s?k=travel+liquid+probiotics&tag=unlockcusco-20'
+          link: 'https://amzn.to/4elC7zu',
+          image: '/images/guides/health-hydration-product-3.jpeg'
         },
         {
           title: 'High-Altitude Protection: Non-Toxic Mineral Sunscreen',
           subtitle: 'Best for the Scorching Andean Sun',
           desc: 'Because Peru sits close to the equator and features massive mountain ranges, the UV index here is routinely extreme. Traditional chemical sunscreens are often packed with ingredients you don’t want absorbing into your skin all day.',
-          why: 'Brands like Thinkbaby (SPF 50+) and Raw Elements offer zinc-based, non-toxic, reef-safe protection. They sit on top of your skin to physically block the scorching Andean sun.',
+          why: 'I use zinc-based mineral sunscreen for my own family. It sits on top of your skin to physically block the scorching Andean sun, won\'t run into your eyes when you sweat, and is completely safe for everyone.',
           perf: 'They won\'t run into your eyes when you sweat, and they are completely safe for the whole family.',
           bestUse: 'Daily application for high-altitude ruins, hiking, or any outdoor exploration in the Andes.',
           icon: Sun,
           color: 'bg-amber-50 text-amber-700 border-amber-200',
-          link: 'https://www.amazon.com/s?k=thinkbaby+sunscreen&tag=unlockcusco-20'
+          link: 'https://amzn.to/44mbF2G',
+          image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop'
         }
       ]
     },
     es: {
-      title: 'Salud e Hidratación Esencial en Perú',
-      intro: 'La llamada de atención de Puno: Por qué importa la hidratación a 3,800 metros',
+      title: 'La llamada de atención de Puno: Por qué importa la hidratación a 3,800 metros',
+      intro: 'Puno, Perú, está ubicado a orillas del Lago Titicaca, uno de los lugares más hermosos que he visitado. Cuando cae la noche sobre el lago, el cielo se refleja en el agua de color púrpura profundo: mitad luz de día y mitad lleno de estrellas. No es broma, tienes que verlo.',
       realityTitle: 'La Realidad del Clima Andino',
-      realityText: 'Nunca olvidaré el viaje a Puno que me enseñó lo brutal que puede ser la altitud y la deshidratación. Ubicado justo al borde del Lago Titicaca, Puno te deja sin aliento—literalmente. El aire allí arriba es tan fino y seco que rápidamente extrae la humedad de tu cuerpo sin que te des cuenta.\n\nEn ese viaje, subestimé el clima, me deshidraté gravemente y pagué el precio. Estuve atrapada en la cama durante tres días seguidos, sintiéndome absolutamente miserable, viendo el hermoso paisaje peruano desde una ventana en lugar de explorarlo.\n\nPara empeorar las cosas, mi madre vino a visitarme en esa misma época y contrajo un horrible virus estomacal local. Se estaba alojando en una casa de huéspedes tradicional donde el único baño disponible estaba a dos tramos de escaleras hacia abajo. Si alguna vez has tenido una enfermedad del viajero, sabes que navegar por escaleras en medio de la noche es el peor escenario posible. Por suerte, logramos conseguirle unos probióticos líquidos de alta calidad y curaron su intestino casi de inmediato.',
-      solutionText: 'Esas dos experiencias cambiaron por completo cómo empaco. Ahora, cada vez que amigos o familiares me dicen que vienen a visitarme a Perú, les doy una lista estricta de artículos imprescindibles para comprar antes de irse.\n\n**Mis principales recomendaciones de preparación para el viaje**\n\nPuedes encontrar fácilmente todos estos artículos en línea antes de tu vuelo. Casi no ocupan espacio en la maleta, pero salvarán por completo tu viaje.\n\n**Consejo de Viaje:** ¡Empaca esto en tu equipaje de mano! No querrás quedarte sin un paquete de electrolitos si la aerolínea pierde tu equipaje documentado y tienes que empezar a moverte apenas llegues a Cusco o Puno.',
+      realityText: 'Desafortunadamente, la primera vez que lo visité, pasé todo el viaje atrapada en la litera inferior de un hostal, con náuseas y dolor de cabeza, porque subestimé la altitud. Con mi brillantez de gringa, pensé que por haber crecido en Colorado a 1,500 metros sobre el nivel del mar, era inmune. Estaba equivocada. El Lago Titicaca se encuentra a más de 3,800 metros de altura, y la combinación de altitud extrema, sol intenso y aire seco significa que debes tomarte la hidratación muy en serio.\n\nOtra forma de arruinar una gran aventura es sucumbir a la diarrea del viajero. Las bacterias presentes en los alimentos, incluso si evitas cuidadosamente las ensaladas, frutas crudas y quesos suaves, pueden causar estragos en tus intestinos. Una vez, cuando mi madre estaba de visita, pasó días subiendo y bajando las escaleras de nuestra casa de huéspedes solo para llegar al baño. Afortunadamente, la llevamos a la farmacia local y le dieron un probiótico líquido increíble llamado Enterogermina que la recuperó rápidamente. Ahora, comienza a tomarlos unos días antes de visitarnos, y ha estado disfrutando mucho más de su tiempo en Perú.',
+      solutionText: 'Esas dos experiencias cambiaron por completo cómo empaco. Ahora, cada vez que amigos o familiares me dicen que vienen a visitarnos a Perú, les sugiero que traigan algunas cosas simples para asegurarse de sentirse lo mejor posible.\n\n**Mis principales recomendaciones de preparación para el viaje**\n\nPuedes encontrar fácilmente todos estos artículos en línea antes de tu vuelo. Casi no ocupan espacio en la maleta, pero podrían salvar absolutamente tu viaje.\n\n**Consejo de Viaje:** ¡Empaca esto en tu equipaje de mano! No querrás quedarte sin un paquete de electrolitos si la aerolínea pierde tu equipaje documentado y tienes que empezar a moverte apenas llegues a Cusco o Puno.',
       buyOnAmazon: 'Comprar en Amazon',
       why: 'Por qué me encanta',
       perf: 'Rendimiento',
@@ -76,36 +79,39 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
       products: [
         {
           title: 'Soporte Avanzado de Hidratación: Paquetes de Electrolitos LMNT',
-          subtitle: 'Lo Mejor para Altitud Extrema y Humedad',
-          desc: 'Cuando te enfrentas a la intensa humedad de la Amazonía o la altitud extrema de los Andes, el agua corriente no es suficiente. Pierdes minerales vitales cuando sudas y te aclimatas.',
-          why: 'Los paquetes LMNT contienen una formulación alta en sodio y sin azúcar (junto con potasio y magnesio) que te rehidrata más rápido que cualquier bebida deportiva estándar.',
+          subtitle: 'Lo Mejor para Altitud Extrema y Aire Seco',
+          desc: 'Cuando te enfrentas a la altitud extrema y al aire seco de la montaña, el agua sola no es suficiente. Pierdes minerales vitales mucho más rápido a medida que tu cuerpo se aclima al aire fino.',
+          why: 'Los paquetes de LMNT contienen una formulación alta en sodio y sin azúcar (junto con potasio y magnesio) que te rehidrata más rápido que cualquier bebida deportiva estándar. Vienen en prácticas barras individuales que puedes verter directamente en tu agua filtrada.',
           perf: 'Vienen en barras ligeras de una sola porción que puedes vaciar directamente en tu agua filtrada.',
           bestUse: 'Hidratación diaria durante caminatas, exploración de ciudades a gran altitud o recuperación de la fatiga del viaje.',
           icon: Droplet,
           color: 'bg-blue-50 text-blue-700 border-blue-200',
-          link: 'https://www.amazon.com/s?k=lmnt+electrolyte+powder&tag=unlockcusco-20'
+          link: 'https://amzn.to/44mbF2G',
+          image: '/images/guides/health-hydration-product-2.jpeg'
         },
         {
-          title: 'Rescate Rápido del Intestino: Paquetes de Probióticos Líquidos',
+          title: 'Rescate Rápido del Intestino: Paquetes de Probióticos Líquidos Enterogermina',
           subtitle: 'Lo Mejor para Estómagos Sensibles adaptándose a la comida local',
-          desc: 'Cuando mi madre se enfermó, fue un duro recordatorio de que viajar introduce tu estómago a cepas de bacterias completamente nuevas. Un probiótico diario construye un muro defensivo en tu flora intestinal.',
-          why: 'Los probióticos líquidos se absorben mucho más rápido que las píldoras tradicionales y no requieren refrigeración si compras variedades aptas para viajes. Son un salvavidas literal para estómagos sensibles.',
+          desc: 'Viajar introduce tu estómago a cepas de bacterias completamente nuevas. Un probiótico diario construye un muro defensivo en tu flora intestinal. Desde esa visita a la farmacia, mi mamá jura por Enterogermina y siempre comienza su régimen unos días antes de volar.',
+          why: 'Estos viales líquidos de dosis única se absorben rápidamente, no tienen ningún sabor y no requieren refrigeración, lo que los hace perfectos para viajar. Son un salvavidas literal para estómagos sensibles que se adaptan a la comida local.',
           perf: 'Opciones de grado clínico altamente efectivas de marcas como Klaire Labs o Seeking Health estabilizan tu microbioma rápidamente.',
           bestUse: 'Tómalo a diario como medida preventiva o inmediatamente a la primera señal de molestia estomacal.',
           icon: ShieldCheck,
           color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          link: 'https://www.amazon.com/s?k=travel+liquid+probiotics&tag=unlockcusco-20'
+          link: 'https://amzn.to/4elC7zu',
+          image: '/images/guides/health-hydration-product-3.jpeg'
         },
         {
           title: 'Protección para Alta Altitud: Protector Solar Mineral No Tóxico',
           subtitle: 'Lo Mejor para el Sol Abrasador de los Andes',
           desc: 'Debido a que Perú se encuentra cerca del ecuador y presenta cordilleras masivas, el índice UV aquí es rutinariamente extremo. Los protectores solares químicos tradicionales a menudo están llenos de ingredientes que no deseas que se absorban en tu piel todo el día.',
-          why: 'Marcas como Thinkbaby (SPF 50+) y Raw Elements ofrecen protección basada en zinc, no tóxica y segura para los arrecifes. Se asientan sobre la piel para bloquear físicamente el sol abrasador.',
+          why: 'Uso protector solar mineral a base de zinc para mi propia familia. Se asienta sobre la piel para bloquear físicamente el sol abrasador de los Andes, no se escurre en los ojos cuando sudas y es completamente seguro para todos.',
           perf: 'No se escurren hacia los ojos cuando sudas y son completamente seguros para toda la familia.',
           bestUse: 'Aplicación diaria para ruinas a gran altitud, caminatas o cualquier exploración al aire libre en los Andes.',
           icon: Sun,
           color: 'bg-amber-50 text-amber-700 border-amber-200',
-          link: 'https://www.amazon.com/s?k=thinkbaby+sunscreen&tag=unlockcusco-20'
+          link: 'https://amzn.to/44mbF2G',
+          image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop'
         }
       ]
     }
@@ -130,7 +136,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
             "@type": "Article",
             "headline": text.title,
             "description": text.intro,
-            "image": "https://images.unsplash.com/photo-1518104593124-ac2e82a5eb9b?q=80&w=1200&auto=format&fit=crop",
+            "image": "https://unlockcusco.com/images/guides/health-hydration-product-1.jpeg",
             "author": { "@type": "Person", "name": "Rebecca W." },
             "publisher": {
               "@type": "Organization",
@@ -156,7 +162,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
         <div className="flex items-center gap-3 mb-8">
           <div className="relative w-12 h-12 rounded-full overflow-hidden bg-slate-200">
             <Image 
-              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop" 
+              src="/images/rebecca-w.jpg" 
               alt="Rebecca W." 
               fill 
               className="object-cover" 
@@ -170,7 +176,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
 
         <div className="relative w-full h-[300px] md:h-[400px] rounded-3xl overflow-hidden mb-12 shadow-sm">
            <Image 
-             src="https://images.unsplash.com/photo-1518104593124-ac2e82a5eb9b?q=80&w=1200&auto=format&fit=crop" 
+             src="/images/guides/health-hydration-product-1.jpeg" 
              alt="Lake Titicaca Puno" 
              fill 
              className="object-cover"

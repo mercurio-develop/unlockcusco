@@ -15,7 +15,7 @@ export const KlookWidget = ({ lang }: { lang: string }) => {
 
     const script = document.createElement("script");
     const locale = lang === "es" ? "es" : "en";
-    script.src = `https://tpemd.com/content?currency=USD&trs=539707&shmarker=739604&locale=${locale}&city_id=1012&category=3&amount=3&powered_by=true&campaign_id=137&promo_id=4497`;
+    script.src = `https://tpemd.com/content?currency=USD&trs=539707&shmarker=739604&t=539707&marker=739604&locale=${locale}&city_id=1012&category=3&amount=3&powered_by=true&campaign_id=137&promo_id=4497`;
     script.async = true;
     script.charset = "utf-8";
 

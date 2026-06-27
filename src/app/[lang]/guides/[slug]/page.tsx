@@ -11,9 +11,9 @@ type GuideContent = {
 
 // Content registry for English
 const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
-  "classic-sacred-valley": {
-    title: "Classic Sacred Valley: The Complete Guide",
-    desc: "An AI-generated breakdown of the classic route through Pisac, Urubamba, and Ollantaytambo.",
+  "sacred-valley-1-day-itinerary": {
+    title: "The Ultimate 1-Day Sacred Valley Itinerary",
+    desc: "Short on time? Here is the perfect 1-day route hitting Pisac, Urubamba, and Ollantaytambo before catching the train to Machu Picchu.",
     image: "/images/boleto/pisac-ruins.jpg",
     sections: [
       { h2: "The Essential Route", p: "The classic Sacred Valley tour is the most popular day trip from Cusco. You'll descend into the warmer climate of the valley, explore vast Inca agricultural terraces, and visit bustling artisan markets." },
@@ -32,12 +32,19 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
     ]
   },
   "ultimate-inca-ruins": {
-    title: "The Ultimate Inca Ruins Guide",
+    title: "The Ultimate Inca Archeological Sites Guide",
     desc: "A deep dive into the architecture, purpose, and history of the Sacred Valley's greatest structures.",
     image: "/images/boleto/ollantaytambo-ruins.jpg",
     sections: [
       { h2: "Master Builders", p: "The Incas were master stonemasons and engineers. They didn't just build on the landscape; they integrated their structures seamlessly into the natural topography." },
-      { h2: "The Trapezoidal Secret", p: "You'll notice that doors, windows, and niches in Inca buildings lean inward, forming a trapezoid. This brilliant architectural choice made their buildings highly resistant to the region's frequent earthquakes." }
+      { h2: "The Trapezoidal Secret", p: "You'll notice that doors, windows, and niches in Inca buildings lean inward, forming a trapezoid. This brilliant architectural choice made their buildings highly resistant to the region's frequent earthquakes." },
+      { h2: "Qorikancha: The Golden Temple of the Sun", p: "Located in the heart of Cusco, Qorikancha was the holiest temple of the Inca Empire. Once sheathed in hundreds of plates of solid gold, its curving walls showcase flawless anti-seismic stone masonry. In the 16th century, Spanish conquerors looted the temple and built the Church of Santo Domingo directly on its foundations, leaving a stark architectural representation of cultural blending." },
+      { h2: "Sacsayhuamán: The Megalithic Marvel", p: "Perched on a hill overlooking Cusco, Sacsayhuamán features three tiers of zig-zagging megalithic walls. Built with colossal stones weighing up to 300 tons that fit together with absolute precision, it served as the main temple of upper (hanan) Cusco. Only 20% of the original structure remains today, serving as the stage for the annual Inti Raymi solar festival." },
+      { h2: "Pisac: Terraces and Mountaintop Shrines", p: "Standing high above the eastern Valley, Pisac is a spectacular mountaintop city. It features massive agricultural terraces, residential quarters, and a sacred sun temple with a beautifully preserved Intihuatana calendar carved from pink granite. The steep cliffs behind the ruins contain ancient cave tombs where thousands of mummies were historically entombed." },
+      { h2: "Ollantaytambo: The Living Inca Fortress", p: "Guarding the western approach to Machu Picchu, Ollantaytambo features steep terraces climb the canyon walls to protect unfinished temples at the summit. It is famous as the site of Manco Inca's historic victory over Spanish forces in 1537, where he flooded the plains to repel the conquistadors. The adjoining village is the only 'living' Inca town, still using original stone grids and water channels." },
+      { h2: "Moray: Concentric Circular Laboratories", p: "Moray consists of several enormous, circular terrace depressions up to 150 meters deep. These concentric rings served as a highly sophisticated agricultural laboratory, creating microclimates with temperature drops of up to 15°C (27°F) between the top and bottom levels. Inca scientists imported diverse soils to test and hybridize different crops, laying the foundation for modern Andean agriculture." },
+      { h2: "Pikillaqta: The Ancient Wari City", p: "Dating back to the 6th century, Pikillaqta is a sprawling pre-Inca city built by the Wari civilization. Unlike the curved masonry of the Inca, it features a rigid geometric grid pattern of stone-and-mud buildings that once housed up to 10,000 residents. The nearby Rumicolca Gate was a key Wari checkpoint later reinforced by the Incas." },
+      { h2: "Tipón: The Sacred Water Gardens", p: "Tipón is a masterwork of hydraulic engineering and agricultural design, built in the early 1420s by the Inca ruler Wiracocha for his father. Clean mountain water is channeled through a series of beautifully aligned stone aqueducts, steps, and split channels, feeding stone basins and fountains that still flow perfectly today." }
     ]
   },
   "top-7-culinary-route": {
@@ -112,13 +119,22 @@ const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
       { h2: "Dry Season vs. Wet Season", p: "The dry season runs from May to October, offering clear blue skies and cold nights. The wet season is from November to April, bringing warmer nights but heavy afternoon downpours." },
       { h2: "The Sweet Spot", p: "The absolute best times to visit are the 'shoulder months' of May and September/October. You'll enjoy the lush green landscapes left over from the rains, but with mostly dry, clear days and smaller crowds than the peak months of July and August." }
     ]
+  },
+  "coffee-cacao-route": {
+    title: "The Route of Coffee and Cacao",
+    desc: "Immerse yourself in Peru's rich agricultural heritage with a bean-to-cup and bean-to-bar journey.",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "The Coffee Route: Sacred Valley Morning", p: "Peruvian high-altitude coffee is renowned worldwide. Start your day in the Sacred Valley visiting local roasters like Pisonay Coffee Roasters. Witness a roasting demonstration and participate in an AI-tailored cupping session to discover your flavor profile." },
+      { h2: "The Cacao Route: Cusco City Afternoon", p: "Cacao Chuncho is one of the most genetically pure and historic varieties of cacao in the world. Spend your afternoon in Cusco City participating in a hands-on chocolate making workshop, learning to temper and mold chocolate before tasting pairings with local spirits." }
+    ]
   }
 };
 
 const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
-  "classic-sacred-valley": {
-    title: "Valle Sagrado Clásico: La Guía Completa",
-    desc: "Un desglose generado por IA de la ruta clásica por Pisac, Urubamba y Ollantaytambo.",
+  "sacred-valley-1-day-itinerary": {
+    title: "El Itinerario Definitivo de 1 Día en el Valle Sagrado",
+    desc: "¿Poco tiempo? Esta es la ruta perfecta de 1 día que pasa por Pisac, Urubamba y Ollantaytambo antes de tomar el tren a Machu Picchu.",
     image: "/images/boleto/pisac-ruins.jpg",
     sections: [
       { h2: "La Ruta Esencial", p: "El tour clásico del Valle Sagrado es la excursión más popular desde Cusco. Descenderás a un clima más cálido, explorarás vastas terrazas y visitarás mercados artesanales." }
@@ -133,11 +149,18 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
     ]
   },
   "ultimate-inca-ruins": {
-    title: "La Guía Definitiva de Ruinas Incas",
+    title: "La Guía Definitiva de Sitios Arqueológicos Incas",
     desc: "Una inmersión profunda en la arquitectura y propósito de las grandes estructuras.",
     image: "/images/boleto/ollantaytambo-ruins.jpg",
     sections: [
-      { h2: "Maestros Constructores", p: "Los incas fueron maestros ingenieros. No solo construyeron sobre el paisaje; integraron sus estructuras en la topografía natural." }
+      { h2: "Maestros Constructores", p: "Los incas fueron maestros ingenieros. No solo construyeron sobre el paisaje; integraron sus estructuras en la topografía natural." },
+      { h2: "Qorikancha: El Templo de Oro del Sol", p: "Ubicado en el centro del Cusco, el Qorikancha era el templo más sagrado del Imperio Inca. Cubierto originalmente con cientos de planchas de oro macizo, sus muros curvos muestran una mampostería sismorresistente impecable. En el siglo XVI, los españoles saquearon el templo y construyeron la Iglesia de Santo Domingo directamente sobre sus bases." },
+      { h2: "Sacsayhuamán: La Maravilla Megalítica", p: "Situado en una colina sobre el Cusco, Sacsayhuamán cuenta con tres niveles de muros megalíticos en zigzag. Construido con piedras colosales de hasta 300 toneladas que encajan con precisión quirúrgica, fue el templo principal de hanan (alto) Cusco. Hoy queda solo el 20% de su estructura, la cual sirve de escenario cada año para el Inti Raymi." },
+      { h2: "Písac: Terrazas y Adoratorios de Altura", p: "Ubicada en una cresta montañosa al este del Valle Sagrado, Písac es una espectacular ciudadela inca. Cuenta con inmensas terrazas agrícolas, barrios residenciales y un templo del sol con un Intihuatana tallado en granito rosa. Los acantilados verticales detrás de las ruinas albergan miles de tumbas prehispánicas en cuevas." },
+      { h2: "Ollantaytambo: La Fortaleza Viva del Valle", p: "Ollantaytambo destaca por sus terrazas que protegen templos inconclusos en la cumbre. Es famoso por ser el lugar de la victoria histórica de Manco Inca en 1537, donde inundó las llanuras para derrotar a los españoles. El pueblo contiguo conserva el trazado inca original y sus canales de agua en funcionamiento." },
+      { h2: "Moray: El Laboratorio de Terrazas Concéntricas", p: "Moray consta de enormes depresiones circulares de hasta 150 metros de profundidad. Estos anillos concéntricos sirvieron como laboratorio agrícola, simulando microclimates con diferencias de temperatura de hasta 15°C entre el tope y el fondo. Los incas trajeron tierras de todas las regiones para aclimatar y domesticar semillas." },
+      { h2: "Pikillaqta: La Gran Metrópoli Wari", p: "Construida por la cultura preínca Wari en el siglo VI, Pikillaqta albergó a 10,000 habitantes. A diferencia del estilo inca, presenta un diseño geométrico de adobe y piedra con canales subterráneos. Cerca se encuentra la Portada de Rumicolca, que servía como puesto de control fortificado." },
+      { h2: "Tipón: El Templo del Agua y la Hidráulica", p: "Tipón es una obra maestra de la hidráulica y el diseño agrícola inca, construida en la década de 1420 por Wiracocha para su padre. El agua de manantiales y glaciares es capturada y conducida por acueductos y fuentes de piedra que continúan funcionando perfectamente en la actualidad." }
     ]
   },
   "top-7-culinary-route": {
@@ -204,6 +227,15 @@ const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
     sections: [
       { h2: "El Punto Exacto", p: "Los mejores meses son mayo y septiembre/octubre. Disfrutarás de paisajes verdes, días secos y menos multitudes que en julio." }
     ]
+  },
+  "coffee-cacao-route": {
+    title: "La Ruta del Café y Cacao",
+    desc: "Sumérgete en la rica herencia agrícola de Perú con un viaje desde el grano hasta la taza y la barra.",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "La Ruta del Café: Mañana en el Valle Sagrado", p: "El café peruano de alta altitud es reconocido mundialmente. Comienza el día en el Valle Sagrado visitando tostadores locales como Pisonay Coffee Roasters. Presencia una demostración de tostado y participa en una sesión de cata adaptada por IA." },
+      { h2: "La Ruta del Cacao: Tarde en la Ciudad del Cusco", p: "El cacao chuncho es una de las variedades de cacao más puras e históricas del mundo. Pasa la tarde en Cusco participando en un taller artesanal de chocolate, aprendiendo a templar y moldear el chocolate antes de degustar maridajes." }
+    ]
   }
 };
 
@@ -251,7 +283,7 @@ export default async function DynamicGuidePage({ params }: { params: Promise<{ l
 
         {/* Action Callout (Only for Itineraries) */}
         {[
-          "classic-sacred-valley",
+          "sacred-valley-1-day-itinerary",
           "cusco-city-tour",
           "ultimate-inca-ruins",
           "top-7-culinary-route",
@@ -289,7 +321,7 @@ export default async function DynamicGuidePage({ params }: { params: Promise<{ l
         </div>
 
         {/* Affiliate Callout Example */}
-        {slug === "classic-sacred-valley" && (
+        {slug === "sacred-valley-1-day-itinerary" && (
           <AffiliateCallout 
             title="Essential Gear: Rain Jacket"
             description="The weather in the Andes changes rapidly. A lightweight, packable rain jacket is absolutely essential for Machu Picchu and the Sacred Valley."

@@ -286,7 +286,7 @@ export function ItineraryPanel({ dict }: {
                 disabled={loadingTripId !== null}
                 className="px-4 py-3 bg-slate-50 hover:bg-rose-50 border border-slate-100 hover:border-rose-100 rounded-xl text-sm font-semibold text-slate-700 hover:text-rose-600 transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Ultimate Inca Ruins</span>
+                <span>Ultimate Inca Archeological Sites</span>
                 {loadingTripId === 'ultimate-inca-ruins' ? (
                   <Loader2 className="w-4 h-4 text-rose-500 animate-spin" />
                 ) : (

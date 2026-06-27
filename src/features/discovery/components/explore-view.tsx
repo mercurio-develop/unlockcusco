@@ -223,7 +223,7 @@ export function ExploreView({
   const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
   
   const [showCollisionDialog, setShowCollisionDialog] = useState(false);
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
   const setActiveTab = useItineraryStore(s => s.setActiveTab);
 

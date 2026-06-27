@@ -93,7 +93,22 @@ export default async function RootLayout(props: {
       className={`${fontSans.variable} ${fontSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans">
-        <Script src="https://tpembars.com/NTM5NzA3.js?t=539707" strategy="beforeInteractive" />
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            id="travelpayouts-moneylink"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                if (window.location.hostname === 'unlockcusco.com' || window.location.hostname === 'www.unlockcusco.com') {
+                  const s = document.createElement('script');
+                  s.src = 'https://tpembars.com/NTM5NzA3.js?t=539707&marker=739604';
+                  s.async = true;
+                  document.body.appendChild(s);
+                }
+              `
+            }}
+          />
+        )}
         <PostHogProvider>
           <NuqsAdapter>
             <PostHogPageView />

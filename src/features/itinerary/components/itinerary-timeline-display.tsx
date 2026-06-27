@@ -5,16 +5,12 @@ import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { useMapboxRoute } from "@/features/discovery/hooks/use-mapbox-route";
 import { BusinessCard } from "@/features/discovery/components/business-card";
 import { getCategoryColor } from "@/lib/utils/category-style";
-import { Navigation, Clock, Bed, Utensils, Home, Camera } from "lucide-react";
+import { Navigation, Clock, Bed } from "lucide-react";
 import type { Business } from "@prisma/client";
-import { useUiStore } from "@/lib/store/use-ui-store";
 
 export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
-  const activeItinerary = useItineraryStore(s => s.activeItinerary);
+  const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const { routeData } = useMapboxRoute();
-  const setRadarState = useUiStore(s => s.setRadarState);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
 
   // Calculate cascade stop times
   const stopTimes = useMemo(() => {
@@ -124,62 +120,7 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
                       </div>
                     )}
                   </div>
-                  {/* Reveal Nearby Actions */}
-                  {waypoint.lat != null && waypoint.lng != null && (
-                    <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-1">
-                      <button 
-                        onClick={() => {
-                          setRadarState({
-                            waypointId: waypoint.id,
-                            lat: waypoint.lat as number,
-                            lng: waypoint.lng as number,
-                            name: waypoint.title || waypoint.locationStr || 'Location',
-                            category: 'Dining'
-                          });
-                          setPanelMode('discover');
-                          setMobileViewMode('map');
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors shadow-sm shrink-0"
-                      >
-                        <Utensils className="w-3.5 h-3.5" />
-                        {isEs ? "Comer Cerca" : "Eat Nearby"}
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setRadarState({
-                            waypointId: waypoint.id,
-                            lat: waypoint.lat as number,
-                            lng: waypoint.lng as number,
-                            name: waypoint.title || waypoint.locationStr || 'Location',
-                            category: 'Stays'
-                          });
-                          setPanelMode('discover');
-                          setMobileViewMode('map');
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors shadow-sm shrink-0"
-                      >
-                        <Home className="w-3.5 h-3.5" />
-                        {isEs ? "Alojamiento Cerca" : "Stay Nearby"}
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setRadarState({
-                            waypointId: waypoint.id,
-                            lat: waypoint.lat as number,
-                            lng: waypoint.lng as number,
-                            name: waypoint.title || waypoint.locationStr || 'Location',
-                            category: 'Culture'
-                          });
-                          setPanelMode('discover');
-                          setMobileViewMode('map');
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-600 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-colors shadow-sm shrink-0"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        {isEs ? "Ver y Hacer" : "See & Do"}
-                      </button>
-                    </div>
-                  )}
+
                 </div>
               </div>
 

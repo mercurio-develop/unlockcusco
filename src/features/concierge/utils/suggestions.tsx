@@ -26,7 +26,7 @@ export function getSuggestions(travelVibe: string, isEs: boolean, panelMode?: "d
     case 'Explorer':
       return [
         { label: isEs ? "Mejores caminatas cerca" : "Best hikes near me", icon: <Compass className={iconClass} /> },
-        { label: isEs ? "Ruinas poco conocidas" : "Off-the-beaten-path ruins", icon: <MapPin className={iconClass} /> },
+        { label: isEs ? "Sitios arqueológicos poco conocidos" : "Off-the-beaten-path archeological sites", icon: <MapPin className={iconClass} /> },
         { label: isEs ? "Días de mercado local" : "Market day schedule", icon: <ShoppingBag className={iconClass} /> },
         { label: isEs ? "Planear mi día completo" : "Plan my full day", icon: <Map className={iconClass} /> }
       ];

@@ -340,7 +340,7 @@ export function BusinessCard({
                       <h4 className="font-bold text-slate-900 mb-2">{t.options || "Options:"}</h4>
                       <ul className="space-y-2 list-disc pl-4 marker:text-slate-400">
                         <li><strong>{t.fullTicket || "Full Ticket (130 Soles):"}</strong> {t.fullTicketDesc || "Valid for 10 days. Includes all 16 sites across Cusco, Sacred Valley, and South Valley."}</li>
-                        <li><strong>{t.partialTicket || "Partial Ticket (70 Soles):"}</strong> {t.partialTicketDesc || "Valid for 1-2 days for a specific circuit (e.g., just Sacred Valley ruins)."}</li>
+                        <li><strong>{t.partialTicket || "Partial Ticket (70 Soles):"}</strong> {t.partialTicketDesc || "Valid for 1-2 days for a specific circuit (e.g., just Sacred Valley archeological sites)."}</li>
                       </ul>
                     </div>
                     <p className="text-xs text-slate-500">
@@ -464,6 +464,8 @@ export function BusinessCard({
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         swapWaypoint(exchangeTargetId, business); 
+                        setExchangeTargetId(null);
+                        setPanelMode('itinerary');
                         if (conciergeSendMessage) {
                           conciergeSendMessage({ text: `[INTERNAL] I just swapped an item in my itinerary with ${business.name || "this location"}.` });
                         }

@@ -50,7 +50,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
       },
       "ultimate-inca-ruins": {
       en: {
-      title: "The Ultimate Inca Ruins Tour",
+      title: "The Ultimate Inca Archeological Sites Tour",
       intro: "A deep dive into the megalithic architecture and history of the Inca Empire's most impressive remaining structures.",
       image: "/images/boleto/ollantaytambo-ruins.jpg",
       sections: [
@@ -59,7 +59,7 @@ export const ITINERARY_GUIDES: GuideDictionary = {
       ]
     },
     es: {
-      title: "El Tour Definitivo de Ruinas Incas",
+      title: "El Tour Definitivo de Sitios Arqueológicos Incas",
       intro: "Una inmersión profunda en la arquitectura megalítica y la historia de las estructuras más impresionantes que quedan del Imperio Inca.",
       image: "/images/boleto/ollantaytambo-ruins.jpg",
       sections: [
