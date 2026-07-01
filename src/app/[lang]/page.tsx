@@ -1,4 +1,4 @@
-import { HeroSection, FeaturesSection, TopListsSection, KlookWidget } from "@/features/landing"
+import { HeroSection, FeaturesSection, TopListsSection } from "@/features/landing"
 import { siteConfig } from "@/lib/config/site"
 import type { Metadata } from "next"
 import { getDictionary, Locale } from "@/lib/dictionaries"
@@ -58,7 +58,6 @@ export default async function HomePage({ params }: PageProps) {
       />
       <HeroSection dict={dict.home} />
       <TopListsSection dict={dict.home} locale={lang} />
-      <KlookWidget lang={lang} />
       <FeaturesSection dict={dict.home} />
 
     </div>

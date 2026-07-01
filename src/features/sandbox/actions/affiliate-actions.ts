@@ -47,7 +47,7 @@ export async function saveAffiliateLink(businessId: string, provider: string, ur
     }
 
     // Filter out existing links with the same provider to avoid duplicates
-    links = links.filter(l => l.provider !== provider)
+    links = links.filter(l => l.provider.toLowerCase() !== provider.toLowerCase())
 
     // Add the new link
     links.push({ provider, url })
@@ -84,7 +84,7 @@ export async function deleteAffiliateLink(businessId: string, provider: string) 
 
     if (business.affiliateLinks && Array.isArray(business.affiliateLinks)) {
       let links = business.affiliateLinks as unknown as Array<{ provider: string; url: string }>
-      links = links.filter(l => l.provider !== provider)
+      links = links.filter(l => l.provider.toLowerCase() !== provider.toLowerCase())
 
       await prisma.business.update({
         where: { id: businessId },

@@ -37,8 +37,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Daily hydration during trekking, high-altitude city exploring, or recovering from travel fatigue.',
           icon: Droplet,
           color: 'bg-blue-50 text-blue-700 border-blue-200',
-          link: 'https://amzn.to/44mbF2G',
-          image: '/images/guides/health-hydration-product-2.jpeg'
+          link: 'https://amzn.to/44mbF2G'
         },
         {
           title: 'Rapid Gut Rescue: Enterogermina Liquid Probiotic Packs',
@@ -49,8 +48,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Take daily as a preventative measure or immediately at the first sign of stomach discomfort.',
           icon: ShieldCheck,
           color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          link: 'https://amzn.to/4elC7zu',
-          image: '/images/guides/health-hydration-product-3.jpeg'
+          link: 'https://amzn.to/4elC7zu'
         },
         {
           title: 'High-Altitude Protection: Non-Toxic Mineral Sunscreen',
@@ -61,8 +59,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Daily application for high-altitude ruins, hiking, or any outdoor exploration in the Andes.',
           icon: Sun,
           color: 'bg-amber-50 text-amber-700 border-amber-200',
-          link: 'https://amzn.to/44mbF2G',
-          image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop'
+          link: 'https://amzn.to/44mbF2G'
         }
       ]
     },
@@ -86,8 +83,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Hidratación diaria durante caminatas, exploración de ciudades a gran altitud o recuperación de la fatiga del viaje.',
           icon: Droplet,
           color: 'bg-blue-50 text-blue-700 border-blue-200',
-          link: 'https://amzn.to/44mbF2G',
-          image: '/images/guides/health-hydration-product-2.jpeg'
+          link: 'https://amzn.to/44mbF2G'
         },
         {
           title: 'Rescate Rápido del Intestino: Paquetes de Probióticos Líquidos Enterogermina',
@@ -98,8 +94,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Tómalo a diario como medida preventiva o inmediatamente a la primera señal de molestia estomacal.',
           icon: ShieldCheck,
           color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-          link: 'https://amzn.to/4elC7zu',
-          image: '/images/guides/health-hydration-product-3.jpeg'
+          link: 'https://amzn.to/4elC7zu'
         },
         {
           title: 'Protección para Alta Altitud: Protector Solar Mineral No Tóxico',
@@ -110,8 +105,7 @@ export default async function HealthHydrationGuidePage({ params }: { params: Pro
           bestUse: 'Aplicación diaria para ruinas a gran altitud, caminatas o cualquier exploración al aire libre en los Andes.',
           icon: Sun,
           color: 'bg-amber-50 text-amber-700 border-amber-200',
-          link: 'https://amzn.to/44mbF2G',
-          image: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop'
+          link: 'https://amzn.to/44mbF2G'
         }
       ]
     }

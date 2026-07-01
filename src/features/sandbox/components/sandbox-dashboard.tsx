@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useTransition } from "react"
+import { useParams } from "next/navigation"
 import { 
   simulateDriverAccept, 
   simulateDriverMessage, 
@@ -54,6 +55,8 @@ interface AffiliateLink {
 }
 
 export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardProps) {
+  const params = useParams()
+  const lang = params?.lang as string || "en"
   const [activeTab, setActiveTab] = useState<"simulator" | "affiliate">("simulator")
   const [loading, setLoading] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -62,6 +65,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [locationFilter, setLocationFilter] = useState("all")
+  const [sortBy, setSortBy] = useState<"name" | "klook_exists" | "klook_missing">("klook_exists")
 
   // States for URL inputs, generated shortlinks, errors, and loading statuses per business
   const [urlInputs, setUrlInputs] = useState<Record<string, string>>({})
@@ -80,15 +84,32 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
     return Array.from(locs).sort()
   }, [businesses])
 
-  // Filtered businesses
+  // Filtered & Sorted businesses
   const filteredBusinesses = useMemo(() => {
-    return businesses.filter(b => {
+    const filtered = businesses.filter(b => {
       const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCat = categoryFilter === "all" || b.category.toLowerCase() === categoryFilter.toLowerCase()
       const matchesLoc = locationFilter === "all" || b.locationSlug.toLowerCase() === locationFilter.toLowerCase()
       return matchesSearch && matchesCat && matchesLoc
     })
-  }, [businesses, searchQuery, categoryFilter, locationFilter])
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "klook_exists" || sortBy === "klook_missing") {
+        const aLinks = (a.affiliateLinks || []) as AffiliateLink[]
+        const bLinks = (b.affiliateLinks || []) as AffiliateLink[]
+        const aHasKlook = aLinks.some(l => l.provider.toLowerCase() === "klook") ? 1 : 0
+        const bHasKlook = bLinks.some(l => l.provider.toLowerCase() === "klook") ? 1 : 0
+        
+        if (aHasKlook !== bHasKlook) {
+          return sortBy === "klook_exists" 
+            ? bHasKlook - aHasKlook  // Has Klook first (1 comes before 0)
+            : aHasKlook - bHasKlook; // No Klook first (0 comes before 1)
+        }
+      }
+      // Fallback to alphabetical by name
+      return a.name.localeCompare(b.name)
+    })
+  }, [businesses, searchQuery, categoryFilter, locationFilter, sortBy])
 
   // Simulator actions
   const handleAccept = async (id: string) => {
@@ -310,7 +331,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
             </p>
 
             {/* Filter Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
                 <input 
@@ -351,6 +372,20 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
                   ))}
                 </select>
               </div>
+
+              {/* Sort Filter */}
+              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-1">
+                <Filter className="w-4.5 h-4.5 text-slate-400 mr-2" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full bg-transparent text-sm py-1 font-semibold text-slate-600 outline-none"
+                >
+                  <option value="klook_exists">Has Klook Link First</option>
+                  <option value="klook_missing">Missing Klook Link First</option>
+                  <option value="name">Name (A-Z)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -365,7 +400,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
             ) : (
               filteredBusinesses.map(business => {
                 const currentLinks = (business.affiliateLinks || []) as AffiliateLink[]
-                const klookLink = currentLinks.find(l => l.provider === "Klook")
+                const klookLink = currentLinks.find(l => l.provider.toLowerCase() === "klook")
                 const searchUrl = getKlookSearchUrl(business.name, business.locationSlug)
                 const isGenerating = generatingStatus[business.id]
                 const generatedLink = generatedShortlinks[business.id]
@@ -374,8 +409,15 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
                 return (
                   <div key={business.id} className="bg-white border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.01)] rounded-2xl p-5 hover:border-slate-300 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div className="space-y-1.5 max-w-sm">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-slate-900 text-[15px]">{business.name}</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <a 
+                          href={`/${lang}/business/${business.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-bold text-slate-900 text-[15px] hover:text-rose-600 hover:underline flex items-center gap-1"
+                        >
+                          {business.name} <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                        </a>
                         {klookLink && (
                           <span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">
                             <Check className="w-3 h-3" /> Active
