@@ -9,7 +9,12 @@ import { searchParamsParsers } from "../search-params"
 import { LayoutGrid, CalendarDays, Sparkles, MapPin } from "lucide-react"
 import { ExploreSearch } from "./explore-search"
 import { ExplorePanel } from "./explore-panel"
-import { useUiStore } from "@/lib/store/use-ui-store"
+import {
+  useSelectionStore,
+  useMapUiStore,
+  useConciergeUiStore,
+  usePanelStore,
+} from "@/lib/store/use-ui-store"
 import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 
 import { ThreePaneLayout } from "@/components/layout/three-pane-layout"
@@ -92,21 +97,26 @@ export function ExploreView({
   
   const [params, setParams] = useQueryStates(searchParamsParsers)
   const router = useRouter()
-  const panelMode = useUiStore(s => s.panelMode);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const selectedId = useUiStore(s => s.selectedId);
-  const setSelectedId = useUiStore(s => s.setSelectedId);
-  const mapClickMode = useUiStore(s => s.mapClickMode);
-  const setMapClickMode = useUiStore(s => s.setMapClickMode);
-  const mapSearchResults = useUiStore(s => s.mapSearchResults);
-  const isChatOpen = useUiStore(s => s.isChatOpen);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
-  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  const panelMode = usePanelStore(s => s.panelMode);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const selectedId = useSelectionStore(s => s.selectedId);
+  const setSelectedId = useSelectionStore(s => s.setSelectedId);
+
+  const selectBusiness = (id: string | null) => {
+    setSelectedId(id);
+    setParams({ id: id ?? null }, { shallow: true, scroll: false });
+  };
+  const mapClickMode = useMapUiStore(s => s.mapClickMode);
+  const setMapClickMode = useMapUiStore(s => s.setMapClickMode);
+  const mapSearchResults = useMapUiStore(s => s.mapSearchResults);
+  const isChatOpen = useConciergeUiStore(s => s.isChatOpen);
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen);
+  const conciergeSendMessage = useConciergeUiStore(s => s.conciergeSendMessage);
 
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
 
-  const radarState = useUiStore(s => s.radarState);
+  const radarState = useMapUiStore(s => s.radarState);
 
   // Compute nearby businesses for radarState
   const radarBusinesses = useMemo(() => {
@@ -206,21 +216,20 @@ export function ExploreView({
   }
 
   useEffect(() => {
-    if (initialSelectedId) {
-      setSelectedId(initialSelectedId)
-    }
-  }, [initialSelectedId, setSelectedId])
+    setSelectedId(params.id ?? null);
+  }, [params.id, setSelectedId]);
 
   const prevLoc = useRef(params.loc)
   useEffect(() => {
     if (params.loc !== prevLoc.current) {
       setSelectedId(null)
+      setParams({ id: null }, { shallow: true, scroll: false })
       prevLoc.current = params.loc
     }
   }, [params.loc, setSelectedId])
 
   const initialTripId = params.trip;
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
+  const setMobileViewMode = useMapUiStore(s => s.setMobileViewMode);
   
   const [showCollisionDialog, setShowCollisionDialog] = useState(false);
   const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
@@ -277,9 +286,7 @@ export function ExploreView({
     setShowCollisionDialog(false);
     
     // Remove the ?trip from URL after making a choice to prevent re-triggering
-    const url = new URL(window.location.href);
-    url.searchParams.delete('trip');
-    window.history.replaceState({}, '', url.toString());
+    setParams({ trip: null }, { shallow: true, scroll: false });
 
     if (choice === 'cancel') {
       setPanelMode('itinerary');
@@ -343,7 +350,7 @@ export function ExploreView({
           businesses={visibleBusinesses}
           totalCount={effectiveMapBusinesses.length}
           selectedId={selectedId}
-          setSelectedId={setSelectedId}          
+          setSelectedId={selectBusiness}          
           onReset={() => router.push('/explore')}
           hasMore={radarState || (mapSearchResults && mapSearchResults.length > 0) ? false : hasMore}
           isLoadingMore={radarState || (mapSearchResults && mapSearchResults.length > 0) ? false : (!mapLoaded || isLoadingMore)}
@@ -363,8 +370,8 @@ export function ExploreView({
       <ThreePaneLayout
       sidebar={sidebar}
       content={content}
-      map={<ExploreMap isDefaultView={isDefaultView} businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""} onSelectBusiness={(id) => {
-        setSelectedId(id);
+      map={<ExploreMap isDefaultView={isDefaultView} businesses={effectiveMapBusinesses} selectedId={selectedId} categoryCounts={categoryCounts} currentLoc={params.loc || ""}       onSelectBusiness={(id) => {
+        selectBusiness(id);
         window.dispatchEvent(new CustomEvent('drawer-snap-half'));
       }} mapClickMode={mapClickMode} onMapAnchorPick={(lat, lng) => { 
         if (mapClickMode === 'start') {

@@ -1,6 +1,6 @@
 import type { Business } from "@prisma/client";
 
-import { useUiStore } from "@/lib/store/use-ui-store";
+import { useSelectionStore, useMapUiStore, useConciergeUiStore } from "@/lib/store/use-ui-store";
 import { useRouter, usePathname } from "next/navigation";
 import { BusinessCard } from "@/features/discovery/components/business-card";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,11 @@ interface FallbackResults {
 type SearchResults = Business[] | FallbackResults;
 
 export function SearchResultsCard({ businesses, input, intent }: { businesses: SearchResults, messageId?: string, input?: SearchInput, intent?: string }) {
-  const setSelectedId = useUiStore(s => s.setSelectedId);
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
-  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
-  const setRadarState = useUiStore(s => s.setRadarState);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const setSelectedId = useSelectionStore(s => s.setSelectedId);
+  const setMobileViewMode = useMapUiStore(s => s.setMobileViewMode);
+  const setMapSearchResults = useMapUiStore(s => s.setMapSearchResults);
+  const setRadarState = useMapUiStore(s => s.setRadarState);
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen);
   const router = useRouter();
   const pathname = usePathname();
 

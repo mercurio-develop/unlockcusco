@@ -1,0 +1,246 @@
+import type { Locale } from "@/paths";
+
+export type GuideContent = {
+  title: string;
+  desc: string;
+  image?: string;
+  sections: { h2: string; p: string }[];
+};
+
+// Content registry for English
+const GUIDES_CONTENT_EN: Record<string, GuideContent> = {
+  "sacred-valley-1-day-itinerary": {
+    title: "The Ultimate 1-Day Sacred Valley Itinerary",
+    desc: "Short on time? Here is the perfect 1-day route hitting Pisac, Urubamba, and Ollantaytambo before catching the train to Machu Picchu.",
+    image: "/images/boleto/pisac-ruins.jpg",
+    sections: [
+      { h2: "The Essential Route", p: "The classic Sacred Valley tour is the most popular day trip from Cusco. You'll descend into the warmer climate of the valley, explore vast Inca agricultural terraces, and visit bustling artisan markets." },
+      { h2: "Pisac: Markets and Mountains", p: "Start in Pisac. While the market in the plaza is famous for silver and textiles, the real treasure is the mountaintop ruin complex. The agricultural terraces here sweep around the mountain like a massive amphitheater." },
+      { h2: "Ollantaytambo: The Living Inca Town", p: "End your day in Ollantaytambo. This town still uses the original Inca street grid and water channels. The massive fortress overlooking the town was the site of a major Inca victory against the Spanish conquistadors." }
+    ]
+  },
+  "cusco-city-tour": {
+    title: "Cusco City Tour: Heart of the Empire",
+    desc: "Discover the hidden history beneath the colonial architecture of the Imperial City.",
+    image: "/images/boleto/sacsayhuaman.jpg",
+    sections: [
+      { h2: "The Navel of the World", p: "Cusco was designed in the shape of a puma, with the massive fortress of Sacsayhuaman serving as its head. Today, it's a fascinating blend of perfect Inca stonework and Spanish colonial architecture." },
+      { h2: "Qorikancha: The Temple of the Sun", p: "Once the richest temple in the Inca Empire, its walls were completely covered in solid gold plates. Today, the Convent of Santo Domingo is built directly on top of its flawless foundations." },
+      { h2: "Sacsayhuaman", p: "Just above the city lies this megalithic marvel. Some of the stones here weigh over 100 tons, yet they fit together so perfectly that not a single piece of paper can slide between them." }
+    ]
+  },
+  "ultimate-inca-ruins": {
+    title: "The Ultimate Inca Archeological Sites Guide",
+    desc: "A deep dive into the architecture, purpose, and history of the Sacred Valley's greatest structures.",
+    image: "/images/boleto/ollantaytambo-ruins.jpg",
+    sections: [
+      { h2: "Master Builders", p: "The Incas were master stonemasons and engineers. They didn't just build on the landscape; they integrated their structures seamlessly into the natural topography." },
+      { h2: "The Trapezoidal Secret", p: "You'll notice that doors, windows, and niches in Inca buildings lean inward, forming a trapezoid. This brilliant architectural choice made their buildings highly resistant to the region's frequent earthquakes." },
+      { h2: "Qorikancha: The Golden Temple of the Sun", p: "Located in the heart of Cusco, Qorikancha was the holiest temple of the Inca Empire. Once sheathed in hundreds of plates of solid gold, its curving walls showcase flawless anti-seismic stone masonry. In the 16th century, Spanish conquerors looted the temple and built the Church of Santo Domingo directly on its foundations, leaving a stark architectural representation of cultural blending." },
+      { h2: "Sacsayhuamán: The Megalithic Marvel", p: "Perched on a hill overlooking Cusco, Sacsayhuamán features three tiers of zig-zagging megalithic walls. Built with colossal stones weighing up to 300 tons that fit together with absolute precision, it served as the main temple of upper (hanan) Cusco. Only 20% of the original structure remains today, serving as the stage for the annual Inti Raymi solar festival." },
+      { h2: "Pisac: Terraces and Mountaintop Shrines", p: "Standing high above the eastern Valley, Pisac is a spectacular mountaintop city. It features massive agricultural terraces, residential quarters, and a sacred sun temple with a beautifully preserved Intihuatana calendar carved from pink granite. The steep cliffs behind the ruins contain ancient cave tombs where thousands of mummies were historically entombed." },
+      { h2: "Ollantaytambo: The Living Inca Fortress", p: "Guarding the western approach to Machu Picchu, Ollantaytambo features steep terraces climb the canyon walls to protect unfinished temples at the summit. It is famous as the site of Manco Inca's historic victory over Spanish forces in 1537, where he flooded the plains to repel the conquistadors. The adjoining village is the only 'living' Inca town, still using original stone grids and water channels." },
+      { h2: "Moray: Concentric Circular Laboratories", p: "Moray consists of several enormous, circular terrace depressions up to 150 meters deep. These concentric rings served as a highly sophisticated agricultural laboratory, creating microclimates with temperature drops of up to 15°C (27°F) between the top and bottom levels. Inca scientists imported diverse soils to test and hybridize different crops, laying the foundation for modern Andean agriculture." },
+      { h2: "Pikillaqta: The Ancient Wari City", p: "Dating back to the 6th century, Pikillaqta is a sprawling pre-Inca city built by the Wari civilization. Unlike the curved masonry of the Inca, it features a rigid geometric grid pattern of stone-and-mud buildings that once housed up to 10,000 residents. The nearby Rumicolca Gate was a key Wari checkpoint later reinforced by the Incas." },
+      { h2: "Tipón: The Sacred Water Gardens", p: "Tipón is a masterwork of hydraulic engineering and agricultural design, built in the early 1420s by the Inca ruler Wiracocha for his father. Clean mountain water is channeled through a series of beautifully aligned stone aqueducts, steps, and split channels, feeding stone basins and fountains that still flow perfectly today." }
+    ]
+  },
+  "top-7-culinary-route": {
+    title: "The Top 7 Culinary Route",
+    desc: "An AI-curated guide to the best flavors in the Andes.",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Andean Gastronomy", p: "The Sacred Valley is a food lover's paradise. The unique microclimates allow for the cultivation of hundreds of varieties of potatoes, corn, and quinoa." },
+      { h2: "From Pachamanca to Haute Cuisine", p: "You can experience everything from a traditional Pachamanca (meat and potatoes cooked under the earth using hot stones) to world-class tasting menus at restaurants like MIL, located right next to the Moray ruins." }
+    ]
+  },
+  "maras-moray": {
+    title: "Exploring Maras & Moray",
+    desc: "Salt pans and agricultural laboratories.",
+    image: "/images/boleto/moray.jpg",
+    sections: [
+      { h2: "Moray: The Inca Greenhouse", p: "These concentric circular terraces weren't an amphitheater—they were an agricultural laboratory. The temperature difference from the top terrace to the bottom can be as much as 15°C (27°F)." },
+      { h2: "Maras Salt Ponds", p: "Just a short drive away are the Salineras de Maras. Over 3,000 geometric salt pools spill down the mountainside, fed by a highly saline subterranean spring. They have been harvested by local families since pre-Inca times." }
+    ]
+  },
+  "artisan-markets": {
+    title: "Best Artisan Markets in the Valley",
+    desc: "Where to find the most authentic textiles and crafts.",
+    image: "/images/boleto/chinchero-ruins.jpg",
+    sections: [
+      { h2: "Chinchero: The Weaving Capital", p: "Chinchero is world-renowned for its textiles. Here, you can watch local women demonstrate the entire process: washing raw alpaca wool with a natural root, spinning it, dyeing it with insects and plants, and weaving complex patterns." },
+      { h2: "Pisac Sunday Market", p: "While open every day, the Pisac market truly comes alive on Sundays. It's the perfect place to buy silver jewelry, ceramics, and warm alpaca sweaters." }
+    ]
+  },
+  "machu-picchu-day": {
+    title: "Machu Picchu in a Day",
+    desc: "Logistics and tips for a whirlwind one-day trip to the Wonder of the World.",
+    image: "/images/dummy/generic.jpg",
+    sections: [
+      { h2: "The Logistics", p: "Doing Machu Picchu in a single day from Cusco requires an early start. You'll need to catch a 4:00 AM bus to Ollantaytambo, board an early train to Aguas Calientes, and then take the 30-minute shuttle bus up to the ruins." },
+      { h2: "Maximize Your Time", p: "Because time is tight, we highly recommend hiring a private guide to ensure you see the most important sectors (like the Temple of the Sun and the Intihuatana) without feeling rushed." }
+    ]
+  },
+  "acclimating-altitude": {
+    title: "How to Acclimate to Altitude",
+    desc: "Essential medical and practical tips for beating Soroche (altitude sickness).",
+    image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Understanding Soroche", p: "Cusco sits at an elevation of 3,399 meters (11,152 feet). The air is noticeably thinner, which can cause headaches, nausea, and shortness of breath." },
+      { h2: "The Golden Rules", p: "Take it easy on your first day. Hydrate constantly. Avoid heavy meals and alcohol for the first 24 hours. Drink coca tea, a traditional Andean remedy that helps improve blood oxygenation." },
+      { h2: "Sleep Low", p: "If possible, immediately head down into the Sacred Valley (around 2,800m / 9,000ft) upon arriving at the Cusco airport. Spending your first two nights lower helps your body adjust much faster." }
+    ]
+  },
+  "packing-sacred-valley": {
+    title: "Packing List for the Sacred Valley",
+    desc: "What to bring for the dramatic temperature swings of the Andes.",
+    image: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Layers are Everything", p: "The Andes are famous for having 'four seasons in a single day'. When the sun is out, it's intense and hot. As soon as the sun drops behind the mountains, temperatures plummet toward freezing." },
+      { h2: "The Essentials", p: "Pack a good sun hat, strong sunscreen (the UV index at this altitude is extreme), a lightweight rain jacket, a warm fleece or down layer, and comfortable, broken-in walking shoes." }
+    ]
+  },
+  "boleto-turistico-explained": {
+    title: "Understanding the Boleto Turistico",
+    desc: "Don't get confused at the gate. Here is exactly what the Cusco Tourist Ticket covers.",
+    image: "https://images.unsplash.com/photo-1600577916048-804c9191e36c?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "What is it?", p: "The Boleto Turistico del Cusco (BTC) is a mandatory ticket that grants you access to 16 of the most important archaeological sites and museums in and around Cusco and the Sacred Valley. You cannot pay individual entrance fees at most of these sites." },
+      { h2: "Partial vs. Full", p: "You can buy a partial ticket (valid for 1-2 days, covering a specific circuit of sites) or the full ticket (valid for 10 days, covering everything). If you plan to see the Sacred Valley and Cusco City ruins, the full ticket is always the best value." }
+    ]
+  },
+  "best-time-machu-picchu": {
+    title: "Best Time to Visit Machu Picchu",
+    desc: "Weather, crowds, and the optimal months for your trip.",
+    image: "https://images.unsplash.com/photo-1508873696983-2df519f0397e?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Dry Season vs. Wet Season", p: "The dry season runs from May to October, offering clear blue skies and cold nights. The wet season is from November to April, bringing warmer nights but heavy afternoon downpours." },
+      { h2: "The Sweet Spot", p: "The absolute best times to visit are the 'shoulder months' of May and September/October. You'll enjoy the lush green landscapes left over from the rains, but with mostly dry, clear days and smaller crowds than the peak months of July and August." }
+    ]
+  },
+  "coffee-cacao-route": {
+    title: "The Route of Coffee and Cacao",
+    desc: "Immerse yourself in Peru's rich agricultural heritage with a bean-to-cup and bean-to-bar journey.",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "The Coffee Route: Sacred Valley Morning", p: "Peruvian high-altitude coffee is renowned worldwide. Start your day in the Sacred Valley visiting local roasters like Pisonay Coffee Roasters. Witness a roasting demonstration and participate in an AI-tailored cupping session to discover your flavor profile." },
+      { h2: "The Cacao Route: Cusco City Afternoon", p: "Cacao Chuncho is one of the most genetically pure and historic varieties of cacao in the world. Spend your afternoon in Cusco City participating in a hands-on chocolate making workshop, learning to temper and mold chocolate before tasting pairings with local spirits." }
+    ]
+  }
+};
+
+const GUIDES_CONTENT_ES: Record<string, GuideContent> = {
+  "sacred-valley-1-day-itinerary": {
+    title: "El Itinerario Definitivo de 1 Día en el Valle Sagrado",
+    desc: "¿Poco tiempo? Esta es la ruta perfecta de 1 día que pasa por Pisac, Urubamba y Ollantaytambo antes de tomar el tren a Machu Picchu.",
+    image: "/images/boleto/pisac-ruins.jpg",
+    sections: [
+      { h2: "La Ruta Esencial", p: "El tour clásico del Valle Sagrado es la excursión más popular desde Cusco. Descenderás a un clima más cálido, explorarás vastas terrazas y visitarás mercados artesanales." }
+    ]
+  },
+  "cusco-city-tour": {
+    title: "City Tour Cusco: El Corazón del Imperio",
+    desc: "Descubre la historia oculta bajo la arquitectura colonial de la Ciudad Imperial.",
+    image: "/images/boleto/sacsayhuaman.jpg",
+    sections: [
+      { h2: "El Ombligo del Mundo", p: "Cusco fue diseñada con forma de puma, con la fortaleza de Sacsayhuaman como su cabeza. Hoy es una fascinante mezcla de trabajo en piedra Inca y arquitectura colonial." }
+    ]
+  },
+  "ultimate-inca-ruins": {
+    title: "La Guía Definitiva de Sitios Arqueológicos Incas",
+    desc: "Una inmersión profunda en la arquitectura y propósito de las grandes estructuras.",
+    image: "/images/boleto/ollantaytambo-ruins.jpg",
+    sections: [
+      { h2: "Maestros Constructores", p: "Los incas fueron maestros ingenieros. No solo construyeron sobre el paisaje; integraron sus estructuras en la topografía natural." },
+      { h2: "Qorikancha: El Templo de Oro del Sol", p: "Ubicado en el centro del Cusco, el Qorikancha era el templo más sagrado del Imperio Inca. Cubierto originalmente con cientos de planchas de oro macizo, sus muros curvos muestran una mampostería sismorresistente impecable. En el siglo XVI, los españoles saquearon el templo y construyeron la Iglesia de Santo Domingo directamente sobre sus bases." },
+      { h2: "Sacsayhuamán: La Maravilla Megalítica", p: "Situado en una colina sobre el Cusco, Sacsayhuamán cuenta con tres niveles de muros megalíticos en zigzag. Construido con piedras colosales de hasta 300 toneladas que encajan con precisión quirúrgica, fue el templo principal de hanan (alto) Cusco. Hoy queda solo el 20% de su estructura, la cual sirve de escenario cada año para el Inti Raymi." },
+      { h2: "Písac: Terrazas y Adoratorios de Altura", p: "Ubicada en una cresta montañosa al este del Valle Sagrado, Písac es una espectacular ciudadela inca. Cuenta con inmensas terrazas agrícolas, barrios residenciales y un templo del sol con un Intihuatana tallado en granito rosa. Los acantilados verticales detrás de las ruinas albergan miles de tumbas prehispánicas en cuevas." },
+      { h2: "Ollantaytambo: La Fortaleza Viva del Valle", p: "Ollantaytambo destaca por sus terrazas que protegen templos inconclusos en la cumbre. Es famoso por ser el lugar de la victoria histórica de Manco Inca en 1537, donde inundó las llanuras para derrotar a los españoles. El pueblo contiguo conserva el trazado inca original y sus canales de agua en funcionamiento." },
+      { h2: "Moray: El Laboratorio de Terrazas Concéntricas", p: "Moray consta de enormes depresiones circulares de hasta 150 metros de profundidad. Estos anillos concéntricos sirvieron como laboratorio agrícola, simulando microclimates con diferencias de temperatura de hasta 15°C entre el tope y el fondo. Los incas trajeron tierras de todas las regiones para aclimatar y domesticar semillas." },
+      { h2: "Pikillaqta: La Gran Metrópoli Wari", p: "Construida por la cultura preínca Wari en el siglo VI, Pikillaqta albergó a 10,000 habitantes. A diferencia del estilo inca, presenta un diseño geométrico de adobe y piedra con canales subterráneos. Cerca se encuentra la Portada de Rumicolca, que servía como puesto de control fortificado." },
+      { h2: "Tipón: El Templo del Agua y la Hidráulica", p: "Tipón es una obra maestra de la hidráulica y el diseño agrícola inca, construida en la década de 1420 por Wiracocha para su padre. El agua de manantiales y glaciares es capturada y conducida por acueductos y fuentes de piedra que continúan funcionando perfectamente en la actualidad." }
+    ]
+  },
+  "top-7-culinary-route": {
+    title: "La Ruta Culinaria del Valle",
+    desc: "Una guía seleccionada por IA con los mejores sabores de los Andes.",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Gastronomía Andina", p: "El Valle Sagrado es un paraíso. Los microclimas permiten el cultivo de cientos de variedades de papas, maíz y quinua." }
+    ]
+  },
+  "maras-moray": {
+    title: "Explorando Maras y Moray",
+    desc: "Salineras milenarias y laboratorios agrícolas.",
+    image: "/images/boleto/moray.jpg",
+    sections: [
+      { h2: "Moray: El Invernadero Inca", p: "Estas terrazas concéntricas eran un laboratorio agrícola. La diferencia de temperatura de arriba a abajo puede ser de hasta 15°C." }
+    ]
+  },
+  "artisan-markets": {
+    title: "Mejores Mercados Artesanales",
+    desc: "Dónde encontrar los textiles más auténticos.",
+    image: "/images/boleto/chinchero-ruins.jpg",
+    sections: [
+      { h2: "Chinchero: Capital del Tejido", p: "Mundialmente famoso por sus textiles. Aquí puedes ver el proceso completo con tintes naturales." }
+    ]
+  },
+  "machu-picchu-day": {
+    title: "Machu Picchu en un Día",
+    desc: "Logística y consejos para un viaje relámpago a la Maravilla del Mundo.",
+    image: "/images/dummy/generic.jpg",
+    sections: [
+      { h2: "La Logística", p: "Hacerlo en un solo día desde Cusco requiere empezar a las 4:00 AM. Tomarás un bus, tren y otro bus hasta las ruinas." }
+    ]
+  },
+  "acclimating-altitude": {
+    title: "Cómo Aclimatarse a la Altura",
+    desc: "Consejos médicos y prácticos para vencer el Soroche.",
+    image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Entendiendo el Soroche", p: "Cusco está a 3,399 metros. El aire es más fino, lo que puede causar dolores de cabeza y náuseas." },
+      { h2: "Las Reglas de Oro", p: "Tómatelo con calma el primer día. Hidrátate. Evita comidas pesadas. Bebe mate de coca." }
+    ]
+  },
+  "packing-sacred-valley": {
+    title: "Qué Empacar para el Valle Sagrado",
+    desc: "Lo esencial para los cambios bruscos de temperatura de los Andes.",
+    image: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "Las Capas lo son Todo", p: "Los Andes tienen 'cuatro estaciones en un día'. Empaca un buen bloqueador, chaqueta para lluvia y algo abrigador para la noche." }
+    ]
+  },
+  "boleto-turistico-explained": {
+    title: "Entendiendo el Boleto Turístico",
+    desc: "Qué es y qué cubre exactamente el Boleto Turístico del Cusco.",
+    image: "https://images.unsplash.com/photo-1600577916048-804c9191e36c?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "¿Qué es?", p: "Es un boleto obligatorio que te da acceso a 16 sitios arqueológicos y museos. No puedes pagar entradas individuales en la mayoría de estos sitios." }
+    ]
+  },
+  "best-time-machu-picchu": {
+    title: "Mejor Época para Visitar Machu Picchu",
+    desc: "Clima, multitudes y los meses óptimos para tu viaje.",
+    image: "https://images.unsplash.com/photo-1508873696983-2df519f0397e?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "El Punto Exacto", p: "Los mejores meses son mayo y septiembre/octubre. Disfrutarás de paisajes verdes, días secos y menos multitudes que en julio." }
+    ]
+  },
+  "coffee-cacao-route": {
+    title: "La Ruta del Café y Cacao",
+    desc: "Sumérgete en la rica herencia agrícola de Perú con un viaje desde el grano hasta la taza y la barra.",
+    image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop",
+    sections: [
+      { h2: "La Ruta del Café: Mañana en el Valle Sagrado", p: "El café peruano de alta altitud es reconocido mundialmente. Comienza el día en el Valle Sagrado visitando tostadores locales como Pisonay Coffee Roasters. Presencia una demostración de tostado y participa en una sesión de cata adaptada por IA." },
+      { h2: "La Ruta del Cacao: Tarde en la Ciudad del Cusco", p: "El cacao chuncho es una de las variedades de cacao más puras e históricas del mundo. Pasa la tarde en Cusco participando en un taller artesanal de chocolate, aprendiendo a templar y moldear el chocolate antes de degustar maridajes." }
+    ]
+  }
+};
+
+export function getGuideContent(
+  slug: string,
+  lang: Locale
+): GuideContent | undefined {
+  const registry = lang === "es" ? GUIDES_CONTENT_ES : GUIDES_CONTENT_EN;
+  return registry[slug];
+}

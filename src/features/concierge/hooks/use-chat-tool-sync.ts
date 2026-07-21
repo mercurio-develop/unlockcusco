@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef } from "react";
-import { useUiStore } from "@/lib/store/use-ui-store";
+import { useMapUiStore, usePanelStore } from "@/lib/store/use-ui-store";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { DEFAULT_COORDS } from "@/lib/constants";
 
  
 export function useChatToolSync(messages: any[]) {
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const setMapSearchResults = useMapUiStore(s => s.setMapSearchResults);
   
   const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);

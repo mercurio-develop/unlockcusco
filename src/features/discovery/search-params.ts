@@ -16,6 +16,8 @@ export const searchParamsParsers = {
   sort: parseAsString.withDefault('recommended'),
   trip: parseAsString,
   filter: parseAsString,
+  ai_prompt: parseAsString,
+  data: parseAsString,
 };
 
 export const searchParamsCache = createSearchParamsCache(searchParamsParsers);

@@ -4,9 +4,15 @@
 import { useState, useEffect, useRef } from "react"
 import { Search, LayoutGrid, List, ChevronDown, Check, Loader2, X, MapPin, Bot, Radar, Bed, ExternalLink } from "lucide-react"
 import { useInView } from "react-intersection-observer"
-import { BusinessCard } from "@/features/discovery/components/business-card"
-import { useUiStore } from "@/lib/store/use-ui-store"
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { BusinessCard } from "@/features/discovery"
+import { searchParamsParsers } from "@/features/discovery/search-params"
+import {
+  useSelectionStore,
+  useMapUiStore,
+  usePanelStore,
+} from "@/lib/store/use-ui-store"
+import { usePathname } from "next/navigation"
+import { useQueryStates } from "nuqs"
 import type { Business } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { SORT_OPTIONS, LOCATIONS, getCategoryData } from "@/features/discovery/constants"
@@ -28,49 +34,51 @@ interface DiscoverPanelProps {
 
 export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId, onReset, hasMore, isLoadingMore, onLoadMore, dict }: DiscoverPanelProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
-  const searchParams = useSearchParams()
-  const router = useRouter()
   const pathname = usePathname()
   const lang = pathname?.split('/')[1] || 'en'
-  
-  const currentSort = searchParams.get("sort") || "recommended"
-  const q = searchParams.get("q") || ""
-  const loc = searchParams.get("loc") || ""
-  const cats = (searchParams.get("cat") || "").split(",").filter(Boolean)
-  const rad = searchParams.get("rad") || ""
+  const [params, setParams] = useQueryStates(searchParamsParsers)
+
+  const currentSort = params.sort || "recommended"
+  const q = params.q || ""
+  const loc = params.loc || ""
+  const cats = (params.cat || "").split(",").filter(Boolean)
+  const rad = params.rad ? String(params.rad) : ""
 
   const [isSortOpen, setIsSortOpen] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
   
   const { ref, inView } = useInView({ threshold: 0 })
-  const isAddingStop = useUiStore(s => s.isAddingStop);
-  const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
-  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
-  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
-  const isExchangingStart = useUiStore(s => s.isExchangingStart);
-  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
-  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
-  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const isAddingStop = useMapUiStore(s => s.isAddingStop);
+  const setIsAddingStop = useMapUiStore(s => s.setIsAddingStop);
+  const exchangeTargetId = useSelectionStore(s => s.exchangeTargetId);
+  const setExchangeTargetId = useSelectionStore(s => s.setExchangeTargetId);
+  const isExchangingStart = useMapUiStore(s => s.isExchangingStart);
+  const setIsExchangingStart = useMapUiStore(s => s.setIsExchangingStart);
+  const isExchangingEnd = useMapUiStore(s => s.isExchangingEnd);
+  const setIsExchangingEnd = useMapUiStore(s => s.setIsExchangingEnd);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
   
-  const mapSearchResults = useUiStore(s => s.mapSearchResults);
-  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
-  const radarState = useUiStore(s => s.radarState);
-  const setRadarState = useUiStore(s => s.setRadarState);
+  const mapSearchResults = useMapUiStore(s => s.mapSearchResults);
+  const setMapSearchResults = useMapUiStore(s => s.setMapSearchResults);
+  const radarState = useMapUiStore(s => s.radarState);
+  const setRadarState = useMapUiStore(s => s.setRadarState);
 
   const removeFilter = (key: string, value?: string) => {
-    const params = new URLSearchParams(searchParams.toString())
     if (key === "cat" && value) {
-      const newCats = cats.filter(c => c !== value)
-      if (newCats.length > 0) {
-        params.set("cat", newCats.join(","))
-      } else {
-        params.delete("cat")
-      }
-    } else {
-      params.delete(key)
+      const newCats = cats.filter((c) => c !== value)
+      setParams(
+        { cat: newCats.length > 0 ? newCats.join(",") : null },
+        { scroll: false }
+      )
+    } else if (key === "sort") {
+      setParams({ sort: null }, { scroll: false })
+    } else if (key === "q") {
+      setParams({ q: null }, { scroll: false })
+    } else if (key === "loc") {
+      setParams({ loc: null }, { scroll: false })
+    } else if (key === "rad") {
+      setParams({ rad: null }, { scroll: false })
     }
-    router.push(`?${params.toString()}`, { scroll: false })
   }
 
   useEffect(() => {
@@ -90,13 +98,10 @@ export function ExplorePanel({ businesses, totalCount, selectedId, setSelectedId
   }, [])
 
   const handleSortChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (value === "recommended") {
-      params.delete("sort")
-    } else {
-      params.set("sort", value)
-    }
-    router.push(`?${params.toString()}`, { scroll: false })
+    setParams(
+      { sort: value === "recommended" ? null : value },
+      { scroll: false }
+    )
     setIsSortOpen(false)
   }
 

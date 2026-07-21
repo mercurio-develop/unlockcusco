@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { sendContactEmail } from "../actions/send-contact-email";
+import { isActionSuccess } from "@/lib/action-state";
+import { homePath, parseLocale } from "@/paths";
 
 export function ContactForm({ lang }: { lang: string }) {
   const isEs = lang === "es";
@@ -17,7 +19,7 @@ export function ContactForm({ lang }: { lang: string }) {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        router.push(`/${lang}`);
+        router.push(homePath(parseLocale(lang)));
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -32,11 +34,11 @@ export function ContactForm({ lang }: { lang: string }) {
     const formData = new FormData(e.currentTarget);
     const result = await sendContactEmail(formData);
 
-    if (result.error) {
-      setError(result.error);
-    } else if (result.success) {
+    if (isActionSuccess(result)) {
       setSuccess(true);
       (e.target as HTMLFormElement).reset();
+    } else {
+      setError(result.error);
     }
 
     setLoading(false);

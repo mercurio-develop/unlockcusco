@@ -22,9 +22,10 @@ Optional: [GEMINI.md](GEMINI.md) for mempalace prerequisite and RTK proxy notes.
 1. **Feature-sliced only** — domain logic in `src/features/{name}/`, never in `src/components/ui/`
 2. **Thin routes** — `src/app/` pages orchestrate layout + Suspense; business logic lives in features
 3. **Barrel imports** — routes import from `@/features/{name}`, not deep paths
-4. **Centralized paths** — use [src/paths.ts](src/paths.ts); never hardcode route strings
+4. **Centralized paths** — use [src/paths.ts](src/paths.ts) with a `Locale` (`en` | `es`); never hardcode `/${lang}/...` strings
 5. **Script reuse** — consult [docs/SCRIPTS_REFERENCE.md](docs/SCRIPTS_REFERENCE.md) before new scripts
 6. **Prisma singleton** — import `prisma` from `@/lib/prisma`, never `new PrismaClient()`
+7. **ActionState** — user-facing server actions return `ActionState` from `@/lib/action-state`; use `isActionSuccess()` in forms
 
 ## Scaffolding
 

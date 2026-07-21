@@ -19,10 +19,10 @@ export const generateSaveLink = tool({
       
       const data = await saveItineraryAction(stateObj);
       
-      if (data.success && data.shortId) {
-        return { success: true, url: `${host}/explore?trip=${data.shortId}`, error: null };
+      if (data.success && data.data?.shortId) {
+        return { success: true, url: `${host}/explore?trip=${data.data.shortId}`, error: null };
       }
-      return { success: false, url: null, error: data.error || 'Failed to save' };
+      return { success: false, url: null, error: (!data.success && data.error) || 'Failed to save' };
     } catch (e) {
       console.error('generateSaveLink error:', e);
       return { success: false, url: null, error: 'Internal error generating link' };

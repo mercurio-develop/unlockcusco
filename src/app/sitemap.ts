@@ -1,71 +1,73 @@
-import { MetadataRoute } from 'next'
-import { prisma } from '@/lib/prisma'
-import { siteConfig } from '@/lib/config/site'
+import { MetadataRoute } from "next";
+import { prisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/config/site";
+import {
+  LOCALES,
+  businessPath,
+  exploreCategoryPath,
+  explorePath,
+  gearPath,
+  guidesPath,
+  homePath,
+} from "@/paths";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch all active businesses
   const businesses = await prisma.business.findMany({
-    select: {
-      slug: true,
-    },
+    select: { slug: true },
   });
 
-  // Fetch all location/category combinations for the explore directory
   const combinations = await prisma.business.groupBy({
-    by: ['locationSlug', 'category'],
+    by: ["locationSlug", "category"],
   });
 
-  const baseUrl = siteConfig.url;
-
-  // Base routes
-  const routes = [
-    '',
-    '/explore',
-    '/guides',
-  ].flatMap((route) => [
+  const routes = LOCALES.flatMap((lang) => [
     {
-      url: `${baseUrl}/en${route}`,
+      url: `${siteConfig.url}${homePath(lang)}`,
       lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: route === '' ? 1 : 0.8,
+      changeFrequency: "daily" as const,
+      priority: 1,
     },
     {
-      url: `${baseUrl}/es${route}`,
+      url: `${siteConfig.url}${explorePath(lang)}`,
       lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: route === '' ? 1 : 0.8,
-    }
-  ]);
-
-  // Business routes
-  const businessRoutes = businesses.flatMap((business) => [
-    {
-      url: `${baseUrl}/en/business/${business.slug}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
     },
     {
-      url: `${baseUrl}/es/business/${business.slug}`,
-      changeFrequency: 'weekly' as const,
+      url: `${siteConfig.url}${guidesPath(lang)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    },
+    {
+      url: `${siteConfig.url}${gearPath(lang)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
       priority: 0.6,
-    }
+    },
   ]);
 
-  // Explore location/category routes
+  const businessRoutes = businesses.flatMap((business) =>
+    LOCALES.map((lang) => ({
+      url: `${siteConfig.url}${businessPath(lang, business.slug)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }))
+  );
+
   const exploreRoutes = combinations
-    .filter(c => c.locationSlug && c.category)
-    .flatMap((c) => [
-      {
-        url: `${baseUrl}/en/explore/${c.locationSlug}/${c.category}`,
-        changeFrequency: 'weekly' as const,
+    .filter((c) => c.locationSlug && c.category)
+    .flatMap((c) =>
+      LOCALES.map((lang) => ({
+        url: `${siteConfig.url}${exploreCategoryPath(
+          lang,
+          c.locationSlug!,
+          c.category!
+        )}`,
+        changeFrequency: "weekly" as const,
         priority: 0.7,
-      },
-      {
-        url: `${baseUrl}/es/explore/${c.locationSlug}/${c.category}`,
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      }
-    ]);
+      }))
+    );
 
   return [...routes, ...businessRoutes, ...exploreRoutes];
 }

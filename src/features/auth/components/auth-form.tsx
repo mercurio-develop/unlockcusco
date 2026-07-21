@@ -32,7 +32,7 @@ export function AuthForm({ type, lang, redirectPath, dict }: AuthFormProps) {
     const action = isLogin ? login : signup
     const response = await action(formData)
 
-    if (response?.error) {
+    if (response && !response.success) {
       setError(response.error)
       setIsLoading(false)
     }

@@ -1,16 +1,37 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { useMapboxRoute } from "@/features/discovery/hooks/use-mapbox-route";
+import { useMapUiStore } from "@/lib/store/use-map-ui-store";
+import { usePanelStore } from "@/lib/store/use-panel-store";
 import { BusinessCard } from "@/features/discovery/components/business-card";
 import { getCategoryColor } from "@/lib/utils/category-style";
+import { explorePath, parseLocale } from "@/paths";
 import { Navigation, Clock, Bed } from "lucide-react";
 import type { Business } from "@prisma/client";
+import { StopDrawer } from "./stop-drawer";
+
+interface SelectedStopState {
+  business?: Business | null;
+  title?: string;
+  category?: string;
+  description?: string;
+  lat?: number;
+  lng?: number;
+  stopNumber?: number;
+}
 
 export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = parseLocale(pathname?.split('/')[1]);
+
   const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const { routeData } = useMapboxRoute();
+
+  const [selectedStop, setSelectedStop] = useState<SelectedStopState | null>(null);
 
   // Calculate cascade stop times
   const stopTimes = useMemo(() => {
@@ -39,6 +60,44 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
 
   const waypoints = activeItinerary.waypoints || [];
 
+  const handleSearchNearby = (category: string) => {
+    const activeLat = selectedStop?.business?.lat ?? selectedStop?.lat;
+    const activeLng = selectedStop?.business?.lng ?? selectedStop?.lng;
+    const activeTitle = selectedStop?.business?.name ?? selectedStop?.title;
+
+    if (!activeLat || !activeLng) return;
+
+    useMapUiStore.getState().setRadarState({
+      waypointId: 'itin-anchor',
+      lat: activeLat,
+      lng: activeLng,
+      name: activeTitle || 'Location',
+      category: category === 'dining' ? 'Dining' : category === 'stays' ? 'Stays' : 'Culture'
+    });
+    usePanelStore.getState().setPanelMode('discover');
+    useMapUiStore.getState().setMobileViewMode('map');
+
+    setSelectedStop(null);
+    router.push(explorePath(locale));
+  };
+
+  const handleShowOnMap = () => {
+    const activeLat = selectedStop?.business?.lat ?? selectedStop?.lat;
+    const activeLng = selectedStop?.business?.lng ?? selectedStop?.lng;
+    const activeSlug = selectedStop?.business?.locationSlug || '';
+    const activeId = selectedStop?.business?.id || '';
+
+    if (!activeLat || !activeLng) return;
+
+    setSelectedStop(null);
+    router.push(explorePath(locale, {
+      loc: activeSlug,
+      lat: activeLat,
+      lng: activeLng,
+      id: activeId,
+    }));
+  };
+
   return (
     <div className="relative w-full max-w-5xl mx-auto py-12">
       {/* Central Spine */}
@@ -46,13 +105,29 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
 
       {/* Start Anchor */}
       {activeItinerary.startAnchor && (
-        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-center mb-16 md:mb-24 group">
-          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-slate-900 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white">
+        <div 
+          onClick={() => {
+            if (activeItinerary.startAnchor?.service) {
+              setSelectedStop({
+                business: activeItinerary.startAnchor.service as Business,
+                lat: activeItinerary.startAnchor.lat ?? undefined,
+                lng: activeItinerary.startAnchor.lng ?? undefined,
+                title: activeItinerary.startAnchor.title
+              });
+            }
+          }}
+          className={`relative flex flex-col md:flex-row items-start md:items-center justify-center mb-16 md:mb-24 group ${
+            activeItinerary.startAnchor.service ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+          }`}
+        >
+          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-slate-900 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white transition-transform group-hover:scale-105">
             <Navigation className="w-5 h-5" />
           </div>
           <div className="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right pt-2 md:pt-0">
             <p className="text-xs font-bold tracking-widest text-slate-500 uppercase mb-2">{isEs ? "Punto de Partida" : "Start Point"}</p>
-            <h3 className="text-2xl font-serif font-bold text-slate-900">{activeItinerary.startAnchor.title || "Current Location"}</h3>
+            <h3 className="text-2xl font-serif font-bold text-slate-900 group-hover:text-rose-600 transition-colors">
+              {activeItinerary.startAnchor.title || "Current Location"}
+            </h3>
           </div>
           <div className="hidden md:block md:w-1/2 md:pl-16" />
         </div>
@@ -80,13 +155,30 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
               
               {/* Central Node */}
               <div 
-                className="absolute left-8 md:left-1/2 w-14 h-14 rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white text-white font-serif text-xl font-bold"
+                className="absolute left-8 md:left-1/2 w-14 h-14 rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white text-white font-serif text-xl font-bold cursor-pointer hover:scale-110 active:scale-95 transition-transform"
                 style={{ backgroundColor: stopColor }}
+                onClick={() => {
+                  if (waypoint.service) {
+                    setSelectedStop({
+                      business: waypoint.service as Business,
+                      stopNumber: idx + 1
+                    });
+                  } else {
+                    setSelectedStop({
+                      title: waypoint.title,
+                      category: waypoint.category,
+                      description: "Description not available.",
+                      lat: waypoint.lat ?? undefined,
+                      lng: waypoint.lng ?? undefined,
+                      stopNumber: idx + 1
+                    });
+                  }
+                }}
               >
                 {idx + 1}
               </div>
 
-              {/* Card Container - OPEN STORYBOOK */}
+              {/* Card Container */}
               <div className={`ml-20 md:ml-0 md:w-1/2 pt-2 md:pt-0 ${isEven ? 'md:pl-16' : 'md:pr-16'}`}>
                 <div className="relative">
                   {stopTimes[idx] && (
@@ -106,10 +198,25 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
                         orientation="vertical" 
                         showItineraryAdd={false} 
                         showItineraryEnd={false} 
-                        showActions={true}
+                        showActions={false}
+                        simple={true}
+                        onSelect={() => setSelectedStop({
+                          business: waypoint.service as Business,
+                          stopNumber: idx + 1
+                        })}
                       />
                     ) : (
-                      <div className="p-8">
+                      <div 
+                        className="p-8 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                        onClick={() => setSelectedStop({
+                          title: waypoint.title,
+                          category: waypoint.category,
+                          description: "Description not available.",
+                          lat: waypoint.lat ?? undefined,
+                          lng: waypoint.lng ?? undefined,
+                          stopNumber: idx + 1
+                        })}
+                      >
                         <p className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: stopColor }}>
                           {waypoint.category}
                         </p>
@@ -133,7 +240,21 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
 
       {/* End Anchor */}
       {activeItinerary.endAnchor && (
-        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-center mt-16 md:mt-24 group">
+        <div 
+          onClick={() => {
+            if (activeItinerary.endAnchor?.service) {
+              setSelectedStop({
+                business: activeItinerary.endAnchor.service as Business,
+                lat: activeItinerary.endAnchor.lat ?? undefined,
+                lng: activeItinerary.endAnchor.lng ?? undefined,
+                title: activeItinerary.endAnchor.title
+              });
+            }
+          }}
+          className={`relative flex flex-col md:flex-row items-start md:items-center justify-center mt-16 md:mt-24 group ${
+            activeItinerary.endAnchor.service ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+          }`}
+        >
            {/* Final Travel Time Pill */}
            {(() => {
               const lastLeg = routeData?.legs?.[waypoints.length];
@@ -149,16 +270,37 @@ export function ItineraryTimelineDisplay({ isEs }: { isEs: boolean }) {
               return null;
            })()}
 
-          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-rose-600 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white">
+          <div className="absolute left-8 md:left-1/2 w-12 h-12 bg-rose-600 text-white rounded-full flex items-center justify-center -translate-x-1/2 shadow-lg z-10 border-4 border-white transition-transform group-hover:scale-105">
             <Bed className="w-5 h-5" />
           </div>
           <div className="ml-20 md:ml-0 md:w-1/2 md:pr-16 text-left md:text-right pt-2 md:pt-0">
             <p className="text-xs font-bold tracking-widest text-rose-500 uppercase mb-2">{isEs ? "Punto Final" : "End Point"}</p>
-            <h3 className="text-2xl font-serif font-bold text-slate-900">{activeItinerary.endAnchor.title || "Destination"}</h3>
+            <h3 className="text-2xl font-serif font-bold text-slate-900 group-hover:text-rose-600 transition-colors animate-pulse-once">
+              {activeItinerary.endAnchor.title || "Destination"}
+            </h3>
           </div>
           <div className="hidden md:block md:w-1/2 md:pl-16" />
         </div>
       )}
+
+      {/* Vault Drawer for stop details */}
+      {selectedStop && (
+        <StopDrawer
+          isOpen={!!selectedStop}
+          onClose={() => setSelectedStop(null)}
+          isEs={isEs}
+          business={selectedStop.business}
+          title={selectedStop.title}
+          category={selectedStop.category}
+          description={selectedStop.description}
+          lat={selectedStop.lat}
+          lng={selectedStop.lng}
+          stopNumber={selectedStop.stopNumber}
+          onSearchNearby={handleSearchNearby}
+          onShowOnMap={handleShowOnMap}
+        />
+      )}
     </div>
   );
 }
+

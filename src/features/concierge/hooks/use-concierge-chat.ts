@@ -2,7 +2,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useChat } from '@ai-sdk/react';
-import { useUiStore } from "@/lib/store/use-ui-store";
+import {
+  useSelectionStore,
+  useConciergeUiStore,
+  useInteractionStore,
+} from "@/lib/store/use-ui-store";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { getInitialMessages } from "../constants";
 import { buildChatPayload, formatItineraryState } from "../utils/chat-payload";
@@ -13,14 +17,14 @@ import { useChatToolSync } from "./use-chat-tool-sync";
 import type { UIMessage } from "@ai-sdk/react";
 
 export function useConciergeChat() {
-  const isChatOpen = useUiStore(s => s.isChatOpen);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
-  const travelVibe = useUiStore(s => s.travelVibe);
-  const travelIntensity = useUiStore(s => s.travelIntensity);
-  const targetDate = useUiStore(s => s.targetDate);
-  const setConciergeSendMessage = useUiStore(s => s.setConciergeSendMessage);
-  const selectedId = useUiStore(s => s.selectedId);
-  const interactionHistory = useUiStore(s => s.interactionHistory);
+  const isChatOpen = useConciergeUiStore(s => s.isChatOpen);
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen);
+  const travelVibe = useConciergeUiStore(s => s.travelVibe);
+  const travelIntensity = useConciergeUiStore(s => s.travelIntensity);
+  const targetDate = useConciergeUiStore(s => s.targetDate);
+  const setConciergeSendMessage = useConciergeUiStore(s => s.setConciergeSendMessage);
+  const selectedId = useSelectionStore(s => s.selectedId);
+  const interactionHistory = useInteractionStore(s => s.interactionHistory);
   const activeItinerary = useItineraryStore(s => s.activeTab === 'primary' ? s.activeItinerary : s.secondaryItinerary);
   const pathname = usePathname();
 

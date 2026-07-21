@@ -2,10 +2,9 @@ import { Suspense } from "react"
 import { ExploreView, getBusinesses } from "@/features/discovery"
 import { searchParamsCache } from "@/features/discovery/search-params"
 import { getDictionary, Locale } from "@/lib/dictionaries"
-import { getItinerary } from "@/features/itinerary/queries/get-itinerary"
+import { getItinerary } from "@/features/itinerary"
 import { Loader2 } from "lucide-react"
 import { StoreInitializer } from "@/lib/store/store-initializer"
-import { NuqsAdapter } from "nuqs/adapters/next/app"
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema"
 
 
@@ -63,18 +62,16 @@ export default async function ExplorePage({
           <p className="text-slate-500 font-medium animate-pulse">{dict.explore?.building}</p>
         </div>
       }>
-        <NuqsAdapter>
-          <ExploreView
-            initialBusinesses={data.businesses || []}
-            initialMapBusinesses={data.allBusinesses || []}
-            initialCategoryCounts={data.categoryCounts || {}}
-            initialHasMore={data.hasMore || false}
-            initialQuery={parsedParams.q}
-            initialSelectedId={parsedParams.id}
-            initialItinerary={initialItinerary}
-            dict={dict}
-          />
-        </NuqsAdapter>
+        <ExploreView
+          initialBusinesses={data.businesses || []}
+          initialMapBusinesses={data.allBusinesses || []}
+          initialCategoryCounts={data.categoryCounts || {}}
+          initialHasMore={data.hasMore || false}
+          initialQuery={parsedParams.q}
+          initialSelectedId={parsedParams.id}
+          initialItinerary={initialItinerary}
+          dict={dict}
+        />
       </Suspense>
 
     </div>

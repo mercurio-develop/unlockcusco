@@ -1,4 +1,4 @@
-import { CloudRain, ThermometerSun, Sun, Footprints, Backpack, Shirt, Mountain, BatteryCharging, Check, Droplet } from "lucide-react";
+import { CloudRain, ThermometerSun, Sun, Footprints, Backpack, Shirt, Mountain, BatteryCharging, Check, Droplet, type LucideIcon } from "lucide-react";
 
 export interface MistakeSection {
   title: string;
@@ -14,7 +14,7 @@ export interface AffiliateProduct {
   why: string;
   perf: string;
   bestUse: string;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   link: string;
   image?: string;

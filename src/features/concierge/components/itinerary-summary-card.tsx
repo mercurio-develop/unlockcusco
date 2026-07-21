@@ -1,14 +1,14 @@
 "use client";
 
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
-import { useUiStore } from "@/lib/store/use-ui-store";
+import { usePanelStore, useConciergeUiStore } from "@/lib/store/use-ui-store";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { ArrowRight, Navigation } from "lucide-react";
 
 export function ItinerarySummaryCard({ itinerary }: { itinerary: OptimizedPlan }) {
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen);
 
   const handleOpenPlanner = () => {
     setActiveItinerary(itinerary);

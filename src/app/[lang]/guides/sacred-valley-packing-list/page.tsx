@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { AffiliateProductCard } from "@/features/guides/components/affiliate-product-card";
+import { AffiliateProductCard } from "@/features/guides";
 import { packingListContent } from "@/features/guides/constants/packing-list-content";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {

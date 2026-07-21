@@ -1,14 +1,17 @@
 "use server";
 
 import { resend } from "@/lib/resend";
+import { actionError, actionSuccess, type ActionState } from "@/lib/action-state";
 
-export async function sendContactEmail(formData: FormData) {
+export async function sendContactEmail(
+  formData: FormData
+): Promise<ActionState> {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const message = formData.get("message") as string;
 
   if (!name || !email || !message) {
-    return { error: "All fields are required" };
+    return actionError("All fields are required");
   }
 
   try {
@@ -23,15 +26,15 @@ export async function sendContactEmail(formData: FormData) {
       });
 
       if (error) {
-        return { error: error.message };
+        return actionError(error.message);
       }
     } else {
       console.log("No valid RESEND_API_KEY. Simulated sending contact email:", { name, email, message });
     }
 
-    return { success: true };
+    return actionSuccess();
   } catch (error) {
     console.error("Failed to send contact email:", error);
-    return { error: "Failed to send email. Please try again later." };
+    return actionError("Failed to send email. Please try again later.");
   }
 }

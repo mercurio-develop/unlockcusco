@@ -4,8 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Compass, Map, Sparkles, Bot, Settings2, ChevronDown, HelpCircle, Menu, Home, LayoutGrid, CalendarDays } from "lucide-react"
-import { explorePath } from "@/paths"
-import { useUiStore } from "@/lib/store/use-ui-store"
+import { explorePath, exploreLocationPath, homePath, parseLocale } from "@/paths"
+import { useConciergeUiStore } from "@/lib/store/use-concierge-ui-store"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -31,17 +31,16 @@ export function Navbar({ dict }: {
 }) {
   const pathname = usePathname() || '/'
   const router = useRouter()
-  const isChatOpen = useUiStore(s => s.isChatOpen)
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen)
-  const travelVibe = useUiStore(s => s.travelVibe)
-  const setTravelVibe = useUiStore(s => s.setTravelVibe)
-  const travelIntensity = useUiStore(s => s.travelIntensity)
-  const setTravelIntensity = useUiStore(s => s.setTravelIntensity)
+  const isChatOpen = useConciergeUiStore(s => s.isChatOpen)
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen)
+  const travelVibe = useConciergeUiStore(s => s.travelVibe)
+  const setTravelVibe = useConciergeUiStore(s => s.setTravelVibe)
+  const travelIntensity = useConciergeUiStore(s => s.travelIntensity)
+  const setTravelIntensity = useConciergeUiStore(s => s.setTravelIntensity)
   const [isPrefsOpen, setIsPrefsOpen] = useState(false)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 
-  const locale = pathname.split('/')[1] || 'en'
-  const langPrefix = ['en', 'es'].includes(locale) ? `/${locale}` : '/en'
+  const locale = parseLocale(pathname.split('/')[1])
 
   // Use dict or fallback to English if not provided (e.g. some client route issue)
   const t = dict || {
@@ -97,7 +96,7 @@ export function Navbar({ dict }: {
   }
 
   const navItems = [
-    { href: explorePath(), label: "Explore", icon: Compass },
+    { href: explorePath(locale), label: "Explore", icon: Compass },
   ]
 
   const isProfilePage = pathname?.match(/^\/(en|es)?\/?services\/(agencies|healers)\/[^\/]+$/)
@@ -109,7 +108,7 @@ export function Navbar({ dict }: {
       <div className="w-full max-w-5xl px-4 md:px-6 flex items-center justify-between">
         
         {/* Brand/Logo */}
-        <Link href={langPrefix} className="flex items-center gap-2 group shrink-0">
+        <Link href={homePath(locale)} className="flex items-center gap-2 group shrink-0">
           <Bot className="w-4 h-4 text-rose-600" />
           <span className="text-white font-sans font-bold text-sm tracking-wide uppercase">
             UNLOCK<span className="text-rose-500">CUSCO</span>
@@ -119,8 +118,8 @@ export function Navbar({ dict }: {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => {
-            const fullHref = `${langPrefix}${item.href}`
-            const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
+            const fullHref = item.href
+            const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && !fullHref.endsWith('/'))
             return (
               <Link
                 key={item.href}
@@ -142,7 +141,7 @@ export function Navbar({ dict }: {
             <DropdownMenuContent className="w-48 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[210]">
               {LOCATIONS.map((loc) => (
                 <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
-                  <Link href={`${langPrefix}/explore/${loc.id}`} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
+                  <Link href={exploreLocationPath(locale, loc.id)} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                     {loc.name}
                   </Link>
                 </DropdownMenuItem>
@@ -180,7 +179,7 @@ export function Navbar({ dict }: {
             onClick={() => {
               if (!pathname?.includes("/explore")) {
                 setIsChatOpen(true);
-                router.push(`${langPrefix}/explore`);
+                router.push(explorePath(locale));
               } else {
                 setIsChatOpen(!isChatOpen);
               }
@@ -330,8 +329,8 @@ export function Navbar({ dict }: {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-slate-900/95 backdrop-blur-xl border-slate-800 shadow-xl rounded-2xl p-2 z-[210] mr-4">
                 {navItems.map((item) => {
-                  const fullHref = `${langPrefix}${item.href}`
-                  const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && item.href !== '/')
+                  const fullHref = item.href
+                  const isActive = pathname === fullHref || (pathname?.startsWith(fullHref) && !fullHref.endsWith('/'))
                   return (
                     <DropdownMenuItem key={item.href} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0 mb-1">
                       <Link
@@ -353,7 +352,7 @@ export function Navbar({ dict }: {
                 
                 {LOCATIONS.map((loc) => (
                   <DropdownMenuItem key={loc.id} className="rounded-xl focus:bg-slate-800 cursor-pointer p-0">
-                    <Link href={`${langPrefix}/explore/${loc.id}`} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
+                    <Link href={exploreLocationPath(locale, loc.id)} onClick={() => setIsChatOpen(false)} className="w-full h-full px-3 py-2 text-sm font-medium text-slate-300 hover:text-white">
                       {loc.name}
                     </Link>
                   </DropdownMenuItem>

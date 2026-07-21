@@ -12,7 +12,7 @@ import {
   saveAffiliateLink, 
   deleteAffiliateLink 
 } from "@/features/sandbox/actions/affiliate-actions"
-import type { RideBooking, Driver, RideMessage } from "@prisma/client"
+import type { Prisma, RideBooking, Driver, RideMessage } from "@prisma/client"
 import { 
   Smartphone, 
   Link2, 
@@ -41,7 +41,7 @@ interface BusinessStub {
   category: string
   locationSlug: string
   slug: string
-  affiliateLinks: any // JSON type from Prisma
+  affiliateLinks: Prisma.JsonValue
 }
 
 interface SandboxDashboardProps {
@@ -52,6 +52,23 @@ interface SandboxDashboardProps {
 interface AffiliateLink {
   provider: string
   url: string
+}
+
+function parseAffiliateLinks(value: Prisma.JsonValue | null | undefined): AffiliateLink[] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "provider" in item &&
+      "url" in item &&
+      typeof item.provider === "string" &&
+      typeof item.url === "string"
+    ) {
+      return [{ provider: item.provider, url: item.url }]
+    }
+    return []
+  })
 }
 
 export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardProps) {
@@ -95,8 +112,8 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
 
     return [...filtered].sort((a, b) => {
       if (sortBy === "klook_exists" || sortBy === "klook_missing") {
-        const aLinks = (a.affiliateLinks || []) as AffiliateLink[]
-        const bLinks = (b.affiliateLinks || []) as AffiliateLink[]
+        const aLinks = parseAffiliateLinks(a.affiliateLinks)
+        const bLinks = parseAffiliateLinks(b.affiliateLinks)
         const aHasKlook = aLinks.some(l => l.provider.toLowerCase() === "klook") ? 1 : 0
         const bHasKlook = bLinks.some(l => l.provider.toLowerCase() === "klook") ? 1 : 0
         
@@ -127,7 +144,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
   const handleComplete = async (id: string) => {
     setLoading(true)
     const res = await simulateRideComplete(id)
-    if (res?.error) {
+    if (!res.success) {
       alert("Simulation failed: " + res.error)
     }
     setLoading(false)
@@ -149,17 +166,17 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
     
     setGeneratingStatus(prev => ({ ...prev, [businessId]: false }))
 
-    if (result.error) {
+    if (!result.success) {
       setBusinessErrors(prev => ({ ...prev, [businessId]: result.error || "Generation failed" }))
-    } else if (result.partnerUrl) {
-      setGeneratedShortlinks(prev => ({ ...prev, [businessId]: result.partnerUrl }))
+    } else if (result.data?.partnerUrl) {
+      setGeneratedShortlinks(prev => ({ ...prev, [businessId]: result.data!.partnerUrl }))
     }
   }
 
   const handleSaveLink = (businessId: string, shortlink: string) => {
     startTransition(async () => {
       const res = await saveAffiliateLink(businessId, "Klook", shortlink)
-      if (res.error) {
+      if (!res.success) {
         setBusinessErrors(prev => ({ ...prev, [businessId]: res.error || "Save failed" }))
       } else {
         alert("Affiliate link successfully saved to business detail page!")
@@ -178,7 +195,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
 
     startTransition(async () => {
       const res = await deleteAffiliateLink(businessId, "Klook")
-      if (res.error) {
+      if (!res.success) {
         alert("Failed to delete link: " + res.error)
       } else {
         alert("Affiliate link removed.")
@@ -378,7 +395,9 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
                 <Filter className="w-4.5 h-4.5 text-slate-400 mr-2" />
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) =>
+                    setSortBy(e.target.value as "name" | "klook_exists" | "klook_missing")
+                  }
                   className="w-full bg-transparent text-sm py-1 font-semibold text-slate-600 outline-none"
                 >
                   <option value="klook_exists">Has Klook Link First</option>
@@ -399,7 +418,7 @@ export function SandboxDashboard({ rides, businesses = [] }: SandboxDashboardPro
               </div>
             ) : (
               filteredBusinesses.map(business => {
-                const currentLinks = (business.affiliateLinks || []) as AffiliateLink[]
+                const currentLinks = parseAffiliateLinks(business.affiliateLinks)
                 const klookLink = currentLinks.find(l => l.provider.toLowerCase() === "klook")
                 const searchUrl = getKlookSearchUrl(business.name, business.locationSlug)
                 const isGenerating = generatingStatus[business.id]

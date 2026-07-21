@@ -6,7 +6,7 @@ import { ScrollCarousel } from "@/components/ui/scroll-carousel"
 interface ComparableExperiencesProps {
   experiences: Business[]
   isEs: boolean
-  dict: any
+  dict: Record<string, unknown>
 }
 
 export function ComparableExperiences({ experiences, isEs, dict }: ComparableExperiencesProps) {

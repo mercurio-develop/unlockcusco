@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, MapPin, Sparkles, Utensils, Bed, Leaf, Palette, Compass, Bot, Ticket, Calendar, Droplet, HeartPulse } from "lucide-react"
 import { SACRED_VALLEY_LOCATIONS } from "@/lib/constants"
-import { ScrollCarousel } from "@/components/ui/scroll-carousel"
+import { explorePath, parseLocale } from "@/paths"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function HeroSection({ dict }: { dict: Record<string, any> }) {
@@ -15,20 +15,19 @@ export function HeroSection({ dict }: { dict: Record<string, any> }) {
   const [isFocused, setIsFocused] = useState(false)
   const router = useRouter()
   const pathname = usePathname() || '/'
-  const locale = pathname.split('/')[1] || 'en'
-  const langPrefix = ['en', 'es'].includes(locale) ? `/${locale}` : '/en'
+  const locale = parseLocale(pathname.split('/')[1])
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = (e?: React.FormEvent, directPrompt?: string) => {
     if (e) e.preventDefault()
     const finalQuery = directPrompt || query.trim()
     if (!finalQuery) {
-      router.push(`${langPrefix}/explore`)
+      router.push(explorePath(locale))
       return
     }
     setIsSearching(true)
     setTimeout(() => {
-      router.push(`${langPrefix}/explore?ai_prompt=${encodeURIComponent(finalQuery)}`)
+      router.push(explorePath(locale, { ai_prompt: finalQuery }))
     }, 400)
   }
 

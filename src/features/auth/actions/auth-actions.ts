@@ -4,15 +4,16 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { actionError, type ActionState } from '@/lib/action-state'
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const lang = formData.get('lang') as string || 'en'
   const redirectPath = formData.get('redirect') as string || `/${lang}/dashboard`
 
   if (!email || !password) {
-    return { error: 'Email and password are required' }
+    return actionError('Email and password are required')
   }
 
   const supabase = await createClient()
@@ -23,14 +24,14 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return actionError(error.message)
   }
 
   revalidatePath('/', 'layout')
   redirect(redirectPath)
 }
 
-export async function signup(formData: FormData) {
+export async function signup(formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
@@ -38,7 +39,7 @@ export async function signup(formData: FormData) {
   const lang = formData.get('lang') as string || 'en'
 
   if (!email || !password || !firstName || !lastName) {
-    return { error: 'All fields are required' }
+    return actionError('All fields are required')
   }
 
   const supabase = await createClient()
@@ -55,7 +56,7 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return actionError(error.message)
   }
 
   if (data.user) {

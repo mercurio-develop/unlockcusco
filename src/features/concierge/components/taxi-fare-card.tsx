@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Car, Clock, DollarSign, CreditCard, CheckCircle2, Navigation, Map, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
-import { useUiStore } from "@/lib/store/use-ui-store";
+import { usePanelStore } from "@/lib/store/use-ui-store";
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
 
 interface TaxiFareCardProps {
@@ -29,7 +29,7 @@ export function TaxiFareCard({ data }: TaxiFareCardProps) {
   const [isPaying, setIsPaying] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const setActiveItinerary = useItineraryStore(s => s.setActiveItinerary);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
 
   const handlePay = () => {
     setIsPaying(true);

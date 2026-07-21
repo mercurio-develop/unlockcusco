@@ -1,26 +1,21 @@
-import { create } from 'zustand';
-import { Business } from '@prisma/client';
+/**
+ * @deprecated Prefer focused stores: useSelectionStore, useMapUiStore,
+ * useConciergeUiStore, usePanelStore, useInteractionStore.
+ */
+import { useSelectionStore } from "./use-selection-store";
+import { useMapUiStore } from "./use-map-ui-store";
+import { useConciergeUiStore } from "./use-concierge-ui-store";
+import { usePanelStore } from "./use-panel-store";
+import { useInteractionStore } from "./use-interaction-store";
+import type { InteractionRecord, RadarState } from "./store-types";
 
-export interface InteractionRecord {
-  type: 'view' | 'map_click';
-  id: string;
-  name?: string;
-  timestamp: number;
-}
-
-export interface RadarState {
-  waypointId: string;
-  lat: number;
-  lng: number;
-  name: string;
-  category: string;
-}
+export type { InteractionRecord, RadarState };
 
 export interface UiState {
   isChatOpen: boolean;
   setIsChatOpen: (v: boolean) => void;
-  mobileViewMode: 'list' | 'map';
-  setMobileViewMode: (v: 'list' | 'map') => void;
+  mobileViewMode: "list" | "map";
+  setMobileViewMode: (v: "list" | "map") => void;
   userCoords: { lat: number; lng: number } | null;
   setUserCoords: (v: { lat: number; lng: number } | null) => void;
   travelVibe: string | null;
@@ -30,7 +25,9 @@ export interface UiState {
   targetDate: Date;
   setTargetDate: (v: Date) => void;
   conciergeSendMessage: ((msg: { text: string }) => void) | null;
-  setConciergeSendMessage: (v: ((msg: { text: string }) => void) | null) => void;
+  setConciergeSendMessage: (
+    v: ((msg: { text: string }) => void) | null
+  ) => void;
   panelMode: "discover" | "itinerary";
   setPanelMode: (v: "discover" | "itinerary") => void;
   selectedId: string | null;
@@ -41,60 +38,123 @@ export interface UiState {
   setIsExchangingStart: (v: boolean) => void;
   isExchangingEnd: boolean;
   setIsExchangingEnd: (v: boolean) => void;
-  isAuthRoute?: boolean; // Added to match possible usage if needed, though not in original
   isAddingStop: boolean;
   setIsAddingStop: (v: boolean) => void;
-  mapClickMode: 'start' | 'end' | null;
-  setMapClickMode: (v: 'start' | 'end' | null) => void;
-  mapSearchResults: Business[] | null;
-  setMapSearchResults: (v: Business[] | null) => void;
-  aiPromptToTrigger: string | null;
-  setAiPromptToTrigger: (v: string | null) => void;
+  mapClickMode: "start" | "end" | null;
+  setMapClickMode: (v: "start" | "end" | null) => void;
+  mapSearchResults: import("@prisma/client").Business[] | null;
+  setMapSearchResults: (
+    v: import("@prisma/client").Business[] | null
+  ) => void;
   interactionHistory: InteractionRecord[];
-  addInteraction: (record: Omit<InteractionRecord, 'timestamp'>) => void;
+  addInteraction: (record: Omit<InteractionRecord, "timestamp">) => void;
   radarState: RadarState | null;
   setRadarState: (v: RadarState | null) => void;
 }
 
-export const useUiStore = create<UiState>((set) => ({
-  isChatOpen: true,
-  setIsChatOpen: (v) => set({ isChatOpen: v }),
-  mobileViewMode: 'list',
-  setMobileViewMode: (v) => set({ mobileViewMode: v }),
-  userCoords: null,
-  setUserCoords: (v) => set({ userCoords: v }),
-  travelVibe: null,
-  setTravelVibe: (v) => set({ travelVibe: v }),
-  travelIntensity: null,
-  setTravelIntensity: (v) => set({ travelIntensity: v }),
-  targetDate: new Date(),
-  setTargetDate: (v) => set({ targetDate: v }),
-  conciergeSendMessage: null,
-  setConciergeSendMessage: (v) => set({ conciergeSendMessage: v }),
-  panelMode: 'discover',
-  setPanelMode: (v) => set({ panelMode: v }),
-  selectedId: null,
-  setSelectedId: (v) => set({ selectedId: v }),
-  exchangeTargetId: null,
-  setExchangeTargetId: (v) => set({ exchangeTargetId: v }),
-  isExchangingStart: false,
-  setIsExchangingStart: (v) => set({ isExchangingStart: v }),
-  isExchangingEnd: false,
-  setIsExchangingEnd: (v) => set({ isExchangingEnd: v }),
-  isAddingStop: false,
-  setIsAddingStop: (v) => set({ isAddingStop: v }),
-  mapClickMode: null,
-  setMapClickMode: (v) => set({ mapClickMode: v }),
-  mapSearchResults: null,
-  setMapSearchResults: (v) => set({ mapSearchResults: v }),
-  aiPromptToTrigger: null,
-  setAiPromptToTrigger: (v) => set({ aiPromptToTrigger: v }),
-  interactionHistory: [],
-  addInteraction: (record) => set((state) => {
-    const newRecord = { ...record, timestamp: Date.now() };
-    const history = [newRecord, ...state.interactionHistory].slice(0, 10);
-    return { interactionHistory: history };
-  }),
-  radarState: null,
-  setRadarState: (v) => set({ radarState: v }),
-}));
+type UiSelector<T> = (state: UiState) => T;
+
+function buildUiState(): UiState {
+  const selection = useSelectionStore.getState();
+  const mapUi = useMapUiStore.getState();
+  const concierge = useConciergeUiStore.getState();
+  const panel = usePanelStore.getState();
+  const interaction = useInteractionStore.getState();
+
+  return {
+    isChatOpen: concierge.isChatOpen,
+    setIsChatOpen: concierge.setIsChatOpen,
+    mobileViewMode: mapUi.mobileViewMode,
+    setMobileViewMode: mapUi.setMobileViewMode,
+    userCoords: interaction.userCoords,
+    setUserCoords: interaction.setUserCoords,
+    travelVibe: concierge.travelVibe,
+    setTravelVibe: concierge.setTravelVibe,
+    travelIntensity: concierge.travelIntensity,
+    setTravelIntensity: concierge.setTravelIntensity,
+    targetDate: concierge.targetDate,
+    setTargetDate: concierge.setTargetDate,
+    conciergeSendMessage: concierge.conciergeSendMessage,
+    setConciergeSendMessage: concierge.setConciergeSendMessage,
+    panelMode: panel.panelMode,
+    setPanelMode: panel.setPanelMode,
+    selectedId: selection.selectedId,
+    setSelectedId: selection.setSelectedId,
+    exchangeTargetId: selection.exchangeTargetId,
+    setExchangeTargetId: selection.setExchangeTargetId,
+    isExchangingStart: mapUi.isExchangingStart,
+    setIsExchangingStart: mapUi.setIsExchangingStart,
+    isExchangingEnd: mapUi.isExchangingEnd,
+    setIsExchangingEnd: mapUi.setIsExchangingEnd,
+    isAddingStop: mapUi.isAddingStop,
+    setIsAddingStop: mapUi.setIsAddingStop,
+    mapClickMode: mapUi.mapClickMode,
+    setMapClickMode: mapUi.setMapClickMode,
+    mapSearchResults: mapUi.mapSearchResults,
+    setMapSearchResults: mapUi.setMapSearchResults,
+    interactionHistory: interaction.interactionHistory,
+    addInteraction: interaction.addInteraction,
+    radarState: mapUi.radarState,
+    setRadarState: mapUi.setRadarState,
+  };
+}
+
+export function useUiStore<T>(selector: UiSelector<T>): T {
+  const selection = useSelectionStore();
+  const mapUi = useMapUiStore();
+  const concierge = useConciergeUiStore();
+  const panel = usePanelStore();
+  const interaction = useInteractionStore();
+
+  const state: UiState = {
+    isChatOpen: concierge.isChatOpen,
+    setIsChatOpen: concierge.setIsChatOpen,
+    mobileViewMode: mapUi.mobileViewMode,
+    setMobileViewMode: mapUi.setMobileViewMode,
+    userCoords: interaction.userCoords,
+    setUserCoords: interaction.setUserCoords,
+    travelVibe: concierge.travelVibe,
+    setTravelVibe: concierge.setTravelVibe,
+    travelIntensity: concierge.travelIntensity,
+    setTravelIntensity: concierge.setTravelIntensity,
+    targetDate: concierge.targetDate,
+    setTargetDate: concierge.setTargetDate,
+    conciergeSendMessage: concierge.conciergeSendMessage,
+    setConciergeSendMessage: concierge.setConciergeSendMessage,
+    panelMode: panel.panelMode,
+    setPanelMode: panel.setPanelMode,
+    selectedId: selection.selectedId,
+    setSelectedId: selection.setSelectedId,
+    exchangeTargetId: selection.exchangeTargetId,
+    setExchangeTargetId: selection.setExchangeTargetId,
+    isExchangingStart: mapUi.isExchangingStart,
+    setIsExchangingStart: mapUi.setIsExchangingStart,
+    isExchangingEnd: mapUi.isExchangingEnd,
+    setIsExchangingEnd: mapUi.setIsExchangingEnd,
+    isAddingStop: mapUi.isAddingStop,
+    setIsAddingStop: mapUi.setIsAddingStop,
+    mapClickMode: mapUi.mapClickMode,
+    setMapClickMode: mapUi.setMapClickMode,
+    mapSearchResults: mapUi.mapSearchResults,
+    setMapSearchResults: mapUi.setMapSearchResults,
+    interactionHistory: interaction.interactionHistory,
+    addInteraction: interaction.addInteraction,
+    radarState: mapUi.radarState,
+    setRadarState: mapUi.setRadarState,
+  };
+
+  return selector(state);
+}
+
+useUiStore.getState = buildUiState;
+useUiStore.setState = () => {
+  throw new Error("useUiStore.setState is deprecated; update focused stores directly.");
+};
+
+export {
+  useSelectionStore,
+  useMapUiStore,
+  useConciergeUiStore,
+  usePanelStore,
+  useInteractionStore,
+};

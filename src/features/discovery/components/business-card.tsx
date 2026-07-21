@@ -4,7 +4,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { agencyPath, therapistPath } from "@/paths"
+import { businessPath, explorePath, parseLocale } from "@/paths"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,7 +16,13 @@ import { Star, Zap, Plus, MapPin, MoreHorizontal, ExternalLink, MessageCircle, R
 import { trackWhatsappClick } from "@/features/discovery/actions/track-click"
 import { trackBusinessView } from "@/features/discovery/actions/track-view"
 import { SafeImageWrapper } from "@/components/ui/safe-image"
-import { useUiStore } from "@/lib/store/use-ui-store"
+import {
+  useSelectionStore,
+  useMapUiStore,
+  useConciergeUiStore,
+  usePanelStore,
+  useInteractionStore,
+} from "@/lib/store/use-ui-store"
 import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 
 import { cn } from "@/lib/utils"
@@ -46,6 +52,7 @@ interface BusinessCardProps {
   showDetails?: boolean
   mapTargetId?: string
   intent?: string
+  simple?: boolean
    
   dict?: any
   onDoubleClick?: () => void
@@ -66,6 +73,7 @@ export function BusinessCard({
   showDetails = true,
   mapTargetId,
   intent,
+  simple = false,
   dict,
   onDoubleClick
 }: BusinessCardProps) {
@@ -78,23 +86,23 @@ export function BusinessCard({
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
 
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const exchangeTargetId = useUiStore(s => s.exchangeTargetId);
-  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
-  const isExchangingStart = useUiStore(s => s.isExchangingStart);
-  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
-  const isExchangingEnd = useUiStore(s => s.isExchangingEnd);
-  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
-  const setSelectedId = useUiStore(s => s.setSelectedId);
-  const addInteraction = useUiStore(s => s.addInteraction);
-  const setIsChatOpen = useUiStore(s => s.setIsChatOpen);
-  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const exchangeTargetId = useSelectionStore(s => s.exchangeTargetId);
+  const setExchangeTargetId = useSelectionStore(s => s.setExchangeTargetId);
+  const isExchangingStart = useMapUiStore(s => s.isExchangingStart);
+  const setIsExchangingStart = useMapUiStore(s => s.setIsExchangingStart);
+  const isExchangingEnd = useMapUiStore(s => s.isExchangingEnd);
+  const setIsExchangingEnd = useMapUiStore(s => s.setIsExchangingEnd);
+  const setSelectedId = useSelectionStore(s => s.setSelectedId);
+  const addInteraction = useInteractionStore(s => s.addInteraction);
+  const setIsChatOpen = useConciergeUiStore(s => s.setIsChatOpen);
+  const conciergeSendMessage = useConciergeUiStore(s => s.conciergeSendMessage);
    
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
+  const setMobileViewMode = useMapUiStore(s => s.setMobileViewMode);
   const router = useRouter()
   const pathname = usePathname()
-  
-  const locale = pathname?.split('/')[1] || 'en'
+  const locale = parseLocale(pathname?.split('/')[1])
+  const exploreRoute = explorePath(locale)
   const t = dict?.businessCard || DICTIONARIES.businessCard
 
   const isHorizontal = orientation === "horizontal"
@@ -162,7 +170,7 @@ export function BusinessCard({
             } />
             <DropdownMenuContent>
               {hasProfile && (
-                <DropdownMenuItem onClick={() => router.push(business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug))}>
+                <DropdownMenuItem onClick={() => router.push(businessPath(locale, business.slug))}>
                   <ExternalLink className="w-4 h-4 mr-2" /> View Profile
                 </DropdownMenuItem>
               )}
@@ -243,7 +251,7 @@ export function BusinessCard({
             <div className={cn("flex-1", isHorizontal ? "line-clamp-1" : "line-clamp-1")}>
               {hasProfile ? (
                 <Link 
-                  href={business.category === 'AGENCY' ? agencyPath(business.slug) : therapistPath(business.slug)} 
+                  href={businessPath(locale, business.slug)} 
                   className={cn(
                     "font-bold text-slate-900 leading-tight hover:text-rose-600 transition-colors",
                     isHorizontal ? "text-[12px] sm:text-[14px] lg:text-base" : "text-[13px] sm:text-[14px] lg:text-[15px]"
@@ -292,7 +300,7 @@ export function BusinessCard({
              )}
              </div>          
           {/* Zagat Description */}
-          {bDesc && (
+          {bDesc && !simple && (
             <div className="mt-1" onClick={(e) => {
               if (bDesc && bDesc.length > 100) {
                 e.stopPropagation();
@@ -366,8 +374,8 @@ export function BusinessCard({
                   setStartAnchorLocation(business.lat || 0, business.lng || 0, business.name, business as any);
                   setPanelMode('itinerary' as any);
                   setSelectedId('itin-start');
-                  if (pathname !== '/explore') {
-                    router.push('/explore');
+                  if (pathname !== exploreRoute) {
+                    router.push(exploreRoute);
                   }
                   if (conciergeSendMessage) {
                     conciergeSendMessage({ text: `[INTERNAL] I just set my start location to ${business.name}.` });
@@ -388,8 +396,8 @@ export function BusinessCard({
                   updateEndAnchorLocation(business.lat || 0, business.lng || 0, business.name, business as any);
                   setPanelMode('itinerary' as any);
                   setSelectedId('itin-arrival');
-                  if (pathname !== '/explore') {
-                    router.push('/explore');
+                  if (pathname !== exploreRoute) {
+                    router.push(exploreRoute);
                   }
                   if (conciergeSendMessage) {
                     conciergeSendMessage({ text: `[INTERNAL] I just set my end location to ${business.name}.` });
@@ -506,8 +514,8 @@ export function BusinessCard({
                         if (conciergeSendMessage) {
                           conciergeSendMessage({ text: `[INTERNAL] I just added ${business.name || "this location"} to my itinerary.` });
                         }
-                        if (pathname !== '/explore') {
-                          router.push('/explore');
+                        if (pathname !== exploreRoute) {
+                          router.push(exploreRoute);
                         }
                       }}
                       className={cn(
@@ -531,11 +539,16 @@ export function BusinessCard({
                   addInteraction({ type: 'map_click', id: business.id, name: business.name });
                   setIsChatOpen(false); // Close the chat overlay to show the map
                   setMobileViewMode('map'); // Ensure we are in map view on mobile
-                  if (pathname === `/${locale}/explore`) {
+                  if (pathname === exploreRoute) {
                     setSelectedId(mapTargetId || business.id);
                     window.dispatchEvent(new CustomEvent('switch-to-map-view'));
                   } else {
-                    router.push(`/${locale}/explore?loc=${business.locationSlug || ''}&lat=${business.lat}&lng=${business.lng}&id=${business.id}`);
+                    router.push(explorePath(locale, {
+                      loc: business.locationSlug || '',
+                      lat: business.lat ?? undefined,
+                      lng: business.lng ?? undefined,
+                      id: business.id,
+                    }));
                   }
                 }}
                 className={cn(
@@ -550,7 +563,7 @@ export function BusinessCard({
             
             {showDetails && (
               <Link
-                href={`/${locale}/business/${business.slug}`}
+                href={businessPath(locale, business.slug)}
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
                   "flex flex-1 items-center justify-center bg-transparent text-slate-700 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-medium rounded-full transition-all gap-1.5",

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback, ReactNode } from "react"
-import { useUiStore } from "@/lib/store/use-ui-store"
+import { useMapUiStore } from "@/lib/store/use-ui-store"
 import { cn } from "@/lib/utils"
 import { LayoutGrid, Map as RouteMap} from "lucide-react"
 
@@ -19,8 +19,8 @@ export function ThreePaneLayout({
   className
 }: ThreePaneLayoutProps) {
   const [leftWidth, setLeftWidth] = useState(40)
-  const mobileViewMode = useUiStore(s => s.mobileViewMode)
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode)
+  const mobileViewMode = useMapUiStore(s => s.mobileViewMode)
+  const setMobileViewMode = useMapUiStore(s => s.setMobileViewMode)
   const [isDragging, setIsDragging] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 

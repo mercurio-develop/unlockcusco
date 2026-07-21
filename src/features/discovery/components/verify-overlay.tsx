@@ -4,6 +4,7 @@ import { useState } from "react";
 import { verifyBusinessAction } from "../actions/verify-business";
 import { CheckCircle2, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isActionSuccess } from "@/lib/action-state";
 import { useRouter } from "next/navigation";
 
 interface VerifyOverlayProps {
@@ -25,7 +26,7 @@ export function VerifyOverlay({ businessId, token, lang }: VerifyOverlayProps) {
     const result = await verifyBusinessAction(businessId, token);
     setIsVerifying(false);
 
-    if (result.success) {
+    if (isActionSuccess(result)) {
       setSuccess(true);
       setTimeout(() => {
         setHidden(true);

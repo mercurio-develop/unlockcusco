@@ -1,5 +1,5 @@
 import { useSearchParams } from "next/navigation";
-import { useUiStore } from "@/lib/store/use-ui-store";
+import { useInteractionStore, useConciergeUiStore } from "@/lib/store/use-ui-store";
 import { useItineraryStore } from "@/lib/store/use-itinerary-store";
 import { buildChatPayload } from "../utils/chat-payload";
 import type { OptimizedPlan } from '@/lib/ai/schemas/planner-schema';
@@ -10,12 +10,12 @@ export function useChatLocation(
   targetDate: Date | null,
   activeItinerary: OptimizedPlan | null
 ) {
-  const userCoords = useUiStore(s => s.userCoords);
-  const setUserCoords = useUiStore(s => s.setUserCoords);
+  const userCoords = useInteractionStore(s => s.userCoords);
+  const setUserCoords = useInteractionStore(s => s.setUserCoords);
   const searchParams = useSearchParams();
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
-  const travelVibe = useUiStore(s => s.travelVibe);
-  const travelIntensity = useUiStore(s => s.travelIntensity);
+  const travelVibe = useConciergeUiStore(s => s.travelVibe);
+  const travelIntensity = useConciergeUiStore(s => s.travelIntensity);
 
   const handleShareLocation = () => {
     if (!navigator.geolocation) {

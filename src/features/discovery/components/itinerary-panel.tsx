@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, Component, type ReactNode } from "react";
+import { useState, useEffect, Component, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { useUiStore } from "@/lib/store/use-ui-store"
+import { useQueryStates } from "nuqs";
+import { searchParamsParsers } from "../search-params";
+import {
+  useSelectionStore,
+  useMapUiStore,
+  useConciergeUiStore,
+  usePanelStore,
+} from "@/lib/store/use-ui-store"
 import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 import { useMapboxRoute, type RouteData } from "@/features/discovery/hooks/use-mapbox-route"
 import { useCallback } from "react"
-import { saveItineraryAction } from "@/features/itinerary/actions/save-itinerary";
-import { getItinerary } from "@/features/itinerary/queries/get-itinerary";
+import { saveItineraryAction, getItinerary, StopDrawer, StopDetailContent } from "@/features/itinerary";
+import { explorePath, parseLocale } from "@/paths";
 import type { OptimizedPlan } from "@/lib/ai/schemas/planner-schema";
 import { getCategoryColor } from "@/lib/utils/category-style";
 import { EndPointPicker } from "@/components/ui/end-point-picker";
@@ -104,6 +111,24 @@ export function ItineraryPanel({ dict }: {
   const [saveUrl, setSaveUrl] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
+  const [selectedDrawerStop, setSelectedDrawerStop] = useState<{
+    business?: Business | null;
+    title?: string;
+    category?: string;
+    description?: string;
+    lat?: number;
+    lng?: number;
+    stopNumber?: number;
+  } | null>(null);
+  const [, setParams] = useQueryStates(searchParamsParsers);
+  const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const activeTab = useItineraryStore(s => s.activeTab);
   const setActiveTab = useItineraryStore(s => s.setActiveTab);
@@ -119,18 +144,18 @@ export function ItineraryPanel({ dict }: {
   const transportProfiles = useItineraryStore(s => s.transportProfiles);
   const setLegTransportProfile = useItineraryStore(s => s.setLegTransportProfile);
 
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const selectedId = useUiStore(s => s.selectedId);
-  const setSelectedId = useUiStore(s => s.setSelectedId);
-  const setExchangeTargetId = useUiStore(s => s.setExchangeTargetId);
-  const setIsExchangingStart = useUiStore(s => s.setIsExchangingStart);
-  const setIsExchangingEnd = useUiStore(s => s.setIsExchangingEnd);
-  const setIsAddingStop = useUiStore(s => s.setIsAddingStop);
-  const mapClickMode = useUiStore(s => s.mapClickMode);
-  const setMapClickMode = useUiStore(s => s.setMapClickMode);
-  const setMobileViewMode = useUiStore(s => s.setMobileViewMode);
-  const setRadarState = useUiStore(s => s.setRadarState);
-  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const selectedId = useSelectionStore(s => s.selectedId);
+  const setSelectedId = useSelectionStore(s => s.setSelectedId);
+  const setExchangeTargetId = useSelectionStore(s => s.setExchangeTargetId);
+  const setIsExchangingStart = useMapUiStore(s => s.setIsExchangingStart);
+  const setIsExchangingEnd = useMapUiStore(s => s.setIsExchangingEnd);
+  const setIsAddingStop = useMapUiStore(s => s.setIsAddingStop);
+  const mapClickMode = useMapUiStore(s => s.mapClickMode);
+  const setMapClickMode = useMapUiStore(s => s.setMapClickMode);
+  const setMobileViewMode = useMapUiStore(s => s.setMobileViewMode);
+  const setRadarState = useMapUiStore(s => s.setRadarState);
+  const conciergeSendMessage = useConciergeUiStore(s => s.conciergeSendMessage);
 
   const { routeData } = useMapboxRoute();
 
@@ -166,9 +191,7 @@ export function ItineraryPanel({ dict }: {
         setActiveTab('primary');
         setActiveItinerary(loadedItinerary);
 
-        const url = new URL(window.location.href);
-        url.searchParams.set('trip', tripId);
-        window.history.pushState({}, '', url.toString());
+        setParams({ trip: tripId }, { shallow: true, scroll: false });
       }
     } catch (error) {
       console.error("Failed to load quick start trip:", error);
@@ -189,19 +212,18 @@ export function ItineraryPanel({ dict }: {
 
     try {
       const data = await saveItineraryAction(stateToSave);
-      if (data.success && data.shortId) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('trip', data.shortId);
-        window.history.replaceState({}, '', url.toString());
-        return url.toString();
+      if (data.success && data.data?.shortId) {
+        setParams({ trip: data.data.shortId }, { shallow: true, scroll: false });
+        return explorePath(parseLocale(pathname?.split("/")[1]), {
+          trip: data.data.shortId,
+        });
       }
     } catch (e) {
       console.error("Failed to save itinerary:", e);
     }
     return null;
-  }, []);
+  }, [pathname, setParams]);
 
-  const pathname = usePathname();
   const isEs = pathname?.split('/')[1] === 'es';
 
   const t = (dict?.itineraryPanel || (isEs ? DICTIONARIES.itineraryPanelEs : DICTIONARIES.itineraryPanel));
@@ -333,7 +355,46 @@ export function ItineraryPanel({ dict }: {
 
   return (
     <ItineraryErrorBoundary>
-    <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
+    <div className="relative flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
+      {/* Desktop Detail Panel overlay */}
+      {!isMobile && selectedDrawerStop && (
+        <div className="absolute inset-0 z-50 bg-white flex flex-col h-full animate-in fade-in slide-in-from-right duration-200">
+          <StopDetailContent
+            isEs={isEs}
+            onClose={() => setSelectedDrawerStop(null)}
+            business={selectedDrawerStop.business}
+            title={selectedDrawerStop.title}
+            category={selectedDrawerStop.category}
+            description={selectedDrawerStop.description}
+            lat={selectedDrawerStop.lat}
+            lng={selectedDrawerStop.lng}
+            stopNumber={selectedDrawerStop.stopNumber}
+            onSearchNearby={(category) => {
+              handleSearchNearby(
+                { stopPropagation: () => {} } as any,
+                category,
+                selectedDrawerStop.lat ?? selectedDrawerStop.business?.lat ?? undefined,
+                selectedDrawerStop.lng ?? selectedDrawerStop.business?.lng ?? undefined,
+                selectedDrawerStop.title ?? selectedDrawerStop.business?.name ?? undefined,
+                selectedDrawerStop.business?.id ?? undefined
+              );
+              setSelectedDrawerStop(null);
+            }}
+            onShowOnMap={() => {
+              const activeId = selectedDrawerStop.business?.id || '';
+              const activeLat = selectedDrawerStop.business?.lat ?? selectedDrawerStop.lat;
+              const activeLng = selectedDrawerStop.business?.lng ?? selectedDrawerStop.lng;
+              if (activeId && activeLat && activeLng) {
+                setSelectedId(activeId);
+                window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+                setMobileViewMode('map');
+              }
+              setSelectedDrawerStop(null);
+            }}
+            isInsideDrawer={false}
+          />
+        </div>
+      )}
       <div className="px-6 pt-6 pb-4 bg-white border-b border-gray-200 shrink-0 flex flex-col gap-3">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0 pr-4">
@@ -405,9 +466,20 @@ export function ItineraryPanel({ dict }: {
         
         {/* Start Anchor */}
         <div 
-          onClick={() => setSelectedId('itin-start')}
-          className={`flex flex-col rounded-2xl border-l-4 border border-l-slate-900 transition-all ${selectedId === 'itin-start' ? 'bg-white shadow-lg ring-1 ring-slate-900 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
-        >          <div className="flex gap-4 p-4">
+          onClick={() => {
+            setSelectedId('itin-start');
+            if (activeItinerary.startAnchor && (activeItinerary.startAnchor.service || (activeItinerary.startAnchor.lat && activeItinerary.startAnchor.lng))) {
+              setSelectedDrawerStop({
+                business: activeItinerary.startAnchor.service as Business,
+                title: activeItinerary.startAnchor.title,
+                lat: activeItinerary.startAnchor.lat ?? undefined,
+                lng: activeItinerary.startAnchor.lng ?? undefined
+              });
+            }
+          }}
+          className={`flex flex-col rounded-2xl border-l-4 border border-l-slate-900 transition-all cursor-pointer ${selectedId === 'itin-start' ? 'bg-white shadow-lg ring-1 ring-slate-900 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
+        >
+          <div className="flex gap-4 p-4">
             <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-inner">
               {activeItinerary.startAnchor?.type === 'AIRPORT' ? <Plane className="w-4 h-4" /> : <Navigation className="w-4 h-4" />}
             </div>
@@ -449,7 +521,7 @@ export function ItineraryPanel({ dict }: {
                     setMobileViewMode('map');
                     window.dispatchEvent(new CustomEvent('drawer-snap-half'));
                   }}
-                  className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  className="shrink-0 h-8 px-2.5 sm:px-3 rounded-full flex items-center gap-1.5 transition-colors text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
                   title="Set marker on map"
                 >
                   <MapPin className="w-3.5 h-3.5" />
@@ -478,48 +550,6 @@ export function ItineraryPanel({ dict }: {
               {activeItinerary.startAnchor?.time && <p className="text-[10px] font-bold text-slate-500 mt-1">⏱ Departure {activeItinerary.startAnchor.time}</p>}
             </div>
           </div>
-          {/* Expandable detail — inside border container, mirrors waypoint card */}
-          <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-start' && (activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
-            <div className="overflow-hidden">
-              {(activeItinerary.startAnchor?.lat && activeItinerary.startAnchor?.lng) && (
-                <div className="space-y-4 pt-4">
-                  {(activeItinerary.startAnchor.service as Business) && (
-                    <BusinessCard business={(activeItinerary.startAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
-                  )}
-                  
-                  <div className="space-y-2 pt-2">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'dining', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
-                      >
-                        <Utensils className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.eat} Nearby</span>
-                        <span className="sm:hidden">{t.eat}</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'stays', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
-                      >
-                        <Bed className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.stay} Nearby</span>
-                        <span className="sm:hidden">{t.stay}</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'adventure', activeItinerary.startAnchor?.lat, activeItinerary.startAnchor?.lng, activeItinerary.startAnchor?.title || "Start Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
-                      >
-                        <Mountain className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.do} Nearby</span>
-                        <span className="sm:hidden">{t.do}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Waypoints */}
@@ -534,15 +564,38 @@ export function ItineraryPanel({ dict }: {
               >
                 <div className="flex gap-3 items-start">
                   <div
-                    className="w-10 h-10 rounded-full text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md"
+                    className="w-10 h-10 rounded-full text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md cursor-pointer hover:scale-105 transition-transform"
                     style={{ backgroundColor: getCategoryColor(waypoint.category) }}
+                    onClick={() => {
+                      setSelectedId(waypoint.id);
+                      setSelectedDrawerStop({
+                        business: waypoint.service as Business,
+                        title: waypoint.title,
+                        category: waypoint.category,
+                        description: "Description not available.",
+                        lat: waypoint.lat ?? undefined,
+                        lng: waypoint.lng ?? undefined,
+                        stopNumber: idx + 1
+                      });
+                    }}
                   >
                     {idx + 1}
                   </div>
                   
                   <div 
                     className="flex-1 cursor-pointer select-none"
-                    onClick={() => setSelectedId(selectedId === waypoint.id ? null : waypoint.id)}
+                    onClick={() => {
+                      setSelectedId(waypoint.id);
+                      setSelectedDrawerStop({
+                        business: waypoint.service as Business,
+                        title: waypoint.title,
+                        category: waypoint.category,
+                        description: "Description not available.",
+                        lat: waypoint.lat ?? undefined,
+                        lng: waypoint.lng ?? undefined,
+                        stopNumber: idx + 1
+                      });
+                    }}
                   >
                     <div className="flex justify-between items-start">
                       <p className="text-[10px] font-bold tracking-widest text-rose-500 uppercase">{waypoint.category}</p>
@@ -694,55 +747,23 @@ export function ItineraryPanel({ dict }: {
                   </div>
 
                   <button
-                    onClick={(e) => { e.stopPropagation(); setSelectedId(selectedId === waypoint.id ? null : waypoint.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedId(waypoint.id);
+                      setSelectedDrawerStop({
+                        business: waypoint.service as Business,
+                        title: waypoint.title,
+                        category: waypoint.category,
+                        description: "Description not available.",
+                        lat: waypoint.lat ?? undefined,
+                        lng: waypoint.lng ?? undefined,
+                        stopNumber: idx + 1
+                      });
+                    }}
                     className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors ml-1 rounded-full hover:bg-slate-50"
                   >
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${selectedId === waypoint.id ? 'rotate-180' : ''}`} />
+                    <ChevronDown className="w-5 h-5 -rotate-90" />
                   </button>
-                </div>
-
-                {/* Expandable Section with CSS Grid Transition */}
-                <div 
-                  className={`grid transition-all duration-300 ease-in-out ${selectedId === waypoint.id ? "grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}
-                >
-                  <div className="overflow-hidden">
-                    {(waypoint.service as Business | null) && (
-                      <div className="space-y-4">
-                        <BusinessCard business={(waypoint.service as Business)} mapTargetId={waypoint.id} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
-                        
-                        <div className="space-y-2 pt-2">
-                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
-                          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                            <button
-                              onClick={(e) => handleSearchNearby(e, 'dining', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
-                            >
-                              <Utensils className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">{t.eat} Nearby</span>
-                              <span className="sm:hidden">{t.eat}</span>
-                            </button>
-                            <button
-                              onClick={(e) => handleSearchNearby(e, 'stays', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
-                            >
-                              <Bed className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">{t.stay} Nearby</span>
-                              <span className="sm:hidden">{t.stay}</span>
-                            </button>
-                            <button
-                              onClick={(e) => handleSearchNearby(e, 'adventure', waypoint.lat, waypoint.lng, waypoint.title, waypoint.id)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
-                            >
-                              <Mountain className="w-3.5 h-3.5" />
-                              <span className="hidden sm:inline">{t.do} Nearby</span>
-                              <span className="sm:hidden">{t.do}</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                 </div>
               </div>
             </div>
@@ -763,8 +784,18 @@ export function ItineraryPanel({ dict }: {
         <div className="relative">
           <TransitEdge index={(activeItinerary.waypoints || []).length} routeData={routeData} transportProfile={transportProfiles[(activeItinerary.waypoints || []).length] || 'driving'} setTransportProfile={setLegTransportProfile} t={t} />
           <div 
-            onClick={() => setSelectedId('itin-arrival')}
-            className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all ${selectedId === 'itin-arrival' ? 'bg-white shadow-lg ring-1 ring-rose-500 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
+            onClick={() => {
+              setSelectedId('itin-arrival');
+              if (activeItinerary.endAnchor && (activeItinerary.endAnchor.service || (activeItinerary.endAnchor.lat && activeItinerary.endAnchor.lng))) {
+                setSelectedDrawerStop({
+                  business: activeItinerary.endAnchor.service as Business,
+                  title: activeItinerary.endAnchor.title,
+                  lat: activeItinerary.endAnchor.lat ?? undefined,
+                  lng: activeItinerary.endAnchor.lng ?? undefined
+                });
+              }
+            }}
+            className={`flex flex-col rounded-2xl border-l-4 border border-l-rose-600 transition-all cursor-pointer ${selectedId === 'itin-arrival' ? 'bg-white shadow-lg ring-1 ring-rose-500 scale-[1.01]' : 'bg-white shadow-md hover:shadow-xl border-slate-200/60'}`}
           >
             <div className="flex gap-4 p-4">
               <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-inner">
@@ -864,47 +895,6 @@ export function ItineraryPanel({ dict }: {
                 })()}
               </div>
             </div>
-            {/* Expandable detail */}
-            <div className={`grid transition-all duration-300 ease-in-out ${selectedId === 'itin-arrival' && (activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) ? "grid-rows-[1fr] opacity-100 px-4 pb-4 pt-0 border-t border-gray-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="overflow-hidden">
-                {(activeItinerary.endAnchor?.lat && activeItinerary.endAnchor?.lng) && (
-                  <div className="space-y-4 pt-4">
-                    {(activeItinerary.endAnchor.service as Business) && (
-                      <BusinessCard business={(activeItinerary.endAnchor.service as Business)} orientation="horizontal" showItineraryAdd={false} showItineraryEnd={false} dict={dict} />
-                    )}
-                    <div className="space-y-2 pt-2">
-                      <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{t.searchNearby}</p>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'dining', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-orange-100 whitespace-nowrap"
-                      >
-                        <Utensils className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.eat} Nearby</span>
-                        <span className="sm:hidden">{t.eat}</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'stays', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap"
-                      >
-                        <Bed className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.stay} Nearby</span>
-                        <span className="sm:hidden">{t.stay}</span>
-                      </button>
-                      <button
-                        onClick={(e) => handleSearchNearby(e, 'adventure', activeItinerary.endAnchor?.lat, activeItinerary.endAnchor?.lng, activeItinerary.endAnchor?.title || "End Point")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors text-[10px] font-bold uppercase tracking-wider border border-emerald-100 whitespace-nowrap"
-                      >
-                        <Mountain className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{t.do} Nearby</span>
-                        <span className="sm:hidden">{t.do}</span>
-                      </button>
-                    </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -990,9 +980,7 @@ export function ItineraryPanel({ dict }: {
               <Button
                 onClick={() => {
                   setActiveItinerary(null);
-                  const url = new URL(window.location.href);
-                  url.searchParams.delete('trip');
-                  window.history.replaceState({}, '', url.toString());
+                  setParams({ trip: null }, { shallow: true, scroll: false });
                   setIsClearModalOpen(false);
                 }}
                 className="bg-rose-600 text-white hover:bg-rose-700 text-sm font-medium w-full sm:w-auto h-11 rounded-xl"
@@ -1003,6 +991,44 @@ export function ItineraryPanel({ dict }: {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Vault Drawer for stop details on mobile */}
+      {isMobile && selectedDrawerStop && (
+        <StopDrawer
+          isOpen={!!selectedDrawerStop}
+          onClose={() => setSelectedDrawerStop(null)}
+          isEs={isEs}
+          business={selectedDrawerStop.business}
+          title={selectedDrawerStop.title}
+          category={selectedDrawerStop.category}
+          description={selectedDrawerStop.description}
+          lat={selectedDrawerStop.lat}
+          lng={selectedDrawerStop.lng}
+          stopNumber={selectedDrawerStop.stopNumber}
+          onSearchNearby={(category) => {
+            handleSearchNearby(
+              { stopPropagation: () => {} } as any,
+              category,
+              selectedDrawerStop.lat ?? selectedDrawerStop.business?.lat ?? undefined,
+              selectedDrawerStop.lng ?? selectedDrawerStop.business?.lng ?? undefined,
+              selectedDrawerStop.title ?? selectedDrawerStop.business?.name ?? undefined,
+              selectedDrawerStop.business?.id ?? undefined
+            );
+            setSelectedDrawerStop(null);
+          }}
+          onShowOnMap={() => {
+            const activeId = selectedDrawerStop.business?.id || '';
+            const activeLat = selectedDrawerStop.business?.lat ?? selectedDrawerStop.lat;
+            const activeLng = selectedDrawerStop.business?.lng ?? selectedDrawerStop.lng;
+            if (activeId && activeLat && activeLng) {
+              setSelectedId(activeId);
+              window.dispatchEvent(new CustomEvent('switch-to-map-view'));
+              setMobileViewMode('map');
+            }
+            setSelectedDrawerStop(null);
+          }}
+        />
+      )}
     </ItineraryErrorBoundary>
   );
 }

@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config/site'
 
-import { BusinessList } from "@/features/discovery/components/business-list"
+import { BusinessList } from "@/features/discovery"
 import { getCategoryData } from '@/features/discovery/constants'
 import { getDictionary, Locale } from '@/lib/dictionaries'
 

@@ -2,33 +2,36 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidateTag } from "next/cache";
+import { actionError, actionSuccess, type ActionState } from "@/lib/action-state";
 
-export async function legacyVerifyBusinessAction(businessId: string) {
+export async function legacyVerifyBusinessAction(
+  businessId: string
+): Promise<ActionState<{ slug: string }>> {
   if (!businessId) {
-    return { success: false, error: "Missing required parameters" };
+    return actionError("Missing required parameters");
   }
 
   try {
     const business = await prisma.business.findUnique({
-      where: { id: businessId }
+      where: { id: businessId },
     });
 
     if (!business) {
-      return { success: false, error: "Business not found" };
+      return actionError("Business not found");
     }
 
     await prisma.business.update({
       where: { id: businessId },
       data: {
         isClaimed: true,
-        verificationToken: null // Clear any pending token just in case
-      }
+        verificationToken: null,
+      },
     });
 
     ;(revalidateTag as (tag: string) => void)("businesses");
-    return { success: true, slug: business.slug };
+    return actionSuccess({ slug: business.slug });
   } catch (error) {
     console.error("Error verifying business:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return actionError("An unexpected error occurred");
   }
 }

@@ -23,7 +23,7 @@ export default function NotFound() {
         </div>
 
         <div className="pt-6">
-          <Link href={explorePath()}>
+          <Link href={explorePath('en')}>
             <Button size="lg" className="w-full sm:w-auto gap-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full">
               <Compass className="w-4 h-4" />
               Return to Explore

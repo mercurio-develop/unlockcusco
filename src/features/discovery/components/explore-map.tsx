@@ -3,14 +3,22 @@
 
 import { useEffect, useRef, useMemo, useState, useCallback } from "react"
 import { createPortal } from "react-dom"
-import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
+import { useQueryStates } from "nuqs"
+import { searchParamsParsers } from "../search-params"
+import { explorePath, businessPath, parseLocale } from "@/paths"
 import { CATEGORIES, LOCATIONS, DICTIONARIES, TOWN_COORDS } from "../constants"
 import Map, { Marker, Popup, Source, Layer, NavigationControl, GeolocateControl, useControl } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { Star, Layers, Navigation, Utensils, Sprout, Mountain as MountainIcon, Bed, Landmark, Ticket, MapPin, Plane, Car, Clipboard, Scissors, User, Sparkles, Clock, X, ChevronDown, ChevronUp, Check, Bot } from "lucide-react"
 import type { Business } from "@prisma/client"
-import { useUiStore } from "@/lib/store/use-ui-store"
+import {
+  useSelectionStore,
+  useMapUiStore,
+  useConciergeUiStore,
+  usePanelStore,
+} from "@/lib/store/use-ui-store"
 import { useItineraryStore } from "@/lib/store/use-itinerary-store"
 import { useMapboxRoute } from "@/features/discovery/hooks/use-mapbox-route"
 
@@ -273,11 +281,11 @@ interface ExploreMapProps {
 export default function ExploreMap({ businesses, selectedId, onSelectBusiness, mapClickMode, onMapAnchorPick, categoryCounts = {}, currentLoc = "", onBoundsChange, isDefaultView = false, dict }: ExploreMapProps) {  const mapRef = useRef<MapRef>(null)
   const router = useRouter()
   const pathname = usePathname()
-  const locale = pathname?.split('/')[1] || 'en'
-  const searchParams = useSearchParams()
+  const lang = parseLocale(pathname?.split('/')[1])
+  const [params, setParams] = useQueryStates(searchParamsParsers)
   const [popupBusiness, setPopupBusiness] = useState<PopupData | null>(null)
   const [mapMode, setMapMode] = useState<string>("satellite")
-  const currentCatStr = searchParams.get("cat") || ""
+  const currentCatStr = params.cat || ""
   const currentCats = useMemo(() => currentCatStr ? currentCatStr.split(',').filter(Boolean) : [], [currentCatStr])
   const selectedMapCategory = currentCats.length > 0 ? (currentCats.length === 1 ? currentCats[0].toUpperCase() : `${currentCats.length} CATEGORIES`) : "ALL"
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null)
@@ -286,7 +294,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   const [isCategoryExpanded, setIsCategoryExpanded] = useState(false)
   const [isMapLoaded, setIsMapLoaded] = useState(false)
-  const mobileViewMode = useUiStore(s => s.mobileViewMode);
+  const mobileViewMode = useMapUiStore(s => s.mobileViewMode);
 
   const t = dict?.exploreMap || DICTIONARIES.exploreMap
 
@@ -301,18 +309,18 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const setStartAnchorLocation = useItineraryStore(s => s.setStartAnchorLocation);
   const updateEndAnchorLocation = useItineraryStore(s => s.updateEndAnchorLocation);
 
-  const mapSearchResults = useUiStore(s => s.mapSearchResults);
-  const setMapSearchResults = useUiStore(s => s.setMapSearchResults);
-  const setMapClickModeGlobal = useUiStore(s => s.setMapClickMode);
-  const isChatOpen = useUiStore(s => s.isChatOpen);
-  const conciergeSendMessage = useUiStore(s => s.conciergeSendMessage);
+  const mapSearchResults = useMapUiStore(s => s.mapSearchResults);
+  const setMapSearchResults = useMapUiStore(s => s.setMapSearchResults);
+  const setMapClickModeGlobal = useMapUiStore(s => s.setMapClickMode);
+  const isChatOpen = useConciergeUiStore(s => s.isChatOpen);
+  const conciergeSendMessage = useConciergeUiStore(s => s.conciergeSendMessage);
 
   const { routeData } = useMapboxRoute();
-  const panelMode = useUiStore(s => s.panelMode);
-  const setPanelMode = useUiStore(s => s.setPanelMode);
-  const radarState = useUiStore(s => s.radarState);
-  const setRadarState = useUiStore(s => s.setRadarState);
-  const setSelectedId = useUiStore(s => s.setSelectedId);
+  const panelMode = usePanelStore(s => s.panelMode);
+  const setPanelMode = usePanelStore(s => s.setPanelMode);
+  const radarState = useMapUiStore(s => s.radarState);
+  const setRadarState = useMapUiStore(s => s.setRadarState);
+  const setSelectedId = useSelectionStore(s => s.setSelectedId);
 
   // FlyTo when start anchor location changes
   const startLat = activeItinerary?.startAnchor?.lat
@@ -468,8 +476,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     return [];
   }, [activeItinerary, panelMode]);
 
-  const latParam = searchParams.get('lat');
-  const lngParam = searchParams.get('lng');
+  const latParam = params.lat;
+  const lngParam = params.lng;
 
   useEffect(() => {
     if (!selectedId) { setPopupBusiness(null); return; }
@@ -509,8 +517,8 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
     } 
 
     if (!targetLat && latParam && lngParam && selectedId) {
-      targetLat = parseFloat(latParam);
-      targetLng = parseFloat(lngParam);
+      targetLat = latParam;
+      targetLng = lngParam;
       targetBusiness = { id: selectedId, name: "Selected Location", lat: targetLat, lng: targetLng, isClusterPopup: false };
     }
     
@@ -593,21 +601,21 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   const businessSignature = validBusinesses.map(b => b.id).join(',');
   const searchSignature = mapSearchResults ? mapSearchResults.map(b => b.id).join(',') : '';
-  const [prevSignature, setPrevSignature] = useState<string | null>(null);
-  const [prevSearchSignature, setPrevSearchSignature] = useState<string | null>(null);
-  const [prevMobileViewMode, setPrevMobileViewMode] = useState<string | null>(null);
+  const prevSignatureRef = useRef<string | null>(null);
+  const prevSearchSignatureRef = useRef<string | null>(null);
+  const prevMobileViewModeRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (validBusinesses.length === 0 || !mapRef.current) return;
-    const shouldRefit = businessSignature !== prevSignature;
-    const searchRefit = searchSignature !== prevSearchSignature;
-    const viewModeChangedToMap = mobileViewMode === 'map' && prevMobileViewMode !== 'map';
+    const shouldRefit = businessSignature !== prevSignatureRef.current;
+    const searchRefit = searchSignature !== prevSearchSignatureRef.current;
+    const viewModeChangedToMap = mobileViewMode === 'map' && prevMobileViewModeRef.current !== 'map';
     
     // Always run the bounds check if mobile view mode changes to 'map'
     if (shouldRefit || searchRefit || viewModeChangedToMap) {
-      if (shouldRefit) setPrevSignature(businessSignature);
-      if (searchRefit) setPrevSearchSignature(searchSignature);
-      if (viewModeChangedToMap) setPrevMobileViewMode(mobileViewMode);
+      if (shouldRefit) prevSignatureRef.current = businessSignature;
+      if (searchRefit) prevSearchSignatureRef.current = searchSignature;
+      if (viewModeChangedToMap) prevMobileViewModeRef.current = mobileViewMode;
       
       if (isDefaultView && !selectedId && !radarState && (!mapSearchResults || mapSearchResults.length === 0)) return;
       if (selectedId) return;
@@ -670,7 +678,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
       return () => clearTimeout(timer);
     }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validBusinesses, businessSignature, prevSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode, radarState, mapSearchResults]);
+  }, [validBusinesses, businessSignature, selectedId, isDefaultView, isMapLoaded, mobileViewMode, radarState, mapSearchResults]);
 
   // Explicitly fit bounds for the active itinerary when panel mode is 'itinerary'
   useEffect(() => {
@@ -718,10 +726,15 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
 
   const navigateLocation = (locValue: string) => {
     if (setMapSearchResults) setMapSearchResults(null);
-    const params = new URLSearchParams(searchParams.toString());
-    if (locValue) params.set("loc", locValue); else params.delete("loc");
-    params.delete("lat"); params.delete("lng"); params.delete("id");
-    router.push(`/explore?${params.toString()}`);
+    setParams(
+      {
+        loc: locValue || null,
+        lat: null,
+        lng: null,
+        id: null,
+      },
+      { shallow: false }
+    );
   }
 
   const availableMapCategories = useMemo(() => {
@@ -736,16 +749,24 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
   const toggleCategory = (catValue: string, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (setMapSearchResults) setMapSearchResults(null);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("lat"); params.delete("lng"); params.delete("id");
-    if (catValue === "ALL") { params.delete("cat"); } else {
-       const newCats = [...currentCats];
-       const normalized = catValue.charAt(0).toUpperCase() + catValue.slice(1).toLowerCase();
-       const existingIndex = newCats.findIndex(c => c.toLowerCase() === normalized.toLowerCase());
-       if (existingIndex >= 0) newCats.splice(existingIndex, 1); else newCats.push(normalized);
-       if (newCats.length > 0) params.set("cat", newCats.join(',')); else params.delete("cat");
+    if (catValue === "ALL") {
+      setParams({ cat: null, lat: null, lng: null, id: null }, { shallow: false });
+      return;
     }
-    router.push(`/explore?${params.toString()}`);
+    const newCats = [...currentCats];
+    const normalized = catValue.charAt(0).toUpperCase() + catValue.slice(1).toLowerCase();
+    const existingIndex = newCats.findIndex(c => c.toLowerCase() === normalized.toLowerCase());
+    if (existingIndex >= 0) newCats.splice(existingIndex, 1);
+    else newCats.push(normalized);
+    setParams(
+      {
+        cat: newCats.length > 0 ? newCats.join(",") : null,
+        lat: null,
+        lng: null,
+        id: null,
+      },
+      { shallow: false }
+    );
   }
 
   return (
@@ -867,7 +888,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               <Bot className="w-3 h-3 text-white" />
             </div>
             <span className="text-[11px] font-bold text-indigo-900 whitespace-nowrap overflow-hidden text-ellipsis">
-              {locale === 'es' ? 'Selección del Concierge' : 'Concierge Picks'}
+              {lang === 'es' ? 'Selección del Concierge' : 'Concierge Picks'}
             </span>
             <button
               onClick={(e) => {
@@ -904,7 +925,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               >
                 {(() => {
                   const c = radarState.category.toUpperCase();
-                  if (locale === 'es') {
+                  if (lang === 'es') {
                     if (c === 'STAYS') return 'Alojamientos';
                     if (c === 'DINING') return 'Restaurantes';
                     if (c === 'CULTURE') return 'Cultura';
@@ -1112,7 +1133,7 @@ export default function ExploreMap({ businesses, selectedId, onSelectBusiness, m
               return (
                 <div className="w-[320px] relative" onClick={e => e.stopPropagation()}>
                   <button onClick={() => { setPopupBusiness(null); onSelectBusiness(null); }} className="absolute top-2 right-2 z-50 text-slate-400 hover:text-slate-700 bg-white/80 rounded-full p-1.5 shadow-sm backdrop-blur-sm"><X className="w-4 h-4"/></button>
-                  <BusinessCard business={popupBusiness as Business} orientation="vertical" showActions={panelMode !== "itinerary"} showItineraryEnd={panelMode !== "discover"} onSelect={() => { const slug = (popupBusiness as Business).slug; if (slug) router.push(`/${locale}/business/${slug}`); }} onDoubleClick={() => { const slug = (popupBusiness as Business).slug; if (slug) router.push(`/${locale}/business/${slug}`); }} showMap={false} dict={dict} />
+                  <BusinessCard business={popupBusiness as Business} orientation="vertical" showActions={panelMode !== "itinerary"} showItineraryEnd={panelMode !== "discover"} onSelect={() => { const slug = (popupBusiness as Business).slug; if (slug) router.push(businessPath(lang, slug)); }} onDoubleClick={() => { const slug = (popupBusiness as Business).slug; if (slug) router.push(businessPath(lang, slug)); }} showMap={false} dict={dict} />
                 </div>
               );
             })()}

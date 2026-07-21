@@ -5,6 +5,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { actionError, actionSuccess, type ActionState } from "@/lib/action-state";
 
 const ItineraryStateSchema = z.any().refine(
   (val) => {
@@ -33,20 +34,22 @@ function generateShortId(length = 6) {
   return result;
 }
 
-export async function saveItineraryAction(state: unknown) {
+export async function saveItineraryAction(
+  state: unknown
+): Promise<ActionState<{ shortId: string }>> {
   try {
     if (ratelimit) {
       const headersList = await headers();
       const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
       const { success } = await ratelimit.limit(ip);
       if (!success) {
-        return { error: "Too many requests. Please try again in a minute." };
+        return actionError("Too many requests. Please try again in a minute.");
       }
     }
 
     const validationResult = ItineraryStateSchema.safeParse(state);
     if (!validationResult.success) {
-      return { error: 'Invalid state' };
+      return actionError("Invalid state");
     }
 
     let shortId = generateShortId();
@@ -65,9 +68,9 @@ export async function saveItineraryAction(state: unknown) {
       }
     });
 
-    return { success: true, shortId: saved.shortId };
+    return actionSuccess({ shortId: saved.shortId });
   } catch (error) {
     console.error('Failed to save itinerary:', error);
-    return { error: 'Internal server error' };
+    return actionError('Internal server error');
   }
 }

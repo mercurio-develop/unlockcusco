@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Droplet, ShieldCheck, Zap, Sun } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { AffiliateProductCard } from "@/features/guides/components/affiliate-product-card";
+import { AffiliateProductCard } from "@/features/guides";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -211,7 +211,7 @@ export default async function WaterFilterGuidePage({ params }: { params: Promise
 
         <div className="prose prose-slate prose-lg max-w-none">
           <p className="text-lg text-slate-600 leading-relaxed font-medium italic mb-10 border-l-4 border-indigo-500 pl-4">
-            "{text.intro}"
+            &ldquo;{text.intro}&rdquo;
           </p>
 
           <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">{text.realityTitle}</h2>

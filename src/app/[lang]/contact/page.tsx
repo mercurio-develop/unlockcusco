@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config/site";
-import { ContactForm } from "@/features/contact/components/contact-form";
+import { ContactForm } from "@/features/contact";
 
 interface PageProps {
   params: Promise<{ lang: string }>;

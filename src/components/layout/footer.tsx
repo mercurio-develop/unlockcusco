@@ -4,9 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES, LOCATIONS } from '@/features/discovery/constants'
 import { siteConfig } from '@/lib/config/site'
+import {
+  contactPath,
+  exploreLocationPath,
+  explorePath,
+  guidesPath,
+  homePath,
+  parseLocale,
+} from '@/paths'
 
 export function Footer({ lang }: { lang: string }) {
-  const isEs = lang === 'es'
+  const locale = parseLocale(lang)
+  const isEs = locale === 'es'
   const pathname = usePathname() || ''
 
   if (pathname.includes('/explore')) {
@@ -19,7 +28,7 @@ export function Footer({ lang }: { lang: string }) {
         
         {/* Brand Section */}
         <div className="space-y-6">
-          <Link href={`/${lang}`} className="text-2xl font-sans font-bold text-white tracking-tight">
+          <Link href={homePath(locale)} className="text-2xl font-sans font-bold text-white tracking-tight">
             UNLOCK<span className="text-rose-500">CUSCO</span>
           </Link>
           <p className="text-sm leading-relaxed text-slate-400 max-w-xs">
@@ -38,7 +47,7 @@ export function Footer({ lang }: { lang: string }) {
             {LOCATIONS.map((loc) => (
               <li key={loc.value}>
                 <Link 
-                  href={`/${lang}/explore/${loc.value}`}
+                  href={exploreLocationPath(locale, loc.value)}
                   className="text-sm hover:text-rose-400 transition-colors capitalize"
                 >
                   {loc.label}
@@ -57,7 +66,7 @@ export function Footer({ lang }: { lang: string }) {
             {CATEGORIES.filter(c => (c.value !== 'Template' && c.value !== 'Guide')).map((cat) => (
               <li key={cat.value}>
                 <Link 
-                  href={`/${lang}/explore?cat=${cat.value.toLowerCase()}`}
+                  href={explorePath(locale, { cat: cat.value.toLowerCase() })}
                   className="text-sm hover:text-rose-400 transition-colors"
                 >
                   {cat.label}
@@ -74,17 +83,17 @@ export function Footer({ lang }: { lang: string }) {
           </h3>
           <ul className="space-y-3">
             <li>
-              <Link href={`/${lang}/guides`} className="text-sm hover:text-rose-400 transition-colors">
+              <Link href={guidesPath(locale)} className="text-sm hover:text-rose-400 transition-colors">
                 {isEs ? "Guías de Viaje" : "Travel Guides"}
               </Link>
             </li>
             <li>
-              <Link href={`/${lang}/explore`} className="text-sm hover:text-rose-400 transition-colors">
+              <Link href={explorePath(locale)} className="text-sm hover:text-rose-400 transition-colors">
                 {isEs ? "Mapa Interactivo" : "Interactive Map"}
               </Link>
             </li>
             <li>
-              <Link href={`/${lang}/contact`} className="text-sm hover:text-rose-400 transition-colors">
+              <Link href={contactPath(locale)} className="text-sm hover:text-rose-400 transition-colors">
                 {isEs ? "Contacto" : "Contact Us"}
               </Link>
             </li>
