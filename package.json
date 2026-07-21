@@ -15,9 +15,12 @@
     "init-llm": "bash scripts/init-llm.sh",
     "scaffold:feature": "npx tsx scripts/scaffold-feature.ts",
     "audit:images": "tsx scripts/utils/analyze-broken-images-detailed.ts",
+    "audit:emails": "tsx scripts/utils/check-emails.ts",
     "fix:images": "tsx scripts/utils/refresh-broken-images-apify.ts --run-apify --limit 50",
     "fix:images:homepage": "tsx scripts/utils/refresh-broken-images-apify.ts --run-apify --homepage",
-    "fix:images:unsplash": "tsx scripts/utils/update-unsplash-images.ts"
+    "fix:images:unsplash": "tsx scripts/utils/update-unsplash-images.ts",
+    "fix:emails": "tsx scripts/utils/fetch-missing-emails-apify.ts",
+    "fix:emails:dry": "tsx scripts/utils/fetch-missing-emails-apify.ts --dry-run --limit 10 --verbose"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.71",

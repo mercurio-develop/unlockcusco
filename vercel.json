@@ -6,10 +6,6 @@
     {
       "path": "/api/cron/cleanup-itineraries",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/heal-images",
-      "schedule": "0 3 * * 0"
     }
   ],
   "headers": [
