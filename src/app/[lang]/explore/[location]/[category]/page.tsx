@@ -22,22 +22,6 @@ const LOCATION_LABELS: Record<string, string> = {
   cusco: 'Cusco',
 }
 
-export async function generateStaticParams() {
-  const combinations = await prisma.business.groupBy({
-    by: ['locationSlug', 'category'],
-  })
-  
-  const params: { location: string, category: string, lang: string }[] = []
-  combinations
-    .filter(c => c.locationSlug && c.category)
-    .forEach(c => {
-      params.push({ location: c.locationSlug as string, category: c.category as string, lang: 'en' })
-      params.push({ location: c.locationSlug as string, category: c.category as string, lang: 'es' })
-    })
-    
-  return params
-}
-
 export async function generateMetadata({
   params,
 }: {

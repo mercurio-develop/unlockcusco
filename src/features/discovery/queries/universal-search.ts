@@ -74,7 +74,7 @@ export async function universalSearch({
         SELECT id
         FROM "Business"
         WHERE embedding IS NOT NULL
-        ORDER BY embedding <-> ${embedding}::vector
+        ORDER BY embedding <-> ${embedding}::extensions.vector
         LIMIT 100
       `;
 
