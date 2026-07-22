@@ -117,3 +117,8 @@ check-*.ts
 check-*.js
 restore_*.js
 screenshot.js
+
+premium-clients/
+onboarding-client/
+scripts/*
+jaguar-onboarding.json
