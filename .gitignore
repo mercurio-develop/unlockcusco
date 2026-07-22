@@ -96,6 +96,7 @@ business-images/
 issues/
 ghost-phone/
 onboarding-client/
+premium-clients/
 CAPACITOR_DEV_GUIDE.md
 CLAUDE.md
 GEMINI.md
@@ -119,6 +120,5 @@ restore_*.js
 screenshot.js
 
 premium-clients/
-onboarding-client/
 scripts/*
 jaguar-onboarding.json
